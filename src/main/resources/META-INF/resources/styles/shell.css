@@ -1,0 +1,56 @@
+.customer-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+.app-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--vaadin-gap-m, 1rem);
+    padding: 0.5rem 1.5rem;
+}
+
+.customer-shell > .app-bar {
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.internal-shell .app-bar {
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+    padding-inline-start: 0.5rem;
+}
+
+.app-bar > vaadin-breadcrumbs {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+}
+
+.app-bar > .lookup-mount:empty,
+.assistant-mount:empty {
+    display: none;
+}
+
+.customer-shell > main {
+    flex: 1 1 auto;
+    padding: 1.5rem;
+}
+
+.internal-shell .explorer-view {
+    padding: 1.5rem;
+}
+
+.login-view {
+    display: flex;
+    justify-content: center;
+}
+
+.view-heading {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.2;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}

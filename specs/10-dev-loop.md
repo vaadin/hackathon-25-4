@@ -12,18 +12,22 @@ The coding agent dev loop that 25.3 introduced: a daemon that holds the applicat
 .vaadin/vaadin-dev restart
 ```
 
-If the goal is still hidden behind the `flow` prefix on beta2, as it was on 25.3.0-beta1, that is a row for `specs/FEEDBACK-25.4.md` and the `flow:install-dev-cli` spelling is the workaround.
+Verified on 25.4.0-beta2 in US-1.5: `./mvnw vaadin:install-dev-cli` works under the `vaadin` prefix, so the 25.3 workaround is not needed. The daemon inherits the environment of the shell that starts it: `VAADIN_LAUNCH_BROWSER=false` there keeps it from opening a browser.
 
 ## What each kind of edit costs
 
-Measured on 25.3 and to be re measured here in epic 01, because these numbers decide how the polish pass batches its edits:
+Measured on 25.4.0-beta2 on 2026-11-20, on this application at the end of epic 01, one edit per `apply`. These numbers decide how the polish pass batches its edits:
 
-| Edit | Expected cost |
-| --- | --- |
-| A method body in a view | Hot swap, under a second |
-| A new bean or a signature change | Restart, several seconds |
-| CSS under `META-INF/resources` | Push to the open browser, immediate |
-| A translation bundle | Restart, so never batch one with a Java edit while iterating |
+| Edit | Measured | What the loop answered |
+| --- | --- | --- |
+| `start`, cold | 16.4 s | `running` |
+| A method body in a view | 1.5 s | `hot-reload: redefineClasses(1)` |
+| A new bean plus a constructor that takes it | 11.3 s | `restart: new Spring bean`, the context has no definition for it |
+| CSS under `META-INF/resources` | 0.1 s | `hmr: 1 resource(s) copied, pushed 1 stylesheet(s) in place` |
+| The translation bundle | 10.3 s | `restart: translations.properties changed (read only while the app starts)` |
+| `shutdown` | 0.5 s | `stopping app it owns` |
+
+The loop says why it restarted, every time. A restart costs ten to eleven seconds whatever caused it, so a bundle edit is seven times a Java edit and a hundred times a CSS edit.
 
 ## Rules, learned in 25.3 and kept
 

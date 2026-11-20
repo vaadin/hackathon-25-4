@@ -1,29 +1,16 @@
-/* Add your styles here */
+@import url("styles/shell.css");
 
-.app-logo {
-    border-radius: min(40%, var(--vaadin-radius-m));
-    margin-inline-start: var(--vaadin-padding-inline-container);
-}
+html {
+    --aura-base-font-size: 16;
 
-.app-name {
-    font-weight: var(--aura-font-weight-semibold);
-    font-size: var(--aura-font-size-l);
-}
+    /* The state of a version. Always shown beside its word, never alone. */
+    --status-secure: light-dark(#1a7f37, #56d364);
+    --status-fix: light-dark(#9a6700, #e3b341);
+    --status-unresolved: light-dark(#cf222e, #ff7b72);
 
-.app-footer {
-    color: var(--vaadin-text-color-secondary);
-    font-size: var(--aura-font-size-s);
-}
-
-/* TODO: This is only for demo purposes. You can delete it. */
-vaadin-side-nav:has(vaadin-side-nav-item:only-child)::after {
-    display: block;
-    content: "More menu items will appear here when you add more views.";
-    font-size: var(--aura-font-size-s);
-    color: var(--vaadin-text-color-secondary);
-    box-sizing: border-box;
-    padding: 1em;
-    max-width: 14em;
-    min-width: 100%;
-    white-space: normal;
+    /* The four severities, worst first. */
+    --severity-critical: light-dark(#a40e26, #ff7b72);
+    --severity-high: light-dark(#bc4c00, #ffa657);
+    --severity-moderate: light-dark(#9a6700, #e3b341);
+    --severity-low: light-dark(#57606a, #9da7b3);
 }

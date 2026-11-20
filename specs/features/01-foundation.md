@@ -45,20 +45,20 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 ## Acceptance criteria
 
 ### AC1: Two shells
-- [ ] Public routes render under the customer shell with breadcrumbs and the measured chip
-- [ ] Internal routes refuse `guest` and anonymous, and return the signed in `team` user to the route they asked for
+- [x] Public routes render under the customer shell with breadcrumbs and the measured chip
+- [x] Internal routes refuse `guest` and anonymous, and return the signed in `team` user to the route they asked for
 
 ### AC2: Theme
-- [ ] Dark system preference paints dark with no light flash
-- [ ] The Switch overrides the system and the override survives a reload
+- [x] Dark system preference paints dark with no light flash
+- [x] The Switch overrides the system and the override survives a reload
 
 ### AC3: CSP
-- [ ] Responses carry the enforced policy header
-- [ ] The application boots and navigates with the policy on
+- [x] Responses carry the enforced policy header
+- [x] The application boots and navigates with the policy on
 
 ### AC4: Guard rails
-- [ ] `NoHardcodedStringsTest` fails on a planted literal
-- [ ] `SpecConsistencyTest` fails on a planted phantom test name
+- [x] `NoHardcodedStringsTest` fails on a planted literal
+- [x] `SpecConsistencyTest` fails on a planted phantom test name
 
 ## Test cases
 
