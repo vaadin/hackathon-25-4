@@ -1,0 +1,50 @@
+# Epic 10: Verdict workbench
+
+**Goal:** the queue ranked by what one verdict closes, and a form whose output is the YAML the pipeline takes.
+**Feature spec:** `specs/features/10-workbench.md`
+**Dependencies:** epics 02 and 08. The AI fill of this screen is epic 11's US-11.5, so this epic is complete without any provider plumbing.
+
+---
+
+### US-10.1: The queue
+
+**Tasks:**
+- [ ] Grid over the queue fixture order, series filter in the address
+- [ ] The summary, Charts or figures, decided and recorded
+- [ ] Row selection prefills the form
+
+**Verified by:** `WorkbenchBrowserlessTest`
+
+---
+
+### US-10.2: The draft form
+
+**As a** team member **I want** a form that refuses an empty verdict **so that** what reaches GitHub answers something.
+
+**Tasks:**
+- [ ] `VerdictDraft` entity, H2, binder with Draft and Ready groups
+- [ ] Side labels through `LabelTextAlign`
+- [ ] The closed vocabulary only, drafts listed and restored
+
+**25.4 APIs:** FormLayout side labels.
+**Verified by:** `WorkbenchBrowserlessTest`
+
+---
+
+### US-10.3: The YAML and the handoff
+
+**Tasks:**
+- [ ] Live YAML in a Markdown code block, round trip tested, absent keys absent
+- [ ] The closing sentence from the queue numbers
+- [ ] `NativeForm` GET into GitHub's new file editor, the copy control, the URL length refusal
+- [ ] The platform PRs warning sentence
+
+**25.x APIs:** `NativeForm`, Markdown.
+**Verified by:** `VerdictYamlTest`, `WorkbenchBrowserlessTest`
+
+---
+
+## Definition of Done
+
+- [ ] Every acceptance criterion in `features/10-workbench.md` is checked
+- [ ] The YAML round trips on every fixture draft
