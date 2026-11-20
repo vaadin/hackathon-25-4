@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!-- Vaadin project from https://github.com/vaadin/security-status -->
+    <!-- Scaffolded from vaadin/walking-skeleton v25.4-flow plus the
+         spec driven files of vaadin/spec-driven-development-demo,
+         assembled the way start.vaadin.com builds its sdd starter. -->
     <groupId>com.vaadin.securitystatus</groupId>
     <artifactId>security-status</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -10,6 +12,8 @@
     <properties>
         <java.version>21</java.version>
         <vaadin.version>25.4.0-beta2</vaadin.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
+        <surefire.excludedGroups>live-ai</surefire.excludedGroups>
     </properties>
     
     <parent>
@@ -25,6 +29,13 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
                 <version>${vaadin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -92,6 +103,117 @@
         </plugins>
     </build>
     
+    <profiles>
+        <!-- The real assistant. vaadin-ai-core-flow already ships
+             SpringAILLMProvider, so all this profile adds is the model behind
+             it. Without the profile there is no ChatModel on the classpath and
+             the mock is the only provider, which is what the default build and
+             every test run against.
+
+             Activated by the presence of the key rather than activeByDefault,
+             because Maven turns every activeByDefault profile off the moment
+             any other profile is named, so -Pit would silently take the
+             assistant away. -->
+        <profile>
+            <id>ai</id>
+            <activation>
+                <property>
+                    <name>env.OPENAI_API_KEY</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.ai</groupId>
+                    <artifactId>spring-ai-starter-model-openai</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- The browser tier. Starts the application, runs every *IT against a
+             real browser, and stops it again: ./mvnw verify -Pit
+             Surefire never sees these, because *IT does not match its default
+             includes, so the ordinary gate stays fast and needs no browser. -->
+        <profile>
+            <id>it</id>
+            <properties>
+                <it.port>8081</it.port>
+                <it.headless>true</it.headless>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-for-it</id>
+                                <goals><goal>start</goal></goals>
+                                <configuration>
+                                    <arguments>
+                                        <argument>--server.port=${it.port}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-for-it</id>
+                                <goals><goal>stop</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <it.port>${it.port}</it.port>
+                                <it.headless>${it.headless}</it.headless>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- The production frontend build, which is also where the commercial
+             licence is enforced. -->
+        <profile>
+            <id>production</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>vaadin-maven-plugin</artifactId>
+                        <version>${vaadin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>frontend</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>prepare-frontend</goal>
+                                    <goal>build-frontend</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <productionMode>true</productionMode>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <repositories>
         <repository>
             <id>central</id>
