@@ -81,7 +81,9 @@ Whenever you cannot do something the obvious way, write it down. The point of bu
 
 Say what you expected, what happened, what you did instead, and where the workaround lives. Never delete an entry when it gets fixed: mark it fixed, because the workaround still has to be removed.
 
-Writing the row is half of it. Each finding becomes an issue in the repository that owns the thing, through the pipeline in `specs/issues/`: a draft per finding, a minimal reproducer per draft, and a posting script with a dry run. A row is a suspicion, a project is a fact.
+Writing the row is half of it. Each finding becomes an issue in the repository that owns the thing, through the pipeline in `specs/issues/README.md`: a short draft per finding with a detailed Reproduce section, a minimal reproducer project zipped beside it, a duplicate search, and a posting script with a dry run that also lists the issue in the Platform in Test tracker, `vaadin/platform#9642`. A row is a suspicion, a project is a fact.
+
+The draft and its reproducer are written before the story that found the row is reported done. A row that cannot be reduced yet gets a line in the Not ready table of that README saying what it needs. Never post: `post.sh --confirm` is run by a person, after the commit is pushed.
 
 ## Preview APIs
 

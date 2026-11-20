@@ -14,11 +14,14 @@ Routing, when drafting: an API on the server, a binder, a signal, the router goe
 
 | Finding | Expected | What happened | What we did instead | Where the workaround lives |
 | --- | --- | --- | --- | --- |
+| No server side way to apply a remembered color scheme before the first paint | `@ColorScheme`, or a sibling of it, that names a web storage key and lets the bootstrap page apply the stored value itself | `WebStorage` answers one round trip after the page is painted, so reading the choice from Java always paints the system scheme first and repaints. The 25.4 storage additions do not change when the answer arrives | An inline script in the document head, added through `AppShellSettings.addInlineWithContents`, sets `color-scheme` on the root element from `localStorage`. The storage key now lives in Java and in a script string | `base/ui/ThemeMemory.java`, `Application.configurePage`. Known: flow#26391. Measurement drafted as a comment in `issues/07b-comment-on-flow-26391.md`, ready |
+| No typed accessor for the system's color scheme preference. Known: flow#26390, open | `ExtendedClientDetails` to say what the operating system prefers, next to the 25.4 typed accessors it gained | Corrected by the reproducer: `getColorScheme()` reports what the application set, `LIGHT_DARK` here, never `prefers-color-scheme`. A switch that must start in the right position has to ask the browser itself | A declared `@JsDefinition` expression with `matchMedia`, read once when the switch attaches | `base/ui/ThemeSwitch.java`. Mentioned in `issues/07b-comment-on-flow-26391.md` |
 
 ## Awkward APIs
 
 | Finding | Expected | What happened | What we did instead | Where the workaround lives |
 | --- | --- | --- | --- | --- |
+| **Withdrawn, documented.** `VaadinExpiredSessionStrategy` only acts under Spring Security concurrency control | The 25.4 strategy handles "the session expired" | Stated twice on `flow/security/spring/security-configuration`, which we read after writing this row. An ordinary timeout or a server restart never reaches it, and the two demo accounts are shared, so no session limit is set and the strategy is installed but idle | The one notice comes from `CustomizedSystemMessages` with the session expired notification enabled and no redirect URL. The strategy is still passed explicitly so a later session limit needs no other change | `base/security/SessionExpiredNotice.java`, `base/security/SecurityConfig.java`. Epitaph in `issues/06-expired-session-strategy.md` |
 
 ## Bugs routed around
 
@@ -29,6 +32,7 @@ Routing, when drafting: an API on the server, a binder, a signal, the router goe
 
 | Finding | Expected | What happened | What we did instead | Where the workaround lives |
 | --- | --- | --- | --- | --- |
+| The Content Security Policy page does not say how `vaadin.csp=strict` behaves | The page for the feature says when the header is sent, where the policy is adjusted and which responses carry it | In development mode strict sends no header at all, only production does. The hook, `IndexHtmlResponse.getContentSecurityPolicy()`, is on no page and was found by reading `IndexHtmlRequestHandler`. Only the bootstrap page carries the policy. So "every later epic develops under the policy" cannot be done with the 25.4 mode alone | Our own enforced policy on every response through Spring Security's header writer, built with the 25.4 `ContentSecurityPolicy` class, and the parameter at `warn`, which logs each call a strict policy would refuse | `base/security/CspPolicy.java`, `base/security/SecurityConfig.java`, `application.properties`. Draft `issues/08-csp-page-strict-mode.md`, ready |
 
 ## CSP directives the components forced open
 
@@ -36,6 +40,10 @@ Per `specs/04-security.md`, every loosened directive is a fact the teams want, r
 
 | Directive | Forced by | Why |
 | --- | --- | --- |
+| `script-src 'unsafe-inline'` | Flow, the bootstrap page | The client engine is started by an inline script. The 25.4 strict mode replaces this with a nonce, in production mode only. Our own head script for the theme memory rides on the same permission |
+| `script-src 'unsafe-eval'` | Flow, the client engine, and the development tools | JavaScript the server sends as a string is compiled in the browser. After moving our one string `executeJs` to `@JsDefinition`, the `warn` mode logs no call site of ours, so what still needs this is the framework and the dev server |
+| `style-src 'unsafe-inline'` | The components | Style attributes and injected style elements. Vaadin's own strict policy keeps this one too |
+| `img-src data:` and `font-src data:` | Aura and the components | Icons and fonts inlined as data URLs. Vaadin's own strict policy has the same two |
 
 ## Data needs toward cve-status
 

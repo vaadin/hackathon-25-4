@@ -1,0 +1,1 @@
+Withdrawn. A signed in user without the role is shown the not found view on purpose, so the message does not say whether the view exists: `flow/security/access-control/error-views`, Default Behavior. The same page shows a custom view for `AccessDeniedException` for an application that wants to say "signed in, not allowed". Confirmed on `03-security.zip`, route `/admin`.

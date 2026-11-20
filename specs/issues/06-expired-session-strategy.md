@@ -1,0 +1,1 @@
+Withdrawn. `VaadinExpiredSessionStrategy` acting only under Spring Security concurrency control is stated twice in `flow/security/spring/security-configuration`: "The strategy is only used by Spring Security when concurrency control is active", and "Applications that do not configure a maximum number of sessions are not affected". We had not read the page before writing the row.

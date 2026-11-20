@@ -41,3 +41,5 @@ Output goes to `specs/reviews/<feature>/REVIEW.md`.
 ## Phase 5: summary
 
 Report: what was built, which acceptance criteria are now checked, which tests were added, what the UI verification found, and anything left undone. Tick the checkboxes in the specification files for what is genuinely done, and nothing else.
+
+Every feedback row this story added has a draft and a run reproducer in `specs/issues/`, per `specs/issues/README.md`, or a line in its Not ready table. List them in the report.

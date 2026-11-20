@@ -1,0 +1,10 @@
+# The reproducer projects ship as zips, because a reader who opens an issue
+# wants one file to download. An unzipped working copy is scratch and must not
+# come back into the repository.
+projects/*
+!projects/.gitkeep
+!projects/*.zip
+
+# A screenshot a draft links has to be reachable from the repository, because
+# the API cannot attach a file to an issue or a comment.
+!projects/*.png
