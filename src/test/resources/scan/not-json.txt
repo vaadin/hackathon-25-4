@@ -1,0 +1,2 @@
+Scan results
+CVE-2026-89407 jackson-core 2.18.2 HIGH

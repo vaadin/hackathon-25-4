@@ -1,0 +1,16 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "metadata": { "component": { "type": "application", "name": "shop", "version": "2.0.0", "purl": "pkg:maven/com.example/shop@2.0.0" } },
+  "components": [
+    { "type": "library", "name": "vaadin-core", "version": "24.9.21", "purl": "pkg:maven/com.vaadin/vaadin-core@24.9.21",
+      "components": [
+        { "type": "library", "name": "vaadin-swing-kit-flow", "version": "24.9.21", "purl": "pkg:maven/com.vaadin/vaadin-swing-kit-flow@24.9.21",
+          "components": [
+            { "type": "library", "name": "plexus-utils", "version": "3.5.1", "purl": "pkg:maven/org.codehaus.plexus/plexus-utils@3.5.1" }
+          ] }
+      ] },
+    { "type": "library", "name": "router", "version": "1.2.0", "purl": "pkg:npm/%40vaadin/router@1.2.0" },
+    { "type": "library", "name": "shop-core", "version": "2.0.0", "purl": "pkg:maven/com.example/shop-core@2.0.0" }
+  ]
+}

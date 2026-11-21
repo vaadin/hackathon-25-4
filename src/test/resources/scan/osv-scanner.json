@@ -1,0 +1,63 @@
+{
+  "results": [
+    {
+      "source": { "path": "/build/app/pom.xml", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "com.vaadin:vaadin", "version": "24.9.21", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2026-2742", "database_specific": { "severity": "MODERATE" } }
+          ]
+        },
+        {
+          "package": { "name": "com.fasterxml.jackson.core:jackson-core", "version": "2.18.2", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "GHSA-h46c-h94j-95f3", "aliases": ["CVE-2026-89407"], "database_specific": { "severity": "HIGH" } }
+          ]
+        },
+        {
+          "package": { "name": "com.vaadin:vaadin-swing-kit-flow", "version": "24.9.21", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2021-33604", "aliases": [], "database_specific": { "severity": "LOW" } }
+          ]
+        },
+        {
+          "package": { "name": "io.opentelemetry:opentelemetry-api", "version": "1.44.1", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "GHSA-xm3p-2x9q-r7qf", "aliases": ["CVE-2026-45292"], "database_specific": { "severity": "MODERATE" } }
+          ]
+        },
+        {
+          "package": { "name": "org.bouncycastle:bcprov-jdk18on", "version": "1.78", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2026-8763", "database_specific": { "severity": "CRITICAL" } }
+          ]
+        },
+        {
+          "package": { "name": "org.codehaus.plexus:plexus-utils", "version": "3.5.1", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2025-67030", "database_specific": { "severity": "HIGH" } }
+          ]
+        },
+        {
+          "package": { "name": "org.springframework:spring-web", "version": "6.2.11", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2026-47886", "database_specific": { "severity": "HIGH" } }
+          ]
+        },
+        {
+          "package": { "name": "com.vaadin:flow-server", "version": "24.9.21", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2099-0002", "database_specific": { "severity": "MODERATE" } }
+          ]
+        },
+        {
+          "package": { "name": "com.example:billing-core", "version": "1.0.0", "ecosystem": "Maven" },
+          "vulnerabilities": [
+            { "id": "CVE-2099-0001", "database_specific": { "severity": "LOW" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -73,6 +73,13 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <!-- Composes the audit report PDF on the server. Pure Java, the
+             standard fonts are built in, nothing is fetched at render time. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.5</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -113,6 +120,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <!-- The PDF Viewer is commercial, and with it the default build creates
+                     an application bundle, which fails without a licence. The default
+                     build, the gate, must pass on a machine without one, so there it
+                     builds with Vaadin's own banner instead. The production profile
+                     below keeps the failure. -->
+                <configuration>
+                    <commercialWithBanner>true</commercialWithBanner>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -226,6 +241,7 @@
                         </executions>
                         <configuration>
                             <productionMode>true</productionMode>
+                            <commercialWithBanner>false</commercialWithBanner>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -39,6 +39,16 @@ public class FixturePages {
         this.refresh = refresh;
     }
 
+    /**
+     * A data service over the committed fixtures with no Spring context, for a
+     * unit test outside this package.
+     */
+    public static SecurityDataService offline() {
+        var client = new PagesClient(FixtureTransport.BASE_URL, new FixtureTransport());
+        return new SecurityDataService(new PagesCache(client, Clock.fixed(NOW, ZoneOffset.UTC)), client,
+                new DataRefreshSignal(), Runnable::run);
+    }
+
     @Bean(DataConfiguration.TRANSPORT)
     FixtureTransport pagesTransport() {
         return transport;

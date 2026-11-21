@@ -1,0 +1,25 @@
+{
+  "reportSchema": "1.1",
+  "scanInfo": { "engineVersion": "12.1.0", "dataSource": [] },
+  "projectInfo": { "name": "billing", "reportDate": "2026-11-20T10:00:00Z" },
+  "dependencies": [
+    { "fileName": "vaadin-24.9.21.jar", "packages": [ { "id": "pkg:maven/com.vaadin/vaadin@24.9.21", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2026-2742", "severity": "MEDIUM" } ] },
+    { "fileName": "jackson-core-2.18.2.jar", "packages": [ { "id": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.2", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2026-89407", "severity": "HIGH" } ] },
+    { "fileName": "vaadin-swing-kit-flow-24.9.21.jar", "packages": [ { "id": "pkg:maven/com.vaadin/vaadin-swing-kit-flow@24.9.21", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2021-33604", "severity": "LOW" } ] },
+    { "fileName": "opentelemetry-api-1.44.1.jar", "packages": [ { "id": "pkg:maven/io.opentelemetry/opentelemetry-api@1.44.1", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2026-45292", "severity": "MEDIUM" } ] },
+    { "fileName": "bcprov-jdk18on-1.78.jar", "packages": [ { "id": "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.78", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2026-8763", "severity": "CRITICAL" } ] },
+    { "fileName": "plexus-utils-3.5.1.jar", "packages": [ { "id": "pkg:maven/org.codehaus.plexus/plexus-utils@3.5.1", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2025-67030", "severity": "HIGH" } ] },
+    { "fileName": "spring-web-6.2.11.jar", "packages": [ { "id": "pkg:maven/org.springframework/spring-web@6.2.11", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2026-47886", "severity": "HIGH" } ] },
+    { "fileName": "flow-server-24.9.21.jar", "packages": [ { "id": "pkg:maven/com.vaadin/flow-server@24.9.21", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2099-0002", "severity": "MEDIUM" } ] },
+    { "fileName": "billing-core-1.0.0.jar", "packages": [ { "id": "pkg:maven/com.example/billing-core@1.0.0", "confidence": "HIGHEST" } ],
+      "vulnerabilities": [ { "source": "NVD", "name": "CVE-2099-0001", "severity": "LOW" } ] }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "reportSchema": "1.1",
+  "scanInfo": { "engineVersion": "12.1.0" },
+  "dependencies": [
+    { "fileName": "jackson-core-2.18.2.jar", "packages": [ { "id": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.2" } ],
+      "vulnerabilities": [ { "name": "CVE-2026-89407", "severity": "HIGH" } ] },
+    { "fileName": "legacy-tools.zip", "vulnerabilities": [ { "name": "CVE-2024-1111", "severity": "HIGH" } ] },
+    { "fileName": "bundled-js/app.min.js", "vulnerabilities": [ { "name": "CVE-2024-2222", "severity": "MEDIUM" } ] },
+    { "fileName": "clean-1.0.jar", "packages": [ { "id": "pkg:maven/com.example/clean@1.0" } ] }
+  ]
+}

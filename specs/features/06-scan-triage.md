@@ -42,21 +42,21 @@ Per `01-domain-model.md`: each reported finding joins `scan-index` and the reade
 ## Acceptance criteria
 
 ### AC1: The four formats parse
-- [ ] One fixture per format produces the same findings set where the fixtures encode the same scan
-- [ ] The help card's format list equals the parser's, by test
+- [x] One fixture per format produces the same findings set where the fixtures encode the same scan
+- [x] The help card's format list equals the parser's, by test
 
 ### AC2: Triage is honest
-- [ ] A measured, ruled out finding lands in already secure with the verdict named
-- [ ] An unmeasured coordinate lands with owner yours and is never called secure
-- [ ] Skipped entries are counted on screen
+- [x] A measured, ruled out finding lands in already secure with the verdict named
+- [x] An unmeasured coordinate lands with owner yours and is never called secure
+- [x] Skipped entries are counted on screen
 
 ### AC3: Files leave correctly
-- [ ] The CSV carries one row per finding with the six columns in the stated order, the whole set, named for the version
-- [ ] The PDF previews in the viewer and downloads with the right type and name
+- [x] The CSV carries one row per finding with the six columns in the stated order, the whole set, named for the version
+- [x] The PDF previews in the viewer and downloads with the right type and name
 
 ### AC4: The file is not kept
-- [ ] No temp file exists after the request, asserted by the handler's contract test
-- [ ] The help dialog says the report is parsed and discarded
+- [x] No temp file exists after the request, asserted by the handler's contract test
+- [x] The help dialog says the report is parsed and discarded
 
 ## Test cases
 

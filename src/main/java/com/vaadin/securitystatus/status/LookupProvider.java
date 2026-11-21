@@ -13,16 +13,18 @@ class LookupProvider implements ShellLookup {
     private final org.springframework.beans.factory.ObjectProvider<LookupState> state;
     private final SecurityDataService data;
     private final DataRefreshSignal refresh;
+    private final org.springframework.beans.factory.ObjectProvider<ScanState> scan;
 
     LookupProvider(org.springframework.beans.factory.ObjectProvider<LookupState> state, SecurityDataService data,
-            DataRefreshSignal refresh) {
+            DataRefreshSignal refresh, org.springframework.beans.factory.ObjectProvider<ScanState> scan) {
         this.state = state;
+        this.scan = scan;
         this.data = data;
         this.refresh = refresh;
     }
 
     @Override
     public Component create() {
-        return new Lookup(state.getObject(), data, refresh);
+        return new Lookup(state.getObject(), data, refresh, scan.getObject());
     }
 }

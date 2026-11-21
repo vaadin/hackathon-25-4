@@ -7,7 +7,10 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.download.Download;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 
@@ -39,6 +42,20 @@ public final class Downloads {
      */
     public static Anchor link(String text, String fileName, Supplier<Optional<Content>> source) {
         return new Anchor(handler(fileName, source), text);
+    }
+
+    /**
+     * The same download, started by a click on any component, which keeps its
+     * own look: the browser asks for the file inside the click, without a round
+     * trip first.
+     */
+    public static Registration onClick(Component component, String fileName, Supplier<Optional<Content>> source) {
+        return Download.onClick(component, handler(fileName, source));
+    }
+
+    /** A handler for a component that shows the content itself rather than saving it, such as a viewer. */
+    public static DownloadHandler shown(String fileName, Supplier<Optional<Content>> source) {
+        return handler(fileName, source);
     }
 
     static DownloadHandler handler(String fileName, Supplier<Optional<Content>> source) {

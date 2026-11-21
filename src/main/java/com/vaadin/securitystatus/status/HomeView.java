@@ -22,6 +22,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
@@ -43,6 +44,10 @@ import com.vaadin.securitystatus.data.model.CasesIndex;
  * whenever a new measurement is published.
  */
 @Route("")
+// The lookup is on every customer route, mounted by the shell through the ShellLookup
+// bean, so no route's bytecode names it and the production bundle scanner never finds
+// its components. Named here, on the one route whose components load eagerly.
+@Uses(Lookup.class)
 @PageTitle("home.title")
 @AnonymousAllowed
 public final class HomeView extends Composite<Div> implements BeforeEnterObserver {

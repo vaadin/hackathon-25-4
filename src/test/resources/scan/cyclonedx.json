@@ -1,0 +1,33 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "metadata": {
+    "component": { "type": "application", "bom-ref": "pkg:maven/com.example/billing@1.0.0", "name": "billing", "version": "1.0.0", "purl": "pkg:maven/com.example/billing@1.0.0" }
+  },
+  "components": [
+    { "type": "library", "bom-ref": "vaadin", "group": "com.vaadin", "name": "vaadin", "version": "24.9.21", "purl": "pkg:maven/com.vaadin/vaadin@24.9.21?type=pom",
+      "components": [
+        { "type": "library", "bom-ref": "flow-server", "group": "com.vaadin", "name": "flow-server", "version": "24.9.21", "purl": "pkg:maven/com.vaadin/flow-server@24.9.21?type=jar",
+          "components": [
+            { "type": "library", "bom-ref": "jackson-core", "group": "com.fasterxml.jackson.core", "name": "jackson-core", "version": "2.18.2", "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.2?type=jar" }
+          ] },
+        { "type": "library", "bom-ref": "swing-kit", "group": "com.vaadin", "name": "vaadin-swing-kit-flow", "version": "24.9.21", "purl": "pkg:maven/com.vaadin/vaadin-swing-kit-flow@24.9.21?type=jar" }
+      ] },
+    { "type": "library", "bom-ref": "otel", "group": "io.opentelemetry", "name": "opentelemetry-api", "version": "1.44.1", "purl": "pkg:maven/io.opentelemetry/opentelemetry-api@1.44.1?type=jar" },
+    { "type": "library", "bom-ref": "bcprov", "group": "org.bouncycastle", "name": "bcprov-jdk18on", "version": "1.78", "purl": "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.78?type=jar" },
+    { "type": "library", "bom-ref": "plexus", "group": "org.codehaus.plexus", "name": "plexus-utils", "version": "3.5.1", "purl": "pkg:maven/org.codehaus.plexus/plexus-utils@3.5.1?type=jar" },
+    { "type": "library", "bom-ref": "spring-web", "group": "org.springframework", "name": "spring-web", "version": "6.2.11", "purl": "pkg:maven/org.springframework/spring-web@6.2.11?type=jar" },
+    { "type": "library", "bom-ref": "billing-core", "group": "com.example", "name": "billing-core", "version": "1.0.0", "purl": "pkg:maven/com.example/billing-core@1.0.0?type=jar" }
+  ],
+  "vulnerabilities": [
+    { "id": "CVE-2026-2742", "ratings": [ { "severity": "medium" } ], "affects": [ { "ref": "vaadin" } ] },
+    { "id": "GHSA-h46c-h94j-95f3", "references": [ { "id": "CVE-2026-89407" } ], "ratings": [ { "severity": "high" } ], "affects": [ { "ref": "jackson-core" } ] },
+    { "id": "CVE-2021-33604", "ratings": [ { "severity": "low" } ], "affects": [ { "ref": "swing-kit" } ] },
+    { "id": "CVE-2026-45292", "ratings": [ { "severity": "medium" } ], "affects": [ { "ref": "otel" } ] },
+    { "id": "CVE-2026-8763", "ratings": [ { "severity": "critical" } ], "affects": [ { "ref": "bcprov" } ] },
+    { "id": "CVE-2025-67030", "ratings": [ { "severity": "high" } ], "affects": [ { "ref": "plexus" } ] },
+    { "id": "CVE-2026-47886", "ratings": [ { "severity": "high" } ], "affects": [ { "ref": "spring-web" } ] },
+    { "id": "CVE-2099-0002", "ratings": [ { "severity": "medium" } ], "affects": [ { "ref": "flow-server" } ] },
+    { "id": "CVE-2099-0001", "ratings": [ { "severity": "low" } ], "affects": [ { "ref": "billing-core" } ] }
+  ]
+}

@@ -9,10 +9,10 @@
 ### US-6.1: Upload and parse
 
 **Tasks:**
-- [ ] Drop zone and button on the report tab, one file, replace swaps
-- [ ] In memory `UploadHandler`, parsed in the request, discarded
-- [ ] The four format parsers, detection by shape
-- [ ] Version read from the file's coordinates, the conditional version field
+- [x] Drop zone and button on the report tab, one file, replace swaps
+- [x] In memory `UploadHandler`, parsed in the request, discarded
+- [x] The four format parsers, detection by shape
+- [x] Version read from the file's coordinates, the conditional version field
 
 **25.x APIs:** modular upload, upload handlers.
 **Verified by:** `ReportParserTest`, `ScanUploadIT`
@@ -22,9 +22,9 @@
 ### US-6.2: Triage
 
 **Tasks:**
-- [ ] The three buckets with owner and action per `01-domain-model.md`
-- [ ] Skipped entries counted
-- [ ] The headline and bucket cards, the capped table, the secure Switch
+- [x] The three buckets with owner and action per `01-domain-model.md`
+- [x] Skipped entries counted
+- [x] The headline and bucket cards, the capped table, the secure Switch
 
 **Verified by:** `TriageTest`, `ScanViewBrowserlessTest`
 
@@ -35,8 +35,8 @@
 **As an** auditor **I want** the triage as a file **so that** the audit record carries the measurement.
 
 **Tasks:**
-- [ ] The CSV through the `Download` API, named for the version
-- [ ] The PDF composed server side, previewed in `PdfViewer`, then downloaded
+- [x] The CSV through the `Download` API, named for the version
+- [x] The PDF composed server side, previewed in `PdfViewer`, then downloaded
 
 **25.4 APIs:** `Download`, `PdfViewer`.
 **Verified by:** `TriageDownloadIT`
@@ -46,9 +46,9 @@
 ### US-6.4: The help that counts
 
 **Tasks:**
-- [ ] The format list held to the parser by test
-- [ ] What is assessed counted against the file in hand
-- [ ] The parsed and discarded sentence
+- [x] The format list held to the parser by test
+- [x] What is assessed counted against the file in hand
+- [x] The parsed and discarded sentence
 
 **Verified by:** `ScanViewBrowserlessTest`
 
@@ -56,5 +56,5 @@
 
 ## Definition of Done
 
-- [ ] Every acceptance criterion in `features/06-scan-triage.md` is checked
-- [ ] No upload leaves a file behind, by the handler's contract test
+- [x] Every acceptance criterion in `features/06-scan-triage.md` is checked
+- [x] No upload leaves a file behind, by the handler's contract test

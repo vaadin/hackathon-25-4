@@ -1,11 +1,15 @@
 package com.vaadin.securitystatus.status;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -15,12 +19,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadButton;
+import com.vaadin.flow.component.upload.UploadDropZone;
+import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.DomEventFilter;
 import com.vaadin.flow.dom.Element;
@@ -29,6 +36,8 @@ import com.vaadin.flow.js.JsExpression;
 import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.server.streams.UploadEvent;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.base.ui.HelpDialog;
@@ -84,8 +93,18 @@ public final class Lookup extends Composite<Div> {
         PendingJavaScriptResult emptyAndClose(Element field);
     }
 
+    /** The largest report read, in bytes. A scanner report of a whole application is a few megabytes. */
+    static final long MAX_REPORT_BYTES = 32L * 1024 * 1024;
+
     private final LookupState state;
     private final SecurityDataService data;
+    private final ScanState scan;
+    private final UploadManager reports;
+    private final TextField reportVersion = new TextField();
+    /** The version the scan route answers for, empty anywhere else. */
+    private final ValueSignal<String> scanVersion = new ValueSignal<>("");
+    /** A report is in and the file names no release: only then is the reader asked for one. */
+    private final Signal<Boolean> reportAsks;
 
     private final Tabs tabs = new Tabs();
     private final Map<LookupState.Tab, com.vaadin.flow.component.tabs.Tab> tabOf = new HashMap<>();
@@ -99,9 +118,14 @@ public final class Lookup extends Composite<Div> {
     /** What the last Check could not use, said in place. */
     private final ValueSignal<String> note = new ValueSignal<>("");
 
-    Lookup(LookupState state, SecurityDataService data, DataRefreshSignal refresh) {
+    Lookup(LookupState state, SecurityDataService data, DataRefreshSignal refresh, ScanState scan) {
         this.state = state;
         this.data = data;
+        this.scan = scan;
+        // Read in the request and never stored: the handler parses the request's own
+        // stream, so no copy of the file exists anywhere once the request ends.
+        this.reports = new UploadManager(this, this::receive);
+        this.reportAsks = scan.held().map(held -> held.isPresent() && held.get().report().vaadin().isEmpty());
         addClassName("lookup");
         getElement().setAttribute("role", "search");
 
@@ -218,42 +242,138 @@ public final class Lookup extends Composite<Div> {
     }
 
     private Component reportPanel() {
-        var upload = new Upload();
-        upload.addClassName("lookup-report");
-        upload.setMaxFiles(1);
-        upload.setAcceptedFileTypes(".json", "application/json");
-        upload.setDropLabel(new Span(getTranslation("lookup.report.drop")));
-        upload.setUploadButton(new Button(getTranslation("lookup.report.choose")));
-        // Reading the report is epic 06. Until then the drop zone is drawn and
-        // takes nothing, rather than accepting a file it would ignore.
-        upload.setEnabled(false);
+        reports.setMaxFiles(1);
+        reports.setMaxFileSize(MAX_REPORT_BYTES);
+        reports.addFileRejectedListener(rejected -> scan.refusal().set(switch (rejected.getReason()) {
+            case FILE_TOO_LARGE -> getTranslation("lookup.report.refused.large", MAX_REPORT_BYTES / (1024 * 1024));
+            case TOO_MANY_FILES -> getTranslation("lookup.report.refused.many");
+            case INCORRECT_FILE_TYPE, UNKNOWN -> refusedFormat();
+        }));
 
-        var formats = new Paragraph(getTranslation("lookup.report.formats"));
-        formats.addClassName("lookup-report-formats");
-        var card = new Div(upload, formats, reportHelp());
+        var choose = new UploadButton(reports);
+        choose.addClassName("lookup-report-choose");
+        choose.bindText(scan.held().map(held -> getTranslation(
+                held.isPresent() ? "lookup.report.replace" : "lookup.report.choose")));
+        var drop = new UploadDropZone(new Div(new Span(getTranslation("lookup.report.drop")), choose), reports);
+        drop.addClassName("lookup-report");
+
+        // Before a file the line names the formats read, and no others, rule 6.11.21.
+        // With one in, it says what is in the file instead.
+        var line = new Paragraph();
+        line.addClassName("lookup-report-formats");
+        line.bindText(scan.held().map(held -> held.map(this::fileLine).orElseGet(this::formatsLine)));
+
+        var refused = new Span();
+        refused.addClassName("lookup-report-refused");
+        refused.getElement().setAttribute("role", "alert");
+        refused.bindText(scan.refusal());
+        refused.bindVisible(scan.refusal().map(text -> !text.isEmpty()));
+
+        reportVersion.addClassName("lookup-report-version");
+        reportVersion.setLabel(getTranslation("lookup.report.version"));
+        reportVersion.setClearButtonVisible(true);
+        reportVersion.setValueChangeMode(ValueChangeMode.EAGER);
+        reportVersion.bindValue(state.version(), state.version()::set);
+        reportVersion.bindVisible(reportAsks);
+
+        var card = new Div(drop, line, refused, reportHelp());
         card.addClassName("lookup-report-card");
 
-        var panel = new Div(card);
+        var panel = new Div(card, reportVersion);
         panel.addClassName("lookup-panel");
         panel.bindVisible(state.tab().map(LookupState.Tab.REPORT::equals));
         return panel;
     }
 
+    /** The four formats the parser reads, in the parser's order, so the line cannot name another. */
+    String formatsLine() {
+        var names = new ArrayList<String>();
+        for (ReportFormat format : ReportFormat.values()) {
+            names.add(getTranslation(format.nameKey()));
+        }
+        String last = names.removeLast();
+        return getTranslation("lookup.report.formats", String.join(", ", names), last);
+    }
+
+    private String fileLine(ScanState.Held held) {
+        var parts = new ArrayList<String>();
+        parts.add(held.fileName());
+        held.report().vaadin().ifPresent(version -> parts.add(getTranslation("lookup.report.file.vaadin", version)));
+        int size = held.report().size();
+        parts.add(getTranslation(size == 1 ? "lookup.report.file.findings.one" : "lookup.report.file.findings.many",
+                size));
+        parts.add(getTranslation(held.report().format().nameKey()));
+        return String.join(" \u00b7 ", parts);
+    }
+
+    private String refusedFormat() {
+        var names = new ArrayList<String>();
+        for (ReportFormat format : ReportFormat.values()) {
+            names.add(getTranslation(format.nameKey()));
+        }
+        String last = names.removeLast();
+        return getTranslation("lookup.report.refused.format", String.join(", ", names), last);
+    }
+
+    /**
+     * Runs on the request that carries the file, outside the session lock: the
+     * stream is parsed as it arrives and what the screen needs is handed to the
+     * session. A file that is not a report is refused in the upload area and
+     * nothing navigates.
+     */
+    private void receive(UploadEvent event) throws IOException {
+        ScannerReport report;
+        try (InputStream body = event.getInputStream()) {
+            report = ReportParser.parse(body);
+        } catch (ReportParser.RefusedException refused) {
+            event.reject(refused.refusal().name());
+            event.getUI().access(() -> {
+                scan.refusal().set(refused.refusal() == ReportParser.Refusal.NOT_JSON
+                        ? getTranslation("lookup.report.refused.json", refusedFormat())
+                        : refusedFormat());
+                reports.clearFileList();
+            });
+            return;
+        }
+        String fileName = event.getFileName();
+        event.getUI().access(() -> took(new ScanState.Held(fileName, report)));
+    }
+
+    private void took(ScanState.Held held) {
+        Optional<String> before = scan.held().peek().flatMap(previous -> previous.report().vaadin());
+        scan.held().set(Optional.of(held));
+        scan.refusal().set("");
+        reports.clearFileList();
+        // A version the reader named wins over the file's: it is their own statement.
+        // One that came from the previous file is the file's, and the new file answers it.
+        String asked = scanVersion.peek();
+        boolean readersOwn = !asked.isEmpty() && !before.filter(asked::equals).isPresent();
+        String version = readersOwn ? asked : held.report().vaadin().orElse("");
+        state.tab().set(LookupState.Tab.REPORT);
+        if (version.isEmpty()) {
+            UI.getCurrent().navigate(ScanView.class);
+        } else {
+            state.version().set(version);
+            UI.getCurrent().navigate(ScanView.class, new RouteParameters(ScanView.VERSION, version));
+        }
+    }
+
     private Component checkButton() {
-        check.setText(getTranslation("lookup.check"));
         check.addClassName("lookup-check");
         check.addThemeVariants(ButtonVariant.PRIMARY);
         check.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
         Signal<Boolean> asked = Signal.computed(() -> switch (state.tab().get()) {
             case VERSION -> !typed.get().isBlank() || !state.version().get().isBlank();
             case IDS -> !state.ids().get().isBlank();
-            case REPORT -> false;
+            case REPORT -> reportAsks.get() && !state.version().get().isBlank();
         });
         // Not bindEnabled: Button refuses a bound enabled state beside disable on
         // click, even in the UNTIL_RESPONSE mode where it hands the state back by
         // itself. specs/FEEDBACK-25.4.md, draft 13.
         Signal.effect(check, () -> check.setEnabled(asked.get()));
-        check.bindVisible(state.tab().map(tab -> tab != LookupState.Tab.REPORT));
+        check.bindVisible(Signal.computed(() -> state.tab().get() != LookupState.Tab.REPORT || reportAsks.get()));
+        check.bindText(state.tab().map(tab -> getTranslation(
+                tab == LookupState.Tab.REPORT ? "lookup.report.answer" : "lookup.check")));
         check.addClickListener(click -> submit());
         return check;
     }
@@ -315,10 +435,18 @@ public final class Lookup extends Composite<Div> {
         switch (state.tab().peek()) {
             case VERSION -> submitVersion();
             case IDS -> submitIds();
-            case REPORT -> {
-                // The report tab answers by its upload, epic 06.
-            }
+            case REPORT -> submitReportVersion();
         }
+    }
+
+    /** The version a report that names none is answered for. */
+    private void submitReportVersion() {
+        String cleaned = LookupInput.cleanVersion(state.version().peek());
+        if (cleaned.isEmpty()) {
+            return;
+        }
+        state.version().set(cleaned);
+        UI.getCurrent().navigate(ScanView.class, new RouteParameters(ScanView.VERSION, cleaned));
     }
 
     private void submitVersion() {
@@ -392,7 +520,9 @@ public final class Lookup extends Composite<Div> {
             case VERSION -> version.focus();
             case IDS -> ids.focus();
             case REPORT -> {
-                // Nothing on the report tab takes text until epic 06.
+                if (reportVersion.isVisible()) {
+                    reportVersion.focus();
+                }
             }
         }
     }
@@ -405,6 +535,7 @@ public final class Lookup extends Composite<Div> {
         }
         var parameters = navigation.getRouteParameters();
         var target = chain.get(0);
+        scanVersion.set(target instanceof ScanView ? parameters.get(ScanView.VERSION).orElse("") : "");
         if (target instanceof VersionView) {
             parameters.get(VersionView.VERSION).ifPresent(asked -> {
                 typed.set("");
@@ -455,9 +586,54 @@ public final class Lookup extends Composite<Div> {
     }
 
     private HelpDialog reportHelp() {
-        return new HelpDialog(getTranslation("lookup.help.report.title"),
-                HelpDialog.section(getTranslation("lookup.help.report.assessed"),
-                        getTranslation("lookup.help.report.assessed.text"),
-                        getTranslation("lookup.help.report.rest.text")));
+        var counted = new Paragraph();
+        counted.addClassName("lookup-help-scope");
+        counted.bindText(scan.held().map(held -> held.map(this::scopeSentence).orElse("")));
+        counted.bindVisible(scan.held().map(Optional::isPresent));
+        var assessed = HelpDialog.section(getTranslation("lookup.help.report.assessed"),
+                getTranslation("lookup.help.report.assessed.text"), getTranslation("lookup.help.report.rest.text"));
+        assessed.add(counted);
+
+        var sections = new ArrayList<Component>();
+        sections.add(assessed);
+        sections.add(HelpDialog.section(getTranslation("lookup.help.report.kept"),
+                getTranslation("lookup.help.report.kept.text")));
+        // One recipe per format the parser reads, in its order: a format accepted and
+        // never explained is one the reader has to guess at.
+        for (ReportFormat format : ReportFormat.values()) {
+            var recipe = HelpDialog.section(getTranslation(format.nameKey()),
+                    getTranslation("lookup.help.report." + format.name() + ".why"));
+            recipe.addClassName("lookup-help-format");
+            var command = new Pre(getTranslation("lookup.help.report." + format.name() + ".run"));
+            command.addClassName("lookup-help-run");
+            recipe.add(command, new Paragraph(getTranslation("lookup.help.report." + format.name() + ".leaves")));
+            sections.add(recipe);
+        }
+        sections.add(new Paragraph(getTranslation("lookup.help.report.json")));
+        return new HelpDialog(getTranslation("lookup.help.report.title"), sections.toArray(Component[]::new));
+    }
+
+    /** The two numbers of rule 6.11.18, counted against the file in hand. */
+    private String scopeSentence(ScanState.Held held) {
+        Triage.Scope scope;
+        try {
+            scope = Triage.scope(held.report(), data.scanIndex());
+        } catch (DataUnreachableException unreachable) {
+            return "";
+        }
+        if (scope.listed() == 0) {
+            return "";
+        }
+        if (scope.unknown() == 0) {
+            return getTranslation("lookup.help.report.scope.all");
+        }
+        String key = (scope.inventory() ? "lookup.help.report.scope.inventory." : "lookup.help.report.scope.findings.")
+                + (scope.unknown() == 1 ? "one" : "many");
+        String said = getTranslation(key, scope.listed(), scope.known(), scope.unknown());
+        if (!scope.unknownExamples().isEmpty()) {
+            said += " " + getTranslation(scope.unknown() == 1 ? "lookup.help.report.scope.example.one"
+                    : "lookup.help.report.scope.example.many", String.join(", ", scope.unknownExamples()));
+        }
+        return said;
     }
 }
