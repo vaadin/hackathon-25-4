@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.securitystatus.base.nav.Address;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.CaseCatalog;
 import com.vaadin.securitystatus.data.model.CasesIndex;
@@ -80,7 +81,8 @@ final class CaseRules {
             path = example.substring(0, question);
             flags = example.substring(question + 1);
         }
-        QueryParameters query = flags.isEmpty() ? QueryParameters.empty() : QueryParameters.fromString(flags);
+        // The catalogue's flags are read and written by the one writer of addresses.
+        QueryParameters query = Address.parse(path, flags).query();
         if (path.startsWith(VERSION_PREFIX)) {
             String version = path.substring(VERSION_PREFIX.length());
             if (version.isEmpty() || version.contains("/")) {

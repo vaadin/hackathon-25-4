@@ -24,7 +24,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
@@ -32,6 +31,8 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.securitystatus.base.nav.Address;
+import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -51,9 +52,6 @@ import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
 @PageTitle("advisories.title")
 @AnonymousAllowed
 public final class AdvisoriesView extends Composite<Div> implements BeforeEnterObserver {
-
-    /** The query flag naming the one verdict shown. */
-    public static final String VERDICT = "verdict";
 
     /** What the list is drawn from: the index, or nothing when it could not be read. */
     private record Loaded(Optional<CasesIndex> index, List<AdvisoryCatalogEntry> ordered) {
@@ -104,9 +102,8 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        List<String> asked = event.getLocation().getQueryParameters().getParameters().getOrDefault(VERDICT,
-                List.of());
-        verdict.set(AdvisoryRules.verdict(asked.stream().findFirst()));
+        verdict.set(AdvisoryRules.verdict(Address.first(event.getLocation().getQueryParameters(),
+                QueryFlag.VERDICT)));
     }
 
     private Loaded load() {
@@ -155,8 +152,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     /** A pill is a real link writing the flag, so it can be opened in a new tab and the back button undoes it. */
     private Component pill(String text, Optional<String> word, boolean active) {
         var link = new RouterLink(text, AdvisoriesView.class);
-        link.setQueryParameters(word.map(value -> QueryParameters.simple(Map.of(VERDICT, value)))
-                .orElse(QueryParameters.empty()));
+        link.setQueryParameters(Address.of("advisories").with(QueryFlag.VERDICT, word).query());
         link.addClassName("verdict-pill");
         word.ifPresent(value -> link.addClassName("verdict-" + value));
         if (active) {

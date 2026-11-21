@@ -29,6 +29,8 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.securitystatus.base.nav.Address;
+import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -52,8 +54,6 @@ import com.vaadin.securitystatus.data.model.CasesIndex;
 @AnonymousAllowed
 public final class HomeView extends Composite<Div> implements BeforeEnterObserver {
 
-    /** The query flag that lists the prerelease lines too, as the source page's {@code ?pre} does. */
-    static final String PRERELEASES = "pre";
 
     static final int RECENT_ROWS = 8;
 
@@ -78,7 +78,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        prereleases.set(event.getLocation().getQueryParameters().getParameters().containsKey(PRERELEASES));
+        prereleases.set(Address.has(event.getLocation().getQueryParameters(), QueryFlag.PRE));
     }
 
     private void show(boolean withPrereleases) {

@@ -1,0 +1,295 @@
+/* The explorer front door and the release page. */
+.internal-shell .release-view {
+    padding: 1.5rem;
+}
+
+.explorer-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.explorer-layout {
+    flex: 1 1 0;
+    min-height: 32rem;
+    border-top: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+}
+
+.explorer-master {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 1rem 0;
+    overflow: auto;
+}
+
+.explorer-search {
+    width: 100%;
+}
+
+/* The palette the rings and dots take, by registry position. */
+.product-ring.ring-0 { --ring: #0969da; }
+.product-ring.ring-1 { --ring: #1a7f37; }
+.product-ring.ring-2 { --ring: #8250df; }
+.product-ring.ring-3 { --ring: #bc4c00; }
+.product-ring.ring-4 { --ring: #bf3989; }
+.product-ring.ring-5 { --ring: #0a7c8a; }
+.product-ring.ring-6 { --ring: #9a6700; }
+.product-ring.ring-7 { --ring: #cf222e; }
+.product-ring.ring-8 { --ring: #4b6584; }
+.product-ring.ring-9 { --ring: #2da44e; }
+.product-ring.ring-10 { --ring: #a475f9; }
+.product-ring.ring-11 { --ring: #e16f24; }
+
+.product-ring {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    flex: 0 0 auto;
+    border: 3px solid var(--ring, currentColor);
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.product-ring.dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-width: 0;
+    background: var(--ring, currentColor);
+}
+
+.product-ring.dot.off {
+    opacity: 0.25;
+}
+
+.explorer-products {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.explorer-products-heading {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.explorer-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.explorer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border-radius: 999px;
+    color: inherit;
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.explorer-chip.off {
+    border-style: dashed;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-chip.off .chip-name {
+    text-decoration: line-through;
+}
+
+/* Rule 6.5.10: the count is quieter than the name. */
+.chip-count,
+.chip-discontinued {
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
+}
+
+.explorer-silent,
+.explorer-search-count,
+.explorer-hidden,
+.explorer-group-note,
+.explorer-group-more,
+.explorer-spring-only,
+.explorer-finding-missing {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.875rem;
+}
+
+.explorer-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.explorer-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.explorer-row.open {
+    border-color: var(--vaadin-text-color, currentColor);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+}
+
+.explorer-row:focus-visible {
+    outline: 2px solid var(--vaadin-focus-ring-color, currentColor);
+    outline-offset: 2px;
+}
+
+.explorer-row-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+}
+
+.explorer-row-line {
+    font-size: 1.125rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.explorer-row-scanned {
+    margin-inline-start: auto;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
+}
+
+.explorer-row-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.explorer-badge.badge-vulnerable {
+    color: var(--status-unresolved);
+}
+
+.explorer-badge.badge-unjudged {
+    color: var(--status-fix);
+}
+
+.explorer-badge.badge-not_affected {
+    color: var(--status-secure);
+}
+
+.explorer-row-summary {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.explorer-rings,
+.explorer-dots {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.explorer-detail {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 1.5rem;
+    overflow: auto;
+}
+
+.explorer-detail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.explorer-detail-title {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.explorer-detail-summary {
+    margin: 0;
+}
+
+.explorer-group > vaadin-details-summary {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.explorer-findings {
+    --vaadin-grid-cell-padding: 0.375rem 0.5rem;
+}
+
+.explorer-severity {
+    font-size: 0.875rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.explorer-finding {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem 0.75rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.explorer-field h3 {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.explorer-field p {
+    margin: 0;
+}
+
+.explorer-coordinate {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin-block-end: 0.375rem;
+}
+
+.explorer-coordinate-name {
+    font-family: var(--vaadin-font-family-monospace, monospace);
+    font-size: 0.875rem;
+}
+
+.explorer-route {
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
+}
+
+.explorer-route-none {
+    margin: 0;
+    font-size: 0.8125rem;
+}
+
+.explorer-detail .release-files-row {
+    padding-block-start: 0.5rem;
+    border-top: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+}
+
+/* The panes scroll; what is inside them keeps its height. */
+.explorer-master > *,
+.explorer-detail > * {
+    flex: 0 0 auto;
+}

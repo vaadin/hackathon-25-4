@@ -215,6 +215,27 @@ class ReadModelTest {
         assertThat(service.explorerVersion(VersionNumber.of("0.0.0"))).isEmpty();
     }
 
+    // A release record whose packages name who declared which version, as data/24.9.26.json does on
+    // 2026-11-21T10:13:39Z: objects, not texts. The 25.3.5 fixture carries none, so it is given here.
+    @Test
+    void a_declared_version_is_read_as_who_asked_for_what() {
+        host.replace("data/9.9.9.json", """
+                {"version": "9.9.9", "findings": [{"cve": "CVE-2026-1", "packages": [{"package": "io.vertx:vertx-core",
+                 "declared": [{"by": "kubernetes-httpclient-vertx@7.3.2", "version": "4.5.25", "won": false}],
+                 "declared_without_spring": null}]}]}
+                """);
+
+        ExplorerVersion release = service.explorerVersion(VersionNumber.of("9.9.9")).orElseThrow();
+
+        ExplorerVersion.PackageFinding coordinate = release.findings().getFirst().packages().getFirst();
+        assertThat(coordinate.declared()).singleElement().satisfies(declared -> {
+            assertThat(declared.by()).contains("kubernetes-httpclient-vertx@7.3.2");
+            assertThat(declared.version()).contains("4.5.25");
+            assertThat(declared.won()).isFalse();
+        });
+        assertThat(coordinate.declaredWithoutSpring()).isEmpty();
+    }
+
     @Test
     void the_queue_maps_as_published() {
         VerdictQueue queue = service.queue();

@@ -1,10 +1,13 @@
 package com.vaadin.securitystatus.base.i18n;
 
+import java.util.Comparator;
+
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.PageTitleContext;
 import com.vaadin.flow.router.PageTitleGenerator;
+import com.vaadin.flow.router.RouteConfiguration;
 
 /**
  * The one writer of page titles. A route declares a bundle key in
@@ -21,7 +24,14 @@ public class TranslatedPageTitleGenerator implements PageTitleGenerator {
             return "";
         }
         var parameters = context.routeParameters();
+        // The names come as a set; the template gives their order.
+        String template = RouteConfiguration.forApplicationScope().getTemplate(context.navigationTarget())
+                .orElse("");
         Object[] arguments = parameters.getParameterNames().stream()
+                .sorted(Comparator.comparingInt((String name) -> {
+                    int at = template.indexOf(":" + name);
+                    return at < 0 ? Integer.MAX_VALUE : at;
+                }).thenComparing(Comparator.naturalOrder()))
                 .map(name -> parameters.get(name).orElse("")).toArray();
         return I18NProvider.translate(key, arguments);
     }

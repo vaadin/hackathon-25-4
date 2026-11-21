@@ -19,7 +19,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * DAT-08. A per release file asked of this application arrives as the
+ * DAT-08 and EXP-07. Each of the six per release files, offered on the
+ * release page, arrives as the
  * publisher has it: the same bytes, the publisher's content type, and a
  * disposition that names the file. The publisher here is
  * {@link FixturePagesServer}, so the bytes cross two real HTTP connections.
@@ -34,7 +35,8 @@ class ExportsProxyIT {
     private static final String RELEASE = "25.3.5";
 
     /** The suffix of each file, and the content type the live host served it with on the day of the fixtures. */
-    private static final Map<String, String> PUBLISHED = Map.of("csv", "text/csv; charset=utf-8", "vex.json",
+    private static final Map<String, String> PUBLISHED = Map.of("json", "application/json; charset=utf-8", "csv",
+            "text/csv; charset=utf-8", "vex.json",
             "application/json; charset=utf-8", "dependency-check-suppressions.xml", "application/xml",
             "osv-scanner.toml", "application/toml", "bomber-ignore.txt", "text/plain; charset=utf-8");
 
@@ -54,7 +56,7 @@ class ExportsProxyIT {
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         base = "http://localhost:" + System.getProperty("it.port", "8080");
 
-        driver.get(base + "/findings");
+        driver.get(base + "/findings/release/25.3/" + RELEASE);
         await("vaadin-login-form input[name=password]");
         driver.executeScript("""
                 document.querySelector('vaadin-login-form vaadin-text-field').value = 'team';
@@ -69,14 +71,14 @@ class ExportsProxyIT {
         driver.quit();
     }
 
-    // DAT-08
+    // DAT-08, EXP-07
     @Test
     void each_file_of_a_release_streams_through_with_its_bytes_type_and_name() {
         assertThat(linksOf(RELEASE)).hasSize(PUBLISHED.size());
 
         PUBLISHED.forEach((suffix, contentType) -> {
             String fileName = RELEASE + "." + suffix;
-            byte[] published = FixturePagesServer.fixture("exports/" + fileName);
+            byte[] published = FixturePagesServer.fixture((suffix.equals("json") ? "data/" : "exports/") + fileName);
 
             Map<String, Object> download = fetch(hrefEndingIn(fileName));
 
@@ -97,6 +99,8 @@ class ExportsProxyIT {
     void a_file_the_publisher_does_not_have_is_a_404_and_not_an_empty_download() {
         // Every line offers its files, and the fixtures hold those of one release only.
         String missing = "24.9.26.csv";
+        driver.get(base + "/findings/release/24.9/24.9.26");
+        await("a.release-file[href$='/24.9.26.csv']");
 
         Map<String, Object> download = fetch(hrefEndingIn(missing));
 

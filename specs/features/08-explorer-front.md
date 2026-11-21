@@ -47,22 +47,22 @@ Per release: JSON, CSV, VEX, dependency check suppressions, osv-scanner toml, bo
 ## Acceptance criteria
 
 ### AC1: The filter is the source filter
-- [ ] Off only addressing by registry name, unknown names dropped
-- [ ] Marginal counts move when another chip turns off
-- [ ] A finding with two products needs both off to hide
-- [ ] The no product finding never hides
+- [x] Off only addressing by registry name, unknown names dropped
+- [x] Marginal counts move when another chip turns off
+- [x] A finding with two products needs both off to hide
+- [x] The no product finding never hides
 
 ### AC2: Rows and groups
-- [ ] Badges match the fixture per line
-- [ ] Group open state persists across a reload, merged
-- [ ] The 150 cap counts its remainder
+- [x] Badges match the fixture per line
+- [x] Group open state persists across a reload, merged
+- [x] The 150 cap counts its remainder
 
 ### AC3: Search
-- [ ] `?q` narrows rows and survives navigation
-- [ ] A full version typed lands on the release page
+- [x] `?q` narrows rows and survives navigation
+- [x] A full version typed lands on the release page
 
 ### AC4: Downloads
-- [ ] Each file fetches with its content type through the proxy
+- [x] Each file fetches with its content type through the proxy
 
 ## Test cases
 

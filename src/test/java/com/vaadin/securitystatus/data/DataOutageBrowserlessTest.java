@@ -12,6 +12,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
@@ -58,9 +59,9 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
     @Test
     @WithMockUser(username = "team", roles = Roles.SECURITY)
     void the_internal_front_door_says_it_too() {
-        // The control: with the host up, five files for each of the ten lines.
+        // The control: with the host up, one row for each of the ten lines.
         navigate(ExplorerView.class);
-        assertThat($(Anchor.class).withClassName("release-file").all()).hasSize(50);
+        assertThat($(NativeButton.class).withClassName("explorer-row").all()).hasSize(10);
         navigate("nothing-here", com.vaadin.flow.router.RouteNotFoundError.class);
 
         fixtures.coldAndDown();
@@ -68,6 +69,7 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
         navigate(ExplorerView.class);
 
         assertThat($(DataOutageNotice.class).single().getText()).isEqualTo(UNREACHABLE);
+        assertThat($(NativeButton.class).withClassName("explorer-row").exists()).isFalse();
         assertThat($(Anchor.class).withClassName("release-file").exists()).isFalse();
     }
 

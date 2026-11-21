@@ -29,7 +29,6 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
@@ -37,6 +36,8 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.securitystatus.base.nav.Address;
+import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.Downloads;
 import com.vaadin.securitystatus.base.ui.PdfPreview;
@@ -63,9 +64,6 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
 public final class ScanView extends Composite<Div> implements BeforeEnterObserver {
 
     public static final String VERSION = "version";
-
-    /** The address flag that shows the secure findings in the table. */
-    public static final String SECURE = "secure";
 
     /** The rows the table draws; the files carry all of them. */
     static final int TABLE_CAP = 200;
@@ -96,7 +94,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         asked.set(event.getRouteParameters().get(VERSION).orElse(""));
-        showSecure.set(event.getLocation().getQueryParameters().getParameters().containsKey(SECURE));
+        showSecure.set(Address.has(event.getLocation().getQueryParameters(), QueryFlag.SECURE));
     }
 
     /** What the screen is drawn from: the index, the scan index, and the version's document when measured. */
@@ -398,12 +396,8 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private void showSecure(String version, boolean show) {
-        var query = show ? QueryParameters.simple(Map.of(SECURE, "")) : QueryParameters.empty();
-        if (version.isEmpty()) {
-            UI.getCurrent().navigate(ScanView.class, RouteParameters.empty(), query);
-        } else {
-            UI.getCurrent().navigate(ScanView.class, new RouteParameters(VERSION, version), query);
-        }
+        Address.of(version.isEmpty() ? "scan" : "scan/" + version).bare(QueryFlag.SECURE, show)
+                .go(UI.getCurrentOrThrow());
     }
 
     private static Component advisoryLink(String advisory, String version) {

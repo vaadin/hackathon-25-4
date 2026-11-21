@@ -103,12 +103,13 @@ public class SecurityDataService {
             return Optional.empty();
         }
         String fileName = kind.fileName(version);
+        String path = kind.path(version);
         try {
-            return client.open("exports/" + fileName).map(stream -> new ExportFile(stream.body(), fileName,
+            return client.open(path).map(stream -> new ExportFile(stream.body(), fileName,
                     stream.contentType() == null ? "application/octet-stream" : stream.contentType(),
                     stream.length()));
         } catch (PagesClient.UnreachableException failure) {
-            throw new DataUnreachableException("exports/" + fileName, failure);
+            throw new DataUnreachableException(path, failure);
         }
     }
 

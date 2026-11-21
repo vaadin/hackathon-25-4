@@ -68,7 +68,7 @@ public record ExplorerVersion(VersionNumber version, Optional<String> line, Opti
     /** One package that carries the advisory into this release, and the routes it takes. */
     public record PackageFinding(@JsonProperty("package") String packageName, Optional<String> origin,
             Optional<String> verdict, List<String> versions, List<String> versionsWithoutSpring,
-            List<String> declared, List<String> declaredWithoutSpring, List<String> modules, List<Route> routes,
+            List<Declared> declared, List<Declared> declaredWithoutSpring, List<String> modules, List<Route> routes,
             List<Route> routesWithoutSpring, Optional<String> published, Optional<String> impact,
             Optional<String> workaround, Optional<String> commentary, Optional<String> fixExpected,
             Map<String, Object> fixExpectedVersion) {
@@ -89,6 +89,18 @@ public record ExplorerVersion(VersionNumber version, Optional<String> line, Opti
             commentary = Wire.text(commentary);
             fixExpected = Wire.text(fixExpected);
             fixExpectedVersion = Wire.map(fixExpectedVersion);
+        }
+    }
+
+    /**
+     * A version of the package that something in the tree asked for, who asked,
+     * and whether that request is the one resolution kept.
+     */
+    public record Declared(Optional<String> by, Optional<String> version, @Nullable Boolean won) {
+
+        public Declared {
+            by = Wire.text(by);
+            version = Wire.text(version);
         }
     }
 
