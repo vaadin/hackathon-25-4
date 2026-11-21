@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -21,6 +22,7 @@ import com.vaadin.securitystatus.base.ui.ThemeMemory;
  * the root element resolves to on every rendered frame, so a single light frame
  * ahead of the dark one is caught.
  */
+@ExtendWith(FixturePagesServer.class)
 class ThemeFirstPaintIT {
 
     private static final String PROBE = """

@@ -1,0 +1,1670 @@
+{
+  "generated_at": "2026-11-20T10:54:59Z",
+  "versions": [
+    {
+      "findings": 212,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:29:47+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.0.json",
+      "version": "14.14.0"
+    },
+    {
+      "findings": 211,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:48+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.1.json",
+      "version": "14.14.1"
+    },
+    {
+      "findings": 211,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:29:52+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.2.json",
+      "version": "14.14.2"
+    },
+    {
+      "findings": 211,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:13+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.3.json",
+      "version": "14.14.3"
+    },
+    {
+      "findings": 210,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:17+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.4.json",
+      "version": "14.14.4"
+    },
+    {
+      "findings": 210,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:31:25+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.5.json",
+      "version": "14.14.5"
+    },
+    {
+      "findings": 224,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:25+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.6.json",
+      "version": "14.14.6"
+    },
+    {
+      "findings": 229,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:45+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.7.json",
+      "version": "14.14.7"
+    },
+    {
+      "findings": 221,
+      "line": "14.14",
+      "scanned_at": "2026-11-15T03:30:46+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.8.json",
+      "version": "14.14.8"
+    },
+    {
+      "findings": 219,
+      "line": "14.14",
+      "scanned_at": "2026-11-20T03:26:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/14.14.9.json",
+      "version": "14.14.9"
+    },
+    {
+      "findings": 182,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:30:58+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.0.json",
+      "version": "23.6.0"
+    },
+    {
+      "findings": 182,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:19+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.1.json",
+      "version": "23.6.1"
+    },
+    {
+      "findings": 177,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:25+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.10.json",
+      "version": "23.6.10"
+    },
+    {
+      "findings": 176,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:34:18+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.11.json",
+      "version": "23.6.11"
+    },
+    {
+      "findings": 176,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.12.json",
+      "version": "23.6.12"
+    },
+    {
+      "findings": 176,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:58+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.13.json",
+      "version": "23.6.13"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:56+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.14.json",
+      "version": "23.6.14"
+    },
+    {
+      "findings": 185,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:34:54+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.15.json",
+      "version": "23.6.15"
+    },
+    {
+      "findings": 185,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:33:04+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.16.json",
+      "version": "23.6.16"
+    },
+    {
+      "findings": 181,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:33:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.17.json",
+      "version": "23.6.17"
+    },
+    {
+      "findings": 181,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:33:27+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.18.json",
+      "version": "23.6.18"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-20T03:26:06+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.19.json",
+      "version": "23.6.19"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:19+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.2.json",
+      "version": "23.6.2"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:44+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.3.json",
+      "version": "23.6.3"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:28+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.4.json",
+      "version": "23.6.4"
+    },
+    {
+      "findings": 180,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:54+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.5.json",
+      "version": "23.6.5"
+    },
+    {
+      "findings": 179,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:52+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.6.json",
+      "version": "23.6.6"
+    },
+    {
+      "findings": 177,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:33:31+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.7.json",
+      "version": "23.6.7"
+    },
+    {
+      "findings": 177,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:31:59+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.8.json",
+      "version": "23.6.8"
+    },
+    {
+      "findings": 177,
+      "line": "23.6",
+      "scanned_at": "2026-11-15T03:32:30+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/23.6.9.json",
+      "version": "23.6.9"
+    },
+    {
+      "findings": 309,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T04:03:03+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.0.json",
+      "version": "24.10.0"
+    },
+    {
+      "findings": 296,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:55:50+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.1.json",
+      "version": "24.10.1"
+    },
+    {
+      "findings": 134,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T04:05:52+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.10.json",
+      "version": "24.10.10"
+    },
+    {
+      "findings": 122,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:57:59+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.11.json",
+      "version": "24.10.11"
+    },
+    {
+      "findings": 115,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T04:02:38+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.12.json",
+      "version": "24.10.12"
+    },
+    {
+      "findings": 115,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:59:01+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.13.json",
+      "version": "24.10.13"
+    },
+    {
+      "findings": 112,
+      "line": "24.10",
+      "scanned_at": "2026-11-20T03:25:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.14.json",
+      "version": "24.10.14"
+    },
+    {
+      "findings": 249,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:59:57+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.3.json",
+      "version": "24.10.3"
+    },
+    {
+      "findings": 248,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:56:36+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.4.json",
+      "version": "24.10.4"
+    },
+    {
+      "findings": 245,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T04:04:26+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.6.json",
+      "version": "24.10.6"
+    },
+    {
+      "findings": 229,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:56:53+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.7.json",
+      "version": "24.10.7"
+    },
+    {
+      "findings": 144,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T04:01:16+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.8.json",
+      "version": "24.10.8"
+    },
+    {
+      "findings": 136,
+      "line": "24.10",
+      "scanned_at": "2026-11-15T03:57:49+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.10.9.json",
+      "version": "24.10.9"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:34:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.0.json",
+      "version": "24.4.0"
+    },
+    {
+      "findings": 308,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:34:53+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.1.json",
+      "version": "24.4.1"
+    },
+    {
+      "findings": 318,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:36:49+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.10.json",
+      "version": "24.4.10"
+    },
+    {
+      "findings": 315,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:39:32+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.11.json",
+      "version": "24.4.11"
+    },
+    {
+      "findings": 315,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:37:26+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.12.json",
+      "version": "24.4.12"
+    },
+    {
+      "findings": 311,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:38:34+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.13.json",
+      "version": "24.4.13"
+    },
+    {
+      "findings": 311,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:37:50+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.14.json",
+      "version": "24.4.14"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:41:02+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.15.json",
+      "version": "24.4.15"
+    },
+    {
+      "findings": 306,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:38:37+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.16.json",
+      "version": "24.4.16"
+    },
+    {
+      "findings": 306,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:40:03+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.17.json",
+      "version": "24.4.17"
+    },
+    {
+      "findings": 302,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:39:05+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.18.json",
+      "version": "24.4.18"
+    },
+    {
+      "findings": 302,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:42:26+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.19.json",
+      "version": "24.4.19"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:34:38+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.2.json",
+      "version": "24.4.2"
+    },
+    {
+      "findings": 302,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:39:41+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.20.json",
+      "version": "24.4.20"
+    },
+    {
+      "findings": 302,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:41:18+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.21.json",
+      "version": "24.4.21"
+    },
+    {
+      "findings": 302,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:40:12+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.22.json",
+      "version": "24.4.22"
+    },
+    {
+      "findings": 301,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:43:44+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.23.json",
+      "version": "24.4.23"
+    },
+    {
+      "findings": 238,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:40:48+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.24.json",
+      "version": "24.4.24"
+    },
+    {
+      "findings": 240,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:42:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.25.json",
+      "version": "24.4.25"
+    },
+    {
+      "findings": 240,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:41:17+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.26.json",
+      "version": "24.4.26"
+    },
+    {
+      "findings": 234,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:45:04+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.27.json",
+      "version": "24.4.27"
+    },
+    {
+      "findings": 232,
+      "line": "24.4",
+      "scanned_at": "2026-11-20T03:26:25+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.28.json",
+      "version": "24.4.28"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:36:53+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.3.json",
+      "version": "24.4.3"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:35:19+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.4.json",
+      "version": "24.4.4"
+    },
+    {
+      "findings": 307,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:36:07+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.5.json",
+      "version": "24.4.5"
+    },
+    {
+      "findings": 306,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:35:44+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.6.json",
+      "version": "24.4.6"
+    },
+    {
+      "findings": 318,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:38:11+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.7.json",
+      "version": "24.4.7"
+    },
+    {
+      "findings": 318,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:36:20+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.8.json",
+      "version": "24.4.8"
+    },
+    {
+      "findings": 318,
+      "line": "24.4",
+      "scanned_at": "2026-11-15T03:37:21+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.4.9.json",
+      "version": "24.4.9"
+    },
+    {
+      "findings": 333,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:43:58+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.0.json",
+      "version": "24.7.0"
+    },
+    {
+      "findings": 332,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:42:28+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.1.json",
+      "version": "24.7.1"
+    },
+    {
+      "findings": 304,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:49:36+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.10.json",
+      "version": "24.7.10"
+    },
+    {
+      "findings": 304,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:45:25+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.11.json",
+      "version": "24.7.11"
+    },
+    {
+      "findings": 303,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:48:12+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.12.json",
+      "version": "24.7.12"
+    },
+    {
+      "findings": 297,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:46:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.13.json",
+      "version": "24.7.13"
+    },
+    {
+      "findings": 296,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:51:08+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.14.json",
+      "version": "24.7.14"
+    },
+    {
+      "findings": 296,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:46:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.15.json",
+      "version": "24.7.15"
+    },
+    {
+      "findings": 221,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:49:38+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.16.json",
+      "version": "24.7.16"
+    },
+    {
+      "findings": 221,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:47:23+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.17.json",
+      "version": "24.7.17"
+    },
+    {
+      "findings": 216,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:52:37+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.18.json",
+      "version": "24.7.18"
+    },
+    {
+      "findings": 214,
+      "line": "24.7",
+      "scanned_at": "2026-11-20T03:27:15+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.19.json",
+      "version": "24.7.19"
+    },
+    {
+      "findings": 320,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:46:40+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.2.json",
+      "version": "24.7.2"
+    },
+    {
+      "findings": 315,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:43:02+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.3.json",
+      "version": "24.7.3"
+    },
+    {
+      "findings": 314,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:45:21+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.4.json",
+      "version": "24.7.4"
+    },
+    {
+      "findings": 314,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:43:39+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.5.json",
+      "version": "24.7.5"
+    },
+    {
+      "findings": 314,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:48:05+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.6.json",
+      "version": "24.7.6"
+    },
+    {
+      "findings": 309,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:44:14+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.7.json",
+      "version": "24.7.7"
+    },
+    {
+      "findings": 304,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:46:47+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.8.json",
+      "version": "24.7.8"
+    },
+    {
+      "findings": 304,
+      "line": "24.7",
+      "scanned_at": "2026-11-15T03:44:54+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.7.9.json",
+      "version": "24.7.9"
+    },
+    {
+      "findings": 338,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:50:58+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.0.json",
+      "version": "24.9.0"
+    },
+    {
+      "findings": 332,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:48:34+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.1.json",
+      "version": "24.9.1"
+    },
+    {
+      "findings": 316,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:57:11+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.10.json",
+      "version": "24.9.10"
+    },
+    {
+      "findings": 315,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:51:12+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.11.json",
+      "version": "24.9.11"
+    },
+    {
+      "findings": 313,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:54:47+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.12.json",
+      "version": "24.9.12"
+    },
+    {
+      "findings": 311,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:52:02+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.13.json",
+      "version": "24.9.13"
+    },
+    {
+      "findings": 296,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:58:44+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.14.json",
+      "version": "24.9.14"
+    },
+    {
+      "findings": 248,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:52:22+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.16.json",
+      "version": "24.9.16"
+    },
+    {
+      "findings": 247,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:56:04+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.17.json",
+      "version": "24.9.17"
+    },
+    {
+      "findings": 230,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:53:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.18.json",
+      "version": "24.9.18"
+    },
+    {
+      "findings": 144,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T04:00:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.19.json",
+      "version": "24.9.19"
+    },
+    {
+      "findings": 332,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:54:12+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.2.json",
+      "version": "24.9.2"
+    },
+    {
+      "findings": 137,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:53:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.20.json",
+      "version": "24.9.20"
+    },
+    {
+      "findings": 135,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:57:22+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.21.json",
+      "version": "24.9.21"
+    },
+    {
+      "findings": 132,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:54:21+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.22.json",
+      "version": "24.9.22"
+    },
+    {
+      "findings": 122,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T04:01:37+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.23.json",
+      "version": "24.9.23"
+    },
+    {
+      "findings": 121,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:54:43+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.24.json",
+      "version": "24.9.24"
+    },
+    {
+      "findings": 116,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:58:38+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.25.json",
+      "version": "24.9.25"
+    },
+    {
+      "findings": 113,
+      "line": "24.9",
+      "scanned_at": "2026-11-20T03:25:39+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.26.json",
+      "version": "24.9.26"
+    },
+    {
+      "findings": 332,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:48:51+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.3.json",
+      "version": "24.9.3"
+    },
+    {
+      "findings": 327,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:52:17+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.4.json",
+      "version": "24.9.4"
+    },
+    {
+      "findings": 327,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:49:43+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.5.json",
+      "version": "24.9.5"
+    },
+    {
+      "findings": 326,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:55:42+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.6.json",
+      "version": "24.9.6"
+    },
+    {
+      "findings": 324,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:50:03+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.7.json",
+      "version": "24.9.7"
+    },
+    {
+      "findings": 321,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:53:28+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.8.json",
+      "version": "24.9.8"
+    },
+    {
+      "findings": 320,
+      "line": "24.9",
+      "scanned_at": "2026-11-15T03:50:53+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/24.9.9.json",
+      "version": "24.9.9"
+    },
+    {
+      "findings": 51,
+      "line": "25.3",
+      "scanned_at": "2026-11-15T04:18:39+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.3.0.json",
+      "version": "25.3.0"
+    },
+    {
+      "findings": 48,
+      "line": "25.3",
+      "scanned_at": "2026-11-15T04:12:41+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.3.1.json",
+      "version": "25.3.1"
+    },
+    {
+      "findings": 46,
+      "line": "25.3",
+      "scanned_at": "2026-11-15T04:25:18+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.3.2.json",
+      "version": "25.3.2"
+    },
+    {
+      "findings": 37,
+      "line": "25.3",
+      "scanned_at": "2026-11-15T04:13:09+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.3.3.json",
+      "version": "25.3.3"
+    },
+    {
+      "findings": 33,
+      "line": "25.3",
+      "scanned_at": "2026-11-15T04:19:41+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.3.4.json",
+      "version": "25.3.4"
+    },
+    {
+      "findings": 15,
+      "line": "25.3",
+      "scanned_at": "2026-11-20T03:25:17+00:00",
+      "spring_boot_state": "safe",
+      "state": "safe",
+      "url": "data/25.3.5.json",
+      "version": "25.3.5"
+    },
+    {
+      "findings": 48,
+      "line": "25.4",
+      "scanned_at": "2026-11-15T04:26:33+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.4.0-alpha1.json",
+      "version": "25.4.0-alpha1"
+    },
+    {
+      "findings": 40,
+      "line": "25.4",
+      "scanned_at": "2026-11-15T04:14:10+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.4.0-alpha3.json",
+      "version": "25.4.0-alpha3"
+    },
+    {
+      "findings": 33,
+      "line": "25.4",
+      "scanned_at": "2026-11-15T04:20:49+00:00",
+      "spring_boot_state": "vulnerable",
+      "state": "vulnerable",
+      "url": "data/25.4.0-alpha4.json",
+      "version": "25.4.0-alpha4"
+    },
+    {
+      "findings": 15,
+      "line": "25.4",
+      "scanned_at": "2026-11-15T04:14:36+00:00",
+      "spring_boot_state": "safe",
+      "state": "safe",
+      "url": "data/25.4.0-alpha5.json",
+      "version": "25.4.0-alpha5"
+    },
+    {
+      "findings": 15,
+      "line": "25.4",
+      "scanned_at": "2026-11-16T03:29:47+00:00",
+      "spring_boot_state": "safe",
+      "state": "safe",
+      "url": "data/25.4.0-alpha6.json",
+      "version": "25.4.0-alpha6"
+    },
+    {
+      "findings": 13,
+      "line": "25.4",
+      "scanned_at": "2026-11-19T03:25:33+00:00",
+      "spring_boot_state": "safe",
+      "state": "safe",
+      "url": "data/25.4.0-beta1.json",
+      "version": "25.4.0-beta1"
+    },
+    {
+      "findings": 13,
+      "line": "25.4",
+      "scanned_at": "2026-11-20T03:25:43+00:00",
+      "spring_boot_state": "safe",
+      "state": "safe",
+      "url": "data/25.4.0-beta2.json",
+      "version": "25.4.0-beta2"
+    },
+    {
+      "findings": 9,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:06+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.0.json",
+      "version": "7.7.0"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:00+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.1.json",
+      "version": "7.7.1"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:37+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.10.json",
+      "version": "7.7.10"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:53+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.12.json",
+      "version": "7.7.12"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:47+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.13.json",
+      "version": "7.7.13"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:45+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.14.json",
+      "version": "7.7.14"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:51+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.15.json",
+      "version": "7.7.15"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:11+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.16.json",
+      "version": "7.7.16"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:01+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.17.json",
+      "version": "7.7.17"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:09+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.2.json",
+      "version": "7.7.2"
+    },
+    {
+      "findings": 6,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:00+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.23.json",
+      "version": "7.7.23"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:06+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.24.json",
+      "version": "7.7.24"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:34+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.25.json",
+      "version": "7.7.25"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:17+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.26.json",
+      "version": "7.7.26"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:19+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.27.json",
+      "version": "7.7.27"
+    },
+    {
+      "findings": 4,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:24+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.28.json",
+      "version": "7.7.28"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:53+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.29.json",
+      "version": "7.7.29"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:18+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.3.json",
+      "version": "7.7.3"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:32+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.30.json",
+      "version": "7.7.30"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:35+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.31.json",
+      "version": "7.7.31"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:40+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.32.json",
+      "version": "7.7.32"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:13+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.33.json",
+      "version": "7.7.33"
+    },
+    {
+      "findings": 7,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:47+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.34.json",
+      "version": "7.7.34"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:52+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.36.json",
+      "version": "7.7.36"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:27:56+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.37.json",
+      "version": "7.7.37"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:32+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.38.json",
+      "version": "7.7.38"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:03+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.39.json",
+      "version": "7.7.39"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:20+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.4.json",
+      "version": "7.7.4"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:09+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.40.json",
+      "version": "7.7.40"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:12+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.41.json",
+      "version": "7.7.41"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:52+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.42.json",
+      "version": "7.7.42"
+    },
+    {
+      "findings": 6,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:19+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.43.json",
+      "version": "7.7.43"
+    },
+    {
+      "findings": 6,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:26+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.44.json",
+      "version": "7.7.44"
+    },
+    {
+      "findings": 6,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:28+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.45.json",
+      "version": "7.7.45"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:29:11+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.46.json",
+      "version": "7.7.46"
+    },
+    {
+      "findings": 5,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:34+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.47.json",
+      "version": "7.7.47"
+    },
+    {
+      "findings": 4,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:44+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.48.json",
+      "version": "7.7.48"
+    },
+    {
+      "findings": 4,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:43+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.49.json",
+      "version": "7.7.49"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:15+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.5.json",
+      "version": "7.7.5"
+    },
+    {
+      "findings": 2,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:29:31+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.50.json",
+      "version": "7.7.50"
+    },
+    {
+      "findings": 2,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:49+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.51.json",
+      "version": "7.7.51"
+    },
+    {
+      "findings": 2,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:29:02+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.52.json",
+      "version": "7.7.52"
+    },
+    {
+      "findings": 2,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:28:59+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.53.json",
+      "version": "7.7.53"
+    },
+    {
+      "findings": 0,
+      "line": "7.7",
+      "scanned_at": null,
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.54.json",
+      "version": "7.7.54"
+    },
+    {
+      "findings": 33,
+      "line": "7.7",
+      "scanned_at": "2026-11-13T03:25:09+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.55.json",
+      "version": "7.7.55"
+    },
+    {
+      "findings": 33,
+      "line": "7.7",
+      "scanned_at": "2026-11-20T03:25:07+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/7.7.56.json",
+      "version": "7.7.56"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:23+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.6.json",
+      "version": "7.7.6"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:35+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.7.json",
+      "version": "7.7.7"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:34+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.8.json",
+      "version": "7.7.8"
+    },
+    {
+      "findings": 8,
+      "line": "7.7",
+      "scanned_at": "2026-11-15T03:26:30+00:00",
+      "spring_boot_state": null,
+      "state": "vulnerable",
+      "url": "data/7.7.9.json",
+      "version": "7.7.9"
+    },
+    {
+      "findings": 2,
+      "line": "8.32",
+      "scanned_at": "2026-11-15T03:29:15+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/8.32.0.json",
+      "version": "8.32.0"
+    },
+    {
+      "findings": 0,
+      "line": "8.32",
+      "scanned_at": null,
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/8.32.1.json",
+      "version": "8.32.1"
+    },
+    {
+      "findings": 0,
+      "line": "8.32",
+      "scanned_at": null,
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/8.32.2.json",
+      "version": "8.32.2"
+    },
+    {
+      "findings": 33,
+      "line": "8.32",
+      "scanned_at": "2026-11-20T03:25:22+00:00",
+      "spring_boot_state": null,
+      "state": "safe",
+      "url": "data/8.32.3.json",
+      "version": "8.32.3"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 @import url("styles/shell.css");
+@import url("styles/data.css");
 
 html {
     --aura-base-font-size: 16;

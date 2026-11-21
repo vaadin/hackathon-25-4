@@ -22,6 +22,7 @@ import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
+import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.status.HomeView;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -39,6 +40,9 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
     DataRefreshSignal dataRefresh;
+
+    @Autowired
+    FixturePages fixtures;
 
     // FND-03
     @Test
@@ -79,13 +83,25 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
 
     @Test
     void measured_chip_is_omitted_until_a_measurement_is_known() {
+        fixtures.coldAndDown();
+        try {
+            navigate(HomeView.class);
+            assertThat($(Badge.class).exists()).isFalse();
+
+            dataRefresh.publish(Instant.parse("2026-11-19T03:15:00Z"));
+            runPendingSignalsTasks();
+
+            assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-19");
+        } finally {
+            fixtures.restore();
+        }
+    }
+
+    @Test
+    void measured_chip_shows_the_generated_at_of_the_index_that_was_read() {
         navigate(HomeView.class);
-        assertThat($(Badge.class).exists()).isFalse();
 
-        dataRefresh.publish(Instant.parse("2026-11-19T03:15:00Z"));
-        runPendingSignalsTasks();
-
-        assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-19");
+        assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-20");
     }
 
     private static String documentTitle() {

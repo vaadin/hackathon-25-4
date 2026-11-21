@@ -1,0 +1,49 @@
+.data-outage {
+    max-width: 40rem;
+    margin-block: 1rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.line-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: var(--vaadin-gap-m, 1rem);
+    margin-block-start: 1.5rem;
+}
+
+.line-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+}
+
+.line-card-minor {
+    font-size: 1.25rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.line-card-version {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.release-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-block-start: 1.5rem;
+}
+
+.release-files-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+}
+
+.release-files-version {
+    min-width: 7rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}

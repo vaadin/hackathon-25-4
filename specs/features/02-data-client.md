@@ -27,19 +27,19 @@ The one place that talks to GitHub Pages, the cache in front of it, the read mod
 ## Acceptance criteria
 
 ### AC1: One door to the network
-- [ ] No class outside `data` imports an HTTP client, enforced by an architecture test
+- [x] No class outside `data` imports an HTTP client, enforced by an architecture test
 
 ### AC2: The cache behaves
-- [ ] A second request inside the TTL causes no fetch
-- [ ] A 304 revalidation refreshes the TTL without reparsing
-- [ ] Stale answers survive a dead upstream
+- [x] A second request inside the TTL causes no fetch
+- [x] A 304 revalidation refreshes the TTL without reparsing
+- [x] Stale answers survive a dead upstream
 
 ### AC3: The signal reaches everyone
-- [ ] A moved `generated_at` updates the measured chip in two concurrent sessions without a reload
+- [x] A moved `generated_at` updates the measured chip in two concurrent sessions without a reload
 
 ### AC4: The models are honest
-- [ ] Absent optional fields map to absent, never to empty strings
-- [ ] `24.10` sorts above `24.2`
+- [x] Absent optional fields map to absent, never to empty strings
+- [x] `24.10` sorts above `24.2`
 
 ## Test cases
 

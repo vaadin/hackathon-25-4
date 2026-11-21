@@ -24,4 +24,9 @@ public class DataRefreshSignal {
     public void publish(Instant newest) {
         generatedAt.set(newest);
     }
+
+    /** Back to knowing nothing, for a test that needs a cold start. */
+    void forget() {
+        generatedAt.set(null);
+    }
 }

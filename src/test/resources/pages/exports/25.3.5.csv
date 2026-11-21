@@ -1,0 +1,16 @@
+cve,severity,verdict,package,resolved,origin,module,fix owner,fixed in,workaround
+CVE-2021-33604,low,false_positive,com.vaadin:vaadin-swing-kit-flow,3.0.1,vaadin,vaadin-swing-kit-flow,vaadin,,
+CVE-2022-31691,critical,false_positive,org.springframework.boot:spring-boot-devtools,4.1.2,spring-boot,,vaadin,,
+CVE-2024-21639,critical,false_positive,me.friwi:jcef-api,jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85,vaadin,vaadin-swing-kit-client,upstream,,
+CVE-2024-21640,critical,false_positive,me.friwi:jcef-api,jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85,vaadin,vaadin-swing-kit-client,upstream,,
+CVE-2024-9410,moderate,false_positive,me.friwi:jcef-api,jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85,vaadin,vaadin-swing-kit-client,upstream,,
+CVE-2025-15056,moderate,fixed,quill,2.0.3,vaadin,,vaadin,,None needed. A scanner that still reports it is reading Quill's version string rather than the code.
+CVE-2026-116796,high,fixed,highcharts,12.2.0,vaadin,@vaadin/react-components-pro,vaadin,,
+CVE-2026-118244,high,fixed,highcharts,12.2.0,vaadin,@vaadin/react-components-pro,vaadin,,
+CVE-2026-118246,high,fixed,highcharts,12.2.0,vaadin,@vaadin/react-components-pro,vaadin,,
+CVE-2026-118250,high,fixed,highcharts,12.2.0,vaadin,@vaadin/react-components-pro,vaadin,,
+CVE-2026-118251,high,fixed,highcharts,12.2.0,vaadin,@vaadin/react-components-pro,vaadin,,
+CVE-2026-118259,moderate,configuration,io.opentelemetry:opentelemetry-api,1.62.0,vaadin,vaadin-testbench,upstream,,"If you add such tracing, set <opentelemetry.version>1.67.0</opentelemetry.version> in your pom, which resolves the api and the SDK at 1.67.0 under the Spring Boot parent, or cap or remove the tracestate header at your proxy before requests reach the application."
+CVE-2026-120350,low,fixed,quill,2.0.3,vaadin,,vaadin,,None needed. A scanner that still reports it is reading Quill's version string rather than the code.
+CVE-2026-53914,critical,false_positive,org.jetbrains.kotlin:kotlin-stdlib,2.3.21,vaadin,flow-webpush; hilla-spring-boot-starter,vaadin,,
+CVE-2026-54285,moderate,false_positive,io.opentelemetry:opentelemetry-api,1.62.0,vaadin,vaadin-testbench,upstream,,

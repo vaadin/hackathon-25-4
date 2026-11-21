@@ -151,6 +151,9 @@
             <id>it</id>
             <properties>
                 <it.port>8081</it.port>
+                <!-- Where the browser tests serve the committed fixtures, standing in
+                     for GitHub Pages, so this run needs no network either. -->
+                <it.pages.port>8082</it.pages.port>
                 <it.headless>true</it.headless>
             </properties>
             <build>
@@ -165,6 +168,7 @@
                                 <configuration>
                                     <arguments>
                                         <argument>--server.port=${it.port}</argument>
+                                        <argument>--securitystatus.pages.base-url=http://localhost:${it.pages.port}/cve-status/</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -183,6 +187,7 @@
                             </includes>
                             <systemPropertyVariables>
                                 <it.port>${it.port}</it.port>
+                                <it.pages.port>${it.pages.port}</it.pages.port>
                                 <it.headless>${it.headless}</it.headless>
                             </systemPropertyVariables>
                         </configuration>

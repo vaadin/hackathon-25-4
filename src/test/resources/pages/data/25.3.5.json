@@ -1,0 +1,910 @@
+{
+  "counts": {
+    "from_spring_boot": 1,
+    "in_the_build": 0,
+    "risk": 0,
+    "ruled_out": 14,
+    "total": 15,
+    "unjudged": 0
+  },
+  "findings": [
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has compared the Swing Kit version against the version range of a different artifact. CVE-2021-33604 is about the development mode handler of flow-server 2.0.0 to 2.6.1 and 3.0.0 to 6.0.9, that is Vaadin 14.0 to 14.6 and 15 to 19. vaadin-swing-kit-flow is not flow-server, but its own version numbers, 2.2.3 to 2.4.2 and 3.0.1, fall inside those ranges, so the match looks real. The range is open because the claim is about which artifact the advisory names, which no Swing Kit version changes. Nothing to upgrade for it.",
+      "cve": "CVE-2021-33604",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None. The advisory is about flow-server of Vaadin 19 and earlier, not about Swing Kit.",
+      "modules": [
+        "vaadin-swing-kit-flow"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has compared the Swing Kit version against the version range of a different artifact. CVE-2021-33604 is about the development mode handler of flow-server 2.0.0 to 2.6.1 and 3.0.0 to 6.0.9, that is Vaadin 14.0 to 14.6 and 15 to 19. vaadin-swing-kit-flow is not flow-server, but its own version numbers, 2.2.3 to 2.4.2 and 3.0.1, fall inside those ranges, so the match looks real. The range is open because the claim is about which artifact the advisory names, which no Swing Kit version changes. Nothing to upgrade for it.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None. The advisory is about flow-server of Vaadin 19 and earlier, not about Swing Kit.",
+          "modules": [
+            "vaadin-swing-kit-flow"
+          ],
+          "origin": "vaadin",
+          "package": "com.vaadin:vaadin-swing-kit-flow",
+          "published": null,
+          "routes": [
+            {
+              "entry": "vaadin-swing-kit-flow",
+              "steps": [
+                "vaadin-swing-kit-flow@3.0.1"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "vaadin-swing-kit-flow",
+              "steps": [
+                "vaadin-swing-kit-flow@3.0.1"
+              ]
+            }
+          ],
+          "verdict": "false_positive",
+          "versions": [
+            "3.0.1"
+          ],
+          "versions_without_spring": [
+            "3.0.1"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "low",
+      "spring_pins": false,
+      "summary": "URL encoding error in development mode handler in com.vaadin:flow-server versions 2.0.0 through 2.6.1 (Vaadin 14.0.0 through 14.6.1), 3.0.0 through 6.0.9 (Vaadin 15.0.0 through 19.0.8) allows local user to execute arbitrary JavaScript code by opening crafted URL in browser",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has matched the wrong product. This advisory is about Spring Tools 4 for Eclipse and the Spring Boot Tools extension for VSCode, which are editor tooling, and the dependency it was matched against is spring-boot-devtools, a different artifact that no editor ships. Nothing in a Vaadin application is affected, and nothing has to be upgraded for it.",
+      "cve": "CVE-2022-31691",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": null,
+      "modules": null,
+      "owner": "spring-boot",
+      "packages": [
+        {
+          "commentary": "Your scanner has matched the wrong product. This advisory is about Spring Tools 4 for Eclipse and the Spring Boot Tools extension for VSCode, which are editor tooling, and the dependency it was matched against is spring-boot-devtools, a different artifact that no editor ships. Nothing in a Vaadin application is affected, and nothing has to be upgraded for it.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "",
+          "modules": null,
+          "origin": "spring-boot",
+          "package": "org.springframework.boot:spring-boot-devtools",
+          "published": null,
+          "routes": [
+            {
+              "entry": "spring-boot-devtools",
+              "steps": [
+                "spring-boot-devtools@4.1.2"
+              ]
+            }
+          ],
+          "routes_without_spring": [],
+          "verdict": "false_positive",
+          "versions": [
+            "4.1.2"
+          ],
+          "versions_without_spring": [],
+          "workaround": ""
+        }
+      ],
+      "severity": "critical",
+      "spring_pins": false,
+      "summary": "Spring Tools 4 for Eclipse version 4.16.0 and below as well as VSCode extensions such as Spring Boot Tools, Concourse CI Pipeline Editor, Bosh Editor and Cloudfoundry Manifest YML Support version 1.39.0 and below all use Snakeyaml library for YAML editing support",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has flagged a Chromium Embedded Framework that already carries the fix. These two advisories are out of bounds reads in the off screen rendering code of CEF, reachable by a compromised GPU process, and they are fixed from CEF 120.2.3 and 121.2.6. Swing Kit on Vaadin 24.9 and later brings CEF 127.3.1 or 135.0.20. The scanner cannot compare the version string jcef-api carries with the date NVD uses as its bound, so it reports every version. Nothing to upgrade for these.",
+      "cve": "CVE-2024-21639",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "upstream",
+      "fixed_in": null,
+      "impact": "None. The CEF your application resolves is newer than the fix.",
+      "modules": [
+        "vaadin-swing-kit-client"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has flagged a Chromium Embedded Framework that already carries the fix. These two advisories are out of bounds reads in the off screen rendering code of CEF, reachable by a compromised GPU process, and they are fixed from CEF 120.2.3 and 121.2.6. Swing Kit on Vaadin 24.9 and later brings CEF 127.3.1 or 135.0.20. The scanner cannot compare the version string jcef-api carries with the date NVD uses as its bound, so it reports every version. Nothing to upgrade for these.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None. The CEF your application resolves is newer than the fix.",
+          "modules": [
+            "vaadin-swing-kit-client"
+          ],
+          "origin": "vaadin",
+          "package": "me.friwi:jcef-api",
+          "published": null,
+          "routes": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "verdict": "false_positive",
+          "versions": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "versions_without_spring": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "critical",
+      "spring_pins": false,
+      "summary": "CEF (Chromium Embedded Framework ) is a simple framework for embedding Chromium-based browsers in other applications",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has flagged a Chromium Embedded Framework that already carries the fix. These two advisories are out of bounds reads in the off screen rendering code of CEF, reachable by a compromised GPU process, and they are fixed from CEF 120.2.3 and 121.2.6. Swing Kit on Vaadin 24.9 and later brings CEF 127.3.1 or 135.0.20. The scanner cannot compare the version string jcef-api carries with the date NVD uses as its bound, so it reports every version. Nothing to upgrade for these.",
+      "cve": "CVE-2024-21640",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "upstream",
+      "fixed_in": null,
+      "impact": "None. The CEF your application resolves is newer than the fix.",
+      "modules": [
+        "vaadin-swing-kit-client"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has flagged a Chromium Embedded Framework that already carries the fix. These two advisories are out of bounds reads in the off screen rendering code of CEF, reachable by a compromised GPU process, and they are fixed from CEF 120.2.3 and 121.2.6. Swing Kit on Vaadin 24.9 and later brings CEF 127.3.1 or 135.0.20. The scanner cannot compare the version string jcef-api carries with the date NVD uses as its bound, so it reports every version. Nothing to upgrade for these.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None. The CEF your application resolves is newer than the fix.",
+          "modules": [
+            "vaadin-swing-kit-client"
+          ],
+          "origin": "vaadin",
+          "package": "me.friwi:jcef-api",
+          "published": null,
+          "routes": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "verdict": "false_positive",
+          "versions": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "versions_without_spring": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "critical",
+      "spring_pins": false,
+      "summary": "Chromium Embedded Framework (CEF) is a simple framework for embedding Chromium-based browsers in other applications.`CefVideoConsumerOSR::OnFrameCaptured` does not check `pixel_format` properly, which leads to out-of-bounds read out of the sandbox",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has matched the wrong product. CVE-2024-9410 is a server side request forgery in the Sentry configuration of Ada.cx, a hosted customer service product, and jcef-api is the Java binding of the Chromium Embedded Framework that Swing Kit brings. They have nothing in common, so no version of jcef-api is affected. Nothing to upgrade for it.",
+      "cve": "CVE-2024-9410",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "upstream",
+      "fixed_in": null,
+      "impact": "None.",
+      "modules": [
+        "vaadin-swing-kit-client"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has matched the wrong product. CVE-2024-9410 is a server side request forgery in the Sentry configuration of Ada.cx, a hosted customer service product, and jcef-api is the Java binding of the Chromium Embedded Framework that Swing Kit brings. They have nothing in common, so no version of jcef-api is affected. Nothing to upgrade for it.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None.",
+          "modules": [
+            "vaadin-swing-kit-client"
+          ],
+          "origin": "vaadin",
+          "package": "me.friwi:jcef-api",
+          "published": null,
+          "routes": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "vaadin-swing-kit-client",
+              "steps": [
+                "vaadin-swing-kit-client@3.0.1",
+                "jcefmaven@135.0.20",
+                "jcef-api@jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+              ]
+            }
+          ],
+          "verdict": "false_positive",
+          "versions": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "versions_without_spring": [
+            "jcef-ca49ada+cef-135.0.20+ge7de5c3+chromium-135.0.7049.85"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "moderate",
+      "spring_pins": false,
+      "summary": "Ada.cx's Sentry configuration allowed for blind server-side request forgeries (SSRF) through the use of a data scraping endpoint",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": "vaadin-dev-bundle-25.3.5.jar",
+      "commentary": "Fixed on this line. Platform 25.3.5 pins @vaadin/rich-text-editor 25.3.5, whose vendored Quill escapes the video and formula values before building the semantic HTML, and the reproduction that fires on 25.3.4 does not fire here. The patched copy keeps Quill's own version string 2.0.3, because the fix is ours and there is no Quill release to move to, so a scanner reading the bundled file reports the advisory on this version anyway. That report is stale, not a second finding. CVE-2026-120350 names this same flaw: it is the advisory Vaadin itself published for it, and CVE-2025-15056 is the id under which it was first reported, so a scanner may lead with either. One record, one fix, and this verdict answers both ids.",
+      "cve": "CVE-2025-15056",
+      "fix_expected": "Already in. Released in @vaadin/rich-text-editor 25.3.5 on 2026-10-29 and pinned by platform 25.3.5.",
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on 25.3.5 and later: the version you are running carries the corrected copy. Below 25.3.5 the editor is affected through RichTextEditor.asDelta(), which has its own verdict.",
+      "modules": null,
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed on this line. Platform 25.3.5 pins @vaadin/rich-text-editor 25.3.5, whose vendored Quill escapes the video and formula values before building the semantic HTML, and the reproduction that fires on 25.3.4 does not fire here. The patched copy keeps Quill's own version string 2.0.3, because the fix is ours and there is no Quill release to move to, so a scanner reading the bundled file reports the advisory on this version anyway. That report is stale, not a second finding. CVE-2026-120350 names this same flaw: it is the advisory Vaadin itself published for it, and CVE-2025-15056 is the id under which it was first reported, so a scanner may lead with either. One record, one fix, and this verdict answers both ids.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "Already in. Released in @vaadin/rich-text-editor 25.3.5 on 2026-10-29 and pinned by platform 25.3.5.",
+          "fix_expected_version": null,
+          "impact": "None on 25.3.5 and later: the version you are running carries the corrected copy. Below 25.3.5 the editor is affected through RichTextEditor.asDelta(), which has its own verdict.",
+          "modules": null,
+          "origin": "vaadin",
+          "package": "quill",
+          "published": null,
+          "routes": [],
+          "routes_without_spring": [],
+          "verdict": "fixed",
+          "versions": [
+            "2.0.3"
+          ],
+          "versions_without_spring": [
+            "2.0.3"
+          ],
+          "workaround": "None needed. A scanner that still reports it is reading Quill's version string rather than the code."
+        }
+      ],
+      "severity": "moderate",
+      "spring_pins": false,
+      "summary": "A lack of data validation vulnerability in the HTML export feature in Quill in allows Cross-Site Scripting (XSS)",
+      "verdict": "fixed",
+      "workaround": "None needed. A scanner that still reports it is reading Quill's version string rather than the code."
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+      "cve": "CVE-2026-116796",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+      "modules": [
+        "@vaadin/react-components-pro"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+          "modules": [
+            "@vaadin/react-components-pro"
+          ],
+          "origin": "vaadin",
+          "package": "highcharts",
+          "published": null,
+          "routes": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "verdict": "fixed",
+          "versions": [
+            "12.2.0"
+          ],
+          "versions_without_spring": [
+            "12.2.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "high",
+      "spring_pins": false,
+      "summary": "Highcharts Core: `javascript:` URL in an `xlink:href` attribute survives text filtering and reaches exported charts",
+      "verdict": "fixed",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+      "cve": "CVE-2026-118244",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+      "modules": [
+        "@vaadin/react-components-pro"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+          "modules": [
+            "@vaadin/react-components-pro"
+          ],
+          "origin": "vaadin",
+          "package": "highcharts",
+          "published": null,
+          "routes": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "verdict": "fixed",
+          "versions": [
+            "12.2.0"
+          ],
+          "versions_without_spring": [
+            "12.2.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "high",
+      "spring_pins": false,
+      "summary": "Highcharts Core: HTML text parsing falls back to unfiltered `innerHTML` during printing",
+      "verdict": "fixed",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+      "cve": "CVE-2026-118246",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+      "modules": [
+        "@vaadin/react-components-pro"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+          "modules": [
+            "@vaadin/react-components-pro"
+          ],
+          "origin": "vaadin",
+          "package": "highcharts",
+          "published": null,
+          "routes": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "verdict": "fixed",
+          "versions": [
+            "12.2.0"
+          ],
+          "versions_without_spring": [
+            "12.2.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "high",
+      "spring_pins": false,
+      "summary": "Highcharts Core: `breadcrumbs.style` keys become SVG event-handler attributes",
+      "verdict": "fixed",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+      "cve": "CVE-2026-118250",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+      "modules": [
+        "@vaadin/react-components-pro"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+          "modules": [
+            "@vaadin/react-components-pro"
+          ],
+          "origin": "vaadin",
+          "package": "highcharts",
+          "published": null,
+          "routes": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "verdict": "fixed",
+          "versions": [
+            "12.2.0"
+          ],
+          "versions_without_spring": [
+            "12.2.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "high",
+      "spring_pins": false,
+      "summary": "Highcharts: dotted series.keys paths write to Object.prototype",
+      "verdict": "fixed",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+      "cve": "CVE-2026-118251",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+      "modules": [
+        "@vaadin/react-components-pro"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed in Vaadin 25.3.1. Vaadin Charts pins Highcharts 12.2.0 exactly, and of the advisories Highsoft disclosed on 29 September 2026, all five reach Highcharts 12.2.0: writes to Object.prototype through dotted series.keys paths, and cross site scripting through credits.href, breadcrumbs.style, HTML text parsing while printing, and xlink:href in exported charts. Vaadin 25.3.1 and later apply Highsoft's recommended workarounds to the bundled Highcharts when it loads and keep the same Highcharts version, so your scanner still reports highcharts 12.2.0 on a fixed release. Vaadin published this as CVE-2026-107588.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None on Vaadin 25.3.1 and later. On earlier 25.3 releases, chart options that carry data an attacker controls can run script in the viewer's browser or pollute Object.prototype, as each advisory describes.",
+          "modules": [
+            "@vaadin/react-components-pro"
+          ],
+          "origin": "vaadin",
+          "package": "highcharts",
+          "published": null,
+          "routes": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "@vaadin/react-components-pro",
+              "steps": [
+                "@vaadin/react-components-pro@25.3.5",
+                "@vaadin/charts@25.3.5",
+                "highcharts@12.2.0"
+              ]
+            }
+          ],
+          "verdict": "fixed",
+          "versions": [
+            "12.2.0"
+          ],
+          "versions_without_spring": [
+            "12.2.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "high",
+      "spring_pins": false,
+      "summary": "Highcharts: `javascript:` URL in credits.href runs script on click",
+      "verdict": "fixed",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "The parser is in the jar and nothing in a Vaadin application hands it an incoming header. From 25.3, opentelemetry-api 1.62.0 arrives through TestBench, whose Selenium client only adds trace context to the requests it sends, and Observability Kit no longer uses OpenTelemetry or an agent. The advisory needs incoming tracestate headers to reach W3CTraceContextPropagator.extract, which happens only if you add tracing of your own: Spring Boot OpenTelemetry tracing, the OpenTelemetry Java agent, or code that extracts trace context from requests.",
+      "cve": "CVE-2026-118259",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "upstream",
+      "fixed_in": null,
+      "impact": "None unless your application adds tracing that extracts W3C trace context from incoming requests. There anybody who can send a request can make each one cost CPU through a crafted tracestate header.",
+      "modules": [
+        "vaadin-testbench"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "The parser is in the jar and nothing in a Vaadin application hands it an incoming header. From 25.3, opentelemetry-api 1.62.0 arrives through TestBench, whose Selenium client only adds trace context to the requests it sends, and Observability Kit no longer uses OpenTelemetry or an agent. The advisory needs incoming tracestate headers to reach W3CTraceContextPropagator.extract, which happens only if you add tracing of your own: Spring Boot OpenTelemetry tracing, the OpenTelemetry Java agent, or code that extracts trace context from requests.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None unless your application adds tracing that extracts W3C trace context from incoming requests. There anybody who can send a request can make each one cost CPU through a crafted tracestate header.",
+          "modules": [
+            "vaadin-testbench"
+          ],
+          "origin": "vaadin",
+          "package": "io.opentelemetry:opentelemetry-api",
+          "published": "1.67.0",
+          "routes": [
+            {
+              "entry": "vaadin-testbench",
+              "steps": [
+                "vaadin-testbench@25.3.5",
+                "selenium-remote-driver@4.52.0",
+                "opentelemetry-api@1.62.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [],
+          "verdict": "configuration",
+          "versions": [
+            "1.62.0"
+          ],
+          "versions_without_spring": [
+            "1.67.0"
+          ],
+          "workaround": "If you add such tracing, set <opentelemetry.version>1.67.0</opentelemetry.version> in your pom, which resolves the api and the SDK at 1.67.0 under the Spring Boot parent, or cap or remove the tracestate header at your proxy before requests reach the application."
+        }
+      ],
+      "severity": "moderate",
+      "spring_pins": true,
+      "summary": "opentelemetry-java: Quadratic CPU consumption in W3C tracestate parsing",
+      "verdict": "configuration",
+      "workaround": "If you add such tracing, set <opentelemetry.version>1.67.0</opentelemetry.version> in your pom, which resolves the api and the SDK at 1.67.0 under the Spring Boot parent, or cap or remove the tracestate header at your proxy before requests reach the application."
+    },
+    {
+      "bundled_in": "vaadin-dev-bundle-25.3.5.jar",
+      "commentary": "Fixed on this line. Platform 25.3.5 pins @vaadin/rich-text-editor 25.3.5, whose vendored Quill escapes the video and formula values before building the semantic HTML, and the reproduction that fires on 25.3.4 does not fire here. The patched copy keeps Quill's own version string 2.0.3, because the fix is ours and there is no Quill release to move to, so a scanner reading the bundled file reports the advisory on this version anyway. That report is stale, not a second finding. CVE-2026-120350 names this same flaw: it is the advisory Vaadin itself published for it, and CVE-2025-15056 is the id under which it was first reported, so a scanner may lead with either. One record, one fix, and this verdict answers both ids.",
+      "cve": "CVE-2026-120350",
+      "fix_expected": "Already in. Released in @vaadin/rich-text-editor 25.3.5 on 2026-10-29 and pinned by platform 25.3.5.",
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None on 25.3.5 and later: the version you are running carries the corrected copy. Below 25.3.5 the editor is affected through RichTextEditor.asDelta(), which has its own verdict.",
+      "modules": null,
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Fixed on this line. Platform 25.3.5 pins @vaadin/rich-text-editor 25.3.5, whose vendored Quill escapes the video and formula values before building the semantic HTML, and the reproduction that fires on 25.3.4 does not fire here. The patched copy keeps Quill's own version string 2.0.3, because the fix is ours and there is no Quill release to move to, so a scanner reading the bundled file reports the advisory on this version anyway. That report is stale, not a second finding. CVE-2026-120350 names this same flaw: it is the advisory Vaadin itself published for it, and CVE-2025-15056 is the id under which it was first reported, so a scanner may lead with either. One record, one fix, and this verdict answers both ids.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "Already in. Released in @vaadin/rich-text-editor 25.3.5 on 2026-10-29 and pinned by platform 25.3.5.",
+          "fix_expected_version": null,
+          "impact": "None on 25.3.5 and later: the version you are running carries the corrected copy. Below 25.3.5 the editor is affected through RichTextEditor.asDelta(), which has its own verdict.",
+          "modules": null,
+          "origin": "vaadin",
+          "package": "quill",
+          "published": null,
+          "routes": [],
+          "routes_without_spring": [],
+          "verdict": "fixed",
+          "versions": [
+            "2.0.3"
+          ],
+          "versions_without_spring": [
+            "2.0.3"
+          ],
+          "workaround": "None needed. A scanner that still reports it is reading Quill's version string rather than the code."
+        }
+      ],
+      "severity": "low",
+      "spring_pins": false,
+      "summary": "Quill 2.0.3 is vulnerable to Cross-Site Scripting (XSS) via insufficient data validation in the HTML export feature, allowing injected HTML content to execute in the browser",
+      "verdict": "fixed",
+      "workaround": "None needed. A scanner that still reports it is reading Quill's version string rather than the code."
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has matched the wrong artifact. The advisory is unsafe deserialization of the incremental cache of KAPT, the annotation processing plugin of the Kotlin build tooling, and the advisory database names only org.jetbrains.kotlin:kotlin-gradle-plugin. The CPE jetbrains:kotlin covers every artifact JetBrains publishes under that name, so the scanner reported it on kotlin-stdlib, which does not contain that code. The range is open because no version of kotlin-stdlib carries it. Nothing to upgrade for it.",
+      "cve": "CVE-2026-53914",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "vaadin",
+      "fixed_in": null,
+      "impact": "None. The affected code is build tooling and is not in this library.",
+      "modules": [
+        "flow-webpush",
+        "hilla-spring-boot-starter"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has matched the wrong artifact. The advisory is unsafe deserialization of the incremental cache of KAPT, the annotation processing plugin of the Kotlin build tooling, and the advisory database names only org.jetbrains.kotlin:kotlin-gradle-plugin. The CPE jetbrains:kotlin covers every artifact JetBrains publishes under that name, so the scanner reported it on kotlin-stdlib, which does not contain that code. The range is open because no version of kotlin-stdlib carries it. Nothing to upgrade for it.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None. The affected code is build tooling and is not in this library.",
+          "modules": [
+            "flow-webpush",
+            "hilla-spring-boot-starter"
+          ],
+          "origin": "vaadin",
+          "package": "org.jetbrains.kotlin:kotlin-stdlib",
+          "published": "2.4.20",
+          "routes": [
+            {
+              "entry": "hilla-spring-boot-starter",
+              "steps": [
+                "hilla-spring-boot-starter@25.3.5",
+                "hilla-typescript-generator@25.3.5",
+                "kotlin-stdlib@2.3.21"
+              ]
+            },
+            {
+              "entry": "flow-webpush",
+              "steps": [
+                "flow-webpush@25.3.7",
+                "kotlin-stdlib@2.3.21"
+              ]
+            }
+          ],
+          "routes_without_spring": [],
+          "verdict": "false_positive",
+          "versions": [
+            "2.3.21"
+          ],
+          "versions_without_spring": [],
+          "workaround": ""
+        }
+      ],
+      "severity": "critical",
+      "spring_pins": true,
+      "summary": "In JetBrains Kotlin before 2.4.20 code execution was possible via unsafe deserialization in the build cache metadata",
+      "verdict": "false_positive",
+      "workaround": null
+    },
+    {
+      "bundled_in": null,
+      "commentary": "Your scanner has matched the wrong product. The CPE it used, opentelemetry:opentelemetry, names the project rather than a package and carries the platform each record is about: CVE-2026-54285 is an advisory of opentelemetry-js on node.js, and the other four are advisories of the Go implementation. None is about a Java artifact, but the Java libraries share the product name, so each lands on every io.opentelemetry jar your application resolves. The range is open because the claim is about which implementation the records name, which no Java version changes. Nothing to upgrade for these.",
+      "cve": "CVE-2026-54285",
+      "fix_expected": null,
+      "fix_expected_version": null,
+      "fix_owner": "upstream",
+      "fixed_in": null,
+      "impact": "None. These advisories are about the Go and JavaScript implementations of OpenTelemetry, not the Java libraries your application resolves.",
+      "modules": [
+        "vaadin-testbench"
+      ],
+      "owner": "vaadin",
+      "packages": [
+        {
+          "commentary": "Your scanner has matched the wrong product. The CPE it used, opentelemetry:opentelemetry, names the project rather than a package and carries the platform each record is about: CVE-2026-54285 is an advisory of opentelemetry-js on node.js, and the other four are advisories of the Go implementation. None is about a Java artifact, but the Java libraries share the product name, so each lands on every io.opentelemetry jar your application resolves. The range is open because the claim is about which implementation the records name, which no Java version changes. Nothing to upgrade for these.",
+          "declared": null,
+          "declared_without_spring": null,
+          "fix_expected": "",
+          "fix_expected_version": null,
+          "impact": "None. These advisories are about the Go and JavaScript implementations of OpenTelemetry, not the Java libraries your application resolves.",
+          "modules": [
+            "vaadin-testbench"
+          ],
+          "origin": "vaadin",
+          "package": "io.opentelemetry:opentelemetry-api",
+          "published": "1.67.0",
+          "routes": [
+            {
+              "entry": "vaadin-testbench",
+              "steps": [
+                "vaadin-testbench@25.3.5",
+                "selenium-remote-driver@4.52.0",
+                "opentelemetry-api@1.62.0"
+              ]
+            }
+          ],
+          "routes_without_spring": [
+            {
+              "entry": "vaadin-testbench",
+              "steps": [
+                "vaadin-testbench@25.3.5",
+                "selenium-remote-driver@4.52.0",
+                "opentelemetry-api@1.67.0"
+              ]
+            }
+          ],
+          "verdict": "false_positive",
+          "versions": [
+            "1.62.0"
+          ],
+          "versions_without_spring": [
+            "1.67.0"
+          ],
+          "workaround": ""
+        }
+      ],
+      "severity": "moderate",
+      "spring_pins": false,
+      "summary": "opentelemetry-js is the OpenTelemetry JavaScript Client",
+      "verdict": "false_positive",
+      "workaround": null
+    }
+  ],
+  "from_spring_boot": {
+    "count": 1,
+    "risk": [],
+    "state": "safe"
+  },
+  "generated_at": "2026-11-20T10:54:59Z",
+  "line": "25.3",
+  "newest": "25.3.5",
+  "scanned_at": "2026-11-20T03:25:17+00:00",
+  "scanner_files": true,
+  "spring_boot": "4.1.2",
+  "spring_boot_declared": "4.1.2",
+  "state": "safe",
+  "version": "25.3.5",
+  "without_spring": [
+    "CVE-2021-33604",
+    "CVE-2024-21639",
+    "CVE-2024-21640",
+    "CVE-2024-9410",
+    "CVE-2025-15056",
+    "CVE-2026-116796",
+    "CVE-2026-118244",
+    "CVE-2026-118246",
+    "CVE-2026-118250",
+    "CVE-2026-118251",
+    "CVE-2026-120350",
+    "CVE-2026-54285"
+  ],
+  "workaround": false
+}
