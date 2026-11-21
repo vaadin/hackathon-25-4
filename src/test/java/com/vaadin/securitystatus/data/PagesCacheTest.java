@@ -237,7 +237,7 @@ class PagesCacheTest {
         VersionAnswer answer = service.version(MEASURED).orElseThrow();
         assertThat(host.requestsFor(VERSION)).hasSize(1);
 
-        Instant nextNight = Instant.parse("2026-11-21T03:17:42Z");
+        Instant nextNight = Instant.parse("2026-11-22T03:17:42Z");
         host.replace(INDEX, host.fixture(INDEX).replace(FixturePages.PINNED_GENERATED_AT.toString(),
                 nextNight.toString()));
         service.revalidate();
@@ -263,7 +263,7 @@ class PagesCacheTest {
     @Test
     void a_generated_at_that_moves_backwards_is_trusted() {
         service.revalidate();
-        Instant earlier = Instant.parse("2026-11-19T03:17:42Z");
+        Instant earlier = Instant.parse("2026-11-20T03:17:42Z");
         host.replace(INDEX,
                 host.fixture(INDEX).replace(FixturePages.PINNED_GENERATED_AT.toString(), earlier.toString()));
 

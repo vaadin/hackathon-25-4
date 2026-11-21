@@ -74,7 +74,7 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
         assertThat(texts("line-card-action")).containsExactly("On 25.3.5 or later", "On 24.10.12 or later",
                 "On 24.9.24 or later", "Newest is 24.7.19", "Newest is 24.4.28", "Newest is 23.6.19",
                 "Newest is 14.14.9", "On 8.32.0 or later", "On 7.7.50 or later");
-        assertThat(texts("line-card-scanned")).containsOnly("Scanned 2026-11-20");
+        assertThat(texts("line-card-scanned")).containsOnly("Scanned 2026-11-21");
     }
 
     // AC3: the action line names upgrade_to when the index has one
@@ -82,8 +82,8 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     void the_action_line_names_the_upgrade_the_index_gives() {
         String index = fixtures.transport().fixture(INDEX);
         String moved = index.replace(
-                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-20T03:27:15+00:00\",\"risk\":1,\"triage\":0,\"ruled_out\":102,\"theirs\":99,\"theirs_risk\":59,\"spring_pinned\":7,\"discontinued\":4,\"from_build\":1,\"upgrade_to\":null}",
-                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"fix_available\",\"scanned_at\":\"2026-11-20T03:27:15+00:00\",\"risk\":1,\"triage\":0,\"upgrade_to\":\"24.7.20\"}");
+                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-21T03:25:53+00:00\",\"risk\":1,\"triage\":0,\"ruled_out\":102,\"theirs\":99,\"theirs_risk\":59,\"spring_pinned\":7,\"discontinued\":4,\"from_build\":1,\"upgrade_to\":null}",
+                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"fix_available\",\"scanned_at\":\"2026-11-21T03:25:53+00:00\",\"risk\":1,\"triage\":0,\"upgrade_to\":\"24.7.20\"}");
         assertThat(moved).isNotEqualTo(index);
         replaceIndex(moved);
 
@@ -97,8 +97,8 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void a_line_whose_open_findings_are_all_in_triage_says_not_assessed_yet() {
         String index = fixtures.transport().fixture(INDEX);
-        String moved = index.replace("\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-20T03:27:15+00:00\",\"risk\":1,\"triage\":0",
-                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-20T03:27:15+00:00\",\"risk\":0,\"triage\":2");
+        String moved = index.replace("\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-21T03:25:53+00:00\",\"risk\":1,\"triage\":0",
+                "\"24.7.19\":{\"line\":\"24.7\",\"state\":\"unresolved\",\"scanned_at\":\"2026-11-21T03:25:53+00:00\",\"risk\":0,\"triage\":2");
         assertThat(moved).isNotEqualTo(index);
         replaceIndex(moved);
 

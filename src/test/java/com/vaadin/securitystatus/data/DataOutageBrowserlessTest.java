@@ -83,7 +83,7 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat($(DataOutageNotice.class).exists()).isFalse();
         assertThat($(RouterLink.class).withClassName("line-card").all()).hasSize(9);
-        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-21");
     }
 
     @Test
@@ -95,6 +95,6 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat($(DataOutageNotice.class).exists()).isFalse();
         assertThat($(RouterLink.class).withClassName("line-card").all()).hasSize(9);
-        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-21");
     }
 }

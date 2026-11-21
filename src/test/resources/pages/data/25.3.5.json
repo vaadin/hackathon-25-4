@@ -883,10 +883,10 @@
     "risk": [],
     "state": "safe"
   },
-  "generated_at": "2026-11-20T10:54:59Z",
+  "generated_at": "2026-11-21T03:33:59Z",
   "line": "25.3",
   "newest": "25.3.5",
-  "scanned_at": "2026-11-20T03:25:17+00:00",
+  "scanned_at": "2026-11-21T03:25:04+00:00",
   "scanner_files": true,
   "spring_boot": "4.1.2",
   "spring_boot_declared": "4.1.2",

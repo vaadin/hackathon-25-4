@@ -101,7 +101,7 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
     void measured_chip_shows_the_generated_at_of_the_index_that_was_read() {
         navigate(HomeView.class);
 
-        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-21");
     }
 
     private static String documentTitle() {

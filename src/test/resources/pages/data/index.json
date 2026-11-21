@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-20T10:54:59Z",
+  "generated_at": "2026-11-21T03:33:59Z",
   "versions": [
     {
       "findings": 212,
@@ -85,7 +85,7 @@
     {
       "findings": 219,
       "line": "14.14",
-      "scanned_at": "2026-11-20T03:26:10+00:00",
+      "scanned_at": "2026-11-21T03:25:45+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/14.14.9.json",
@@ -193,7 +193,7 @@
     {
       "findings": 180,
       "line": "23.6",
-      "scanned_at": "2026-11-20T03:26:06+00:00",
+      "scanned_at": "2026-11-21T03:26:05+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/23.6.19.json",
@@ -328,7 +328,7 @@
     {
       "findings": 112,
       "line": "24.10",
-      "scanned_at": "2026-11-20T03:25:33+00:00",
+      "scanned_at": "2026-11-21T03:25:24+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/24.10.14.json",
@@ -580,7 +580,7 @@
     {
       "findings": 232,
       "line": "24.4",
-      "scanned_at": "2026-11-20T03:26:25+00:00",
+      "scanned_at": "2026-11-21T03:26:39+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/24.4.28.json",
@@ -751,7 +751,7 @@
     {
       "findings": 214,
       "line": "24.7",
-      "scanned_at": "2026-11-20T03:27:15+00:00",
+      "scanned_at": "2026-11-21T03:25:53+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/24.7.19.json",
@@ -994,7 +994,7 @@
     {
       "findings": 113,
       "line": "24.9",
-      "scanned_at": "2026-11-20T03:25:39+00:00",
+      "scanned_at": "2026-11-21T03:25:09+00:00",
       "spring_boot_state": "vulnerable",
       "state": "vulnerable",
       "url": "data/24.9.26.json",
@@ -1111,7 +1111,7 @@
     {
       "findings": 15,
       "line": "25.3",
-      "scanned_at": "2026-11-20T03:25:17+00:00",
+      "scanned_at": "2026-11-21T03:25:04+00:00",
       "spring_boot_state": "safe",
       "state": "safe",
       "url": "data/25.3.5.json",
@@ -1174,7 +1174,7 @@
     {
       "findings": 13,
       "line": "25.4",
-      "scanned_at": "2026-11-20T03:25:43+00:00",
+      "scanned_at": "2026-11-21T03:24:43+00:00",
       "spring_boot_state": "safe",
       "state": "safe",
       "url": "data/25.4.0-beta2.json",
@@ -1588,7 +1588,7 @@
     {
       "findings": 33,
       "line": "7.7",
-      "scanned_at": "2026-11-20T03:25:07+00:00",
+      "scanned_at": "2026-11-21T03:24:10+00:00",
       "spring_boot_state": null,
       "state": "safe",
       "url": "data/7.7.56.json",
@@ -1660,7 +1660,7 @@
     {
       "findings": 33,
       "line": "8.32",
-      "scanned_at": "2026-11-20T03:25:22+00:00",
+      "scanned_at": "2026-11-21T03:24:26+00:00",
       "spring_boot_state": null,
       "state": "safe",
       "url": "data/8.32.3.json",

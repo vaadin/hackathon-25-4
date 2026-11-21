@@ -27,6 +27,7 @@ PATHS=(
   cases/v/25.3.5.json
   cases/v/24.9.21.json
   cases/v/24.4.28.json
+  cases/v/24.7.19.json
   cases/cve/CVE-2016-1000027.json
   cases/cve/CVE-2019-25028.json
   cases/cve/CVE-2021-33604.json

@@ -49,22 +49,22 @@ The screen a support reply links at: one version, one verdict, and everything a 
 ## Acceptance criteria
 
 ### AC1: The card tells the state's truth
-- [ ] Each of the three states renders its wording and badge from the fixture that carries it
-- [ ] The single unfixed finding renders inside the card, and two render as the list
-- [ ] The secure move offer never leaves the major and names the minor when it leaves the line
+- [x] Each of the three states renders its wording and badge from the fixture that carries it
+- [x] The single unfixed finding renders inside the card, and two render as the list
+- [x] The secure move offer never leaves the major and names the minor when it leaves the line
 
 ### AC2: Sections match the data
-- [ ] Every section renders only when its list is non empty
-- [ ] Absent verdict fields are omitted, never empty
-- [ ] The caps count their remainders
+- [x] Every section renders only when its list is non empty
+- [x] Absent verdict fields are omitted, never empty
+- [x] The caps count their remainders
 
 ### AC3: The address is the whole answer
-- [ ] Toggling boot, ruled, disc and open rewrites the query without scrolling
-- [ ] A pasted address with flags opens with those sections open
-- [ ] Changing the version scrolls to the top
+- [x] Toggling boot, ruled, disc and open rewrites the query without scrolling
+- [x] A pasted address with flags opens with those sections open
+- [x] Changing the version scrolls to the top
 
 ### AC4: Not measured is answered in place
-- [ ] An unmeasured version renders the sentence, the offer and the table on its own route
+- [x] An unmeasured version renders the sentence, the offer and the table on its own route
 
 ## Test cases
 

@@ -18,7 +18,7 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
 
 /**
  * The read models against the committed fixtures, whose index is pinned at
- * {@code generated_at} 2026-11-20T10:54:59Z, and against documents with fields
+ * {@code generated_at} 2026-11-21T03:33:59Z, and against documents with fields
  * taken away.
  */
 class ReadModelTest {
@@ -106,7 +106,7 @@ class ReadModelTest {
         assertThat(prerelease.version()).isEqualTo(VersionNumber.of("25.4.0-beta2"));
         assertThat(prerelease.isPrerelease()).isTrue();
         assertThat(prerelease.findings()).isEqualTo(13);
-        assertThat(prerelease.scannedAt()).contains(OffsetDateTime.parse("2026-11-20T03:25:43+00:00"));
+        assertThat(prerelease.scannedAt()).contains(OffsetDateTime.parse("2026-11-21T03:24:43+00:00"));
         assertThat(prerelease.support().orElseThrow().label()).contains("Free maintenance");
         assertThat(index.lines().get(1).isPrerelease()).isFalse();
 
