@@ -1,3 +1,4 @@
+@import "./theme-editor.css";
 .admin-nav vaadin-button {
 	background-color: darkseagreen;
 }

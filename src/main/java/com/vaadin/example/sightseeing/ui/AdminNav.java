@@ -3,6 +3,7 @@ package com.vaadin.example.sightseeing.ui;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
+
 public class AdminNav extends HorizontalLayout {
 
     public AdminNav(String current) {
@@ -19,6 +20,11 @@ public class AdminNav extends HorizontalLayout {
         nothingButton.setVisible(!"nothing".equals(current));
         nothingButton.setId("nothingButton");
 
+        Button somethingElseButton = new Button("Something else",
+                e -> getUI().get().navigate("something-else"));
+        somethingElseButton.setVisible(!"something-else".equals(current));
+        somethingElseButton.setId("somethingElseButton");
+
         Button somethingButton = new Button("Something",
                 e -> getUI().get().navigate("something"));
         somethingButton.setVisible(!"something".equals(current));
@@ -33,11 +39,11 @@ public class AdminNav extends HorizontalLayout {
                 e -> getUI().get().navigate("tags"));
         tagsButton.setVisible(!"tags".equals(current));
         tagsButton.setId("tagsButton");
+        add(mapButton, nothingButton, somethingElseButton, somethingButton,
+                placesButton, tagsButton);
+        expand(mapButton, nothingButton, somethingElseButton, somethingButton,
+                placesButton, tagsButton);
 
-        add(mapButton, nothingButton, somethingButton, placesButton,
-                tagsButton);
-        expand(mapButton, nothingButton, somethingButton, placesButton,
-                tagsButton);
         setWidthFull();
     }
 }

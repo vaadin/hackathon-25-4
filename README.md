@@ -1,3 +1,51 @@
+# hackathon-25-4
+Now upgraded to 25.4. Most changes have been made with Vaadin Copilot, although I cleaned up the `AdminNav` changes because they annoyed me, added the `AdminNav` to the new view manually because Copilot didn't understand the request, and fixed the routing manually, because Copilot got it wrong and `AdminNav` didn't compile anymore.
+
+I had quite a few issues in creating a new button to the nav layout and in creating the view, although those weren't actually what I was even planning to test -- I just wanted an empty view so that I could test the Auto-responsive FormLayout and Optimistic Editing without interference from previous content.
+
+I commented along my testing (about what I did and the issues I faced) in [Slack](https://vaadin.slack.com/archives/C0CFXNFPPPZ/p1795200925169279). Didn't create any GitHub issues yet, or confirm which of the issues I ran into were already known.
+
+Some of the annoyances:
+- AI prompt didn't respect Enter, had to click the arrow to enter the prompt.
+- View creation still gave me a broken suggested path.
+- View creation process again failed to complete successfully and I needed to refresh to get rid of the popup with the spinner, even if the view (`SomethingElseView`) actually got created successfully.
+    - I also didn't even get an error message about the failure to either client console or Eclipse console.
+- All the changes were still added to the classes with zero indentation, and the order of operations was sometimes a bit confusing.
+    - I only cleaned up the `AdminNav` changes manually.
+- FormItem had a weird empty area above the content visually, but I'm not sure if that's intentional.
+- It was a little bit confusing that it seemed to be impossible to create any new FormItems after creating one FormRow, but on the other hand I'm not sure what benefit I would have got from having FormItems over FormRows either.
+- It was a bit more confusing to figure out how I could manage to trigger the popup again if I wanted it when I dragged something into the FormRow, instead of just squeezing the item there. But that was probably the whole point of the auto-responsiveness.
+    - I did find the `Auto-Responsive` confusing at first -- I thought it might be for better responsiveness for different viewport sizes or something.
+- Would have liked to have an option to convert that FormItem into a FormRow, but there wasn't even an option for AI prompt when I selected the FormItem from Outline.
+    - I did figure out later that I could have just used the content paragraph's AI prompt, and I tested that it did work, but I reverted those changes because I found it useful to have the FormItem in there for testing.
+- Several of my attempts to use the AI prompts failed, even if I never tried to chat with it and was always asking for code changes.
+    - That's why I thought I would need to ask FormItem's own AI prompt, if it had had one. I figured from the other failures that I could only ask for changes that are about the selected element itself and strictly limited to configuring a limited subset of their own properties. I don't know if that's actually true or I just kept wanting things that weren't supported for other reasons.
+    - Also, I needed two attempts to even manage to read the error popup because it faded out too fast.
+    - I also got a different AI prompt-related failure from asking it to update the routing from a duplicated button's click listener to the new view, which the AI did attempt, but got wrong badly enough that the code no longer compiled. And after I fixed it manually and tried to return to edit mode, I got an error that claimed the file was corrupted and a restart was required.
+    - I also found it kind of tricky to even find the options for the full view (needed to go to the Outline to select that element), although the thing I asked from the AI also wasn't supported, so it was a failed effort in the end anyway (see later for the point about `theme-editor.css`).
+- The different 'sizes' of Text options within UI Library created no visual difference to the resulting paragraphs.
+    - This does not include the `Text - inline` option, which had shorter contents and created a span instead.
+- It was confusing that enabling experimental features added 7 new features by default but not the one that I actually wanted to test.
+    - Unless those 7 features were already enabled by default, and if so, it's confusing why they can only be disabled if experimental features are on.
+    - I didn't try to use any of those default features (unless I did so without intending to), so I don't have any other feedback about them.
+- Optimistic Editing didn't display a new row between the existing rows where I placed it, but shoved it all the way to the bottom. By the time I figured out what happened to it I was just running out of the 5 seconds, and the view refreshed itself, and the row moved where it was supposed to be all along.
+- I would have wanted a way to confirm immediately or undo my changes at times, in addition to the small delay, and the '2 pending edits' or something along those lines was confusing without any way to check what those edits actually were.
+    - But at least it didn't keep increasing that number every time I dragged the new component elsewhere.
+    - The 5 seconds felt a bit short when the component ended up hidden behind the UI Library or into a wrong place altogether like that abovementioned FormRow. Yet other times it felt too long, when I didn't have anything further that I even could have adjusted, like when I had deleted a paragraph. Of course I might have wanted to delete some other content as well, I expect the delay would not have felt annoying in that case.
+    - Also mildly confusing when some operation like dragging the element stopped the timer but didn't immediately reset it visually, giving the impression that when I let go I'll have 2 seconds left to make any further adjustments.
+    - It might also be useful to be able to configure the length of the delay. People have very different reaction times.
+    - Might also like also an option to turn off the fixed delay altogether and only ever save the changes if I confirm it manually, but I do understand if that makes the feature too complicated.
+- Now trying to drag an element (the span, in case it makes any difference) next to itself caused Optimistic Editing issues (`Optimistic preview has not completed successfully`) instead of the update never finishing (see my notes from previous hackathon). Dragging the span on itself gave me the insertion options popup, but I didn't have time to try what would happen with the different options.
+- Theme editor triggered an immediate reload when I made the first change to some element, which was really annoying, especially since those changes were no longer visible after the reload.
+    - I had the Optimistic Editing enabled already at that point, but there was never any delay. Didn't test it without Optimistic Editing.
+    - A second edit to any feature on any element brought the previous changes back to visibility, and didn't trigger any more reloads.
+    - I noticed later that I had an error about MIME type '' in my browser console, which blocked the `theme-editor.css` styles from getting applied, but I didn't have time to dig into that further. Just that apparently re-editing the same elements' styles seemed to get the changes past that block.
+    - Took me a while to even figure out where the theme changes were written, and when I did, I thought I needed to add an import for the `theme-editor.css` manually (because I hadn't spotted that abovementioned error yet, and the AI prompt refused to even attempt to add the style import annotation, and I also hadn't spotted yet the import line that had already been added to `styles.css`). Of course, thanks to the error, the manually added import failed as well, and I ended up reverting it.
+    - Also, if I still had the UI Library open when the reload happened, the Theme Editor ended up behind that.
+- The hover borders of elements didn't keep up properly with scrolling. Sometimes they jumped to follow after a while, sometimes they stayed at the wrong position.
+- Unrelated to my main testing, I also happened to notice that the Pie Chart from my previous hackathon changes was still causing issues if I tried to use Copilot within that view.
+
+
 # hackathon-25-3
 Now upgraded to 25.3. Experimenting with Vaadin Copilot in Eclipse again, works significantly better with the existing layouts than during the previous round. However, 3 Column Form is having significant issues (apparently related to the Pie Chart inside it overflowing), and now Outline is acting up and making a lot of the thing pretty much unusable.
 
