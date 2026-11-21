@@ -1,34 +1,26 @@
 # Where the work stopped
 
-Epic 01, foundation and shell, is implemented: US-1.1 to US-1.5, every checkbox ticked. `./mvnw clean verify -Pit` is green with 17 tests and 6 browser tests. Nothing is committed: the epic commits once, and nobody has asked for the commit yet.
+Epics 01 and 02 are implemented and committed, every checkbox ticked. `./mvnw clean verify -Pit` is green with 58 tests and 9 browser tests. Nothing is pushed and nothing is posted.
+
+The pass runs unattended, one epic per session, driven by `.claude/commands/implement-epic.md`. The session for epic 02 was cut twice by a dropped connection and was closed by hand: the gates and the commits are verified, this file is not as rich in traps for epic 02 as it is for epic 01.
 
 ## Next
 
-1. Commit epic 01, and separately the record of the work: `NEXT.md`, `specs/reviews/`, the feedback files and `specs/issues/`.
-2. Push, then `./specs/issues/post.sh` for a dry run and `--confirm` to post. Five entries are ready: three issues and two comments. Posting adds the issues to `vaadin/platform#9642`.
-3. Epic 02, the data client, `specs/user-stories/epic-02-data-client.md`.
+1. Epic 03, home and the lookup, `specs/user-stories/epic-03-home-and-lookup.md`, then 04 to 13 in order.
+2. At the end, with a person: `NEEDS-A-PERSON.md`, then `DECISIONS.md` row by row, then the issue drafts one by one.
 
-## Decisions waiting for a person
+## Where the decisions are
 
-Each was taken to keep moving and is cheap to reverse.
-
-| Decision | Why it was taken | The alternative |
-| --- | --- | --- |
-| `anyRequest(permitAll)` in `SecurityConfig` | With the default deny all, an unknown address sends an anonymous reader to the login page and a signed in one to a bare 403 | Keep deny all and accept that, which is the framework's design. As it stands, any future endpoint that is not a Vaadin view is open by default |
-| Our own enforced CSP with `'unsafe-inline'` and `'unsafe-eval'`, `vaadin.csp=warn` | The 25.4 strict mode sends nothing in development and covers only the bootstrap page | `vaadin.csp=strict` and no policy of ours: stricter in production, nothing at all while developing |
-| The drawer lists only routes that exist | A link to a missing route would be an invention | List the four destinations the feature names from the start |
-| No custom access denied view | Not asked for by the story | The documented `HasErrorParameter<AccessDeniedException>` view, so a signed in user without the role reads "not allowed" and not "not found" |
-| Partial stylesheets in `/styles/` with a permit rule | Found before knowing the public list | Move them under `/assets/` or `/themes/`, which are public by default, and delete the rule |
-| No session limit, so `VaadinExpiredSessionStrategy` is idle | The two demo accounts are shared | Set `maximumSessions` and the 25.4 strategy becomes live |
-| Breadcrumbs trail is Vaadin, Security status, leaf | The feature document says so | Add "My account" as the live page has |
-| Placeholder `HomeView` and `ExplorerView` | A shell needs a route to render and a boundary needs a route to guard | None, epics 03 and 08 fill them |
+`DECISIONS.md`, numbered and never renumbered. Read it before changing anything it covers. `NEEDS-A-PERSON.md` holds what only a person can do.
 
 ## What exists now
 
 - `base/ui`: `AppBar` shared by both shells with Breadcrumbs, the measured chip, the dark switch and Sign out. `CustomerLayout` is the `@Layout` of public routes, `getLookupMount()` is for epic 03. `InternalLayout` is named by internal views in `@Route(layout = ...)`, its drawer lists every route with a `@Menu` whose title is a bundle key, `getAssistantMount()` is for epic 11. `ViewHeading` is the H1 of a view and reads the resolved title. `NotFoundView` keeps Flow's not found view in the shell. `ThemeSwitch` and `ThemeMemory` hold the dark mode.
 - `base/i18n/TranslatedPageTitleGenerator`: the one writer of titles. A route puts a bundle key in `@PageTitle`, route parameters arrive as `{0}`, `{1}`.
 - `base/security`: `SecurityConfig` with `team` and `guest`, `LoginView`, `Roles`, `SessionExpiredNotice`, `CspPolicy`, `CspOnBootstrapPage`, `CspViolations` with its `/csp-report` endpoint. `CspViolations.newestFirst()` is what the diagnostics view of epic 12 reads.
-- `data/DataRefreshSignal`: a `SharedValueSignal<Instant>`, empty until epic 02 calls `publish`.
+- `data` since epic 02: `PagesClient` is the only class that talks to the network, with ETag revalidation. `PagesCache` holds the time to live rules, single flight and stale over error. `SecurityDataService` is what views and tools call, and it throws `DataUnreachableException` only on a cold cache with no network. `VersionNumber` compares versions, never a string comparison. `data/model` has the read models as records, mapped one to one from the published JSON. `DataRefreshSignal` is published when the index moves. `ExportKind` and `ExportFile` are the per release machine files.
+- `base/ui/Downloads` is the one helper for anything that leaves the application, on the 25.4 `Download` API. `base/ui/DataOutageNotice` is the one unreachable sentence.
+- Tests answer from `src/test/resources/pages/`, byte for byte copies of the published JSON. `scripts/refresh-fixtures.sh` is the only thing that changes them and the only task that needs the network. `FixturePages` and `FixtureTransport` wire them in, `FixturePagesServer` serves them to a browser test. The `Clock` is fixed in tests. `NetworkBoundaryTest` fails if anything outside `data` reaches for HTTP.
 - `styles.css`: the `--status-*` and `--severity-*` tokens. Nothing consumes them yet.
 - Guard rails: `NoHardcodedStringsTest` and `SpecConsistencyTest`. Ticking the last checkbox of a story or a feature makes its test classes mandatory.
 - `specs/issues/`: the procedure in `README.md`, the template, five ready drafts, three withdrawn ones, five reproducer zips.
@@ -53,6 +45,7 @@ Each was taken to keep moving and is cheap to reverse.
 
 ## Left undone
 
+- Review findings in `specs/reviews/02-data-client/REVIEW.md`, and P-04 in `NEEDS-A-PERSON.md`: the unreachable sentence and the download labels are our wording.
 - Review findings in `specs/reviews/01-foundation/REVIEW.md`: the 22px switch, no way back to the system color scheme, no favicon, an empty title on the not found view, no help line on the sign in form.
 - The enforced policy is verified with push and sign in only. Uploads, the AI panel and the PDF viewer arrive in later epics and each has to pass `CspIT` and leave the `warn` log clean.
 - The chip wording "Measured {0}" with an ISO date matches the live header. Epic 02 owns the final wording.

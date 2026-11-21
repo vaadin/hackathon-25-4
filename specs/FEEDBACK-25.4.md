@@ -27,6 +27,7 @@ Routing, when drafting: an API on the server, a binder, a signal, the router goe
 
 | Finding | Expected | What happened | What we did instead | Where the workaround lives |
 | --- | --- | --- | --- | --- |
+| A shared signal changed by another thread while a component is built and not yet attached never reaches that component's bindings. Draft `specs/issues/11-shared-signal-changed-before-attach.md`. Not tried on 25.3 | What `flow/ui-state/effects-computed` says: effects of detached components do not run, and "when the component is attached again, the effect runs if a dependency has changed in the meantime" | The first reader after a cold start found the moved index while its view was being built, the new `generated_at` was published from another thread, and that reader's measured chip stayed hidden for the life of the page, with the signal holding the value and every later page showing it. The reproducer shows the same with one `bindText`: the text stays at the old value after the attach and after a later round trip, while `peek()` returns the new one. The same change made on the request thread arrives. A browserless test does not show it, because there the change runs inline | The publish found by a reader is handed to `VaadinSession.access`, so it runs when the request is over and the components are attached. Verified in a browser: cold start, first reader, chip shown | `DataConfiguration.afterTheCurrentRequest` in `data/` |
 
 ## Documentation gaps
 

@@ -20,11 +20,19 @@ Follow `.claude/commands/implement-story.md`, all five phases, with the document
 - `./mvnw verify -Pit` runs the application in production mode. Run it whenever the epic adds or touches an `*IT`.
 - A story is done only when its gate is green. A red gate is fixed, not reported and left.
 
+## Save as you go
+
+A session can be cut at any moment and whatever lives only in your head is lost. Write each decision row, feedback row and `NEEDS-A-PERSON.md` row when it happens, not at the end. After each story, bring `NEXT.md` up to date with what now exists and the traps just learned. Keep `git status` free of tool output such as `.playwright-mcp/`.
+
 ## Decisions
 
 Every choice a person would have been asked about goes into `DECISIONS.md` as the next numbered row: what, why, the alternative, and how to revert it. Missing data, ambiguous wording in a spec, a trade between two readings, a scope cut, a dependency added, a spec sentence that could not be met as written. Never renumber and never delete a row.
 
 When the spec cannot be met as written, do the nearest honest thing, record the decision, and do not edit the spec to match.
+
+## What only a person can do
+
+Some things cannot be done unattended: a credential or a key nobody gave, a licence, a look at something behind a sign in, a judgment of taste, an interactive session. Do not stop for them and do not fake them. Do everything around it, add the next numbered row to `NEEDS-A-PERSON.md` saying what is needed, why, and what was done instead, and go on. Those are done at the end, with a person.
 
 ## Findings
 
