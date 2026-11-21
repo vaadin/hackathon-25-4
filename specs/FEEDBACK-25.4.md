@@ -55,6 +55,7 @@ Not Vaadin findings: fields a screen needed that the published JSON does not car
 | Screen | Field | Why nothing present covers it |
 | --- | --- | --- |
 | Explorer front door | The short product codes, `module_codes`, in `data/front.json` | The off only address grammar wants the written down codes, which today exist only inside the 66 MB `data.json` no session can fetch. Until the export lands the explorer addresses products by name, the source spec's own 6.2.6 fallback |
+| Answer by CVE | An alias map, GHSA id to the tracked id, in `cases/index.json` or as `cases/cve/<alias>.json` redirects | An advisory is published under its tracked id only, and the catalogue in the index carries no aliases, so a pasted GHSA alias of a tracked CVE cannot be answered without fetching every advisory document. Until the export lands the screen answers it only when another asked id names it, D-62 |
 
 ## The SDD starter
 
