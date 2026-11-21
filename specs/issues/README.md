@@ -144,6 +144,7 @@ Still real, and saying something different from what the row said.
 | --- | --- |
 | `03b-comment-on-flow-25576.md` | The row said an imported sheet is blocked while the declared one is served. The reproducer says the declared one is blocked too, for signed in users as well: ours was served only because it is named `styles.css`, the one name on the public list |
 | `10-bootstrap-page-without-security-headers.md` | First seen as "two `CspIT` assertions failed once and not again", then as "the headers are lost in production mode". The reproducer says both modes: the full `-Pit` run is the only one in production mode, and in development what carried the headers was the "dev mode pending" page of the first seconds |
+| `20b-comment-on-browserless-test-29.md` | The row said a browserless test cannot reach the component a Grid item details renderer builds. The reproducer says the component is found by a query once the details are open; what is missing is `clickRow` opening them, which browserless-test#29 already asks |
 | `07b-comment-on-flow-26391.md` | The row said `ExtendedClientDetails.getColorScheme()` is empty until a scheme is set. It reports what the application set, `LIGHT_DARK` here. Never the system preference, which was the point |
 
 ## Lessons carried from 25.3, so they are not relearned
