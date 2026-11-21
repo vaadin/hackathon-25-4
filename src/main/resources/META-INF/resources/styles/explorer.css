@@ -1,6 +1,150 @@
 /* The explorer front door and the release page. */
-.internal-shell .release-view {
+.internal-shell .release-view,
+.internal-shell .spring-view {
     padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 72rem;
+    box-sizing: border-box;
+}
+
+/* The way back sits in the same place on both deep pages, above the content. */
+.release-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    align-self: flex-start;
+    min-height: 1.5rem;
+}
+
+.release-lookup {
+    width: 24rem;
+    max-width: 100%;
+}
+
+.release-card,
+.spring-boot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border-radius: var(--vaadin-radius-l, 0.75rem);
+}
+
+.release-card-top,
+.spring-boot-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+}
+
+.release-card-version {
+    font-size: 1.25rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.spring-boot-release {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.release-card-line,
+.spring-boot-lines {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.release-card-scanned {
+    margin-inline-start: auto;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
+}
+
+.release-card-summary,
+.spring-boot-summary,
+.spring-supply,
+.release-advice p,
+.spring-advice p,
+.spring-caveat,
+.spring-footer,
+.spring-lead {
+    margin: 0;
+}
+
+.release-advice,
+.spring-advice {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+}
+
+.spring-advice-property,
+.spring-caveat,
+.spring-footer {
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.875rem;
+}
+
+.spring-boots {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.spring-supply-table {
+    max-width: 48rem;
+}
+
+.spring-supply-chip.supply-commercial {
+    color: var(--status-fix);
+}
+
+.spring-supply-chip.supply-ended {
+    color: var(--status-unresolved);
+}
+
+.spring-group > vaadin-details-summary {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.spring-findings {
+    display: flex;
+    flex-direction: column;
+}
+
+.spring-finding {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.1));
+}
+
+.spring-finding-record {
+    min-width: 9.5rem;
+    min-height: 1.5rem;
+    line-height: 1.5rem;
+    font-family: var(--vaadin-font-family-monospace, monospace);
+    font-size: 0.875rem;
+}
+
+.spring-finding-verdict,
+.spring-finding-gone {
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.875rem;
+}
+
+.release-others {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    align-items: baseline;
 }
 
 .explorer-view {
@@ -292,4 +436,14 @@
 .explorer-master > *,
 .explorer-detail > * {
     flex: 0 0 auto;
+}
+
+/* Text links on the deep pages are 24 pixels tall at least, like the rest of the application. */
+.release-advice a,
+.release-view .release-file,
+.release-other,
+.release-go {
+    display: inline-block;
+    min-height: 1.5rem;
+    line-height: 1.5rem;
 }

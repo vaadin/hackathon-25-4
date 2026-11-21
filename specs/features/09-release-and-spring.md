@@ -28,12 +28,12 @@ One release in full, and what Spring Boot brings, the two deep reads the explore
 ## Acceptance criteria
 
 ### AC1: The release page is whole
-- [ ] Card, advice, downloads and lookup render for a measured release
-- [ ] The not measured answer renders in place for the rest
+- [x] Card, advice, downloads and lookup render for a measured release
+- [x] The not measured answer renders in place for the rest
 
 ### AC2: Spring groups tell the supply truth
-- [ ] Each group names its release and its supply status from the data
-- [ ] NVD links match the advisories
+- [x] Each group names its release and its supply status from the data
+- [x] NVD links match the advisories
 
 ## Test cases
 

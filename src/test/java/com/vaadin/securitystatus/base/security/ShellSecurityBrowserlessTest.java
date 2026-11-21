@@ -79,7 +79,8 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         navigate(ExplorerView.class);
 
         assertThat($(H1.class).single().getText()).isEqualTo("Findings");
-        assertThat($(SideNavItem.class).all()).extracting(SideNavItem::getLabel).containsExactly("Findings");
+        assertThat($(SideNavItem.class).all()).extracting(SideNavItem::getLabel).containsExactly("Findings",
+                "What Spring Boot brings");
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 

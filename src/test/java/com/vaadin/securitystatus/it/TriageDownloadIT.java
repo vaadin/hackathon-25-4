@@ -47,7 +47,7 @@ class TriageDownloadIT {
                 .contains("vaadin-security-triage-24.9.21.csv");
         assertThat(href).endsWith("/vaadin-security-triage-24.9.21.csv");
         String[] lines = ((String) csv.get("text")).split("\r\n");
-        assertThat(lines[0]).startsWith("# ").contains("24.9.21").contains("2026-11-21T03:33:59Z");
+        assertThat(lines[0]).startsWith("# ").contains("24.9.21").contains("2026-11-21T10:13:39Z");
         assertThat(lines[1]).isEqualTo("\"CVE\",\"Component\",\"Owner\",\"Verdict\",\"Action\",\"Bucket\"");
         // The whole triage, the secure findings the table hides included.
         assertThat(lines).hasSize(2 + 9);

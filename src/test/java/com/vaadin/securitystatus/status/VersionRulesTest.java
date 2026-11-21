@@ -25,7 +25,7 @@ class VersionRulesTest {
     /** Two lines of 24, one of 23, one of 25 with a prerelease above it. */
     private static final CasesIndex INDEX = MAPPER.readValue("""
             {
-              "generated_at": "2026-11-21T03:33:59Z",
+              "generated_at": "2026-11-21T10:13:39Z",
               "release_repos": {"8": "vaadin/framework", "default": "vaadin/platform"},
               "by_line": {"24.7": ["24.7.18", "24.7.19"], "24.9": ["24.9.25", "24.9.26"], "23.6": ["23.6.19"],
                           "25.3": ["25.3.5"]},

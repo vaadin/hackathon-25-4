@@ -23,7 +23,7 @@ import com.vaadin.securitystatus.status.HomeView;
 /**
  * DAT-05. The nightly publish reaches every open session: the measured chip
  * and the home cards move without a reload. The index fixture is pinned at
- * {@code generated_at} 2026-11-21T03:33:59Z.
+ * {@code generated_at} 2026-11-21T10:13:39Z.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class RefreshBroadcastBrowserlessTest {
@@ -78,7 +78,7 @@ class RefreshBroadcastBrowserlessTest {
 
         // The next night's publish measured a newer release of 24.9.
         String moved = fixtures.transport().fixture(SecurityDataService.INDEX)
-                .replace("\"generated_at\":\"2026-11-21T03:33:59Z\"", "\"generated_at\":\"2026-11-22T03:17:42Z\"")
+                .replace("\"generated_at\":\"2026-11-21T10:13:39Z\"", "\"generated_at\":\"2026-11-22T03:17:42Z\"")
                 .replace("\"line\":\"24.9\",\"version\":\"24.9.26\"", "\"line\":\"24.9\",\"version\":\"24.9.27\"")
                 .replace("\"measured\":\"24.9.26\"", "\"measured\":\"24.9.27\"");
         assertThat(moved).contains("\"line\":\"24.9\",\"version\":\"24.9.27\"").contains("\"measured\":\"24.9.27\"");

@@ -170,8 +170,8 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
         assertThat(location()).isEqualTo("findings/release/24.9/24.9.21");
         // The title takes the route parameters in the template's order: the version, not the line.
         assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Release 24.9.21");
-        assertThat($(Paragraph.class).withClassName("release-older").single().getText())
-                .isEqualTo("The 24.9 line is read at 24.9.26, its newest measured release.");
+        assertThat($(Div.class).withClassName("release-card").single().getElement().getAttribute("data-version"))
+                .isEqualTo("24.9.21");
     }
 
     // AC3: ?q narrows the rows and survives navigation

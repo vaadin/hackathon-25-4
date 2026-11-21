@@ -18,7 +18,7 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
 
 /**
  * The read models against the committed fixtures, whose index is pinned at
- * {@code generated_at} 2026-11-21T03:33:59Z, and against documents with fields
+ * {@code generated_at} 2026-11-21T10:13:39Z, and against documents with fields
  * taken away.
  */
 class ReadModelTest {

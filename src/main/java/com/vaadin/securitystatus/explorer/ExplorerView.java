@@ -18,21 +18,14 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridI18n;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -455,10 +448,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     }
 
     private static Span ring(Product product) {
-        var ring = new Span();
-        ring.addClassNames("product-ring", "ring-" + product.ring());
-        ring.getElement().setAttribute("aria-hidden", "true");
-        return ring;
+        return FindingGrid.ring(product);
     }
 
     // The opened line
@@ -560,160 +550,31 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             details.add(lead("explorer-group-note", getTranslation("explorer.group." + key + ".note")));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
-        details.add(findingsGrid(line, capped.shown(), registry, off, springOff));
+        details.add(new FindingGrid(capped.shown(), registry, off,
+                finding -> findingDetails(line, finding, springOff)));
         if (capped.more() > 0) {
             details.add(lead("explorer-group-more", getTranslation("explorer.group.more", capped.more())));
         }
         return details;
     }
 
-    private Grid<Finding> findingsGrid(Line line, List<Finding> findings, List<Product> registry, Set<String> off,
-            boolean springOff) {
-        var grid = new Grid<Finding>();
-        grid.addClassName("explorer-findings");
-        grid.addThemeVariants(GridVariant.NO_BORDER, GridVariant.WRAP_CELL_CONTENT);
-        grid.setI18n(new GridI18n().setSorter(getTranslation("explorer.grid.sorter"))
-                .setSelectRow(getTranslation("explorer.grid.selectRow"))
-                .setSelectAll(getTranslation("explorer.grid.selectAll"))
-                .setSelectAllUnavailable(getTranslation("explorer.grid.selectAllUnavailable")));
-        grid.addColumn(Finding::cve).setHeader(getTranslation("explorer.grid.advisory")).setSortable(true)
-                .setComparator(Finding::cve).setAutoWidth(true).setFlexGrow(0);
-        grid.addComponentColumn(this::severity).setHeader(getTranslation("explorer.grid.severity"))
-                .setSortable(true).setComparator(finding -> ExplorerRules.severityRank(finding.severity()))
-                .setAutoWidth(true).setFlexGrow(0);
-        grid.addColumn(finding -> through(finding, registry, off)).setHeader(getTranslation("explorer.grid.through"))
-                .setFlexGrow(1);
-        grid.addComponentColumn(finding -> dots(finding, registry, off))
-                .setHeader(getTranslation("explorer.grid.routes")).setAutoWidth(true).setFlexGrow(0);
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(finding -> findingDetails(line, finding, springOff)));
-        grid.setAllRowsVisible(true);
-        grid.setItems(findings);
-        return grid;
-    }
-
-    private Component severity(Finding finding) {
-        var badge = new Span(finding.severity().map(word -> getTranslation("severity." + word)).orElse(""));
-        finding.severity().ifPresent(word -> badge.addClassName("severity-" + word));
-        badge.addClassName("explorer-severity");
-        return badge;
-    }
-
-    /** Through how many of its products a finding arrives, or the one it rides inside. */
-    private String through(Finding finding, List<Product> registry, Set<String> off) {
-        if (finding.bundledIn().isPresent()) {
-            return getTranslation("explorer.through.bundled", finding.bundledIn().get());
-        }
-        List<Product> through = ExplorerRules.through(finding, registry);
-        if (through.isEmpty()) {
-            return getTranslation("explorer.through.none");
-        }
-        if (through.size() == 1) {
-            return getTranslation("explorer.through.only", through.get(0).name());
-        }
-        long on = through.stream().filter(product -> !off.contains(product.name())).count();
-        return on == through.size() ? getTranslation("explorer.through.all", through.size())
-                : getTranslation("explorer.through.some", on, through.size());
-    }
-
-    private Component dots(Finding finding, List<Product> registry, Set<String> off) {
-        var dots = new Span();
-        dots.addClassName("explorer-dots");
-        for (Product product : ExplorerRules.through(finding, registry)) {
-            var dot = ring(product);
-            dot.addClassName("dot");
-            if (off.contains(product.name())) {
-                dot.addClassName("off");
-            }
-            dot.getElement().setAttribute("title", product.name());
-            dots.add(dot);
-        }
-        return dots;
-    }
-
     /**
      * An opened finding, read from the release's own record, which is fetched
-     * the first time a finding of that release is opened. A field the record
-     * does not carry is left out, rule 6.4.11.
+     * the first time a finding of that release is opened and cached by the
+     * data layer.
      */
     private Component findingDetails(Line line, Finding finding, boolean springOff) {
-        var box = new Div();
-        box.addClassName("explorer-finding");
         Optional<ExplorerVersion.Finding> full;
         try {
             full = data.explorerVersion(line.version())
                     .flatMap(version -> version.findings().stream()
                             .filter(candidate -> candidate.cve().equals(finding.cve())).findFirst());
         } catch (DataUnreachableException unreachable) {
-            box.add(new DataOutageNotice());
+            var box = new Div(new DataOutageNotice());
+            box.addClassName("explorer-finding");
             return box;
         }
-        if (full.isEmpty()) {
-            box.add(lead("explorer-finding-missing",
-                    getTranslation("explorer.finding.missing", line.version().toString())));
-        }
-        full.ifPresent(found -> {
-            found.summary().ifPresent(text -> box.add(field("summary", text)));
-            found.impact().ifPresent(text -> box.add(field("impact", text)));
-            found.workaround().ifPresent(text -> box.add(field("workaround", text)));
-            found.fixedIn().map(version -> getTranslation("explorer.finding.fixedIn", version.toString()))
-                    .or(() -> found.fixExpected()).ifPresent(text -> box.add(field("fix", text)));
-            routes(found, springOff).ifPresent(box::add);
-        });
-        var record = new Anchor(recordUrl(finding.cve()), getTranslation("explorer.finding.record", finding.cve()));
-        record.setTarget(AnchorTarget.BLANK);
-        record.addClassName("explorer-finding-record");
-        box.add(record);
-        return box;
-    }
-
-    private Component field(String name, String text) {
-        var label = new H3(getTranslation("explorer.finding." + name));
-        var body = new Paragraph(text);
-        var field = new Div(label, body);
-        field.addClassNames("explorer-field", "field-" + name);
-        return field;
-    }
-
-    /** One row per package and resolved version, each with its routes, rule 6.4.16 and 6.4.20. */
-    private Optional<Component> routes(ExplorerVersion.Finding found, boolean springOff) {
-        var list = new Div();
-        for (ExplorerVersion.PackageFinding coordinate : found.packages()) {
-            List<String> versions = springOff ? coordinate.versionsWithoutSpring() : coordinate.versions();
-            List<ExplorerVersion.Route> routes = springOff ? coordinate.routesWithoutSpring() : coordinate.routes();
-            if (springOff && versions.isEmpty() && routes.isEmpty()) {
-                continue;
-            }
-            var entry = new Div();
-            entry.addClassName("explorer-coordinate");
-            var name = new Span(versions.isEmpty() ? coordinate.packageName()
-                    : coordinate.packageName() + "@" + String.join(", ", versions));
-            name.addClassName("explorer-coordinate-name");
-            entry.add(name);
-            if (routes.isEmpty()) {
-                entry.add(lead("explorer-route-none", getTranslation("explorer.finding.noRoute")));
-            }
-            for (ExplorerVersion.Route route : routes) {
-                var steps = new ArrayList<String>();
-                route.entry().ifPresent(steps::add);
-                steps.addAll(route.steps());
-                var path = new Span(String.join(" › ", steps));
-                path.addClassName("explorer-route");
-                entry.add(path);
-            }
-            list.add(entry);
-        }
-        if (list.getComponentCount() == 0) {
-            return Optional.empty();
-        }
-        var label = new H3(getTranslation("explorer.finding.routes"));
-        var field = new Div(label, list);
-        field.addClassNames("explorer-field", "field-routes");
-        return Optional.of(field);
-    }
-
-    private static String recordUrl(String id) {
-        return id.startsWith("GHSA-") ? "https://github.com/advisories/" + id
-                : "https://www.cve.org/CVERecord?id=" + id;
+        return new FindingDetail(finding.cve(), line.version(), full, springOff);
     }
 
     private static Paragraph lead(String className, String text) {

@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Primary;
 public class FixturePages {
 
     /** The {@code generated_at} of the committed index fixture. */
-    public static final Instant PINNED_GENERATED_AT = Instant.parse("2026-11-21T03:33:59Z");
+    public static final Instant PINNED_GENERATED_AT = Instant.parse("2026-11-21T10:13:39Z");
 
     /** The moment every test runs at: the day of the pinned measurement. */
     public static final Instant NOW = Instant.parse("2026-11-21T12:00:00Z");

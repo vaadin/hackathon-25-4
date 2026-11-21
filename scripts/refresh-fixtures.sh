@@ -40,6 +40,7 @@ PATHS=(
   data/index.json
   data/queue.json
   data/25.3.5.json
+  data/24.9.21.json
   exports/25.3.5.csv
   exports/25.3.5.vex.json
   exports/25.3.5.dependency-check-suppressions.xml
