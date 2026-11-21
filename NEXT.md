@@ -1,29 +1,30 @@
 # Where the work stopped
 
-Epics 01 and 02 are implemented and committed, every checkbox ticked. `./mvnw clean verify -Pit` is green with 58 tests and 9 browser tests. Nothing is pushed and nothing is posted.
+Epics 01, 02 and 03 are implemented and committed. Epic 03 has every checkbox ticked but one: the version field cannot use `PartialMatchMode` beside free text, D-40. `./mvnw clean verify` is green with 96 tests, `./mvnw clean verify -Pit` with 96 tests and 9 browser tests. Nothing is pushed and nothing is posted.
 
-The pass runs unattended, one epic per session, driven by `.claude/commands/implement-epic.md`. The session for epic 02 was cut twice by a dropped connection and was closed by hand: the gates and the commits are verified, this file is not as rich in traps for epic 02 as it is for epic 01.
+The pass runs unattended, one epic per session, driven by `.claude/commands/implement-epic.md`.
 
 ## Next
 
-1. Epic 03, home and the lookup, `specs/user-stories/epic-03-home-and-lookup.md`, then 04 to 13 in order.
+1. Epic 04, answer by version, `specs/user-stories/epic-04-answer-by-version.md`, then 05 to 13 in order. Epic 04 replaces the placeholder `status/VersionView`, 05 `CveView`, 06 `ScanView` and wires the report tab's upload, 07 `AdvisoriesView`.
 2. At the end, with a person: `NEEDS-A-PERSON.md`, then `DECISIONS.md` row by row, then the issue drafts one by one.
 
 ## Where the decisions are
 
-`DECISIONS.md`, numbered and never renumbered. Read it before changing anything it covers. `NEEDS-A-PERSON.md` holds what only a person can do.
+`DECISIONS.md`, numbered and never renumbered, D-37 to D-49 from epic 03. Read it before changing anything it covers. `NEEDS-A-PERSON.md` holds what only a person can do, P-05 and P-06 from epic 03.
 
 ## What exists now
 
-- `base/ui`: `AppBar` shared by both shells with Breadcrumbs, the measured chip, the dark switch and Sign out. `CustomerLayout` is the `@Layout` of public routes, `getLookupMount()` is for epic 03. `InternalLayout` is named by internal views in `@Route(layout = ...)`, its drawer lists every route with a `@Menu` whose title is a bundle key, `getAssistantMount()` is for epic 11. `ViewHeading` is the H1 of a view and reads the resolved title. `NotFoundView` keeps Flow's not found view in the shell. `ThemeSwitch` and `ThemeMemory` hold the dark mode.
+- `base/ui`: `AppBar` shared by both shells with Breadcrumbs, the measured chip, the dark switch and Sign out. `CustomerLayout` is the `@Layout` of public routes and mounts the lookup under the bar through a `ShellLookup` bean, so `base` names no feature. `InternalLayout` is named by internal views in `@Route(layout = ...)`, its drawer lists every route with a `@Menu` whose title is a bundle key, `getAssistantMount()` is for epic 11. `ViewHeading` is the H1 of a view and reads the resolved title. `NotFoundView` keeps Flow's not found view in the shell. `ThemeSwitch` and `ThemeMemory` hold the dark mode. `HelpDialog` is the one shape of a hint: a question mark whose name is the dialog's title, and `HelpDialog.section` for a heading and its paragraphs.
 - `base/i18n/TranslatedPageTitleGenerator`: the one writer of titles. A route puts a bundle key in `@PageTitle`, route parameters arrive as `{0}`, `{1}`.
-- `base/security`: `SecurityConfig` with `team` and `guest`, `LoginView`, `Roles`, `SessionExpiredNotice`, `CspPolicy`, `CspOnBootstrapPage`, `CspViolations` with its `/csp-report` endpoint. `CspViolations.newestFirst()` is what the diagnostics view of epic 12 reads.
-- `data` since epic 02: `PagesClient` is the only class that talks to the network, with ETag revalidation. `PagesCache` holds the time to live rules, single flight and stale over error. `SecurityDataService` is what views and tools call, and it throws `DataUnreachableException` only on a cold cache with no network. `VersionNumber` compares versions, never a string comparison. `data/model` has the read models as records, mapped one to one from the published JSON. `DataRefreshSignal` is published when the index moves. `ExportKind` and `ExportFile` are the per release machine files.
-- `base/ui/Downloads` is the one helper for anything that leaves the application, on the 25.4 `Download` API. `base/ui/DataOutageNotice` is the one unreachable sentence.
-- Tests answer from `src/test/resources/pages/`, byte for byte copies of the published JSON. `scripts/refresh-fixtures.sh` is the only thing that changes them and the only task that needs the network. `FixturePages` and `FixtureTransport` wire them in, `FixturePagesServer` serves them to a browser test. The `Clock` is fixed in tests. `NetworkBoundaryTest` fails if anything outside `data` reaches for HTTP.
-- `styles.css`: the `--status-*` and `--severity-*` tokens. Nothing consumes them yet.
-- Guard rails: `NoHardcodedStringsTest` and `SpecConsistencyTest`. Ticking the last checkbox of a story or a feature makes its test classes mandatory.
-- `specs/issues/`: the procedure in `README.md`, the template, five ready drafts, three withdrawn ones, five reproducer zips.
+- `base/security`: `SecurityConfig` with `team` and `guest`, `LoginView`, `Roles`, `SessionExpiredNotice`, `CspPolicy`, `CspOnBootstrapPage`, `CspViolations` with its `/csp-report` endpoint.
+- `data`: `PagesClient` is the only class that talks to the network. `PagesCache`, `SecurityDataService`, `VersionNumber`, the read models in `data/model`, `DataRefreshSignal`, `ExportKind` and `ExportFile`, as epic 02 left them.
+- `status` since epic 03: `HomeView` with the line cards, Recently reviewed and the designer's pointer, redrawn when the refresh signal moves, `?pre` for prereleases. `HomeView.shownLines`, `spokenFor` and `secureFrom` are the line rules the version screen will want too. `Lookup` is the three tab lookup over the session scoped `LookupState`, fed by `LookupProvider`; `LookupInput` cleans versions and splits ids. `Lookup.KeysJs` holds the declared keyboard filters. `VersionView`, `CveView`, `ScanView`, `AdvisoriesView` are placeholders with a heading, D-37.
+- The answering routes: `/version/{version}`, `/cve/{ids}/{version}` with the ids comma separated and the version optional, `/scan/{version}`, `/advisories`. Each navigation writes its question into `LookupState`.
+- Styles: `styles.css` imports `styles/shell.css`, `styles/data.css`, `styles/lookup.css`, `styles/home.css`. The `--status-*` tokens now color the card states.
+- Tests answer from `src/test/resources/pages/`. `FixturePages` and `FixtureTransport` wire them in, `FixturePagesServer` serves them to a browser test. `HomeBrowserlessTest`, `LookupBrowserlessTest`, `LookupInputTest` are epic 03's.
+- Guard rails: `NoHardcodedStringsTest`, `SpecConsistencyTest`, `NetworkBoundaryTest`.
+- `specs/issues/`: eight ready drafts, 01, 03b, 07b, 08, 10, 11 and from epic 03 `12b-comment-on-flow-5473.md` and `13-bind-enabled-until-response.md`, three withdrawn, eight reproducer zips. `post.sh` dry run lists all of them.
 
 ## Known traps
 
@@ -42,10 +43,23 @@ The pass runs unattended, one epic per session, driven by `.claude/commands/impl
 - After deleting sources, stale classes in `target/` fail the next test run.
 - `vaadin:install-dev-cli` wrote `.vaadin/`, `.agents/` and `.claude/skills/vaadin-devloop`. They are untracked.
 - The live reference pages show a sign in gate, so the visual reviews compared only the gate and the header behind it.
+- Signals refuse `get()` outside a reactive context. In a listener, a click handler or a navigation observer read them with `peek()`; `get()` belongs in `Signal.effect`, `Signal.computed` and the `bind*` lambdas.
+- An effect may not write a signal it depends on. A listener that a server side change also fires, such as the selected change of `Tabs`, writes only when the value differs, as `Lookup` does.
+- `Button.bindEnabled` is refused beside `setDisableOnClick`, in either order, `UNTIL_RESPONSE` too. Use `Signal.effect` with `setEnabled`, draft 13.
+- `ComboBox.setPartialMatchMode` throws once custom values are allowed, as its documentation says.
+- A combo box's typed text is not its value. Read it through the `filter` property with a `filter-changed` listener, and empty it with the component's own `clear()`.
+- JavaScript aimed at an element that is invisible waits until it is shown, documented on the calling JavaScript page. Run it from a visible ancestor, passing the element as a parameter.
+- A combo box dropdown left open on a field that gets hidden covers the page when the field is shown again. Close it on every tab change.
+- Queries in browserless tests return only visible components. A field of a hidden tab is reached by walking the tree, as `LookupBrowserlessTest.inLookup` does.
+- A browserless window opens on home before the test body runs, so navigating to home again reuses that view. Leave and come back to rebuild it.
+- `FixturePages.cold()` moves the refresh signal, and an open view reads the index again at once. Replace a fixture after `cold()` and then call `revalidate()`, or the committed one is cached first.
+- A keyboard filter is browser JavaScript, so a browserless test proves only the server half: it fires the event with `"@" + filter.getSnippetKey()` set to what the browser would have returned. The browser half is checked with Playwright.
+- The first page load after adding a component or a `@JsDefinition` rebuilds the development bundle, about ten seconds.
+
 
 ## Left undone
 
-- Review findings in `specs/reviews/02-data-client/REVIEW.md`, and P-04 in `NEEDS-A-PERSON.md`: the unreachable sentence and the download labels are our wording.
+- Epic 03: the version field uses no `PartialMatchMode`, D-40, so its task stays unticked. The report tab's upload is disabled until epic 06, D-42. The review's major issues are in `specs/reviews/03-home-and-lookup/REVIEW.md` and P-06. The wording without a source is P-05.
+- Review findings in `specs/reviews/02-data-client/REVIEW.md`, and P-04: the unreachable sentence and the download labels are our wording.
 - Review findings in `specs/reviews/01-foundation/REVIEW.md`: the 22px switch, no way back to the system color scheme, no favicon, an empty title on the not found view, no help line on the sign in form.
-- The enforced policy is verified with push and sign in only. Uploads, the AI panel and the PDF viewer arrive in later epics and each has to pass `CspIT` and leave the `warn` log clean.
-- The chip wording "Measured {0}" with an ISO date matches the live header. Epic 02 owns the final wording.
+- The enforced policy is verified with push, sign in and now the home page with the lookup. Uploads, the AI panel and the PDF viewer arrive in later epics and each has to pass `CspIT` and leave the `warn` log clean.
