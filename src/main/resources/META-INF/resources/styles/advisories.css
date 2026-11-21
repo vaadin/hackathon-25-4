@@ -1,0 +1,96 @@
+/* Every advisory, and the unlisted case catalogue. */
+.advisories-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 80rem;
+}
+
+.verdict-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.verdict-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border-radius: 999px;
+    color: inherit;
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.verdict-pill.active {
+    border-color: var(--vaadin-text-color, currentColor);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.06));
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.advisories-total {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.advisories-grid {
+    height: max(24rem, calc(100dvh - 20rem));
+}
+
+.advisories-grid::part(row) {
+    cursor: pointer;
+}
+
+.advisories-grid .advisory-id {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.advisories-outage:empty {
+    display: none;
+}
+
+/* The case catalogue */
+.cases-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 64rem;
+}
+
+.cases-group h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.case-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    padding: 0.5rem 0;
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.case-title {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.case-screen,
+.case-count,
+.case-needs {
+    font-size: 0.875rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.case-needs {
+    flex-basis: 100%;
+}
+
+/* A link alone in a row is the row's one action: big enough to hit. */
+.case-link {
+    display: inline-block;
+    padding-block: 0.25rem;
+}

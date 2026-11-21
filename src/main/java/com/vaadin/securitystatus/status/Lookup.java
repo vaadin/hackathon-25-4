@@ -514,6 +514,14 @@ public final class Lookup extends Composite<Div> {
         }
     }
 
+    /**
+     * Asked by the advisories list after it carried an id here: the version
+     * beside the ids is what is left to give, or to confirm with Check.
+     */
+    void focusIdsVersion() {
+        idsVersion.focus();
+    }
+
     /** The field of the tab on show, from anywhere on the page. */
     private void focusQuestion() {
         switch (state.tab().peek()) {

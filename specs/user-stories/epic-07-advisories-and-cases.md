@@ -9,8 +9,8 @@
 ### US-7.1: The advisories grid
 
 **Tasks:**
-- [ ] Grid in the source order, severity badges, owner and verdict chips
-- [ ] Filter pills with counts writing `?verdict`
+- [x] Grid in the source order, severity badges, owner and verdict chips
+- [x] Filter pills with counts writing `?verdict`
 
 **Verified by:** `AdvisoriesBrowserlessTest`
 
@@ -19,7 +19,7 @@
 ### US-7.2: The context menu
 
 **Tasks:**
-- [ ] `GridContextMenu` with dynamic content: copy id, open record, ask on my version
+- [x] `GridContextMenu` with dynamic content: copy id, open record, ask on my version
 
 **25.4 APIs:** `GridContextMenu` dynamic content.
 **Verified by:** `AdvisoriesBrowserlessTest`
@@ -29,7 +29,7 @@
 ### US-7.3: Cases
 
 **Tasks:**
-- [ ] `/cases` unlisted, the three groups from the fixture, See one links
+- [x] `/cases` unlisted, the three groups from the fixture, See one links
 
 **Verified by:** `CasesBrowserlessTest`
 

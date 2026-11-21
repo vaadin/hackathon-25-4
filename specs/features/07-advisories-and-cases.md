@@ -32,15 +32,15 @@ The full catalogue for the reader who wants the list, and the demo case index. C
 
 ### AC1: The list is the catalogue
 - [ ] Order is severity, then age, then id
-- [ ] Pills carry counts and write the flag through the navigation helper
-- [ ] Owner chips follow the fix owner rule
+- [x] Pills carry counts and write the flag through the navigation helper
+- [x] Owner chips follow the fix owner rule
 
 ### AC2: The context menu acts
-- [ ] Copy id fills the clipboard
-- [ ] The record link matches the row's advisory
+- [x] Copy id fills the clipboard
+- [x] The record link matches the row's advisory
 
 ### AC3: Cases cover the states
-- [ ] Every renderable state has a working See one link
+- [x] Every renderable state has a working See one link
 
 ## Test cases
 

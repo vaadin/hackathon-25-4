@@ -15,10 +15,11 @@ public record CaseCatalog(Optional<Instant> generatedAt, List<Case> cases) {
     }
 
     public record Case(String id, Optional<String> title, Optional<String> screen, Optional<String> status,
-            @Nullable Integer count, Optional<String> example) {
+            @Nullable Integer count, Optional<String> example, Optional<String> needs) {
 
         public Case {
             title = Wire.text(title);
+            needs = Wire.text(needs);
             screen = Wire.text(screen);
             status = Wire.text(status);
             example = Wire.text(example);

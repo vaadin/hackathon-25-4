@@ -5,6 +5,7 @@
 @import url("styles/version.css");
 @import url("styles/cve.css");
 @import url("styles/scan.css");
+@import url("styles/advisories.css");
 
 html {
     --aura-base-font-size: 16;
