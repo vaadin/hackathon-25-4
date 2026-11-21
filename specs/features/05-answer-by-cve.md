@@ -44,21 +44,21 @@ Cards stack in the order asked. The details section exists once per id, each nam
 ## Acceptance criteria
 
 ### AC1: One card per id, the right state
-- [ ] Every state in the fixture set renders its wording
-- [ ] The fix release named is on the reader's line
-- [ ] An unknown id is answered plainly
+- [x] Every state in the fixture set renders its wording
+- [x] The fix release named is on the reader's line
+- [x] An unknown id is answered plainly
 
 ### AC2: Copy answer works
-- [ ] The clipboard receives the composed answer and the notice confirms
-- [ ] The composed text names the id, the verdict, the reader's version and the move, and nothing the data does not carry
+- [x] The clipboard receives the composed answer and the notice confirms
+- [x] The composed text names the id, the verdict, the reader's version and the move, and nothing the data does not carry
 
 ### AC3: The layers are the design's
-- [ ] Only the first layer is open on arrival
-- [ ] Absent fields are omitted
-- [ ] Per package verdicts each name their coordinate
+- [x] Only the first layer is open on arrival
+- [x] Absent fields are omitted
+- [x] Per package verdicts each name their coordinate
 
 ### AC4: Across versions tells each line's truth
-- [ ] The reader's line is marked yours and names the release the finding is gone in
+- [x] The reader's line is marked yours and names the release the finding is gone in
 
 ## Test cases
 

@@ -31,6 +31,11 @@ PATHS=(
   cases/cve/CVE-2016-1000027.json
   cases/cve/CVE-2019-25028.json
   cases/cve/CVE-2021-33604.json
+  cases/cve/CVE-2026-89407.json
+  cases/cve/CVE-2026-45292.json
+  cases/cve/CVE-2026-102276.json
+  cases/cve/CVE-2026-8763.json
+  cases/cve/CVE-2026-54285.json
   data/front.json
   data/index.json
   data/queue.json

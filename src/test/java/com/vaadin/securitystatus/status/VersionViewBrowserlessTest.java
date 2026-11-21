@@ -217,6 +217,31 @@ class VersionViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(find(Table.class, slot("version-disc")).single().getBodyRows()).hasSize(4);
     }
 
+    // Rule 4: a ruled out row whose advisory carries no applicability has no reason cell at all
+    @Test
+    void a_ruled_out_row_without_a_reason_has_no_reason_cell() {
+        String index = fixtures.transport().fixture("cases/index.json");
+        String entry = "\"CVE-2021-33604\":{\"cve\":\"CVE-2021-33604\",\"severity\":\"low\",\"applicability\":\"false_positive\",";
+        assertThat(index).contains(entry);
+        fixtures.transport().replace("cases/index.json",
+                index.replace(entry, "\"CVE-2021-33604\":{\"cve\":\"CVE-2021-33604\",\"severity\":\"low\","));
+        fixtures.revalidate();
+
+        navigate(HomeView.class);
+        navigate("version/25.3.5?ruled=1", VersionView.class);
+
+        Table table = find(Table.class, slot("version-ruled")).single();
+        TableRow bare = table.getBodyRows().stream()
+                .filter(row -> "CVE-2021-33604".equals(row.getElement().getAttribute("data-advisory"))).findFirst()
+                .orElseThrow();
+        assertThat(bare.getCells()).hasSize(1);
+        assertThat(bare.getCells().get(0).getColspan()).isEqualTo(2);
+        // The positive control: a row whose advisory carries a verdict keeps its reason beside it.
+        TableRow said = table.getBodyRows().stream().filter(row -> row != bare).findFirst().orElseThrow();
+        assertThat(said.getCells()).hasSize(2);
+        assertThat(said.getCells().get(1).getElement().getText()).isNotBlank();
+    }
+
     // AC3: toggling ruled and disc rewrites the query and keeps the other flags
     @Test
     void the_ruled_out_and_discontinued_controls_write_their_flags() {

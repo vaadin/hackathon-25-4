@@ -800,13 +800,15 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             var grid = table(getTranslation("version.ruled.col.advisory"), getTranslation("version.ruled.col.why"));
             for (String advisory : ordered) {
                 TableRow row = grid.addRow();
-                row.addDataCell(FindingCard.advisoryLink(advisory, measured));
+                var id = row.addDataCell(FindingCard.advisoryLink(advisory, measured));
                 Optional<String> why = measured.fromBuild().contains(advisory)
                         ? Optional.of(getTranslation("version.ruled.build"))
                         : Optional.ofNullable(index.advisories().get(advisory))
                                 .flatMap(CasesIndex.AdvisoryCatalogEntry::applicability)
                                 .map(index.labels()::get);
-                row.addDataCell(why.orElse(""));
+                // A reason the data does not carry has no cell: the id spans the row instead of
+                // standing beside an empty one that reads as a reason, D-60.
+                why.ifPresentOrElse(row::addDataCell, () -> id.setColspan(2));
                 row.getElement().setAttribute("data-advisory", advisory);
             }
             ruledOut.add(grid);
