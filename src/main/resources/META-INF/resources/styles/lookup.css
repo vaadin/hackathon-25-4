@@ -1,0 +1,93 @@
+/* The lookup, under the app bar of the customer shell. */
+.lookup-mount {
+    padding: 0.75rem 1.5rem 1rem;
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.lookup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 56rem;
+}
+
+.lookup-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--vaadin-gap-m, 1rem);
+}
+
+.lookup-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--vaadin-gap-m, 1rem);
+    min-width: 0;
+}
+
+.lookup-version {
+    width: 16rem;
+    max-width: 100%;
+}
+
+.lookup-ids {
+    width: 24rem;
+    max-width: 100%;
+}
+
+.lookup-ids-version {
+    width: 10rem;
+    max-width: 100%;
+}
+
+.lookup-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.help-mark {
+    min-width: 0;
+    height: auto;
+    padding: 0 0.35rem;
+    margin: 0;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+/* The example in an empty field is the faintest ink on the page, rule 6.11.16
+   of the source spec. Written against vaadin-combo-box 25.4.0-beta1. */
+.lookup vaadin-combo-box > input::placeholder,
+.lookup vaadin-text-field > input::placeholder {
+    color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.35));
+    opacity: 1;
+}
+
+.lookup-report-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.lookup-report-formats {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.lookup-note {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.help-dialog section + section {
+    margin-block-start: 1rem;
+}
+
+.help-dialog h4 {
+    margin: 0 0 0.25rem;
+}
+
+.help-dialog p {
+    margin: 0;
+    max-width: 36rem;
+}

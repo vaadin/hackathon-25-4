@@ -86,12 +86,12 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
         fixtures.coldAndDown();
         try {
             navigate(HomeView.class);
-            assertThat($(Badge.class).exists()).isFalse();
+            assertThat($(Badge.class).withClassName("measured-chip").exists()).isFalse();
 
             dataRefresh.publish(Instant.parse("2026-11-19T03:15:00Z"));
             runPendingSignalsTasks();
 
-            assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-19");
+            assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-19");
         } finally {
             fixtures.restore();
         }
@@ -101,7 +101,7 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
     void measured_chip_shows_the_generated_at_of_the_index_that_was_read() {
         navigate(HomeView.class);
 
-        assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
     }
 
     private static String documentTitle() {

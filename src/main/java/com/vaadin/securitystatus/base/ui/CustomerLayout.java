@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.base.ui;
 
+import org.springframework.beans.factory.ObjectProvider;
+
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.html.Div;
@@ -11,7 +13,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 
 /**
- * The shell of the public routes: the app bar with the lookup mount, and no
+ * The shell of the public routes: the app bar, the lookup under it, and no
  * navigation menu.
  */
 @Layout
@@ -21,17 +23,15 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
     private final Div lookupMount = new Div();
     private final Main main = new Main();
 
-    CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication) {
+    CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
+            ObjectProvider<ShellLookup> lookup) {
         addClassName("customer-shell");
         lookupMount.addClassName("lookup-mount");
-        var appBar = new AppBar(dataRefresh, authentication);
-        appBar.addBeforeSignOut(lookupMount);
-        getContent().add(appBar, main);
+        lookup.ifAvailable(provider -> lookupMount.add(provider.create()));
+        getContent().add(new AppBar(dataRefresh, authentication), lookupMount, main);
     }
 
-    /**
-     * Where the lookup component is mounted, once, by the feature that owns it.
-     */
+    /** Where the lookup is mounted, once per window. */
     public Div getLookupMount() {
         return lookupMount;
     }

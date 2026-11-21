@@ -1,0 +1,143 @@
+/* The front door: the line cards, recently reviewed, the pointer. */
+.home-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-block-start: 1rem;
+}
+
+.home-body h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.section-lead,
+.home-tip {
+    margin: 0.25rem 0 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.line-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: var(--vaadin-gap-m, 1rem);
+    margin-block: 1rem;
+}
+
+.line-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+    color: inherit;
+    text-decoration: none;
+}
+
+.line-card:hover,
+.line-card:focus-visible {
+    border-color: var(--vaadin-border-color, currentColor);
+}
+
+.line-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.line-card-minor {
+    font-size: 1.25rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.line-card-icon {
+    margin-inline-start: auto;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.line-card-state {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.state-secure .line-card-icon,
+.state-secure .line-card-state {
+    color: var(--status-secure);
+}
+
+.state-fix_available .line-card-icon,
+.state-fix_available .line-card-state {
+    color: var(--status-fix);
+}
+
+.state-unresolved .line-card-icon,
+.state-unresolved .line-card-state {
+    color: var(--status-unresolved);
+}
+
+.line-card-action {
+    overflow-wrap: anywhere;
+}
+
+.line-card-scanned {
+    font-size: 0.875rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.recent-rows {
+    display: flex;
+    flex-direction: column;
+    margin-block-start: 0.75rem;
+}
+
+.recent-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    padding: 0.75rem 0;
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    color: inherit;
+    text-decoration: none;
+}
+
+.recent-id {
+    min-width: 9rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+    overflow-wrap: anywhere;
+}
+
+.recent-says {
+    flex: 1 1 20rem;
+    min-width: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.recent-date {
+    font-size: 0.875rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.home-pointer {
+    padding: 1rem;
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+}
+
+.home-pointer h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+}
+
+.home-pointer p {
+    margin: 0;
+}

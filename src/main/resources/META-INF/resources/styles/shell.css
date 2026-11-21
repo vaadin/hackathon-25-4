@@ -29,7 +29,12 @@
     min-width: 0;
 }
 
-.app-bar > .lookup-mount:empty,
+/* On a phone the trail takes a row of its own instead of running under the chip. */
+.customer-shell > .app-bar > vaadin-breadcrumbs {
+    flex: 1 1 12rem;
+}
+
+.lookup-mount:empty,
 .assistant-mount:empty {
     display: none;
 }

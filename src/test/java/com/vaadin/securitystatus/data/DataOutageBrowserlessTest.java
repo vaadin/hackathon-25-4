@@ -10,8 +10,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
@@ -38,7 +38,7 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
         // The control: with the host up the same view shows the lines and no notice.
         navigate(HomeView.class);
         assertThat($(DataOutageNotice.class).exists()).isFalse();
-        assertThat($(Div.class).withClassName("line-card").all()).isNotEmpty();
+        assertThat($(RouterLink.class).withClassName("line-card").all()).isNotEmpty();
 
         fixtures.coldAndDown();
         navigate("nothing-here", com.vaadin.flow.router.RouteNotFoundError.class);
@@ -46,10 +46,10 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(home).isNotNull();
         assertThat($(DataOutageNotice.class).single().getText()).isEqualTo(UNREACHABLE);
-        assertThat($(Div.class).withClassName("line-card").exists()).isFalse();
+        assertThat($(RouterLink.class).withClassName("line-card").exists()).isFalse();
         assertThat($(H1.class).single().getText()).isEqualTo("Security status");
         // Nothing was measured as far as this application knows, so no date is shown.
-        assertThat($(Badge.class).exists()).isFalse();
+        assertThat($(Badge.class).withClassName("measured-chip").exists()).isFalse();
         assertThat(fixtures.transport().requestsFor(SecurityDataService.INDEX)).isNotEmpty()
                 .allMatch(request -> request.status() == 0);
     }
@@ -82,8 +82,8 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         assertThat($(DataOutageNotice.class).exists()).isFalse();
-        assertThat($(Div.class).withClassName("line-card").all()).hasSize(9);
-        assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(RouterLink.class).withClassName("line-card").all()).hasSize(9);
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
     }
 
     @Test
@@ -94,7 +94,7 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
         navigate(HomeView.class);
 
         assertThat($(DataOutageNotice.class).exists()).isFalse();
-        assertThat($(Div.class).withClassName("line-card").all()).hasSize(9);
-        assertThat($(Badge.class).single().getText()).isEqualTo("Measured 2026-11-20");
+        assertThat($(RouterLink.class).withClassName("line-card").all()).hasSize(9);
+        assertThat($(Badge.class).withClassName("measured-chip").single().getText()).isEqualTo("Measured 2026-11-20");
     }
 }

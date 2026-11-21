@@ -16,7 +16,7 @@ import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.flow.component.badge.Badge;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.Application;
 import com.vaadin.securitystatus.status.HomeView;
 
@@ -79,8 +79,9 @@ class RefreshBroadcastBrowserlessTest {
         // The next night's publish measured a newer release of 24.9.
         String moved = fixtures.transport().fixture(SecurityDataService.INDEX)
                 .replace("\"generated_at\":\"2026-11-20T10:54:59Z\"", "\"generated_at\":\"2026-11-21T03:17:42Z\"")
-                .replace("\"line\":\"24.9\",\"version\":\"24.9.26\"", "\"line\":\"24.9\",\"version\":\"24.9.27\"");
-        assertThat(moved).contains("\"line\":\"24.9\",\"version\":\"24.9.27\"");
+                .replace("\"line\":\"24.9\",\"version\":\"24.9.26\"", "\"line\":\"24.9\",\"version\":\"24.9.27\"")
+                .replace("\"measured\":\"24.9.26\"", "\"measured\":\"24.9.27\"");
+        assertThat(moved).contains("\"line\":\"24.9\",\"version\":\"24.9.27\"").contains("\"measured\":\"24.9.27\"");
         fixtures.transport().replace(SecurityDataService.INDEX, moved);
         fixtures.revalidate();
         first.runPendingSignalsTasks();
@@ -103,10 +104,12 @@ class RefreshBroadcastBrowserlessTest {
     }
 
     private static String chip(BrowserlessUIContext window) {
-        return window.find(Badge.class).single().getText();
+        return window.find(Badge.class).withClassName("measured-chip").single().getText();
     }
 
     private static List<String> newestReleases(BrowserlessUIContext window) {
-        return window.find(Span.class).withClassName("line-card-version").all().stream().map(Span::getText).toList();
+        // Each card links to the newest measured release of its line.
+        return window.find(RouterLink.class).withClassName("line-card").all().stream()
+                .map(card -> card.getHref().substring(card.getHref().lastIndexOf('/') + 1)).toList();
     }
 }

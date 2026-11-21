@@ -41,22 +41,22 @@ The front door: every maintained line at a glance, the recently reviewed advisor
 ## Acceptance criteria
 
 ### AC1: The lookup keeps state
-- [ ] Switching tabs keeps the version and the ids
-- [ ] Navigating to an answer and back keeps them too
-- [ ] Escape in a full field clears it and navigates home
+- [x] Switching tabs keeps the version and the ids
+- [x] Navigating to an answer and back keeps them too
+- [x] Escape in a full field clears it and navigates home
 
 ### AC2: Input is cleaned
-- [ ] `Vaadin 24.9.20` asks about `24.9.20`
-- [ ] A CVE pasted into the version field lands on the ids tab
+- [x] `Vaadin 24.9.20` asks about `24.9.20`
+- [x] A CVE pasted into the version field lands on the ids tab
 
 ### AC3: The cards tell the line's truth
-- [ ] State word and icon match the index state for every line
-- [ ] The action line names the index's `upgrade_to` when there is one
-- [ ] Prereleases appear only with `?pre`
+- [x] State word and icon match the index state for every line
+- [x] The action line names the index's `upgrade_to` when there is one
+- [x] Prereleases appear only with `?pre`
 
 ### AC4: Keyboard
-- [ ] Slash focuses the lookup, except while typing elsewhere
-- [ ] Check is disabled on click until the navigation answers
+- [x] Slash focuses the lookup, except while typing elsewhere
+- [x] Check is disabled on click until the navigation answers
 
 ## Test cases
 

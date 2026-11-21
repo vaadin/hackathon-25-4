@@ -61,10 +61,6 @@ public final class AppBar extends Composite<Header> {
         }
     }
 
-    void addBeforeSignOut(Component component) {
-        getContent().addComponentAtIndex(2, component);
-    }
-
     private static boolean isRegistered(Class<? extends Component> target) {
         return RouteConfiguration.forSessionScope().isRouteRegistered(target);
     }
