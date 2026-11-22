@@ -1,0 +1,158 @@
+/* The verdict workbench: the queue, the form and its YAML, the drafts. */
+.workbench-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 96rem;
+}
+
+.workbench-lead,
+.workbench-summary-total {
+    margin: 0;
+}
+
+.workbench-series {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.workbench-series-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border-radius: 999px;
+    color: inherit;
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.workbench-series-link.active {
+    border-color: var(--vaadin-text-color, currentColor);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.06));
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.workbench-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.5rem 2rem;
+}
+
+.workbench-summary-total {
+    flex-basis: 100%;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.workbench-summary-table {
+    width: auto;
+    min-width: 18rem;
+    flex: 0 1 auto;
+}
+
+.workbench-summary-table td:not(:first-child),
+.workbench-summary-table th:not(:first-child) {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+.workbench-queue {
+    height: 22rem;
+}
+
+.workbench-compose {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.workbench-composing {
+    margin: 0.5rem 0 0;
+}
+
+.workbench-elsewhere,
+.workbench-platform,
+.workbench-too-long,
+.workbench-refused {
+    margin: 0;
+    color: var(--status-fix);
+}
+
+.workbench-refused {
+    color: var(--status-unresolved);
+}
+
+.workbench-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 64rem) {
+    .workbench-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.workbench-output {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0.5rem;
+    min-width: 0;
+}
+
+.workbench-output p {
+    margin: 0;
+}
+
+.workbench-yaml {
+    min-width: 0;
+}
+
+.workbench-yaml pre {
+    max-height: 32rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.workbench-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.workbench-handover {
+    display: contents;
+}
+
+.workbench-github {
+    min-height: var(--vaadin-button-height, 2.25rem);
+    padding: 0 1rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.workbench-github:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.workbench-saved {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.workbench-drafts h2 {
+    margin: 1rem 0 0.5rem;
+}

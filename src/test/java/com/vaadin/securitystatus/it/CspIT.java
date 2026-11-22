@@ -127,6 +127,31 @@ class CspIT {
         assertThat(violations()).anyMatch(violation -> violation.startsWith("script-src"));
     }
 
+    /**
+     * The workbench hands a verdict to GitHub's new file editor through a GET form, so
+     * {@code form-action} admits github.com beside the application, D-128, and nothing else.
+     * The admitted target is checked on the header only: submitting to github.com is a
+     * person's act, never a test's.
+     */
+    @Test
+    void forms_go_to_the_application_and_github_only() {
+        driver.get(base + "/");
+        await("vaadin-switch");
+
+        assertThat(header("/", "content-security-policy")).contains("form-action 'self' https://github.com;");
+
+        driver.executeScript("""
+                const form = document.createElement('form');
+                form.method = 'get';
+                form.action = 'https://example.invalid/elsewhere';
+                document.body.appendChild(form);
+                form.submit();
+                """);
+
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> !violations().isEmpty());
+        assertThat(violations()).anyMatch(violation -> violation.startsWith("form-action"));
+    }
+
     private void await(String selector) {
         new WebDriverWait(driver, Duration.ofSeconds(30))
                 .until(d -> !d.findElements(By.cssSelector(selector)).isEmpty());

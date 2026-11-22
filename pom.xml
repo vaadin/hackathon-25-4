@@ -73,6 +73,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <!-- Writes the verdict YAML of the workbench. Spring Boot already brings
+             it; declared because the application now uses it directly. -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
         <!-- Composes the audit report PDF on the server. Pure Java, the
              standard fonts are built in, nothing is fetched at render time. -->
         <dependency>
@@ -184,6 +190,7 @@
                                     <arguments>
                                         <argument>--server.port=${it.port}</argument>
                                         <argument>--securitystatus.pages.base-url=http://localhost:${it.pages.port}/cve-status/</argument>
+                                        <argument>--securitystatus.drafts.dir=${project.build.directory}/it-drafts</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

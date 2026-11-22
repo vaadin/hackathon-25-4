@@ -9,9 +9,9 @@
 ### US-10.1: The queue
 
 **Tasks:**
-- [ ] Grid over the queue fixture order, series filter in the address
-- [ ] The summary, Charts or figures, decided and recorded
-- [ ] Row selection prefills the form
+- [x] Grid over the queue fixture order, series filter in the address
+- [x] The summary, Charts or figures, decided and recorded
+- [x] Row selection prefills the form
 
 **Verified by:** `WorkbenchBrowserlessTest`
 
@@ -22,9 +22,9 @@
 **As a** team member **I want** a form that refuses an empty verdict **so that** what reaches GitHub answers something.
 
 **Tasks:**
-- [ ] `VerdictDraft` entity, H2, binder with Draft and Ready groups
-- [ ] Side labels through `LabelTextAlign`
-- [ ] The closed vocabulary only, drafts listed and restored
+- [x] `VerdictDraft` entity, H2, binder with Draft and Ready groups
+- [x] Side labels through `LabelTextAlign`
+- [x] The closed vocabulary only, drafts listed and restored
 
 **25.4 APIs:** FormLayout side labels.
 **Verified by:** `WorkbenchBrowserlessTest`
@@ -34,10 +34,10 @@
 ### US-10.3: The YAML and the handoff
 
 **Tasks:**
-- [ ] Live YAML in a Markdown code block, round trip tested, absent keys absent
-- [ ] The closing sentence from the queue numbers
-- [ ] `NativeForm` GET into GitHub's new file editor, the copy control, the URL length refusal
-- [ ] The platform PRs warning sentence
+- [x] Live YAML in a Markdown code block, round trip tested, absent keys absent
+- [x] The closing sentence from the queue numbers
+- [x] `NativeForm` GET into GitHub's new file editor, the copy control, the URL length refusal
+- [x] The platform PRs warning sentence
 
 **25.x APIs:** `NativeForm`, Markdown.
 **Verified by:** `VerdictYamlTest`, `WorkbenchBrowserlessTest`
@@ -46,5 +46,5 @@
 
 ## Definition of Done
 
-- [ ] Every acceptance criterion in `features/10-workbench.md` is checked
-- [ ] The YAML round trips on every fixture draft
+- [x] Every acceptance criterion in `features/10-workbench.md` is checked
+- [x] The YAML round trips on every fixture draft

@@ -38,20 +38,20 @@ The queue of what one verdict would close, and the form that composes it. The ou
 ## Acceptance criteria
 
 ### AC1: The queue ranks truthfully
-- [ ] Order and numbers match the fixture
-- [ ] The series filter narrows and lives in the address
+- [x] Order and numbers match the fixture
+- [x] The series filter narrows and lives in the address
 
 ### AC2: The form holds the line
-- [ ] Draft saves with formats only, Ready requires the requireds
-- [ ] The vocabulary is the closed set, nothing else offered
+- [x] Draft saves with formats only, Ready requires the requireds
+- [x] The vocabulary is the closed set, nothing else offered
 
 ### AC3: The YAML is the contract
-- [ ] The rendered YAML round trips through a YAML parser to the draft's fields
-- [ ] Absent optional fields produce no YAML keys
+- [x] The rendered YAML round trips through a YAML parser to the draft's fields
+- [x] Absent optional fields produce no YAML keys
 
 ### AC4: The handoff works
-- [ ] The GitHub URL carries the path and the YAML, verified by decoding it
-- [ ] Above the length cap the link disables with one sentence and the copy control remains
+- [x] The GitHub URL carries the path and the YAML, verified by decoding it
+- [x] Above the length cap the link disables with one sentence and the copy control remains
 
 ## Test cases
 

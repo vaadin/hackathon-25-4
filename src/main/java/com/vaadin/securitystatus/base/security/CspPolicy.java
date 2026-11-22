@@ -13,6 +13,7 @@ final class CspPolicy {
 
     private static final String SELF = "'self'";
     private static final String NONE = "'none'";
+    static final String GITHUB = "https://github.com";
 
     private CspPolicy() {
     }
@@ -30,7 +31,9 @@ final class CspPolicy {
                 .setDirective("connect-src", SELF)
                 .setDirective("object-src", NONE)
                 .setDirective("base-uri", SELF)
-                .setDirective("form-action", SELF)
+                // The workbench hands a verdict over to GitHub's new file editor through a
+                // GET form, and nothing else posts anywhere but here.
+                .setDirective("form-action", SELF, GITHUB)
                 .setDirective("frame-ancestors", NONE)
                 .setDirective("report-uri", REPORT_PATH);
     }

@@ -24,7 +24,9 @@ public enum QueryFlag {
     /** The explorer: the search. */
     Q("q"),
     /** The explorer: the products turned off, by name, comma separated. */
-    OFF("off");
+    OFF("off"),
+    /** The workbench: the one series the queue is narrowed to. */
+    SERIES("series");
 
     private final String key;
 
