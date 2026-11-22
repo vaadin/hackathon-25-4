@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
@@ -760,7 +761,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         discontinued.add(heading(getTranslation("version.disc.title"), count(ids.size())));
         String tip = measured.discontinuedThrough().isEmpty() ? getTranslation("version.disc.tip.unnamed", version)
                 : getTranslation("version.disc.tip", String.join(", ", measured.discontinuedThrough()), version);
-        var paragraph = new Paragraph(new Span(tip), new Span(" "), sectionLink(
+        var paragraph = new Paragraph(new Span(tip), new Text(" "), sectionLink(
                 getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withDisc(!open)));
         paragraph.addClassName("section-tip");
         discontinued.add(paragraph);
@@ -792,7 +793,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         CasesIndex index = current.index();
         List<String> ordered = VersionRules.worstFirst(all, index);
         ruledOut.add(heading(getTranslation("version.ruled.title"), count(ordered.size())));
-        var paragraph = new Paragraph(new Span(getTranslation("version.ruled.tip")), new Span(" "), sectionLink(
+        var paragraph = new Paragraph(new Span(getTranslation("version.ruled.tip")), new Text(" "), sectionLink(
                 getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withRuled(!open)));
         paragraph.addClassName("section-tip");
         ruledOut.add(paragraph);
@@ -845,7 +846,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             HomeView.secureFrom(index, line.line()).filter(from -> !from.equals(spoken)).ifPresent(from -> {
                 var safe = new Span(getTranslation("version.lines.safeFrom", from.toString()));
                 safe.addClassName("safe-from");
-                newest.add(new Span(" "), safe);
+                newest.add(new Text(" "), safe);
             });
             row.addDataCell(newest);
 

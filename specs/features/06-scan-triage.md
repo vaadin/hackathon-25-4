@@ -71,3 +71,17 @@ Per `01-domain-model.md`: each reported finding joins `scan-index` and the reade
 | SCN-07 | The CSV download | Fetching it | 200, text/csv, the filename, M rows | testbench | `TriageDownloadIT` |
 | SCN-08 | The PDF | Previewing then fetching | The viewer renders page one, the download is application/pdf | testbench | `TriageDownloadIT` |
 | SCN-09 | Entries with no coordinate | Uploading | The skipped count renders | browserless | `ScanViewBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- Two files dropped at once: the first is read and the second is refused as too many files, but the "One file at a time" sentence does not stay on screen, because the read of the first sets the refusal back to empty, `Lookup.took`. `ScanViewBrowserlessTest.of_two_reports_dropped_at_once_the_first_is_read_and_the_second_refused` asserts the upload statuses.
+- "Parsed streaming" for a huge report is met only as streamed from the request: the body is read into a JSON tree, not parsed in constant memory, with a 32 MB cap, `Lookup.receive`, `ReportParser.parse`, D-68.
+- SCN-02's "same buckets" holds for osv-scanner, OWASP and bomber only: a CycloneDX file also gets every advisory measured on its coordinates, so its triage carries more rows, `Triage.of`, D-70.
+- The header row naming the version and `generated_at` is a `#` comment line before the column names, not a data row, `TriageFiles.csv`, D-75.
+- The audit PDF writes `?` for any character Helvetica's WinAnsi encoding cannot draw, `TriageFiles.pdf`, D-71.
+- The PDF preview sits behind the experimental flag `pdfViewerComponent`, with the plain download as fallback; remove both when the PDF Viewer leaves experimental, `base/ui/PdfPreview`, `CHANGELOG-RISK.md`.
+- Workaround to remove when draft 17 is answered: `@Uses(Lookup.class)` on `HomeView` so that the production bundle carries the upload pieces, D-79.
+- `commercialWithBanner` on the default build, needed because the PDF Viewer is commercial, D-80, P-12.
+- Workaround to remove when draft 16 is answered: no browserless tester fetches a `Download.onClick` file, so `TriageDownloadIT` reads the undocumented `data-flow-download-<uuid>` attribute, `it/ScanBrowser.downloadAddressOf`.

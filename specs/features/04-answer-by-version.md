@@ -80,3 +80,16 @@ The screen a support reply links at: one version, one verdict, and everything a 
 | VER-08 | A fixture with an absent workaround | Opening the finding | No workaround row at all | browserless | `VersionViewBrowserlessTest` |
 | VER-09 | The all versions table | Rendering for a version on line X | Line X marked yours | browserless | `VersionViewBrowserlessTest` |
 | VER-10 | The What it fixes action | Clicking it | The viewport moves to the fixes section | testbench | `ScrollActionsIT` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- View release notes is offered only beside an upgrade, and links the notes of the target release, `VersionView.verdictCard`, D-52.
+- The three layers are three separate `Details`, `FindingCard.Layers`, not an `Accordion`: several can be open at once. US-4.2 keeps its tick on that basis, D-161.
+- The third layer shows severity, packages, depth and date, plus a link to the advisory screen; the verdict's `justification`, `commentary` and `affects` are not drawn, `FindingCard.Layers`.
+- A fixes row with no one line impact shows the catalogue's applicability label in its place, `VersionView.fixRow`.
+- The Spring Boot supply sentence is written only for `commercial` and `ended`, and only when both release numbers are present; an `open` supply shows the newest release of the line instead, `VersionView.supplySentence`.
+- The all versions table leaves a cell empty for an absent open count, support label or scan date, `VersionView.drawLines`, and the Spring Boot and discontinued tables do the same for an advisory with no catalogue entry, `VersionView.packages`. `AbsenceSweepBrowserlessTest` holds this to exactly those cells, D-159.
+- An unresolved version with no upgrade and nothing stuck is headed with our own wording, "N findings are not assessed yet", D-53, P-08.
+- Workaround to remove when draft 14 is answered: `QueryParameters` reorders flags, so `VersionAddress.address` writes a fixed order and `VersionViewBrowserlessTest.assertAddress` compares the query as a map.

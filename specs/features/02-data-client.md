@@ -53,3 +53,12 @@ The one place that talks to GitHub Pages, the cache in front of it, the read mod
 | DAT-06 | The version fixture with absent workaround fields | Mapping | The record reports absent, not empty | unit | `ReadModelTest` |
 | DAT-07 | Versions 24.2, 24.10, 24.9.21 | Sorting | Numeric order, not string order | unit | `VersionNumberTest` |
 | DAT-08 | A request for an export file | Downloading | The bytes stream with the upstream content type and a disposition naming the file | testbench | `ExportsProxyIT` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- A moved `generated_at` does not drop the per version and per CVE entries: `PagesCache.expireAllExcept` makes every document except the index due for revalidation and keeps it as the stale answer, D-30, D-31.
+- The index also moves the signal when a reader's `index()` call finds it changed, not only through the scheduled revalidation, `SecurityDataService.index`.
+- Workaround to remove when draft 11 is answered: that publish is deferred through `VaadinSession.access` in `DataConfiguration.afterTheCurrentRequest`, D-36.
+- Where the live JSON differs from `01-domain-model.md` and `02-data-source.md`, the read models in `data/model/` follow the live site: summary buckets are counts, a line's kind is `ga` or `prerelease`, `fix_expected_version` is kept as a map, D-21.

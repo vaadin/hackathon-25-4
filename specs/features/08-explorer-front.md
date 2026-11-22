@@ -76,3 +76,16 @@ Per release: JSON, CSV, VEX, dependency check suppressions, osv-scanner toml, bo
 | EXP-06 | A version typed in search | Submitting | The release route | browserless | `ExplorerBrowserlessTest` |
 | EXP-07 | The six download links | Fetching each | 200 with the expected content type | testbench | `ExportsProxyIT` |
 | EXP-08 | Spring starter chip off | Reading the line | The without Spring measurement renders | browserless | `ExplorerFilterBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- There is no drawer: the search, the tri state control and the chips sit at the top of the master pane, and what overlays is the detail pane over them, D-94. Measured in epic 13: at a 760 pixel window the detail overlays; the threshold is the layout's own width, 26rem plus 24rem, so with the internal drawer open it also overlays up to a window of about 1180 pixels, D-160.
+- `?off` addresses products by registry name; switch to the short codes when `module_codes` lands in `data/front.json`, `ExplorerRules`, data need in `FEEDBACK-25.4.md`.
+- A product the profile marks `fixed` has no chip and cannot be turned off; a chip's count is over the opened line, or over every shown line when none is open, not per line, `ExplorerView.drawProducts`, D-96.
+- A full version navigates to the release page on Enter or on leaving the field, not as it is typed, `ExplorerView.submit`, D-103.
+- Each filter change adds a history entry instead of rewriting the address in place, and a remembered selection reaches the address only after the first paint, `ExplorerView.beforeEnter`, `ProductSelection`, D-98.
+- There is no frontend bundle note on the opened line: a bundled finding says "bundled inside X" in its row, and build only findings form an "Only in the build" group, `FindingGrid`, `ExplorerRules.group`, D-95.
+- The opened line offers its files only when its record says `scanner_files`, `ExplorerView.detail`, D-109.
+- Workaround to remove when browserless-test#29 is fixed, draft 20b: the tests open item details with `setDetailsVisible`, `ExplorerBrowserlessTest`.

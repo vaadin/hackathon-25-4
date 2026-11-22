@@ -67,3 +67,15 @@ The chat panel on the internal screens, its tools over the measured data, the im
 | AST-06 | A real browser, mock provider | One exchange in the panel | Message in, answer rendered | testbench | `AssistantPanelIT` |
 | AST-07 | `-Pai` with a key | The canonical question | An answer grounded in a tool call arrives | unit, tagged live-ai, excluded from the gate per `08-testing.md` | `LiveAssistantTest` |
 | AST-08 | A pasted GHSA paragraph, mock provider | AI fill on the workbench | The supported fields fill with markers, nothing saved | browserless | `WorkbenchAiBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- `QueryPage` pages no tool result: 25.4 defines it only for a lazily loading grid through a `DatabaseProvider`. `openFindings` pages through its own `offset` and `limit` arguments, at most 25 lines, and the other tools are unpaged, `AssistantTools.openFindings`, D-143.
+- Request interception records only the prompt: tool calls and refusals reach the tail from the tools' own wrapper, and answers from the response listener, `AssistantPanel.intercept`, `AssistantTools.tools`, `AssistantPanel.ended`, D-146.
+- Grid AI narrows a `Grid<AIDataRow>` nobody sees, over an in memory copy of the catalogue, and its ids then narrow the real grid. It is not the same grid with the same data provider. Workaround to remove when draft 21 is answered: `AdvisoryAsk`, `AdvisoryCatalogue`, D-140.
+- "Still open on 24.9" is read as a verdict of `risk` or `in_triage` with no fix on 24.9 in `fixed_in`, because the index has no per line open state, `prompts/catalogue-schema.md`, D-142.
+- Workaround to remove when draft 22 is answered: the turn's tool calls are counted by our own controller, and the orchestrator's fixed English failure text is overwritten with a bundle sentence, `AssistantTools.callsThisTurn`, `AssistantPanel.ended`, D-144.
+- Workaround to remove when draft 17 is answered: `@Uses` on `InternalLayout` and `AdvisoriesView` keeps the AI web components in the production bundle, D-149.
+- `QueryPage` keeps the second task of US-11.2 unticked, D-143.

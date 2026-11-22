@@ -36,8 +36,7 @@ class NoHardcodedStringsTest {
     private static final Path SOURCES = Path.of("src/main/java/com/vaadin/securitystatus");
 
     private static final Map<String, String> NOT_WORDING = Map.of("ThemeMemory.java",
-            "the first paint script, JavaScript in a text block", "CspPolicy.java",
-            "policy directives, read by browsers", "AdvisoryCatalogue.java",
+            "the first paint script, JavaScript in a text block", "AdvisoryCatalogue.java",
             "SQL statements, read by the database");
 
     private static final Pattern BLOCK_COMMENT = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
@@ -46,7 +45,7 @@ class NoHardcodedStringsTest {
     private static final Pattern TWO_WORDS = Pattern.compile("[\\p{L}]{2,} [\\p{L}]{2,}");
     private static final Pattern ONE_CAPITALISED_WORD = Pattern.compile("\\p{Lu}\\p{Ll}{2,}[.!?:]?");
     private static final Pattern NOT_SHOWN_TO_A_USER = Pattern
-            .compile("\\b(LOG|log|logger|LOGGER)\\.|\\bthrow new\\b|Exception\\(|@JsExpression|@SuppressWarnings");
+            .compile("\\b(LOG|log|logger|LOGGER)\\.|\\bthrow new\\b|Exception\\(|@JsExpression");
 
     @Test
     void the_application_sources_hold_no_wording_of_their_own() throws IOException {

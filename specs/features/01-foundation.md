@@ -70,3 +70,17 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 | FND-04 | A dark system preference | First paint | Dark, no flash | testbench | `ThemeFirstPaintIT` |
 | FND-05 | Any response | Inspecting headers | The CSP header is present and enforcing | testbench | `CspIT` |
 | FND-06 | A planted string literal in a view | Running the gate | `NoHardcodedStringsTest` fails naming the file | unit | `NoHardcodedStringsTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- The customer shell is an automatic `@Layout`, `base/ui/CustomerLayout`, not a `@RouteParent` layout; `@RouteParent(HomeView.class)` only gives the breadcrumb hierarchy of the status views.
+- The lookup is mounted under the app bar, not in it, through the `ShellLookup` bean, `CustomerLayout`, D-38.
+- `VaadinExpiredSessionStrategy` is installed but idle because there is no session limit, `SecurityConfig`, D-06; the one notice and the reload come from `CustomizedSystemMessages` in `base/security/SessionExpiredNotice`. US-1.2 keeps its tick on that basis, D-161.
+- The enforced policy is our own, with `'unsafe-inline'` and `'unsafe-eval'` in `script-src`, `base/security/CspPolicy`, and `vaadin.csp=warn`, not the 25.4 strict mode; `CspMode` is not used, D-02, draft 08.
+- Workaround to remove when draft 10 is answered: the policy is set again on the bootstrap page by `base/security/CspOnBootstrapPage`.
+- Workaround to remove when flow#26391 is fixed, draft 07b: the remembered theme is applied before first paint by an inline head script, `ThemeMemory`, added in `Application.configurePage`.
+- Workaround to remove when flow#26390 is fixed: the system preference is read with a declared `matchMedia` expression, `ThemeSwitch.SystemPreferenceJs`, which since epic 13 returns the typed `JavaScriptResult<Boolean>`, D-157.
+- Workaround to remove when draft 01 is answered: Breadcrumbs run in `MANUAL` mode, with the hierarchy walk written by hand in `AppBar.showTrail`, D-08.
+- Workaround to remove when flow#25576 is answered, draft 03b: `/styles/**` is permitted by hand in `SecurityConfig`, D-05, and `anyRequest(permitAll)` gives up deny by default so that an unknown address reaches the not found view, D-01.

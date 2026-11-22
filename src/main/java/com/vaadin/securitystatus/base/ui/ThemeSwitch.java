@@ -6,7 +6,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.page.ColorScheme;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.page.JavaScriptResult;
 import com.vaadin.flow.component.page.WebStorage;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
@@ -23,7 +23,7 @@ public final class ThemeSwitch extends Composite<Switch> {
     public interface SystemPreferenceJs extends Serializable {
 
         @JsExpression("return window.matchMedia('(prefers-color-scheme: dark)').matches")
-        PendingJavaScriptResult prefersDark();
+        JavaScriptResult<Boolean> prefersDark();
     }
 
     ThemeSwitch() {
@@ -47,7 +47,7 @@ public final class ThemeSwitch extends Composite<Switch> {
                 getContent().setValue(dark);
             } else {
                 getElement().executeJs(SystemPreferenceJs.class).prefersDark()
-                        .then(Boolean.class, prefersDark -> getContent().setValue(prefersDark));
+                        .then(prefersDark -> getContent().setValue(prefersDark));
             }
         });
     }

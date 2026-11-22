@@ -9,7 +9,7 @@
 ### US-7.1: The advisories grid
 
 **Tasks:**
-- [x] Grid in the source order, severity badges, owner and verdict chips
+- [ ] Grid in the source order, severity badges, owner and verdict chips
 - [x] Filter pills with counts writing `?verdict`
 
 **Verified by:** `AdvisoriesBrowserlessTest`

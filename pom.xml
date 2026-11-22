@@ -196,6 +196,19 @@
             </properties>
             <build>
                 <plugins>
+                    <!-- Always a fresh production bundle. The local
+                         src/main/bundles/prod.bundle is git ignored and reused
+                         whenever its imports cover the scanned ones, even when a
+                         route is new, and then the new route's layout never loads,
+                         D-156, flow#26338. -->
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>vaadin-maven-plugin</artifactId>
+                        <version>${vaadin.version}</version>
+                        <configuration>
+                            <forceProductionBuild>true</forceProductionBuild>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -266,6 +279,8 @@
                         <configuration>
                             <productionMode>true</productionMode>
                             <commercialWithBanner>false</commercialWithBanner>
+                            <!-- Never the stale local bundle, D-156. -->
+                            <forceProductionBuild>true</forceProductionBuild>
                         </configuration>
                     </plugin>
                 </plugins>

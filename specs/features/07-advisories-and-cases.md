@@ -50,3 +50,14 @@ The full catalogue for the reader who wants the list, and the demo case index. C
 | ADV-02 | The risk pill | Clicking it | Only risk rows, `?verdict=risk`, count matches | browserless | `AdvisoriesBrowserlessTest` |
 | ADV-03 | A row's context menu | Opening it | The items name the row's id and record host | browserless | `AdvisoriesBrowserlessTest` |
 | ADV-04 | The cases fixture | Opening `/cases` | Three groups, counts, See one links resolve | browserless | `CasesBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- AC1: the list is ordered by severity, then by id; the oldest first step is not applied because the index carries no published date, `AdvisoryRules.ordered`, D-81, D-92. The same gap keeps US-7.1's first task, the grid in the source order, from being true.
+- No one line impact column: `index.advisories` carries no impact text, `AdvisoriesView.configureGrid`, D-82.
+- A case whose fact the index does not carry is checked only for its example's existence, so it can stay renderable after the data stops exhibiting it, `CaseRules.exhibits`, D-88.
+- Workaround to remove when draft 21 is answered: the Grid AI controller drives a hidden `Grid<AIDataRow>` over an in memory copy of the catalogue, and the ids it settles on narrow the advisories grid, `assistant/AdvisoryAsk`, D-140.
+- Workaround to remove when draft 17 is answered: `@Uses` on `AdvisoriesView` so that the production bundle carries the ask box, D-149.
+- Workaround to remove when draft 18 is answered: `GridContextMenuTester.open` throws on a `setDynamicContentProvider` menu, so the test fires the before open event itself, `AdvisoriesBrowserlessTest.openMenu`.

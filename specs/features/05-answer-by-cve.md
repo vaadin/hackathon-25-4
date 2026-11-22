@@ -72,3 +72,13 @@ Cards stack in the order asked. The details section exists once per id, each nam
 | CVE-06 | Copy answer | Clicking it | Clipboard holds the composed answer, notice shown | testbench | `CopyAnswerIT` |
 | CVE-07 | A two package advisory | Opening layer two | Two verdicts, coordinates named, difference marked | browserless | `CveViewBrowserlessTest` |
 | CVE-08 | An advisory with no workaround field | Layer one | No workaround row | browserless | `CveViewBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- Copy answer reads success back through the platform's `Clipboard.onClick(button).writeText(text, onCopied, onError)`, not through a typed JavaScript call with a `JsExpression` return value; `callJsFunction` and `addJsInitializer` are used nowhere in the application, `CveView.copyButton`, D-63, D-157.
+- The copy error callback stays a lambda so that `PromiseAction.Error`, in an internal package, is never named; remove that when the type becomes public, `CveView.copyButton`, draft 15.
+- An alias asked alone, a GHSA for a CVE we track, is not answered under the tracked id: it resolves only when another asked id lists it as an alias, otherwise its card says the id is not tracked under that name, `CveView.resolve`, D-62, the alias map data need in `FEEDBACK-25.4.md`.
+- An id fixed below the reader's version reads "Fixed for you" only when the reader's line ever reported it; on a line that never did, the word is "Does not affect you", `CveRules.state`, D-66.
+- The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView.lineCard`, D-64.

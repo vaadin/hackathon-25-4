@@ -215,6 +215,16 @@ Every feature lands in exactly one epic unless two are named. If an epic is cut,
 | Browserless testers for uploads and constraints, JUnit 6 extensions, AI view testing | 13, and every epic's tests inherit them |
 | Multi select combo box selection change, value change modes on fields | 03, the lookup fields |
 
+### Still open in the coverage
+
+Written at the end of epic 13, from the code.
+
+- Typed JavaScript from the server is covered in part. Declared `@JsDefinition` snippets with `@JsExpression` are used for the scroll actions of epic 04, the lookup's key filters and field clearing of epic 03, and the theme switch, whose system preference read returns the typed `JavaScriptResult<Boolean>`, D-157. `callJsFunction` and `addJsInitializer` are used nowhere: the copy answer control of epic 05 uses the platform's Clipboard API instead, D-63, and no existing code has a lifecycle an initializer would fit. The table's claim for epics 04 and 05 is true only for `JsExpression`, `JsSnippet` and return values.
+- `ShortcutFilterJs` is internal, so the slash key is a filtered `keydown` listener and not a shortcut registration, draft 12b.
+- `CspMode` and the 25.4 strict mode are not used; the policy is our own with `vaadin.csp=warn`, D-02.
+- The JUnit 6 browserless extensions are used for the one test that needs no Spring context, `AssistantPanelBrowserlessTest`; every view test extends `SpringBrowserlessTest`, which the documentation says the extensions do not replace.
+- `QueryPage` is not used for tool results, D-143. `RequestStartedEvent` is not listened to, only `RequestEndedEvent`.
+
 ### 25.4 arrivals no epic claims
 
 The brief asks for all of 25.4, so what is not claimed is named, with a decision. An API left out for a reason is a finding; one left out because nobody looked is a gap.

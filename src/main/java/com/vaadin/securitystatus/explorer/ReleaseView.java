@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
@@ -251,7 +252,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
                         : getTranslation("release.advice.removes", newest.get().toString(), line, removed.size(),
                                 named));
             }
-            says.add(new Span(" "));
+            says.add(new Text(" "));
             says.add(releaseLink(getTranslation("release.advice.newer", newest.get().toString()), newest.get()));
             advice.add(says);
         } else if (newest.filter(record.version()::equals).isPresent()) {
@@ -293,7 +294,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
                             String.join(getTranslation("release.advice.spring.and"), ways)));
         });
         var says = lead("release-advice-spring", String.join(" ", sentences));
-        says.add(new Span(" "));
+        says.add(new Text(" "));
         var link = new RouterLink(getTranslation("release.advice.spring.link"), SpringView.class);
         link.addClassName("release-spring-link");
         says.add(link);
@@ -372,7 +373,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             var more = new Paragraph(new Span(getTranslation("release.others", line.line())));
             more.addClassName("release-others");
             for (VersionNumber other : others.stream().limit(ReleaseRules.OTHERS).toList()) {
-                more.add(new Span(" "));
+                more.add(new Text(" "));
                 var link = releaseLink(other.toString(), other);
                 link.addClassName("release-other");
                 more.add(link);

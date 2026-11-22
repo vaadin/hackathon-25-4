@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Component;
@@ -216,30 +217,30 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         return id;
     }
 
-    private Component severityCell(AdvisoryCatalogEntry row) {
-        var cell = new Span();
-        row.severity().flatMap(VersionRules::severity).ifPresent(known -> {
-            cell.setText(getTranslation("severity." + known));
+    /** Rule 4: no severity the index carries, no element in the cell, rather than an empty one. */
+    private @Nullable Component severityCell(AdvisoryCatalogEntry row) {
+        return row.severity().flatMap(VersionRules::severity).<Component>map(known -> {
+            var cell = new Span(getTranslation("severity." + known));
             cell.addClassNames("severity", "severity-" + known);
-        });
-        return cell;
+            return cell;
+        }).orElse(null);
     }
 
     /** Whose fix it is, by the fix owner rule of the version screen, D-51: no chip for an owner nobody established. */
-    private Component ownerCell(AdvisoryCatalogEntry row) {
+    private @Nullable Component ownerCell(AdvisoryCatalogEntry row) {
         return row.fixOwner().flatMap(FindingCard::ownerKey).<Component>map(key -> {
             var chip = new Badge(getTranslation(key));
             chip.addClassName("owner-chip");
             return chip;
-        }).orElseGet(Span::new);
+        }).orElse(null);
     }
 
-    private Component verdictCell(AdvisoryCatalogEntry row) {
+    private @Nullable Component verdictCell(AdvisoryCatalogEntry row) {
         return row.applicability().flatMap(word -> chipWords(word).map(words -> {
             var chip = new Badge(words);
             chip.addClassNames("verdict-chip", "verdict-" + word);
             return (Component) chip;
-        })).orElseGet(Span::new);
+        })).orElse(null);
     }
 
     /** The index's label for a verdict, else our short word for one of the closed vocabulary, else nothing. */

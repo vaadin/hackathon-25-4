@@ -65,3 +65,14 @@ The queue of what one verdict would close, and the form that composes it. The ou
 | WRK-06 | A restart | Reopening | The draft is still there | browserless | `WorkbenchBrowserlessTest` |
 
 The AI fill's test case lives in `features/11-assistant.md` as AST-08, with the epic that builds it.
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- The queue row shows how many advisories it answers, not which: the ids appear only once the row prefills the form, `WorkbenchView.configureQueue`, column `advisories`.
+- The platform pull request warning appears only for a verdict that silences, and only when some branch's check list misses an advisory of the package. It is not always present, `WorkbenchView.drawOutput`, `QueueRules.stillRed`. No decision row.
+- Open in GitHub is two steps, not one form: Export validates the `Ready` group, and only then is the `NativeForm` submit enabled. Any edit withdraws it, `WorkbenchView.export`, D-127.
+- The YAML GitHub receives has CR LF line breaks, and the 7000 character cap is measured on the form encoded address, `VerdictYaml.handover`, D-129. Whether GitHub keeps the CR LF is P-17.
+- The `Ready` group follows `01-domain-model.md` only in part: it also requires impact for `no_risk`, and it does not enforce a fix version when `fixExpected` names a release, `VerdictDraft`, `VerdictForm`, D-123.
+- The Definition of Done says the YAML round trips on every fixture draft; there is no set of fixture drafts, `VerdictYamlTest` round trips one full draft and one minimal draft built in the test.

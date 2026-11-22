@@ -10,7 +10,7 @@
 
 **Tasks:**
 - [x] `MasterDetailLayout`, series rows with badges and rings, detail per opened line
-- [ ] The drawer with search and chips, overlay below 800
+- [x] The drawer with search and chips, overlay below 800
 
 **25.2 APIs:** Master Detail Layout.
 **Verified by:** `ExplorerBrowserlessTest`

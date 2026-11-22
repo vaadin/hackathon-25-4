@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
@@ -255,7 +256,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             var link = new RouterLink(near, ScanView.class, new RouteParameters(VERSION, near));
             link.addClassName("scan-nearest");
             var offer = new Paragraph(new Span(getTranslation("scan.unmeasured.nearest." + nearest.kind().name(),
-                    nearest.version().line())), new Span(" "), link,
+                    nearest.version().line())), new Text(" "), link,
                     new Span(getTranslation("scan.unmeasured.notYours")));
             notice.add(offer);
         });

@@ -162,6 +162,43 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
                 .startsWith("That file is not JSON").contains("CycloneDX, OWASP Dependency-Check, osv-scanner or bomber");
     }
 
+    // The 25.4 upload testers put a file through the browser's own gate: the size limit refuses
+    // before anything is sent, and the refusal is the bundle's sentence
+    @Test
+    void a_file_over_the_size_limit_is_refused_before_it_is_read(@TempDir Path temporary) throws IOException {
+        Path huge = temporary.resolve("huge.json");
+        try (var file = new java.io.RandomAccessFile(huge.toFile(), "rw")) {
+            file.setLength(Lookup.MAX_REPORT_BYTES + 1);
+        }
+        navigate(HomeView.class);
+        showReportTab();
+        var choose = test(inLookup(UploadButton.class, "lookup-report-choose").getFirst());
+        choose.upload(huge.toFile());
+
+        choose.ensureUploadFailed();
+        assertThat(getCurrentView()).isInstanceOf(HomeView.class);
+        assertThat(inLookup(Span.class, "lookup-report-refused").getFirst().getText()).isEqualTo(
+                "That file is larger than 32 MB, which is more than any scanner report this page reads.");
+    }
+
+    // The drop zone takes one file as the button does: of two dropped at once the first is read and
+    // the second refused at the gate. The refusal sentence does not stay, because the read of the first
+    // clears it; recorded in the Still open notes of feature 06
+    @Test
+    void of_two_reports_dropped_at_once_the_first_is_read_and_the_second_refused() {
+        navigate(HomeView.class);
+        showReportTab();
+        var zone = test(inLookup(UploadDropZone.class, "lookup-report").getFirst());
+
+        zone.drop(fixtureFile("osv-scanner.json"), fixtureFile("bomber.json"));
+
+        assertThat(zone.getLastUploadStatus()).extracting(status -> status.fileName() + " " + status.status())
+                .containsExactly("osv-scanner.json UPLOADED", "bomber.json REJECTED");
+        assertThat(getCurrentView()).isInstanceOf(ScanView.class);
+        assertThat(find(Lookup.class).single().getElement().getTextRecursively())
+                .contains("osv-scanner.json · Vaadin 24.9.21 · 9 findings · osv-scanner");
+    }
+
     // SCN-09, S8
     @Test
     void entries_with_no_coordinate_are_counted_on_screen() {

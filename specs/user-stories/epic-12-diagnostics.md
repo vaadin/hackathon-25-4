@@ -10,7 +10,7 @@
 
 **Tasks:**
 - [ ] Service init listener registering navigation, request, session, CSP and interception listeners
-- [x] The signal singleton with counters and ring tails
+- [ ] The signal singleton with counters and ring tails
 
 **25.4 APIs:** `NavigationStartedEvent`, `NavigationEndedEvent` outcomes, `RequestStartedEvent`, `RequestEndedEvent`.
 **Verified by:** `DiagnosticsBrowserlessTest`

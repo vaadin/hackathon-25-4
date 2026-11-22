@@ -16,15 +16,15 @@ The closing epic: the suites completed to their tables, the sweeps that hold the
 ## Acceptance criteria
 
 ### AC1: The tables are true
-- [ ] `SpecConsistencyTest` passes with every feature table complete
-- [ ] Every Still open section is written from the code, not from memory
+- [x] `SpecConsistencyTest` passes with every feature table complete
+- [x] Every Still open section is written from the code, not from memory
 
 ### AC2: The sweeps hold
-- [ ] No literal, no empty rendered absence, both by test
+- [x] No literal, no empty rendered absence, both by test
 
 ### AC3: The record is whole
-- [ ] Every feedback row has a draft, a reproducer or a stated reason it needs none
-- [ ] DEMO.md walks clean on the fixtures
+- [x] Every feedback row has a draft, a reproducer or a stated reason it needs none
+- [x] DEMO.md walks clean on the fixtures
 
 ## Test cases
 
@@ -33,3 +33,11 @@ The closing epic: the suites completed to their tables, the sweeps that hold the
 | POL-01 | The whole suite | `./mvnw verify` | Green with no licence, key or network | unit | the gate itself |
 | POL-02 | Every feature table | `SpecConsistencyTest` | Every named class exists | unit | `SpecConsistencyTest` |
 | POL-03 | The absent field fixtures | Each screen | Omission, not emptiness | browserless | `AbsenceSweepBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- The JUnit 6 `BrowserlessExtension` is used where it applies, `AssistantPanelBrowserlessTest`, the chat panel on its own with no Spring context. The documentation says the extensions do not replace `SpringBrowserlessTest`, so every view test still extends it; there is no shared extension in a common test configuration.
+- `AbsenceSweepBrowserlessTest` walks one fixture or constructed record per screen with the omission asserted. It does not walk every absent field of every record: a field left out of the sweep is covered only by its feature's own tests.
+- The demo walk of `DEMO.md` was made with real clicks on the committed fixtures served from a local port, in development mode, without the model key. The assistant's live answers and the hand over into GitHub's editor were not walked, P-17, P-18.

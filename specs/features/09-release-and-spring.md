@@ -42,3 +42,12 @@ One release in full, and what Spring Boot brings, the two deep reads the explore
 | REL-01 | A measured release | Opening its address | The card and advice match the fixture | browserless | `ReleaseViewBrowserlessTest` |
 | REL-02 | An unmeasured version | Opening its address | The in place answer | browserless | `ReleaseViewBrowserlessTest` |
 | SPR-01 | The spring fixture | Opening the page | Groups per release with supply wording | browserless | `SpringViewBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- The release card is the explorer's card without the product chips: nothing is narrowed by products switched off on the explorer, `ReleaseView.card`, D-111.
+- The Spring Boot page does not follow the explorer's fold rules: a release section never folds, the open state is not remembered, and only the groups inside it fold and cap at 150, `SpringRules.byBoot`, `SpringView.group`, D-114.
+- A GHSA id on the Spring Boot page links to GitHub's advisory database, not to NVD, `SpringRules.recordUrl`, D-113.
+- An unmeasured release lists twelve of the line's measured releases and counts the rest, not all of them, `ReleaseView.unmeasured`, D-118.

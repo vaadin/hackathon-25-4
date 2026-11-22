@@ -70,3 +70,19 @@ The front door: every maintained line at a glance, the recently reviewed advisor
 | HOM-06 | An answer on screen | Escape in the lookup | Home, with the question withdrawn | browserless | `LookupBrowserlessTest` |
 | HOM-07 | Focus in a dialog text field | Slash | No focus steal | browserless | `LookupBrowserlessTest` |
 | HOM-08 | The recent list in the fixture | Opening home | Eight rows, first impact sentences, verdict chips in customer words | browserless | `HomeBrowserlessTest` |
+
+## Still open
+
+Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+
+- The version ComboBox does not use `PartialMatchMode`, because 25.4.0-beta2 refuses it beside custom values; free text is kept, `Lookup.versionPanel`, D-40. This keeps the first task of US-3.1 unticked.
+- The slash key is not a shortcut registration: it is a `keydown` listener on the UI with a declared filter, `Lookup.KeysJs`, because `ShortcutFilterJs` is internal. Workaround to remove when flow#5473 is answered, draft 12b; US-3.1 keeps its tick on that basis, D-161.
+- Workaround to remove when draft 13 is answered: Check's enabled state is set from a `Signal.effect` instead of `bindEnabled`, which is refused beside disable on click, `Lookup.checkButton`.
+- Clearing a field navigates home only when the answer of that field is on screen, `Lookup.goHomeFrom`; clearing the version beside the ids asks the same ids again without a version, `Lookup.withdrawIdsVersion`.
+- The ids field is a single line `TextField`, `Lookup.idsPanel`; splitting on newlines in `LookupInput.splitIds` has not been checked against what a browser keeps of a pasted multi line list.
+- The tier badge appears only for the extended tier, reads "Extended" and has the line's label as hover text, `HomeView.tierBadge`, D-44.
+- A card whose release has no summary row shows no state word and no icon, where the reference shows Not assessed yet, `HomeView.card`, D-45.
+- The action line puts Upgrade to X first, then On X or later, then Newest is X, `HomeView.actionLine`, D-46.
+- A recent row with no impact shows the first sentence of `commentary` instead, `HomeView.firstSentence`; a recent row with no applicability gets the `in_triage` chip, which the glossary defines as the absence of a verdict, `HomeView.recentRow`.
+- The pointer box keeps the designer's words, which send the reader to the version field, and does not point at the report tab, D-47.
+- Workaround to remove when draft 17 is answered: `@Uses(Lookup.class)` on `HomeView` so that the production bundle includes the lookup, D-79.

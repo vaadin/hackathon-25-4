@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridI18n;
@@ -47,11 +49,13 @@ final class FindingGrid extends Grid<Finding> {
         grid.setItems(findings);
     }
 
-    private Component severity(Finding finding) {
-        var badge = new Span(finding.severity().map(word -> getTranslation("severity." + word)).orElse(""));
-        finding.severity().ifPresent(word -> badge.addClassName("severity-" + word));
-        badge.addClassName("explorer-severity");
-        return badge;
+    /** Rule 4: a finding with no severity gets no element in the cell, rather than an empty one. */
+    private @Nullable Component severity(Finding finding) {
+        return finding.severity().<Component>map(word -> {
+            var badge = new Span(getTranslation("severity." + word));
+            badge.addClassNames("explorer-severity", "severity-" + word);
+            return badge;
+        }).orElse(null);
     }
 
     /** Through how many of its products a finding arrives, or the one it rides inside. */
@@ -71,10 +75,14 @@ final class FindingGrid extends Grid<Finding> {
                 : getTranslation("explorer.through.some", on, through.size());
     }
 
-    private Component dots(Finding finding) {
+    private @Nullable Component dots(Finding finding) {
+        List<Product> products = ExplorerRules.through(finding, registry);
+        if (products.isEmpty()) {
+            return null;
+        }
         var dots = new Span();
         dots.addClassName("explorer-dots");
-        for (Product product : ExplorerRules.through(finding, registry)) {
+        for (Product product : products) {
             var dot = ring(product);
             dot.addClassName("dot");
             if (off.contains(product.name())) {
