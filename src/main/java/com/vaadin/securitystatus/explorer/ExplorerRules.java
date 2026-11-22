@@ -3,11 +3,8 @@ package com.vaadin.securitystatus.explorer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -20,7 +17,7 @@ import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 /**
  * The questions the explorer and the release page share, answered without
  * components: the registry of products, the measurement a line is read from,
- * the five groups of the release page, the two halves the badges answer for,
+ * the order and the cap of a group, the two halves the badges answer for,
  * D-205, and the full version a search jumps to. The front door's own
  * questions are in {@link ExplorerAnswer}. Everything here reads
  * {@code data/front.json} and nothing else.
@@ -55,21 +52,6 @@ final class ExplorerRules {
         /** A product every application has cannot be turned off, so it has no chip. */
         boolean switchable() {
             return !fixed;
-        }
-    }
-
-    /** The five groups of rule 6.6.1, in their order. The two that ask for work start open, rule 6.6.2. */
-    enum Group {
-        RISK(true), UNJUDGED(true), SPRING(false), BUILD(false), ANSWERED(false);
-
-        private final boolean startsOpen;
-
-        Group(boolean startsOpen) {
-            this.startsOpen = startsOpen;
-        }
-
-        boolean startsOpen() {
-            return startsOpen;
         }
     }
 
@@ -120,45 +102,6 @@ final class ExplorerRules {
 
     // Groups
 
-    /**
-     * The group a finding belongs to. Whose it is comes first, because a
-     * finding that is somebody else's is not ours to judge, rule 6.6.6, and the
-     * owner the data records is already the one every route agrees on, rule
-     * 6.6.5a.
-     */
-    static Group group(Finding finding) {
-        String owner = finding.owner().orElse("");
-        if ("build".equals(owner)) {
-            return Group.BUILD;
-        }
-        if ("spring-boot".equals(owner)) {
-            return Group.SPRING;
-        }
-        Optional<String> verdict = finding.verdict().filter(word -> !"in_triage".equals(word));
-        if (verdict.isEmpty()) {
-            return Group.UNJUDGED;
-        }
-        return "risk".equals(verdict.get()) ? Group.RISK : Group.ANSWERED;
-    }
-
-    /** The findings by group, worst first in each, groups with nothing left out, rule 6.6.3. */
-    static Map<Group, List<Finding>> grouped(List<Finding> findings) {
-        var groups = new LinkedHashMap<Group, List<Finding>>();
-        for (Group group : Group.values()) {
-            var members = new ArrayList<Finding>();
-            for (Finding finding : findings) {
-                if (group(finding) == group) {
-                    members.add(finding);
-                }
-            }
-            if (!members.isEmpty()) {
-                members.sort(WORST_FIRST);
-                groups.put(group, members);
-            }
-        }
-        return groups;
-    }
-
     /** Worst first, then by id so the order is stable, rule 6.4.22 without its age step, D-81. */
     static final Comparator<Finding> WORST_FIRST = Comparator
             .comparingInt((Finding finding) -> severityRank(finding.severity())).thenComparing(Finding::cve);
@@ -177,14 +120,6 @@ final class ExplorerRules {
     }
 
     // Badges
-
-    /**
-     * What Vaadin's own half of a list of findings says: the ones Vaadin can
-     * move, owner {@code vaadin} and a version Spring Boot does not pin, D-205.
-     */
-    static Badge vaadinBadge(List<Finding> findings) {
-        return worst(findings.stream().filter(ExplorerRules::ours).toList());
-    }
 
     /** What the other half says: Spring Boot's own findings and the versions Spring Boot pins, D-205. */
     static Badge springBadge(List<Finding> findings) {
@@ -237,13 +172,5 @@ final class ExplorerRules {
     static Optional<VersionNumber> fullVersion(String query) {
         var matcher = FULL_VERSION.matcher(query.strip());
         return matcher.matches() ? Optional.of(VersionNumber.of(matcher.group(1))) : Optional.empty();
-    }
-
-    // Small parts
-
-    /** The products a finding arrives through, in registry order, unknown positions left out. */
-    static List<Product> through(Finding finding, List<Product> products) {
-        return finding.modules().stream().filter(index -> index >= 0 && index < products.size()).distinct()
-                .sorted().map(products::get).toList();
     }
 }

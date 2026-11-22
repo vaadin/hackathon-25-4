@@ -70,12 +70,19 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     public static final String VERSION = "version";
 
-    /** What the reader asked: the ids as the address carries them, and the version beside them. */
-    record Question(List<String> ids, String version) {
+    /**
+     * What the reader asked: the ids as the address carries them, the entries
+     * of the address that are no advisory id, and the version beside them.
+     */
+    record Question(List<String> ids, List<String> unparsed, String version) {
     }
 
-    /** One card: the id asked, the advisory it resolved to, and the alias it was asked as. */
-    record One(String id, @Nullable CveAnswer advisory, @Nullable String askedAs) {
+    /**
+     * One card: the id asked, the advisory it resolved to, the alias it was
+     * asked as, and whether the id is well formed. An entry that is no CVE or
+     * GHSA id is never looked up and gets the plain unknown card, D-226.
+     */
+    record One(String id, @Nullable CveAnswer advisory, @Nullable String askedAs, boolean wellFormed) {
     }
 
     /** Everything the screen is drawn from. */
@@ -87,7 +94,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     private final SecurityDataService data;
-    private final ValueSignal<Question> asked = new ValueSignal<>(new Question(List.of(), ""));
+    private final ValueSignal<Question> asked = new ValueSignal<>(new Question(List.of(), List.of(), ""));
     private final Div body = new Div();
 
     public CveView(SecurityDataService data, DataRefreshSignal refresh) {
@@ -106,9 +113,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        List<String> ids = LookupInput.splitIds(event.getRouteParameters().get(IDS).orElse("")).ids();
+        LookupInput.Ids ids = LookupInput.splitIds(event.getRouteParameters().get(IDS).orElse(""));
         String version = LookupInput.cleanVersion(event.getRouteParameters().get(VERSION).orElse(""));
-        asked.set(new Question(ids, version));
+        asked.set(new Question(ids.ids(), ids.unrecognised(), version));
     }
 
     // Loading
@@ -118,7 +125,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             CasesIndex index = data.index();
             VersionAnswer measured = question.version().isBlank() ? null
                     : data.version(VersionNumber.of(question.version())).orElse(null);
-            List<One> ones = resolve(question.ids());
+            List<One> ones = new ArrayList<>(resolve(question.ids()));
+            question.unparsed().stream().distinct().map(entry -> new One(entry, null, null, false))
+                    .forEach(ones::add);
             return new Answer(index, question.version(), measured, ones);
         } catch (DataUnreachableException unreachable) {
             return new Answer(null, question.version(), null, List.of());
@@ -156,7 +165,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 continue;
             }
             answered.add(shown);
-            ones.add(new One(shown, advisory, askedAs));
+            ones.add(new One(shown, advisory, askedAs, true));
         }
         return ones;
     }
@@ -358,7 +367,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 yield new Words(getTranslation("cve.word.measured"), getTranslation("cve.title.measured", id), why);
             }
             case UNKNOWN -> {
-                boolean ghsa = id.startsWith("GHSA-");
+                boolean ghsa = one.wellFormed() && id.startsWith("GHSA-");
                 why.add(getTranslation(ghsa ? "cve.why.unknown.ghsa" : "cve.why.unknown", id));
                 yield new Words(getTranslation("cve.word.unknown"),
                         getTranslation(ghsa ? "cve.title.unknown.ghsa" : "cve.title.unknown", id), why);

@@ -13,7 +13,7 @@ import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 
-/** The explorer's rules without components: groups, the cap, the search and the registry. */
+/** The explorer's rules without components: the cap, the halves, the search and the registry. */
 class ExplorerRulesTest {
 
     private final ExplorerFront front = FixturePages.offline().explorerFront();
@@ -36,31 +36,6 @@ class ExplorerRulesTest {
         assertThat(capped.shown()).hasSize(150);
         assertThat(capped.more()).isEqualTo(13);
         assertThat(ExplorerRules.capped(findings.subList(0, 150)).more()).isZero();
-    }
-
-    @Test
-    void owner_comes_before_the_verdict_and_only_risk_is_to_act_on() {
-        assertThat(ExplorerRules.group(finding("A", "build", "risk"))).isEqualTo(ExplorerRules.Group.BUILD);
-        assertThat(ExplorerRules.group(finding("A", "spring-boot", null))).isEqualTo(ExplorerRules.Group.SPRING);
-        assertThat(ExplorerRules.group(finding("A", "vaadin", null))).isEqualTo(ExplorerRules.Group.UNJUDGED);
-        assertThat(ExplorerRules.group(finding("A", "vaadin", "in_triage"))).isEqualTo(ExplorerRules.Group.UNJUDGED);
-        assertThat(ExplorerRules.group(finding("A", "vaadin", "risk"))).isEqualTo(ExplorerRules.Group.RISK);
-        assertThat(ExplorerRules.group(finding("A", "vaadin", "configuration")))
-                .isEqualTo(ExplorerRules.Group.ANSWERED);
-    }
-
-    @Test
-    void the_groups_match_the_counts_the_release_record_publishes() {
-        var line = front.lines().stream().filter(candidate -> candidate.line().equals("25.3")).findFirst()
-                .orElseThrow();
-        var record = FixturePages.offline().explorerVersion(VersionNumber.of("25.3.5")).orElseThrow();
-
-        var groups = ExplorerRules.grouped(line.findings());
-
-        assertThat(groups.getOrDefault(ExplorerRules.Group.ANSWERED, List.of())).hasSize(record.counts().get("ruled_out"));
-        assertThat(groups.getOrDefault(ExplorerRules.Group.SPRING, List.of()))
-                .hasSize(record.counts().get("from_spring_boot"));
-        assertThat(groups).doesNotContainKey(ExplorerRules.Group.RISK);
     }
 
     @Test
@@ -96,9 +71,14 @@ class ExplorerRulesTest {
         var ours = finding("B", "vaadin", "false_positive", 0);
         var spring = finding("C", "spring-boot", "risk", 0);
 
-        assertThat(ExplorerRules.vaadinBadge(List.of(pinned, ours, spring))).isEqualTo(ExplorerRules.Badge.NOT_AFFECTED);
-        assertThat(ExplorerRules.springBadge(List.of(pinned, ours, spring))).isEqualTo(ExplorerRules.Badge.VULNERABLE);
-        assertThat(ExplorerRules.vaadinBadge(List.of(finding("D", "vaadin", "in_triage", 0))))
+        List<Finding> all = List.of(pinned, ours, spring);
+
+        assertThat(all.stream().filter(ExplorerRules::ours)).containsExactly(ours);
+        assertThat(all.stream().filter(ExplorerRules::theirs)).containsExactly(pinned, spring);
+        assertThat(ExplorerRules.worst(all.stream().filter(ExplorerRules::ours).toList()))
+                .isEqualTo(ExplorerRules.Badge.NOT_AFFECTED);
+        assertThat(ExplorerRules.springBadge(all)).isEqualTo(ExplorerRules.Badge.VULNERABLE);
+        assertThat(ExplorerRules.worst(List.of(finding("D", "vaadin", "in_triage", 0))))
                 .isEqualTo(ExplorerRules.Badge.UNJUDGED);
     }
 

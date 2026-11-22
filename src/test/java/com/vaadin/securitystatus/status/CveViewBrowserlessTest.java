@@ -119,6 +119,27 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(find(RouterLink.class).withClassName("cve-line-card").exists()).isFalse();
     }
 
+    // D-226: an address whose ids do not parse gets the same unknown card
+    @Test
+    void an_address_whose_id_does_not_parse_is_answered_as_not_in_anything_we_scanned() {
+        open("cve/GHSA-aaaa-bbbb-cccc");
+
+        Section answer = answer("GHSA-aaaa-bbbb-cccc");
+        Section card = card("GHSA-aaaa-bbbb-cccc");
+        assertThat(word(card)).isEqualTo("Not in our measurements");
+        assertThat(title(card)).isEqualTo("GHSA-aaaa-bbbb-cccc is not in anything we scanned");
+        assertThat(answer.getChildren().toList()).containsExactly(card);
+        assertThat(find(Button.class, answer).exists()).isFalse();
+    }
+
+    @Test
+    void an_id_that_does_not_parse_beside_one_that_does_gets_its_own_card_after_it() {
+        open("cve/CVE-2021-33604,foo/24.9.21");
+
+        assertThat(answers()).containsExactly("CVE-2021-33604", "foo");
+        assertThat(title(card("foo"))).isEqualTo("foo is not in anything we scanned");
+    }
+
     // CVE-05, AC4
     @Test
     void the_line_cards_follow_the_coverage_and_the_readers_line_is_marked_with_its_release() {
