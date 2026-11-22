@@ -1,0 +1,10 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: a question about an advisory whose answer no tool carries, the contract sentence of specs/06-ai.md",
+  "when": { "message": "(?i)\\b(who (found|reported|discovered)|is there an exploit|exploited in the wild)\\b.*?(?<id>(?:CVE|GHSA)-[A-Za-z0-9-]+)" },
+  "steps": [
+    { "call": "cveStatus", "with": { "id": "${id}" } },
+    { "say": "The measurements do not say." }
+  ]
+}

@@ -8,6 +8,7 @@
 @import url("styles/advisories.css");
 @import url("styles/explorer.css");
 @import url("styles/workbench.css");
+@import url("styles/assistant.css");
 
 html {
     --aura-base-font-size: 16;

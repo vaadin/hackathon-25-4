@@ -3,13 +3,18 @@ package com.vaadin.securitystatus.status;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
@@ -31,7 +36,10 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.securitystatus.base.ai.AiSurfaces;
 import com.vaadin.securitystatus.base.nav.Address;
+import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.ViewHeading;
@@ -51,6 +59,8 @@ import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
 @RouteParent(HomeView.class)
 @PageTitle("advisories.title")
 @AnonymousAllowed
+// The ask arrives through a bean, which the production bundle's scanner does not follow, D-149.
+@Uses(MessageInput.class)
 public final class AdvisoriesView extends Composite<Div> implements BeforeEnterObserver {
 
     /** What the list is drawn from: the index, or nothing when it could not be read. */
@@ -60,6 +70,8 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     private final SecurityDataService data;
     private final LookupState lookup;
     private final ValueSignal<Optional<String>> verdict = new ValueSignal<>(Optional.empty());
+    /** The advisories a plain language ask narrowed the list to, or empty for no ask. */
+    private final ValueSignal<Optional<Set<String>>> narrowed = new ValueSignal<>(Optional.empty());
     private final Grid<AdvisoryCatalogEntry> grid = new Grid<>();
     private final GridContextMenu<AdvisoryCatalogEntry> menu = new GridContextMenu<>(grid);
     private final Nav pills = new Nav();
@@ -68,7 +80,8 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     /** The index's customer words for the verdicts, as last drawn. */
     private Map<String, String> labels = Map.of();
 
-    public AdvisoriesView(SecurityDataService data, DataRefreshSignal refresh, LookupState lookup) {
+    public AdvisoriesView(SecurityDataService data, DataRefreshSignal refresh, LookupState lookup,
+            AuthenticationContext authentication, ObjectProvider<AiSurfaces> ai) {
         this.data = data;
         this.lookup = lookup;
         addClassName("advisories-view");
@@ -78,14 +91,20 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         outage.addClassName("advisories-outage");
         configureGrid();
         configureMenu();
-        getContent().add(new ViewHeading(), outage, pills, total, grid);
+        getContent().add(new ViewHeading(), outage, pills);
+        // The ask exists only for the team, and the security context is asked
+        // once, here: an anonymous reader gets no box and so no model call, D-141.
+        if (authentication.hasRole(Roles.SECURITY)) {
+            ai.ifAvailable(surfaces -> getContent().add(surfaces.advisoryAsk(narrowed::set)));
+        }
+        getContent().add(total, grid);
 
         var generatedAt = refresh.generatedAt();
         Signal<Loaded> loaded = Signal.computed(() -> {
             generatedAt.get();
             return load();
         });
-        Signal.effect(this, () -> draw(loaded.get(), verdict.get()));
+        Signal.effect(this, () -> draw(loaded.get(), verdict.get(), narrowed.get()));
     }
 
     /**
@@ -117,7 +136,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     // Drawing
 
-    private void draw(Loaded loaded, Optional<String> asked) {
+    private void draw(Loaded loaded, Optional<String> asked, Optional<Set<String>> ask) {
         outage.removeAll();
         pills.removeAll();
         boolean reachable = loaded.index().isPresent();
@@ -134,7 +153,8 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         Map<String, Integer> counts = AdvisoryRules.counts(all);
         // A verdict no advisory carries has no pill, so it cannot narrow the list either.
         Optional<String> shown = asked.filter(counts::containsKey);
-        List<AdvisoryCatalogEntry> rows = AdvisoryRules.filtered(all, shown);
+        List<AdvisoryCatalogEntry> rows = ask.map(ids -> AdvisoryRules.filtered(all, shown).stream()
+                .filter(row -> ids.contains(row.cve())).toList()).orElseGet(() -> AdvisoryRules.filtered(all, shown));
 
         pills.add(pill(getTranslation("advisories.pill.all", all.size()), Optional.empty(), shown.isEmpty()));
         counts.forEach((word, count) -> pills.add(pill(
@@ -142,8 +162,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
                 shown.filter(word::equals).isPresent())));
 
         // Rule 6.3.11: the total, and under a filter the shown count against it.
-        total.setText(shown.isEmpty() ? getTranslation("advisories.total", all.size())
-                : getTranslation("advisories.shown", rows.size(), all.size(), verdictWords(index, shown.get())));
+        total.setText(ask.isPresent() ? getTranslation("advisories.narrowed", rows.size(), all.size())
+                : shown.isEmpty() ? getTranslation("advisories.total", all.size())
+                        : getTranslation("advisories.shown", rows.size(), all.size(), verdictWords(index, shown.get())));
 
         labels = index.labels();
         grid.setItems(query -> rows.stream().skip(query.getOffset()).limit(query.getLimit()), query -> rows.size());

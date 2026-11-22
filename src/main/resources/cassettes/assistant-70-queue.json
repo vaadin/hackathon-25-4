@@ -1,0 +1,11 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: what to give a verdict next",
+  "when": { "message": "(?i)(verdict next|next verdict|top of the queue|queue head)" },
+  "steps": [
+    { "call": "queueHead", "with": { "n": 5 } },
+    { "say": "The top of the verdict queue, from `${queueHead.source}`:\n\n" },
+    { "each": "queueHead.head", "say": ["- ${package}: ${advisories} advisories", ", a verdict closes ${closes}", "\n"] }
+  ]
+}

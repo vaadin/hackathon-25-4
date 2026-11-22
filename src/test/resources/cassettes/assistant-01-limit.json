@@ -1,0 +1,10 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand: a model that keeps calling one tool past the limit of the built in providers, 40 calls per tool",
+  "when": { "message": "(?i)every release of every line" },
+  "steps": [
+    { "call": "versionStatus", "with": { "version": "24.9.21" }, "times": 41 },
+    { "say": "Never reached: the turn ends at the limit." }
+  ]
+}

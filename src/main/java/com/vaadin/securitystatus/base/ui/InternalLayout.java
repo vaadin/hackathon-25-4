@@ -1,11 +1,20 @@
 package com.vaadin.securitystatus.base.ui;
 
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.messages.MessageInput;
+import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.upload.UploadButton;
+import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import org.springframework.beans.factory.ObjectProvider;
+import com.vaadin.securitystatus.base.ai.AiSurfaces;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -18,11 +27,22 @@ import jakarta.annotation.security.RolesAllowed;
  * that declare a {@code @Menu}, whose title is a bundle key.
  */
 @RolesAllowed(Roles.SECURITY)
+// The assistant's panel and the workbench's paste box arrive through a bean,
+// which the production bundle's scanner does not follow, D-79 and D-149.
+@Uses(MessageList.class)
+@Uses(MessageInput.class)
+@Uses(UploadButton.class)
+@Uses(UploadFileList.class)
+// The form AI controller's field marker is no component, so its module is named
+// as the controller's internal FormFieldMarker names it, at the platform's version.
+@NpmPackage(value = "@vaadin/field-highlighter", version = "25.4.0-beta1")
+@JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 public final class InternalLayout extends AppLayout {
 
     private final Div assistantMount = new Div();
 
-    InternalLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication) {
+    InternalLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
+            ObjectProvider<AiSurfaces> ai) {
         addClassName("internal-shell");
         setPrimarySection(Section.NAVBAR);
 
@@ -38,6 +58,7 @@ public final class InternalLayout extends AppLayout {
                 entry -> nav.addItem(new SideNavItem(getTranslation(entry.title()), entry.path())));
 
         assistantMount.addClassName("assistant-mount");
+        ai.ifAvailable(surfaces -> assistantMount.add(surfaces.chatPanel()));
         addToDrawer(nav, assistantMount);
     }
 

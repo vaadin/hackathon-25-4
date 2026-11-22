@@ -145,6 +145,14 @@ public final class VerdictForm extends Composite<FormLayout> {
         return ordered;
     }
 
+    /**
+     * The fields only a person fills: the verdict's id, who assessed it and
+     * what it supersedes. The form AI controller never sees them.
+     */
+    public List<HasValue<?, ?>> personOnly() {
+        return List.of(verdictId, assessedBy, supersedes);
+    }
+
     /** Every field by its property name, in the form's order. */
     public Map<String, HasValue<?, ?>> fields() {
         var out = new LinkedHashMap<String, HasValue<?, ?>>();
@@ -168,6 +176,7 @@ public final class VerdictForm extends Composite<FormLayout> {
 
     private TextField text(String property) {
         var field = new TextField(getTranslation("workbench.field." + property));
+        field.setId("verdict-" + property);
         help(field, property);
         field.setValueChangeMode(ValueChangeMode.EAGER);
         field.setWidthFull();
@@ -177,6 +186,7 @@ public final class VerdictForm extends Composite<FormLayout> {
 
     private TextArea area(String property) {
         var field = new TextArea(getTranslation("workbench.field." + property));
+        field.setId("verdict-" + property);
         help(field, property);
         field.setValueChangeMode(ValueChangeMode.EAGER);
         field.setWidthFull();
@@ -187,6 +197,7 @@ public final class VerdictForm extends Composite<FormLayout> {
     private Select<String> select(String property, List<String> words) {
         var field = new Select<String>();
         field.setLabel(getTranslation("workbench.field." + property));
+        field.setId("verdict-" + property);
         help(field, property);
         field.setItems(words);
         field.setEmptySelectionAllowed(true);

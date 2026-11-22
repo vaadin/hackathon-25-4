@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
+import org.springframework.beans.factory.ObjectProvider;
+import com.vaadin.securitystatus.base.ai.AiSurfaces;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -104,12 +106,17 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     private final Paragraph tooLong = new Paragraph();
     private final Paragraph lastSaved = new Paragraph();
 
+    /** The paste box of the form, when the assistant is there to offer it. */
+    private final ObjectProvider<AiSurfaces> ai;
+
     /** What the queue said when last read, kept for the listeners, which may not read signals. */
     private Optional<VerdictQueue> loaded = Optional.empty();
 
-    public WorkbenchView(SecurityDataService data, DataRefreshSignal refresh, VerdictDrafts drafts) {
+    public WorkbenchView(SecurityDataService data, DataRefreshSignal refresh, VerdictDrafts drafts,
+            ObjectProvider<AiSurfaces> ai) {
         this.data = data;
         this.drafts = drafts;
+        this.ai = ai;
         addClassName("workbench-view");
         lead.addClassName("workbench-lead");
         filter.addClassName("workbench-series");
@@ -344,7 +351,13 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         actions.addClassName("workbench-actions");
         output.add(preview, reach, platform, path, actions, refusal, tooLong, lastSaved, yamlSource);
 
-        var columns = new Div(form, output);
+        // The paste box sits above the form, in the form's column: it fills the
+        // form and nothing else, and saving stays the Save button's alone.
+        var formColumn = new Div();
+        formColumn.addClassName("workbench-form-column");
+        ai.ifAvailable(surfaces -> formColumn.add(surfaces.formFill(form.layout(), form.binder(), form.personOnly())));
+        formColumn.add(form);
+        var columns = new Div(formColumn, output);
         columns.addClassName("workbench-columns");
         section.add(composing, elsewhere, columns);
         return section;

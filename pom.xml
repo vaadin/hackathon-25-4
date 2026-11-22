@@ -86,6 +86,13 @@
             <artifactId>pdfbox</artifactId>
             <version>3.0.5</version>
         </dependency>
+        <!-- Spring AI's chat API, without any model: SpringAILLMProvider is
+             built from a ChatModel, so the code choosing the provider compiles
+             without the key. The model itself comes only with the ai profile. -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-client-chat</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -114,6 +121,16 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Tests tagged live-ai call a real model and never run by default.
+                 Surefire's own property is excludedGroups, so the one above is
+                 handed to it here; -Dsurefire.excludedGroups= lifts it. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.vaadin</groupId>

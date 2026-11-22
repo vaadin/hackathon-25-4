@@ -1,0 +1,14 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: what upgrading clears",
+  "when": { "message": "(?i)\\bupgrad\\w*\\b\\D*?(?<version>\\d+\\.\\d+\\.\\d+(?:-[A-Za-z0-9.]+)?)" },
+  "steps": [
+    { "call": "upgradeTarget", "with": { "version": "${version}" } },
+    { "say": "From ${upgradeTarget.version}, the upgrade target is ${upgradeTarget.to}", "unless": "upgradeTarget.refused" },
+    { "say": ": it clears ${upgradeTarget.clears} and leaves ${upgradeTarget.remains}", "unless": "upgradeTarget.refused" },
+    { "say": ". Cleared: ${upgradeTarget.cleared_by_upgrade}", "unless": "upgradeTarget.refused" },
+    { "say": ". Source: `${upgradeTarget.source}`.", "unless": "upgradeTarget.refused" },
+    { "say": "${upgradeTarget.refused}", "if": "upgradeTarget.refused" }
+  ]
+}

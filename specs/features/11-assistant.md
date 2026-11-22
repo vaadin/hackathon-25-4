@@ -38,22 +38,22 @@ The chat panel on the internal screens, its tools over the measured data, the im
 ## Acceptance criteria
 
 ### AC1: Grounded answers only
-- [ ] The version question produces a `versionStatus` call and quotes its result
-- [ ] The ungroundable question produces the contract sentence
+- [x] The version question produces a `versionStatus` call and quotes its result
+- [x] The ungroundable question produces the contract sentence
 
 ### AC2: Refusals teach
-- [ ] The unmeasured version answer names the nearest measured
-- [ ] The limit renders as the sentence
+- [x] The unmeasured version answer names the nearest measured
+- [x] The limit renders as the sentence
 
 ### AC3: The image is a question, not an answer
-- [ ] The cassette image flow ends in a `cveStatus` call
+- [x] The cassette image flow ends in a `cveStatus` call
 
 ### AC4: Grid AI narrows, never fabricates
-- [ ] The slice ask narrows the grid to matching rows
-- [ ] The out of vocabulary ask is refused in words
+- [x] The slice ask narrows the grid to matching rows
+- [x] The out of vocabulary ask is refused in words
 
 ### AC5: The fill proposes, a person disposes
-- [ ] The paste fills only supported fields, with markers, and saves nothing
+- [x] The paste fills only supported fields, with markers, and saves nothing
 
 ## Test cases
 

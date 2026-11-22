@@ -1,0 +1,10 @@
+{
+  "prompt": "form.md",
+  "promptSha256": "ea7dabfc6a64736820b0aff656a769970c7a09d90127fa387b8c1bd2b97dd8f9",
+  "recorded": "Written by hand: a paste that supports no field, so nothing is written",
+  "when": { "message": "(?i)^thanks for the update" },
+  "steps": [
+    { "call": "get_form_state", "with": {} },
+    { "say": "The text supports none of the fields, so nothing was filled." }
+  ]
+}

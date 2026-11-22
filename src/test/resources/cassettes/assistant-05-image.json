@@ -1,0 +1,14 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand: the extraction a model makes of src/test/resources/assistant/scanner-line.png, then the question it asks the tools",
+  "when": { "attachmentSha256": "1d3078c482f44f035264bf4c2da9a32c5ca6502a127025b9fd0308ad0dac5734" },
+  "steps": [
+    { "extract": { "id": "CVE-2026-89407", "coordinate": "com.fasterxml.jackson.core:jackson-core:2.21.5" } },
+    { "call": "cveStatus", "with": { "id": "${id}" } },
+    { "say": "The picture shows ${id} on ${coordinate}. " },
+    { "say": ["The measurements give it ${cveStatus.severity}", ", verdict **${cveStatus.verdict}**", ", fix owner ${cveStatus.fix_owner}", ". Source: `${cveStatus.source}`.\n\n"], "unless": "cveStatus.refused" },
+    { "each": "cveStatus.lines", "say": ["- ${line}", ": ${status}", ", fixed in ${fixed_in}", "\n"] },
+    { "say": "${cveStatus.refused}", "if": "cveStatus.refused" }
+  ]
+}

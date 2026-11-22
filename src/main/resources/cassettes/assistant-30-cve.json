@@ -1,0 +1,16 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: one advisory across the lines",
+  "when": { "message": "(?i)(?<id>(?:CVE|GHSA)-[A-Za-z0-9-]+)" },
+  "steps": [
+    { "call": "cveStatus", "with": { "id": "${id}" } },
+    { "say": "${cveStatus.cve}", "unless": "cveStatus.refused" },
+    { "say": ", ${cveStatus.severity}", "unless": "cveStatus.refused" },
+    { "say": ", verdict **${cveStatus.verdict}**", "unless": "cveStatus.refused" },
+    { "say": ", fix owner ${cveStatus.fix_owner}", "unless": "cveStatus.refused" },
+    { "say": ". Source: `${cveStatus.source}`.\n\n", "unless": "cveStatus.refused" },
+    { "each": "cveStatus.lines", "say": ["- ${line}", ": ${status}", ", fixed in ${fixed_in}", "\n"] },
+    { "say": "${cveStatus.refused}", "if": "cveStatus.refused" }
+  ]
+}

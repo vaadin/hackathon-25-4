@@ -1,0 +1,9 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand: src/test/resources/assistant/no-id.png carries a package line but no advisory id",
+  "when": { "attachmentSha256": "73b5b7b2b2721c1389629b0545831cea2c23cad43dff137d829824e60aacdf98" },
+  "steps": [
+    { "say": "I could not read an advisory id in the picture: the identifier column is cut off. Which CVE or GHSA id is it?" }
+  ]
+}

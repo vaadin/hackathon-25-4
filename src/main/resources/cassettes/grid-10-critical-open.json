@@ -1,0 +1,13 @@
+{
+  "prompt": "grid.md",
+  "promptSha256": "c071abb6886db45f26bf04cd923e60c021d0a80fd275403079316558d78b62ce",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: the slice ask of specs/06-ai.md",
+  "when": { "message": "(?i)critical\\b.*?\\b(open|unfixed|not fixed)\\b.*?(?<line>\\d+\\.\\d+)" },
+  "steps": [
+    { "call": "get_database_schema", "with": {} },
+    { "call": "update_grid_data", "with": { "query": "SELECT a.cve AS \"Advisory\", a.severity AS \"Severity\", a.verdict AS \"Verdict\" FROM advisories a WHERE a.severity = 'critical' AND a.verdict IN ('risk', 'in_triage') AND NOT EXISTS (SELECT 1 FROM fixes f WHERE f.cve = a.cve AND f.line = '${line}')" } },
+    { "match": { "in": "update_grid_data.text", "pattern": "^Error[^:]*: (?<why>.*)" } },
+    { "say": "The list now shows the critical advisories with no fix published on ${line} that are a risk or still in triage.", "unless": "why" },
+    { "say": "The list was not narrowed: ${why}", "if": "why" }
+  ]
+}

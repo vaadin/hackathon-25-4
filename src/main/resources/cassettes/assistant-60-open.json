@@ -1,0 +1,13 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: the open findings of a version, first page",
+  "when": { "message": "(?i)\\bopen\\b.*?\\b(?:on|of|for|in)\\s+(?<version>\\d+\\.\\d+\\.\\d+(?:-[A-Za-z0-9.]+)?)" },
+  "steps": [
+    { "call": "openFindings", "with": { "version": "${version}" } },
+    { "say": "Open on ${openFindings.version}, ${openFindings.total} in all, from `${openFindings.source}`:\n\n", "unless": "openFindings.refused" },
+    { "each": "openFindings.findings", "say": ["- ${id}, ${list}", ", ${severity}", ", verdict ${verdict}", "\n"] },
+    { "say": "\nThere are more; ask for the next page from ${openFindings.next_offset}.", "if": "openFindings.next_offset" },
+    { "say": "${openFindings.refused}", "if": "openFindings.refused" }
+  ]
+}

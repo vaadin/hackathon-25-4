@@ -1,0 +1,18 @@
+{
+  "prompt": "assistant.md",
+  "promptSha256": "52087b196a831811246b7b1a5437a1a67c33464dad8b6525beadcbf30649ba3e",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: is a version safe, and the refusal for one never measured",
+  "when": { "message": "(?i)\\b(?:is|how is|how safe is|status of)\\s+(?:vaadin\\s+)?(?<version>\\d+\\.\\d+\\.\\d+(?:-[A-Za-z0-9.]+)?)" },
+  "steps": [
+    { "call": "versionStatus", "with": { "version": "${version}" } },
+    { "say": "The measurements of ${versionStatus.version} say **${versionStatus.state}**", "unless": "versionStatus.refused" },
+    { "say": ", scanned ${versionStatus.scanned_at}", "unless": "versionStatus.refused" },
+    { "say": ": ${versionStatus.open.risk} advisories open as a risk and ${versionStatus.open.triage} in triage", "unless": "versionStatus.refused" },
+    { "say": ". Upgrading to ${versionStatus.upgrade.to}", "unless": "versionStatus.refused" },
+    { "say": " clears ${versionStatus.upgrade.clears} and leaves ${versionStatus.upgrade.remains}", "unless": "versionStatus.refused" },
+    { "say": ". Source: `${versionStatus.source}`.", "unless": "versionStatus.refused" },
+    { "match": { "in": "versionStatus.refused", "pattern": "nearest measured release is (?<nearest>[0-9][^;\\s]*[0-9A-Za-z])" } },
+    { "say": "${version} was never measured. The nearest measured release is ${nearest}; ask about that one for a measured answer.", "if": "nearest" },
+    { "say": "${versionStatus.refused}", "if": "versionStatus.refused", "unless": "nearest" }
+  ]
+}

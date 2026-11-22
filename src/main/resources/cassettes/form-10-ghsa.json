@@ -1,0 +1,15 @@
+{
+  "prompt": "form.md",
+  "promptSha256": "ea7dabfc6a64736820b0aff656a769970c7a09d90127fa387b8c1bd2b97dd8f9",
+  "recorded": "Written by hand against the fixtures of 2026-11-21: a GitHub advisory paragraph about jackson-core",
+  "when": { "message": "(?s)GHSA-.*jackson-core" },
+  "steps": [
+    { "call": "get_form_state", "with": {} },
+    { "call": "fill_form", "with": { "values": {
+        "verdict-purl": "pkg:maven/com.fasterxml.jackson.core/jackson-core",
+        "verdict-advisories": "CVE-2026-89407",
+        "verdict-impact": "A crafted number string makes NumberInput.looksLikeValidNumber() backtrack quadratically, so parsing untrusted JSON can use excessive CPU."
+    } } },
+    { "say": "Filled the package, the advisories and the impact from the pasted advisory. Everything else is left for you." }
+  ]
+}

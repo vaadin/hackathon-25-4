@@ -1,0 +1,70 @@
+{
+  "tools": {
+    "versionStatus": {
+      "description": "The measured security state of one Vaadin release: its state, how many advisories are open as a risk and in triage, the upgrade target of its line and when it was scanned. Refuses a version that was never measured and names the nearest one that was.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string", "description": "A Vaadin release, for example 24.9.21" }
+        },
+        "required": ["version"]
+      }
+    },
+    "cveStatus": {
+      "description": "How one advisory stands, by its CVE or GHSA id: its severity, the team's verdict, and how each maintained line is covered, which release fixes it. With a version, how the advisory stands on that one release. Refuses an id the measurements do not know.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "The advisory id, for example CVE-2026-89407" },
+          "version": { "type": "string", "description": "Optional. A Vaadin release to answer for, for example 24.9.21" }
+        },
+        "required": ["id"]
+      }
+    },
+    "upgradeTarget": {
+      "description": "What upgrading a Vaadin release to the newest release of its line clears and what remains open. Refuses a version that was never measured and names the nearest one that was.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string", "description": "A Vaadin release, for example 24.9.21" }
+        },
+        "required": ["version"]
+      }
+    },
+    "openFindings": {
+      "description": "The advisories open on one Vaadin release, the risk list and the triage list, one line each with its severity and verdict, a page at a time. Refuses a version that was never measured and names the nearest one that was.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string", "description": "A Vaadin release, for example 24.9.21" },
+          "offset": { "type": "integer", "description": "Optional. Where the page starts, 0 by default; the result names the next offset when there is more" },
+          "limit": { "type": "integer", "description": "Optional. How many lines the page holds, at most 25, 25 by default" }
+        },
+        "required": ["version"]
+      }
+    },
+    "queueHead": {
+      "description": "The top of the verdict queue: the packages whose verdict would close the most open advisories, in the queue's order.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "n": { "type": "integer", "description": "How many packages, from 1 to 20" }
+        },
+        "required": ["n"]
+      }
+    }
+  },
+  "refusals": {
+    "versionMissing": "Give the Vaadin release as the version argument, for example 24.9.21.",
+    "notMeasured": "Version {0} was never measured. The nearest measured release is {1}; ask about that one, or tell the person so.",
+    "notMeasuredLine": "Version {0} was never measured, and no release of its line {1} was. The measured lines are {2}.",
+    "idMissing": "Give the advisory id as the id argument, for example CVE-2026-89407.",
+    "unknownAdvisory": "The measurements know no advisory {0}. Check the id; a GHSA id is known only when the team tracks it under that id.",
+    "notOnVersion": "Advisory {0} was not found on release {1}: the measurements of that release do not list it.",
+    "queueRange": "n must be a whole number from 1 to 20, and {0} is not.",
+    "unreachable": "The published measurements cannot be read right now. Tell the person that the data is unreachable, and nothing else.",
+    "gridFirstColumn": "The grid narrows the advisories list, so the first column of the query must be advisories.cve. Write the query again with it first.",
+    "gridOnlySelect": "Only a single SELECT query is accepted.",
+    "gridQueryFailed": "The query was refused: {0}"
+  }
+}
