@@ -25,6 +25,10 @@ Follow `.claude/commands/implement-story.md`, all five phases, with the document
 - Stop only what you started, and only by a port it listens on: `kill $(lsof -nP -tiTCP:8080 -sTCP:LISTEN)`. Never `lsof -ti :8080 | xargs kill`: without `-sTCP:LISTEN` that also matches the browsers connected to the port, including the person's own.
 - After a sign in, Chrome shows its save password bubble, and the first real click on the page closes the bubble instead of reaching the page. If real clicks seem not to arrive in Playwright, that is the cause: click once on an empty area, or open a fresh browser context, then retry. Verify with real clicks; a scripted `element.click()` proves less, and a report must say which one it used.
 
+## The model key
+
+This machine has `OPENAI_API_KEY` in the environment, and the `ai` profile of `pom.xml` activates by itself whenever it is set. The gate must prove `CLAUDE.md` rule 8, no key, so run both final gates with the key removed: `env -u OPENAI_API_KEY -u OPENAI_TOKEN ./mvnw clean verify`, and the same for `-Pit`. Start the application for UI verification the same way unless the story is about the live model.
+
 ## Save as you go
 
 A session can be cut at any moment and whatever lives only in your head is lost. Write each decision row, feedback row and `NEEDS-A-PERSON.md` row when it happens, not at the end. After each story, bring `NEXT.md` up to date with what now exists and the traps just learned. Keep `git status` free of tool output such as `.playwright-mcp/`.
