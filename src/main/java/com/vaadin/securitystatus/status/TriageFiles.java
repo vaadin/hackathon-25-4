@@ -32,16 +32,19 @@ public final class TriageFiles {
      *
      * @param title   the document's title
      * @param about   the line naming the version and the {@code generated_at}
-     *                it was answered from
+     *                it was answered from, for the PDF
+     * @param notes   the CSV's comment lines before the column names: what the
+     *                file is, the version and the {@code generated_at}
      * @param lead    the headline and the three bucket counts, one line each,
      *                for the PDF
-     * @param columns the six column names, in order
-     * @param rows    one row per finding, six cells each, in the same order
+     * @param columns the seven column names, in order
+     * @param rows    one row per finding, seven cells each, in the same order
      */
-    public record Sheet(String title, String about, List<String> lead, List<String> columns,
+    public record Sheet(String title, String about, List<String> notes, List<String> lead, List<String> columns,
             List<List<String>> rows) {
 
         public Sheet {
+            notes = List.copyOf(notes);
             lead = List.copyOf(lead);
             columns = List.copyOf(columns);
             rows = rows.stream().map(List::copyOf).toList();
@@ -49,18 +52,18 @@ public final class TriageFiles {
     }
 
     private static final float MARGIN = 36;
-    /** The share of the line each column takes, cve, component, owner, verdict, action, bucket. */
-    private static final float[] WIDTHS = { 0.11f, 0.17f, 0.09f, 0.14f, 0.37f, 0.12f };
+    /** The share of the line each column takes: cve, bucket, owner, component, severity, action, verdict. */
+    private static final float[] WIDTHS = { 0.11f, 0.09f, 0.08f, 0.19f, 0.07f, 0.31f, 0.15f };
     private static final float TEXT = 8;
     private static final float LEADING = 10;
 
     private TriageFiles() {
     }
 
-    /** A comment line naming the version and the measurements, the column names, then one line per finding. */
+    /** Comment lines naming the file, the version and the measurements, the column names, then one line per finding. */
     public static byte[] csv(Sheet sheet) {
         var out = new StringBuilder();
-        out.append("# ").append(sheet.about().replace('\n', ' ')).append("\r\n");
+        sheet.notes().forEach(note -> out.append("# ").append(note.replace('\n', ' ')).append("\r\n"));
         out.append(line(sheet.columns()));
         sheet.rows().forEach(row -> out.append(line(row)));
         return out.toString().getBytes(StandardCharsets.UTF_8);

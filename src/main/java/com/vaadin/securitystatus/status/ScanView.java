@@ -20,7 +20,6 @@ import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -122,11 +121,12 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         Triage.Result result = Triage.of(report, measured.scan(), measured.version(), named);
 
         List<String> lead = new ArrayList<>();
-        if (version.isEmpty()) {
-            body.add(lead("scan-no-version", getTranslation("scan.noVersion")));
-        } else if (measured.version().isEmpty()) {
-            body.add(unmeasured(measured.index(), version, lead));
-        } else {
+        // A report with no version is asked for one in the lookup, under the card, as
+        // the prototype asks; the rows below still say what can be said without it.
+        if (!version.isEmpty() && measured.version().isEmpty()) {
+            body.add(unmeasured(measured.index(), version, report.vaadin().filter(version::equals).isPresent(),
+                    lead));
+        } else if (!version.isEmpty()) {
             VersionAnswer answer = measured.version().get();
             body.add(headline(result, answer, report, lead));
             body.add(buckets(result, answer, lead));
@@ -176,7 +176,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         }
         lead.add(title);
         lead.add(sentence);
-        var heading = new H2(title);
+        var heading = new H3(title);
         heading.addClassName("scan-headline");
         var box = new Section(heading, new Paragraph(sentence));
         box.addClassName("scan-answer");
@@ -223,7 +223,8 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
                 }
                 var parts = new ArrayList<String>();
                 reasons.forEach((reason, count) -> parts.add(getTranslation(reason, count)));
-                yield parts.isEmpty() ? Optional.empty() : Optional.of(String.join(", ", parts));
+                yield parts.isEmpty() ? Optional.empty()
+                        : Optional.of(getTranslation("scan.reasons", String.join(", ", parts)));
             }
         };
     }
@@ -242,23 +243,28 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
 
     // A version nobody measured
 
-    private Component unmeasured(CasesIndex index, String version, List<String> lead) {
+    /**
+     * @param fromFile true when the version is the one the report names, which the
+     *                 prototype says as "Your report was taken from"
+     */
+    private Component unmeasured(CasesIndex index, String version, boolean fromFile, List<String> lead) {
         var notice = new Section();
         notice.addClassName("scan-unmeasured");
         var word = new Badge(getTranslation("scan.unmeasured.word"));
         word.addClassNames("status-chip", "state-unmeasured");
-        String said = getTranslation("scan.unmeasured.text", version);
-        var text = new Paragraph(said);
+        String said = getTranslation(fromFile ? "scan.unmeasured.text.file" : "scan.unmeasured.text", version);
+        // One paragraph, as the prototype says it: the notice, then the nearest measured release.
+        var text = new Paragraph(new Span(said));
+        text.addClassName("scan-unmeasured-text");
         notice.add(word, text);
         lead.add(said);
         VersionRules.nearestMeasured(index, VersionNumber.of(version)).ifPresent(nearest -> {
             String near = nearest.version().toString();
             var link = new RouterLink(near, ScanView.class, new RouteParameters(VERSION, near));
             link.addClassName("scan-nearest");
-            var offer = new Paragraph(new Span(getTranslation("scan.unmeasured.nearest." + nearest.kind().name(),
+            text.add(new Text(" "), new Span(getTranslation("scan.unmeasured.nearest." + nearest.kind().name(),
                     nearest.version().line())), new Text(" "), link,
                     new Span(getTranslation("scan.unmeasured.notYours")));
-            notice.add(offer);
         });
         return notice;
     }
@@ -266,17 +272,22 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     // The files
 
     private TriageFiles.Sheet sheet(Triage.Result result, Measurements measured, String version, List<String> lead) {
-        var columns = List.of(getTranslation("scan.column.cve"), getTranslation("scan.column.component"),
-                getTranslation("scan.column.owner"), getTranslation("scan.column.verdict"),
-                getTranslation("scan.column.action"), getTranslation("scan.column.bucket"));
+        // The prototype's columns in its order, then the app's verdict column, D-197.
+        var columns = List.of(getTranslation("scan.column.cve"), getTranslation("scan.column.bucket"),
+                getTranslation("scan.column.owner"), getTranslation("scan.column.component"),
+                getTranslation("scan.column.severity"), getTranslation("scan.column.action"),
+                getTranslation("scan.column.verdict"));
         var rows = new ArrayList<List<String>>();
         for (Triage.Row row : result.rows()) {
-            rows.add(List.of(row.advisory(), row.coordinate(), getTranslation(ownerKey(row.owner())),
-                    verdictText(row, measured.index()), action(row), getTranslation(bucketKey(row.bucket()))));
+            rows.add(List.of(row.advisory(), getTranslation(bucketKey(row.bucket())),
+                    getTranslation(ownerKey(row.owner())), row.coordinate(), row.severity().orElse(""), action(row),
+                    verdictText(row, measured.index())));
         }
+        String generatedAt = measured.index().generatedAt().toString();
+        var notes = List.of(getTranslation("scan.file.heading"), getTranslation("scan.file.version", version),
+                getTranslation("scan.file.measured", generatedAt));
         return new TriageFiles.Sheet(getTranslation("scan.file.title", version),
-                getTranslation("scan.file.about", version, measured.index().generatedAt().toString()), lead, columns,
-                rows);
+                getTranslation("scan.file.about", version, generatedAt), notes, lead, columns, rows);
     }
 
     private Component actions(TriageFiles.Sheet sheet, String version, Optional<VersionNumber> upgrade,
@@ -294,6 +305,12 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         triage.addThemeVariants(ButtonVariant.PRIMARY);
         Downloads.onClick(triage, csvName, csv);
         bar.add(triage);
+        // The prototype's two, the download and the release notes, then the app's audit report.
+        upgrade.flatMap(to -> VersionRules.releaseNotes(index, to).map(href -> {
+            var notes = new Anchor(href, getTranslation("scan.releaseNotes", to.toString()));
+            notes.addClassName("scan-release-notes");
+            return notes;
+        })).ifPresent(bar::add);
 
         if (PdfPreview.available()) {
             var preview = new Button(getTranslation("scan.preview.pdf"));
@@ -308,11 +325,6 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             Downloads.onClick(download, pdfName, pdf);
             bar.add(download);
         }
-        upgrade.flatMap(to -> VersionRules.releaseNotes(index, to).map(href -> {
-            var notes = new Anchor(href, getTranslation("scan.releaseNotes", to.toString()));
-            notes.addClassName("scan-release-notes");
-            return notes;
-        })).ifPresent(bar::add);
         return bar;
     }
 
@@ -353,8 +365,9 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         head.addClassName("scan-findings-head");
         int secure = result.count(Triage.Bucket.SECURE);
         if (secure > 0) {
-            var toggle = new Switch(getTranslation(secure == 1 ? "scan.findings.secure.one"
-                    : "scan.findings.secure.many", secure));
+            String label = secureShown ? (secure == 1 ? "scan.findings.secure.hide.one" : "scan.findings.secure.hide.many")
+                    : (secure == 1 ? "scan.findings.secure.one" : "scan.findings.secure.many");
+            var toggle = new Switch(getTranslation(label, secure));
             toggle.addClassName("scan-secure-switch");
             toggle.setValue(secureShown);
             toggle.addValueChangeListener(change -> {
@@ -441,7 +454,11 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
      * says of the advisory, which is all that can be said.
      */
     private static Optional<String> settledVerdict(Triage.Row row, CasesIndex index) {
-        boolean named = row.bucket() == Triage.Bucket.SECURE || row.action() == Triage.Action.VERSION_UNMEASURED;
+        // A secure row names the verdict only when the verdict settled it. A row secure
+        // because the version does not report it says so in its action, and the
+        // catalogue's word for other releases beside it would contradict it, D-198.
+        boolean named = row.action() == Triage.Action.RULED_OUT || row.action() == Triage.Action.FROM_BUILD
+                || row.action() == Triage.Action.VERSION_UNMEASURED;
         return row.verdict().filter(verdict -> named).map(index.labels()::get);
     }
 
@@ -459,10 +476,9 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
 
     private Component skipped(List<String> names) {
         List<String> shown = names.stream().filter(name -> !name.isBlank()).limit(4).toList();
-        String said = getTranslation(names.size() == 1 ? "scan.skipped.one" : "scan.skipped.many", names.size());
-        if (!shown.isEmpty()) {
-            said += " " + getTranslation("scan.skipped.names", String.join(", ", shown));
-        }
+        String key = names.size() == 1 ? "scan.skipped.one" : "scan.skipped.many";
+        String said = shown.isEmpty() ? getTranslation(key, names.size())
+                : getTranslation(key + ".named", names.size(), String.join(", ", shown));
         return lead("scan-skipped", said);
     }
 

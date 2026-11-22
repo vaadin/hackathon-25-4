@@ -36,7 +36,7 @@ class TriageDownloadIT {
 
     // SCN-07, AC3
     @Test
-    void the_csv_carries_every_finding_in_six_columns_named_for_the_version() {
+    void the_csv_carries_every_finding_in_seven_columns_named_for_the_version() {
         String href = browser.downloadAddressOf(".scan-download-csv");
 
         Map<String, Object> csv = browser.fetch(href);
@@ -47,12 +47,17 @@ class TriageDownloadIT {
                 .contains("vaadin-security-triage-24.9.21.csv");
         assertThat(href).endsWith("/vaadin-security-triage-24.9.21.csv");
         String[] lines = ((String) csv.get("text")).split("\r\n");
-        assertThat(lines[0]).startsWith("# ").contains("24.9.21").contains("2026-11-21T10:13:39Z");
-        assertThat(lines[1]).isEqualTo("\"CVE\",\"Component\",\"Owner\",\"Verdict\",\"Action\",\"Bucket\"");
+        // The prototype's three comment lines, then its columns in its order and the verdict, D-197.
+        assertThat(lines[0]).isEqualTo("# Vaadin security status, triage of an uploaded report");
+        assertThat(lines[1]).isEqualTo("# Vaadin version: 24.9.21");
+        assertThat(lines[2]).isEqualTo("# Measurements of: 2026-11-21T10:13:39Z");
+        assertThat(lines[3]).isEqualTo(
+                "\"CVE\",\"Bucket\",\"Owner\",\"Component\",\"Severity\",\"Action\",\"Verdict\"");
         // The whole triage, the secure findings the table hides included.
-        assertThat(lines).hasSize(2 + 9);
-        assertThat(lines[3]).isEqualTo("\"CVE-2026-89407\",\"pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.2\","
-                + "\"Vaadin\",\"Fix available\",\"Upgrade to 24.9.26\",\"Fix available\"");
+        assertThat(lines).hasSize(4 + 9);
+        assertThat(lines[5]).isEqualTo("\"CVE-2026-89407\",\"Fix available\",\"Vaadin\","
+                + "\"pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.2\",\"high\",\"Upgrade to 24.9.26\","
+                + "\"Fix available\"");
         assertThat(browser.violations()).isEmpty();
     }
 

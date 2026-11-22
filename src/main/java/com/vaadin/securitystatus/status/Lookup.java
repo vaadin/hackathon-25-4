@@ -254,14 +254,21 @@ public final class Lookup extends Composite<Div> {
         choose.addClassName("lookup-report-choose");
         choose.bindText(scan.held().map(held -> getTranslation(
                 held.isPresent() ? "lookup.report.replace" : "lookup.report.choose")));
-        var drop = new UploadDropZone(new Div(new Span(getTranslation("lookup.report.drop")), choose), reports);
-        drop.addClassName("lookup-report");
 
-        // Before a file the line names the formats read, and no others, rule 6.11.21.
-        // With one in, it says what is in the file instead.
+        // The prototype's card: before a file its title asks for one and the line names the
+        // formats read, and no others, rule 6.11.21; with one in, the title is the file's
+        // name and the line says what is in it. The help mark and the button close the row.
+        var title = new Span();
+        title.addClassName("lookup-report-title");
+        title.bindText(scan.held().map(held -> held.map(ScanState.Held::fileName)
+                .orElseGet(() -> getTranslation("lookup.report.drop"))));
         var line = new Paragraph();
         line.addClassName("lookup-report-formats");
         line.bindText(scan.held().map(held -> held.map(this::fileLine).orElseGet(this::formatsLine)));
+        var said = new Div(title, line);
+        said.addClassName("lookup-report-said");
+        var drop = new UploadDropZone(new Div(said, reportHelp(), choose), reports);
+        drop.addClassName("lookup-report");
 
         var refused = new Span();
         refused.addClassName("lookup-report-refused");
@@ -276,13 +283,26 @@ public final class Lookup extends Composite<Div> {
         reportVersion.bindValue(state.version(), state.version()::set);
         reportVersion.bindVisible(reportAsks);
 
-        var card = new Div(drop, line, refused, reportHelp());
+        // Under the card, as the prototype says it: why the file asks for a version, until
+        // one is given.
+        var asks = new Paragraph();
+        asks.addClassName("lookup-report-asks");
+        asks.bindText(scan.held().map(held -> held.map(this::asksSentence).orElse("")));
+        asks.bindVisible(Signal.computed(() -> reportAsks.get() && scanVersion.get().isEmpty()));
+
+        var card = new Div(drop, refused);
         card.addClassName("lookup-report-card");
 
-        var panel = new Div(card, reportVersion);
-        panel.addClassName("lookup-panel");
+        var panel = new Div(reportVersion, card, asks);
+        panel.addClassNames("lookup-panel", "lookup-report-panel");
         panel.bindVisible(state.tab().map(LookupState.Tab.REPORT::equals));
         return panel;
+    }
+
+    /** A vulnerability report lists only what carries a finding; a bill of materials that names no release is said plainly. */
+    private String asksSentence(ScanState.Held held) {
+        return getTranslation(held.report().components().isEmpty() && !held.report().findings().isEmpty()
+                ? "scan.noVersion.findings" : "scan.noVersion");
     }
 
     /** The four formats the parser reads, in the parser's order, so the line cannot name another. */
@@ -297,7 +317,6 @@ public final class Lookup extends Composite<Div> {
 
     private String fileLine(ScanState.Held held) {
         var parts = new ArrayList<String>();
-        parts.add(held.fileName());
         held.report().vaadin().ifPresent(version -> parts.add(getTranslation("lookup.report.file.vaadin", version)));
         int size = held.report().size();
         parts.add(getTranslation(size == 1 ? "lookup.report.file.findings.one" : "lookup.report.file.findings.many",
@@ -604,8 +623,6 @@ public final class Lookup extends Composite<Div> {
 
         var sections = new ArrayList<Component>();
         sections.add(assessed);
-        sections.add(HelpDialog.section(getTranslation("lookup.help.report.kept"),
-                getTranslation("lookup.help.report.kept.text")));
         // One recipe per format the parser reads, in its order: a format accepted and
         // never explained is one the reader has to guess at.
         for (ReportFormat format : ReportFormat.values()) {
@@ -615,9 +632,19 @@ public final class Lookup extends Composite<Div> {
             var command = new Pre(getTranslation("lookup.help.report." + format.name() + ".run"));
             command.addClassName("lookup-help-run");
             recipe.add(command, new Paragraph(getTranslation("lookup.help.report." + format.name() + ".leaves")));
+            if (format == ReportFormat.CYCLONEDX) {
+                // Its second half, the frontend's, is a second command and a second file.
+                var frontend = new Pre(getTranslation("lookup.help.report.CYCLONEDX.frontend.run"));
+                frontend.addClassName("lookup-help-run");
+                recipe.add(frontend, new Paragraph(getTranslation("lookup.help.report.CYCLONEDX.frontend.leaves")));
+            }
             sections.add(recipe);
         }
         sections.add(new Paragraph(getTranslation("lookup.help.report.json")));
+        // The app's own promise, which replaces the prototype's "Read in this browser":
+        // last, where it disturbs the prototype's order least.
+        sections.add(HelpDialog.section(getTranslation("lookup.help.report.kept"),
+                getTranslation("lookup.help.report.kept.text")));
         return new HelpDialog(getTranslation("lookup.help.report.title"), sections.toArray(Component[]::new));
     }
 

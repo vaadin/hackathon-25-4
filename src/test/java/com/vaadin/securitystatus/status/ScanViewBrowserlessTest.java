@@ -26,7 +26,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -65,20 +65,21 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(getCurrentView()).isInstanceOf(ScanView.class);
         assertThat(path()).isEqualTo("scan/24.9.21");
+        assertThat(inLookup(Span.class, "lookup-report-title").getFirst().getText()).isEqualTo("osv-scanner.json");
         assertThat(inLookup(Paragraph.class, "lookup-report-formats").getFirst().getText())
-                .isEqualTo("osv-scanner.json · Vaadin 24.9.21 · 9 findings · osv-scanner");
-        assertThat(find(H2.class).withClassName("scan-headline").single().getText())
+                .isEqualTo("Vaadin 24.9.21 · 9 findings · osv-scanner");
+        assertThat(find(H3.class).withClassName("scan-headline").single().getText())
                 .isEqualTo("One upgrade clears 1 of your 6 open findings");
         assertThat(text(find(Section.class).withClassName("scan-answer").single()))
                 .contains("Upgrade to 24.9.26, a maintenance release in the minor you already use.")
-                .contains("The remaining 5 need a Spring Boot change, a fix of your own, or are waiting on a fix.");
+                .contains("The remaining 5 need a Spring Boot change or are waiting on a fix.");
 
         // S4: the design's three words and the counts.
         assertThat(find(Div.class).withClassName("scan-bucket").all()).extracting(this::text).containsExactly(
                 "3 Already secure Not affected or already fixed in 24.9.21. Safe to whitelist.",
                 "1 Fix available All fixed by upgrading to 24.9.26.",
-                "5 Unresolved 2 awaiting a Spring Boot change, 1 awaiting the library, 1 not assessed yet,"
-                        + " 1 not ours to answer");
+                "5 Unresolved 2 awaiting a vendor release, 1 waiting on a fix, 1 not assessed yet,"
+                        + " 1 not ours to answer.");
         // The upgrade's release notes are offered beside the downloads.
         assertThat(find(com.vaadin.flow.component.html.Anchor.class).withClassName("scan-release-notes").single()
                 .getHref()).isEqualTo("https://github.com/vaadin/platform/releases/tag/24.9.26");
@@ -95,7 +96,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(row("CVE-2026-45292")).containsExactly("CVE-2026-45292", "opentelemetry-api", "Spring Boot",
                 "Unresolved", "Upgrade Spring Boot, or override its opentelemetry-api version");
         assertThat(row("CVE-2099-0002")).containsExactly("CVE-2099-0002", "flow-server", "Vaadin",
-                "Not assessed yet", "Reported on a coordinate Vaadin brings, and on no release we measure");
+                "Not assessed yet", "Reported on a coordinate Vaadin brings, and not on a release we measure");
         assertThat(row("CVE-2099-0001")).containsExactly("CVE-2099-0001", "billing-core", "Yours", "Unresolved",
                 "Not on anything Vaadin ships: billing-core is yours to assess");
         RouterLink id = find(RouterLink.class).withClassName("scan-advisory").all().getFirst();
@@ -109,10 +110,15 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(UI.getCurrent().getInternals().getActiveViewLocation().getPathWithQueryParameters())
                 .startsWith("scan/24.9.21?secure");
         assertThat(rows()).hasSize(9);
+        assertThat(find(Switch.class).withClassName("scan-secure-switch").single().getLabel())
+                .isEqualTo("Hide the 3 secure findings");
         // AC2: the ruled out finding is already secure with the verdict named.
         assertThat(row("CVE-2021-33604")).containsExactly("CVE-2021-33604", "vaadin-swing-kit-flow", "Vaadin",
                 "Already secure scanner false positive", "Does not reach a Vaadin application");
         assertThat(row("CVE-2026-2742").get(4)).isEqualTo("Not reported on 24.9.21");
+        // A row secure because the version does not report it names no verdict: the catalogue's
+        // word for other releases would contradict its action, D-198.
+        assertThat(row("CVE-2026-2742").get(3)).isEqualTo("Already secure");
     }
 
     // SCN-03, S2
@@ -125,16 +131,20 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(version.isVisible()).isTrue();
         Button check = find(Button.class).withClassName("lookup-check").single();
         assertThat(check.getText()).isEqualTo("Answer for this version");
-        assertThat(text(find(Div.class).withClassName("scan-body").single()))
-                .contains("Your report names no Vaadin release.");
+        // Asked under the card, in the lookup, as the prototype asks.
+        assertThat(inLookup(Paragraph.class, "lookup-report-asks").getFirst().getText()).isEqualTo(
+                "This report lists only the packages that carry a finding, so it does not name the Vaadin release"
+                        + " it was taken from. Enter it and every row becomes an answer.");
+        assertThat(inLookup(Paragraph.class, "lookup-report-asks").getFirst().isVisible()).isTrue();
         assertThat(rows()).allMatch(row -> !row.get(4).startsWith("Upgrade"));
 
         test(version).setValue("24.9.21");
         test(check).click();
 
         assertThat(path()).isEqualTo("scan/24.9.21");
-        assertThat(find(H2.class).withClassName("scan-headline").single().getText())
+        assertThat(find(H3.class).withClassName("scan-headline").single().getText())
                 .isEqualTo("One upgrade clears 1 of your 6 open findings");
+        assertThat(inLookup(Paragraph.class, "lookup-report-asks").getFirst().isVisible()).isFalse();
     }
 
     @Test
@@ -154,12 +164,12 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(getCurrentView()).isInstanceOf(HomeView.class);
         assertThat(inLookup(Span.class, "lookup-report-refused").getFirst().getText()).isEqualTo(
                 "That file is not a CycloneDX, OWASP Dependency-Check, osv-scanner or bomber report."
-                        + " Those four are what this page reads.");
+                        + " Those four are what this page can read.");
 
         uploadHere("not-json.txt");
         assertThat(getCurrentView()).isInstanceOf(HomeView.class);
         assertThat(inLookup(Span.class, "lookup-report-refused").getFirst().getText())
-                .startsWith("That file is not JSON").contains("CycloneDX, OWASP Dependency-Check, osv-scanner or bomber");
+                .startsWith("That file is not JSON. The XML forms of these reports are not read.").contains("CycloneDX, OWASP Dependency-Check, osv-scanner or bomber");
     }
 
     // The 25.4 upload testers put a file through the browser's own gate: the size limit refuses
@@ -196,7 +206,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
                 .containsExactly("osv-scanner.json UPLOADED", "bomber.json REJECTED");
         assertThat(getCurrentView()).isInstanceOf(ScanView.class);
         assertThat(find(Lookup.class).single().getElement().getTextRecursively())
-                .contains("osv-scanner.json · Vaadin 24.9.21 · 9 findings · osv-scanner");
+                .contains("osv-scanner.json").contains("Vaadin 24.9.21 · 9 findings · osv-scanner");
     }
 
     // SCN-09, S8
@@ -209,8 +219,8 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         test(find(Button.class).withClassName("lookup-check").single()).click();
 
         assertThat(find(Paragraph.class).withClassName("scan-skipped").single().getText()).isEqualTo(
-                "2 entries in your report carried findings with no coordinate, so they could not be matched."
-                        + " Named in the file: legacy-tools.zip, bundled-js/app.min.js.");
+                "2 entries in your report carried findings with no coordinate, so they could not be matched:"
+                        + " legacy-tools.zip, bundled-js/app.min.js.");
     }
 
     // The edge case: zero findings
@@ -220,7 +230,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         test(inLookup(TextField.class, "lookup-report-version").getFirst()).setValue("24.9.21");
         test(find(Button.class).withClassName("lookup-check").single()).click();
 
-        assertThat(find(H2.class).withClassName("scan-headline").single().getText())
+        assertThat(find(H3.class).withClassName("scan-headline").single().getText())
                 .isEqualTo("This report carries no findings");
         assertThat(find(Span.class).withClassName("scan-bucket-count").all()).extracting(Span::getText)
                 .containsExactly("0", "0", "0");
@@ -234,10 +244,11 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(path()).isEqualTo("scan/24.9.99");
         Section notice = find(Section.class).withClassName("scan-unmeasured").single();
-        assertThat(text(notice)).startsWith("Not measured We have no scan of Vaadin 24.9.99.");
+        assertThat(text(notice)).startsWith("Not measured Your report was taken from Vaadin 24.9.99 and we have no"
+                + " scan of that release.").contains("The newest release of that line we have measured is 24.9.26");
         RouterLink nearest = find(RouterLink.class).withClassName("scan-nearest").single();
         assertThat(nearest.getText()).isEqualTo("24.9.26");
-        assertThat(find(H2.class).withClassName("scan-headline").exists()).isFalse();
+        assertThat(find(H3.class).withClassName("scan-headline").exists()).isFalse();
         // What the catalogue can say is said, and nothing is called secure.
         assertThat(rows()).isNotEmpty().allMatch(row -> !row.get(3).startsWith("Already secure"));
 
@@ -245,8 +256,8 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         // version document of 24.9.26, so only the address is asserted here.
         test(nearest).click();
         assertThat(path()).isEqualTo("scan/24.9.26");
-        assertThat(inLookup(Paragraph.class, "lookup-report-formats").getFirst().getText())
-                .startsWith("cyclonedx-unmeasured.json");
+        assertThat(inLookup(Span.class, "lookup-report-title").getFirst().getText())
+                .isEqualTo("cyclonedx-unmeasured.json");
     }
 
     // The edge case: a huge report caps the table at 200 and counts the rest
@@ -333,8 +344,8 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows()).isEqualTo(first);
 
         uploadHere("dependency-check-skipped.json");
-        assertThat(inLookup(Paragraph.class, "lookup-report-formats").getFirst().getText())
-                .startsWith("dependency-check-skipped.json");
+        assertThat(inLookup(Span.class, "lookup-report-title").getFirst().getText())
+                .isEqualTo("dependency-check-skipped.json");
     }
 
     // The session bound report: a fresh address with no report in the session
@@ -375,7 +386,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
 
         String help = text(reportHelp());
         assertThat(help).contains("The file you uploaded flags findings on 9 coordinates, and 8 of those are"
-                + " coordinates we measure inside Vaadin releases. The remaining one is not, so its findings come"
+                + " coordinates we measure inside Vaadin releases. The remaining 1 coordinate is not, so its findings come"
                 + " back as yours with no verdict of ours. That one is billing-core.");
         assertThat(help).contains("Your file is not kept").contains("the file itself is not stored");
         assertThat(find(Paragraph.class).withClassName("scan-kept").single().getText())

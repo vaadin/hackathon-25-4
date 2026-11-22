@@ -41,8 +41,9 @@ class ScanUploadIT {
         assertThat(driver.findElements(By.cssSelector(".scan-bucket-count"))).extracting(element -> element.getText())
                 .containsExactly("3", "1", "5");
         assertThat(driver.findElements(By.cssSelector(".scan-row"))).hasSize(6);
+        assertThat(driver.findElement(By.cssSelector(".lookup-report-title")).getText()).isEqualTo("osv-scanner.json");
         assertThat(driver.findElement(By.cssSelector(".lookup-report-formats")).getText())
-                .contains("osv-scanner.json").contains("Vaadin 24.9.21").contains("9 findings");
+                .contains("Vaadin 24.9.21").contains("9 findings");
         assertThat(browser.violations()).isEmpty();
     }
 

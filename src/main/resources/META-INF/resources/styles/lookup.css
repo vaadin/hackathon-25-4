@@ -78,6 +78,30 @@
     gap: 0.5rem 1rem;
 }
 
+/* The report tab follows the prototype: the version field and its Answer button on
+   one row above the card, the card across the whole width, the sentence under it.
+   The panel lends its children to the fields' row; the Check button sits beside the
+   field. Guarded by :not([hidden]) so a hidden panel stays hidden. */
+.lookup-report-panel:not([hidden]) {
+    display: contents;
+}
+
+.lookup-check {
+    order: 1;
+}
+
+.lookup-report-card,
+.lookup-report-asks {
+    order: 2;
+    flex-basis: 100%;
+    min-width: 0;
+}
+
+.lookup-report-asks {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
 .lookup-report-formats {
     margin: 0;
     color: var(--vaadin-text-color-secondary, inherit);
