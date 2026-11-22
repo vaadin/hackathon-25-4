@@ -15,7 +15,8 @@ import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -247,7 +248,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         icon.getElement().setAttribute("aria-hidden", "true");
         var row = new Div(icon, new Span(words.word()));
         row.addClassName("verdict-state");
-        box.add(row, new H2(words.title()));
+        box.add(row, new H3(words.title()));
         if (!words.why().isEmpty()) {
             var why = new Paragraph(String.join(" ", words.why()));
             why.addClassName("verdict-why");
@@ -313,13 +314,13 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             }
             case BOOT -> {
                 impact.ifPresent(why::add);
-                why.add(getTranslation(measured != null && measured.springPinned().contains(id) ? "cve.why.boot.pinned"
-                        : "cve.why.boot.theirs"));
+                why.add(getTranslation("cve.why.boot.pinned"));
                 yield new Words(getTranslation("cve.word.affects"), getTranslation("cve.title.boot", id, version), why);
             }
             case DISCONTINUED -> {
                 List<String> through = measured == null ? List.of() : measured.discontinuedThrough();
                 impact.ifPresent(why::add);
+                why.add(getTranslation("cve.why.disc.real"));
                 if (through.isEmpty()) {
                     why.add(getTranslation("cve.why.disc.unnamed"));
                 } else {
@@ -337,6 +338,13 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                     why.add(getTranslation("cve.why.build"));
                 }
                 impact.ifPresent(why::add);
+                if (why.isEmpty()) {
+                    why.add(getTranslation("cve.why.notAffected"));
+                }
+                // A risk verdict whose every route is the reader's own Spring Boot: said, after the answer, D-187.
+                if (measured != null && measured.theirsRisk().contains(id)) {
+                    why.add(getTranslation("cve.why.boot.theirs"));
+                }
                 yield new Words(getTranslation("cve.word.notAffected"),
                         getTranslation("cve.title.notAffected", id, version), why);
             }
@@ -523,9 +531,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             means.add(pair(getTranslation("version.layer.exploited"),
                     new Paragraph(getTranslation("cve.layer.triageOn", answer.version()))));
         }
-        CveRules.applicability(advisory, measured).flatMap(word -> "not_current".equals(word)
-                ? Optional.of(getTranslation("cve.assessment.notCurrent"))
-                : Optional.ofNullable(index.labels().get(word))).map(CveView::capitalised)
+        // The catalogue's label as published, `not_current` included, as the prototype prints it, D-188.
+        CveRules.applicability(advisory, measured).flatMap(word -> AdvisoryRules.label(index, word, this::getTranslation))
                 .ifPresent(label -> means.add(pair(getTranslation("version.layer.assessment"), new Paragraph(label))));
         source(index, advisory).ifPresent(text -> means.add(pair(getTranslation("cve.layer.source"), new Paragraph(text))));
         layer(layers, "means", getTranslation("version.layer.means"), means, true);
@@ -535,7 +542,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         if (!advisory.modules().isEmpty()) {
             modules.add(pair(getTranslation("cve.layer.modules"), new Paragraph(String.join(", ", advisory.modules()))));
         }
-        box(advisory, answer).ifPresent(table -> modules.add(pair(getTranslation("cve.layer.box"), table)));
+        box(advisory, answer).ifPresent(box -> modules.add(pair(getTranslation("cve.layer.box"), box)));
         first.flatMap(Assessment::workaround)
                 .ifPresent(text -> modules.add(pair(getTranslation("version.finding.do"), new Markdown(text))));
         var fix = new ArrayList<Component>();
@@ -577,17 +584,26 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         // 3. The advisory and the evidence
         var evidence = new Div();
         evidence.addClassName("layer-full");
+        // The severity word as the data writes it, as the prototype prints it, D-188.
         advisory.severity().flatMap(VersionRules::severity).ifPresent(known -> evidence.add(note(
-                getTranslation("cve.evidence.severity", getTranslation("severity." + known)))));
+                getTranslation("cve.evidence.severity", known))));
         advisory.summary().map(String::strip).ifPresent(text -> evidence.add(new Paragraph(text)));
-        said.stream().map(CveRules.Said::assessment).map(Assessment::commentary).flatMap(Optional::stream).distinct()
-                .forEach(text -> evidence.add(new Markdown(text)));
-        range(advisory, measured).ifPresent(text -> evidence.add(note(text)));
-        first.flatMap(Assessment::affects).ifPresent(affects -> evidence.add(note(getTranslation("cve.evidence.affects", affects))));
+        // The version document's copy of a verdict carries no commentary; the advisory document's copy of the
+        // same verdict does, and the prototype prints it, D-196.
+        said.stream().map(verdict -> Optional.ofNullable(advisory.assessments().get(verdict.id()))
+                .flatMap(Assessment::commentary).or(() -> verdict.assessment().commentary()))
+                .flatMap(Optional::stream).distinct().forEach(text -> evidence.add(new Markdown(text)));
+        // The measured range and the range the verdict is written for, one paragraph, D-188.
+        List<String> scope = new ArrayList<>();
+        range(advisory, measured).ifPresent(scope::add);
+        first.flatMap(Assessment::affects).ifPresent(affects -> scope.add(getTranslation("cve.evidence.affects", affects)));
+        if (!scope.isEmpty()) {
+            evidence.add(note(String.join(" ", scope)));
+        }
         advisory.firstSeen().ifPresent(seen -> evidence.add(note(getTranslation("cve.evidence.firstSeen",
                 seen.toLocalDate().toString()))));
         var record = new Paragraph(new Anchor(CveRules.recordUrl(advisory.cve()),
-                getTranslation("cve.evidence.record", advisory.cve())));
+                getTranslation("cve.evidence.record", advisory.cve())), new Text("."));
         record.addClassName("cve-record");
         if (!advisory.aliases().isEmpty()) {
             record.add(new Span(" " + getTranslation("cve.evidence.aliases", String.join(", ", advisory.aliases()))));
@@ -609,10 +625,11 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private Optional<String> source(CasesIndex index, CveAnswer advisory) {
         List<String> from = advisory.origins().stream().map(origin -> index.originLabels().getOrDefault(origin, origin))
                 .toList();
+        // As the prototype writes it: the origins with a capital, the unestablished one as published.
         Optional<String> where = from.isEmpty() ? Optional.ofNullable(index.originLabels().get("unknown"))
-                : Optional.of(String.join(", ", from));
+                : Optional.of(capitalised(String.join(", ", from)));
         List<String> parts = new ArrayList<>();
-        where.map(CveView::capitalised).ifPresent(parts::add);
+        where.ifPresent(parts::add);
         if (!advisory.packages().isEmpty()) {
             parts.add(String.join(", ", advisory.packages()));
         }
@@ -623,13 +640,16 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * The dependency as each line resolves it, which is what a scanner reads:
      * the reader's line when a version was given, every line otherwise.
      */
-    private Optional<Table> box(CveAnswer advisory, Answer answer) {
+    private Optional<Component> box(CveAnswer advisory, Answer answer) {
         String mine = answer.measured() != null ? CveRules.lineOf(answer.measured())
                 : answer.version().isBlank() ? null : VersionNumber.of(answer.version()).line();
         List<String> lines = mine == null ? new ArrayList<>(advisory.arrives().keySet())
                 : advisory.arrives().containsKey(mine) ? new ArrayList<>(List.of(mine)) : new ArrayList<>();
         if (lines.isEmpty()) {
             return Optional.empty();
+        }
+        if (mine != null) {
+            return boxSentences(mine, advisory.arrives().get(mine));
         }
         lines.sort((a, b) -> VersionNumber.of(b).compareTo(VersionNumber.of(a)));
         var table = table(getTranslation("cve.box.col.line"), getTranslation("cve.box.col.package"),
@@ -655,6 +675,30 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             }
         }
         return table.getBodyRows().isEmpty() ? Optional.empty() : Optional.of(table);
+    }
+
+    /**
+     * The reader's own line as the prototype says it, one sentence per
+     * package: the coordinate and its version as scanned, then the library's
+     * fix where the data names one, D-188.
+     */
+    private Optional<Component> boxSentences(String line, List<CveAnswer.Arrival> arrivals) {
+        var says = new Div();
+        says.addClassName("cve-box");
+        for (CveAnswer.Arrival arrival : arrivals) {
+            if (arrival.packageName().isEmpty()) {
+                continue;
+            }
+            List<String> coordinate = new ArrayList<>(List.of(arrival.packageName().get()));
+            arrival.version().ifPresent(coordinate::add);
+            arrival.bundledIn().ifPresent(inside -> coordinate.add(getTranslation("cve.box.inside", inside)));
+            String sentence = getTranslation("cve.box.line", String.join(" ", coordinate), line);
+            if (arrival.fixedUpstream().isPresent()) {
+                sentence += " " + getTranslation("cve.box.line.upstream", arrival.fixedUpstream().get());
+            }
+            says.add(new Paragraph(sentence));
+        }
+        return says.getComponentCount() == 0 ? Optional.empty() : Optional.of(says);
     }
 
     /** One row per verdict, each naming the coordinate it answers for with the differing part marked, rule 6.4.9. */
@@ -772,7 +816,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     private static Component heading(String title, @Nullable String aside) {
-        var row = new Div(new H2(title));
+        var row = new Div(new H3(title));
         row.addClassName("section-row");
         if (aside != null) {
             var span = new Span(aside);

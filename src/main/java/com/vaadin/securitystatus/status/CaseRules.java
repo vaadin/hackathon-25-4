@@ -44,7 +44,10 @@ final class CaseRules {
     private CaseRules() {
     }
 
-    /** Every case in its group, each group in the catalogue's own order. */
+    /**
+     * Every case in its group, the most frequent first as the prototype orders
+     * them, ties in the catalogue's own order, D-195.
+     */
     static Map<Group, List<Placed>> grouped(CaseCatalog catalog, CasesIndex index) {
         var groups = new EnumMap<Group, List<Placed>>(Group.class);
         for (Group group : Group.values()) {
@@ -54,6 +57,8 @@ final class CaseRules {
             Placed placed = place(item, index);
             groups.get(placed.group()).add(placed);
         }
+        groups.values().forEach(cases -> cases.sort(java.util.Comparator.comparingInt(
+                (Placed placed) -> placed.item().count() == null ? 0 : placed.item().count()).reversed()));
         return groups;
     }
 

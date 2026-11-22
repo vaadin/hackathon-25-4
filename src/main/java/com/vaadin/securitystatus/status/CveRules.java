@@ -89,13 +89,16 @@ final class CveRules {
         if (version.triage().contains(id)) {
             return State.TRIAGE;
         }
-        if (version.springPinned().contains(id) || version.theirsRisk().contains(id)) {
+        if (version.springPinned().contains(id)) {
             return State.BOOT;
         }
         if (version.discontinued().contains(id)) {
             return State.DISCONTINUED;
         }
-        if (version.ruledOut().contains(id) || version.theirs().contains(id) || version.fromBuild().contains(id)) {
+        // Every route of a finding in `theirs`, `theirs_risk` included, is the reader's own Spring Boot:
+        // it does not reach them through Vaadin, as the prototype answers, D-187.
+        if (version.ruledOut().contains(id) || version.theirs().contains(id) || version.theirsRisk().contains(id)
+                || version.fromBuild().contains(id)) {
             return State.NOT_AFFECTED;
         }
         boolean reportedOnTheLine = Optional.ofNullable(advisory.coverage().get(lineOf(version)))

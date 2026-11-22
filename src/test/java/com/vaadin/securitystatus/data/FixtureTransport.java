@@ -48,6 +48,7 @@ public final class FixtureTransport implements ClientHttpRequestFactory {
     private final List<Request> requests = new CopyOnWriteArrayList<>();
     private volatile boolean down;
     private volatile int downWithStatus;
+    private volatile int nextWithStatus;
 
     public FixtureTransport() {
         try (InputStream types = resource("content-types.properties")) {
@@ -79,6 +80,11 @@ public final class FixtureTransport implements ClientHttpRequestFactory {
     public void answerEverythingWith(int status) {
         down = true;
         downWithStatus = status;
+    }
+
+    /** The next request alone is answered with this status, as GitHub Pages now and then does with a 503. */
+    public void answerNextWith(int status) {
+        nextWithStatus = status;
     }
 
     public void comeBack() {
@@ -131,6 +137,11 @@ public final class FixtureTransport implements ClientHttpRequestFactory {
         }
         if (down) {
             return answered(path, ifNoneMatch, downWithStatus, new byte[0], null);
+        }
+        if (nextWithStatus != 0) {
+            int once = nextWithStatus;
+            nextWithStatus = 0;
+            return answered(path, ifNoneMatch, once, new byte[0], null);
         }
         byte[] body = replaced.get(path);
         if (body == null) {

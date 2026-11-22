@@ -374,52 +374,53 @@
 }
 
 /*
- * The answer by version as the prototype lays it out, D-174 to D-177. The CVE screen shares the
- * classes above through `version-body`, so these rules are scoped to this view.
+ * The answer by version as the prototype lays it out, D-174 to D-177, and the answer by CVE, which
+ * shares the classes above through `version-body` and is laid out the same way since D-186. The
+ * rules are scoped to the two views so no other screen that reuses a class picks them up.
  *
  * The view's title is the answer's H2; the card's headline and every section heading are H3 under it.
  */
-.version-view .version-body h3 {
+:is(.version-view, .cve-view) .version-body h3 {
     font-size: 1.25rem;
 }
 
-.version-view .version-body .boot-note h3 {
+:is(.version-view, .cve-view) .version-body .boot-note h3 {
     font-size: 1.125rem;
 }
 
-.version-view .verdict-card h3 {
+:is(.version-view, .cve-view) .verdict-card h3 {
     font-size: 1.5rem;
 }
 
 /* The card is tinted by its state, in the application's status colors, as the home cards are. */
-.version-view .verdict-card {
+:is(.version-view, .cve-view) .verdict-card {
     border-inline-start-width: 1px;
 }
 
-.version-view .verdict-card.state-secure {
+:is(.version-view, .cve-view) .verdict-card.state-secure {
     border-color: color-mix(in srgb, var(--status-secure) 35%, transparent);
     background: color-mix(in srgb, var(--status-secure) 7%, transparent);
 }
 
-.version-view .verdict-card.state-fix_available {
+:is(.version-view, .cve-view) .verdict-card.state-fix_available {
     border-color: color-mix(in srgb, var(--status-fix) 35%, transparent);
     background: color-mix(in srgb, var(--status-fix) 7%, transparent);
 }
 
-.version-view .verdict-card.state-unresolved {
+:is(.version-view, .cve-view) .verdict-card.state-unresolved {
     border-color: color-mix(in srgb, var(--status-unresolved) 35%, transparent);
     background: color-mix(in srgb, var(--status-unresolved) 6%, transparent);
 }
 
-.version-view .verdict-card.state-unmeasured {
+:is(.version-view, .cve-view) .verdict-card.state-unmeasured {
     background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
 }
 
-.version-view .verdict-card .finding-card {
+:is(.version-view, .cve-view) .verdict-card .finding-card {
     background: var(--vaadin-background-color, #fff);
 }
 
-.version-view .verdict-state {
+:is(.version-view, .cve-view) .verdict-state {
     font-size: 0.875rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;

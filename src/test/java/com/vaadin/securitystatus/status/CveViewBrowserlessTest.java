@@ -17,7 +17,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -98,7 +98,7 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(getCurrentView()).isInstanceOf(CveView.class);
         assertThat(answers()).containsExactly("CVE-2021-33604", "CVE-2026-45292", "CVE-2016-1000027");
-        assertThat(find(H2.class).all()).extracting(H2::getText).contains("3 advisories", "Details for CVE-2021-33604",
+        assertThat(find(H3.class).all()).extracting(H3::getText).contains("3 advisories", "Details for CVE-2021-33604",
                 "Details for CVE-2026-45292", "Details for CVE-2016-1000027");
         assertThat(text(find(com.vaadin.flow.component.html.Div.class).withClassName("cve-body").single()))
                 .contains("Answered for 24.9.21");
@@ -216,6 +216,25 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(title(card("CVE-2019-25028"))).isEqualTo("CVE-2019-25028 is not reported on 24.9.21");
     }
 
+    // D-187: a risk verdict whose every route is the reader's own Spring Boot does not affect them
+    // through Vaadin, as the prototype answers it, and the card says where the verdict lives.
+    @Test
+    void a_risk_only_through_the_readers_spring_boot_does_not_affect_them() {
+        fixtures.cold();
+        String version = "cases/v/24.9.21.json";
+        fixtures.transport().replace(version,
+                fixtures.transport().fixture(version).replace("CVE-2026-47886", "CVE-2016-1000027"));
+
+        open("cve/CVE-2016-1000027/24.9.21");
+
+        Section card = card("CVE-2016-1000027");
+        assertThat(card.hasClassName("state-secure")).isTrue();
+        assertThat(word(card)).isEqualTo("Does not affect you");
+        assertThat(title(card)).isEqualTo("CVE-2016-1000027 does not affect 24.9.21");
+        assertThat(why(card)).endsWith("Every route to it comes from the Spring Boot your application declares, "
+                + "so the fix is a newer Spring Boot or a version property in your own pom; no Vaadin release moves it.");
+    }
+
     @Test
     void an_advisory_on_a_version_with_no_fix_says_it_affects_it() {
         open("cve/CVE-2026-45292/24.7.19");
@@ -238,6 +257,19 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(text(layer(answer("CVE-2026-89407"), "evidence"))).contains(
                 "Reported by our scans on 25.3.0 to 25.3.4, 5 releases, of the 25.3 line.",
                 "com.fasterxml.jackson.core:jackson-core updated from 2.21.5 to 2.21.7 in 25.3.5.");
+    }
+
+    // D-196: the commentary of the reader's verdict, which only the advisory document carries
+    @Test
+    void the_evidence_layer_carries_the_commentary_of_the_readers_verdict() {
+        open("cve/CVE-2026-89407/24.9.21");
+
+        Details evidence = layer(answer("CVE-2026-89407"), "evidence");
+        assertThat(find(com.vaadin.flow.component.markdown.Markdown.class, evidence).all())
+                .extracting(com.vaadin.flow.component.markdown.Markdown::getContent)
+                .anySatisfy(text -> assertThat(text).startsWith("The version is your Spring Boot's: 3.5.16"));
+        // The measured range and the range the verdict is written for are one paragraph, D-188.
+        assertThat(text(evidence)).contains("of the 24.9 line. The verdict is written for Vaadin");
     }
 
     // The edge case: an alias asked, answered under the tracked id
@@ -352,7 +384,7 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private String title(Section card) {
-        return find(H2.class, card).single().getText();
+        return find(H3.class, card).single().getText();
     }
 
     private String why(Section card) {

@@ -2,13 +2,17 @@
 
 ## Overview
 
-One or more advisory ids, with or without a version, answered the way screen 3 of the delivered design answers them. Covers C1 to C6.
+One or more advisory ids, with or without a version, answered the way screen 3 of the delivered design answers them, laid out as the live prototype lays it out, compared in `specs/reviews/prototype/cve.md`. Covers C1 to C6.
+
+## Layout
+
+Under the customer shell's H1, purpose and lookup, the ids asked are the answer's H2. Each id then reads, in order: its verdict card, Across supported versions, and Details. The card's headline and every section heading are H3, D-186. The card is tinted by its state with a border all round and the state word in capitals; the line cards sit four to a row in the 912 pixel column, each tinted by its state, the reader's own outlined.
 
 ## Behaviour
 
 ### The verdict cards
 
-One card per id, and the state decides the words, taken from the source page's settled set: fixed in X when the reader's version is affected and a release clears it, affects you, not assessed yet, affects you through Spring Boot, affects you through a discontinued product, does not affect you, fixed for you, measured when no version was given, or not in our measurements. The headline with a version answers the one question, is this fixed for me, with the exact release to move to, and that release is on the reader's line by construction, rule 6.11.11.
+One card per id, and the state decides the words, taken from the source page's settled set: fixed in X when the reader's version is affected and a release clears it, affects you, not assessed yet, affects you through Spring Boot when Spring Boot pins the version, affects you through a discontinued product, does not affect you, fixed for you, measured when no version was given, or not in our measurements. A risk verdict whose every route is the reader's own Spring Boot, `theirs_risk`, does not affect them through Vaadin: the card says so, and its why says where the verdict lives, D-187. The headline with a version answers the one question, is this fixed for me, with the exact release to move to, and that release is on the reader's line by construction, rule 6.11.11.
 
 - Actions: View release notes for the fix release, and Copy answer for your ticket, which here is built: it composes the card's facts into a short plain text answer and puts it on the clipboard through the Clipboard API, with the typed JS call reading back success, and confirms in one notice. The source page could not build this without a server and drew the not built dialog; this application has the server, and the difference is a line in the demo script.
 - An id we never measured says so plainly and nothing else, rule C6.
@@ -21,9 +25,9 @@ One small card per maintained line, from `coverage`: affects you, fixed, never a
 
 The design's heading, Details, with the owning id named when several ids were asked. Three layers, only the first open:
 
-1. **What this means for you**: impact, Vaadin's assessment, and Source, where it reaches a Vaadin application from and the dependency it rides in on, unestablished said as such.
-2. **Affected modules and the fix**: the modules, the dependency in the box, package, version, bundled in, fixed upstream in, per line, do this now, fix, who ships it, expected, PR links, handover, and other per package verdicts, each naming its coordinate with the differing part marked, rules 6.4.8 and 6.4.9.
-3. **The advisory and the evidence**: severity, summary, commentary through Markdown, the measured affected range with its count, what the fix actually was, first seen, the link to cve.org or the GitHub advisory, aliases.
+1. **What this means for you**: impact, Vaadin's assessment in the catalogue's own words, and Source, where it reaches a Vaadin application from and the dependency it rides in on, unestablished said as such.
+2. **Affected modules and the fix**: the modules, the dependency in the box, one sentence per package on the reader's line ("X 2.21.4, as we scanned the newest 24.9 release. The library fixes it in 2.21.7.") or a table of every line when no version was given, do this now, fix, who ships it, expected, PR links, handover, and other per package verdicts, each naming its coordinate with the differing part marked, rules 6.4.8 and 6.4.9.
+3. **The advisory and the evidence**: severity, summary, the commentary through Markdown, read from the advisory document's copy of the verdict, D-196, the measured affected range with its count and the range the verdict is written for in one paragraph, what the fix actually was, first seen, the link to cve.org or the GitHub advisory, aliases.
 
 No badges on the verdict card, rule 6.11.12: who ships the fix lives in the fix column, aliases live beside the record.
 
@@ -81,4 +85,5 @@ Written from the code at the end of epic 13. Each line names where the code show
 - The copy error callback stays a lambda so that `PromiseAction.Error`, in an internal package, is never named; remove that when the type becomes public, `CveView.copyButton`, draft 15.
 - An alias asked alone, a GHSA for a CVE we track, is not answered under the tracked id: it resolves only when another asked id lists it as an alias, otherwise its card says the id is not tracked under that name, `CveView.resolve`, D-62, the alias map data need in `FEEDBACK-25.4.md`.
 - An id fixed below the reader's version reads "Fixed for you" only when the reader's line ever reported it; on a line that never did, the word is "Does not affect you", `CveRules.state`, D-66.
-- The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView.lineCard`, D-64.
+- The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView.lineCard`, D-64, confirmed against the prototype as an app extra, D-189.
+- What the prototype shows and the data does not carry: the advisory's publication date after "First seen by our scans", a data need row in `FEEDBACK-25.4.md`, D-179.

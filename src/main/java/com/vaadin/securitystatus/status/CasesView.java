@@ -6,8 +6,11 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
@@ -20,7 +23,6 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -49,7 +51,7 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
         this.data = data;
         addClassName("cases-view");
         body.addClassName("cases-body");
-        getContent().add(ViewHeading.ofAnswer(), body);
+        getContent().add(body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {
@@ -80,15 +82,20 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
     private void draw() {
         body.removeAll();
         Map<CaseRules.Group, List<CaseRules.Placed>> groups;
+        CaseCatalog catalog;
         try {
-            groups = CaseRules.grouped(data.cases(), data.index());
+            catalog = data.cases();
+            groups = CaseRules.grouped(catalog, data.index());
         } catch (DataUnreachableException unreachable) {
-            body.add(new DataOutageNotice());
+            body.add(heading(new H2(getTranslation("cases.heading")), Optional.empty()), new DataOutageNotice());
             return;
         }
-        var lead = new Paragraph(getTranslation("cases.lead"));
-        lead.addClassName("section-lead");
-        body.add(lead);
+        // The prototype's heading, aside and tip as the answer's H2; the title stays the trail's leaf, D-195.
+        body.add(heading(new H2(getTranslation("cases.heading")), catalog.generatedAt()
+                .map(at -> getTranslation("cases.aside", at.atZone(java.time.ZoneOffset.UTC).toLocalDate().toString()))));
+        var tip = new Paragraph(getTranslation("cases.tip"));
+        tip.addClassName("section-tip");
+        body.add(tip);
         for (CaseRules.Group group : CaseRules.Group.values()) {
             body.add(group(group, groups.get(group)));
         }
@@ -96,8 +103,9 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
 
     private Component group(CaseRules.Group group, List<CaseRules.Placed> cases) {
         String key = "cases.group." + group.name();
-        var heading = new H2(getTranslation(key, cases.size()));
-        var section = new Section(heading);
+        // The aside is a count for two groups and a sentence for the third; passed as text, not grouped.
+        var section = new Section(heading(new H3(getTranslation(key)),
+                Optional.of(getTranslation(key + ".aside", String.valueOf(cases.size())))));
         section.addClassNames("cases-group", "cases-" + group.name().toLowerCase(java.util.Locale.ROOT));
         if (cases.isEmpty()) {
             var empty = new Paragraph(getTranslation("cases.group.empty"));
@@ -114,36 +122,68 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
         return section;
     }
 
+    private static Component heading(com.vaadin.flow.component.HtmlContainer title, Optional<String> aside) {
+        var row = new Div(title);
+        row.addClassName("section-row");
+        aside.ifPresent(text -> {
+            var span = new Span(text);
+            span.addClassName("section-aside");
+            row.add(span);
+        });
+        return row;
+    }
+
     private Component row(CaseRules.Placed placed) {
         CaseCatalog.Case item = placed.item();
         var row = new Div();
-        row.addClassName("case-row");
+        row.addClassNames("case-row", "case-" + placed.group().name().toLowerCase(java.util.Locale.ROOT));
         row.getElement().setAttribute("data-case", item.id());
 
+        // The count first, as the prototype sets it, without grouping. None for a case that cannot be
+        // drawn, and 0 under none today only when the catalogue counts 0, rule 4, D-195.
+        Optional<Integer> count = Optional.ofNullable(item.count()).filter(n -> switch (placed.group()) {
+            case RENDERABLE -> true;
+            case NONE_TODAY -> n == 0;
+            case IMPOSSIBLE -> false;
+        });
+        count.ifPresent(n -> {
+            var number = new Span(String.valueOf(n));
+            number.addClassName("case-count");
+            row.add(number);
+        });
+
+        var what = new Div();
+        what.addClassName("case-what");
         var title = new Span(item.title().orElse(item.id()));
         title.addClassName("case-title");
-        row.add(title);
+        what.add(title);
         item.screen().ifPresent(screen -> {
             var where = new Span(screen);
             where.addClassName("case-screen");
-            row.add(where);
-        });
-        if (placed.group() == CaseRules.Group.RENDERABLE && item.count() != null) {
-            var count = new Span(getTranslation("cases.count", item.count()));
-            count.addClassName("case-count");
-            row.add(count);
-        }
-        placed.target().ifPresent(target -> {
-            var link = new RouterLink(getTranslation("cases.seeOne"), target.view(), target.parameters());
-            link.setQueryParameters(target.query());
-            link.addClassName("case-link");
-            row.add(link);
+            what.add(where);
         });
         item.needs().ifPresent(needs -> {
-            var says = new Span(needs);
+            var says = new Span(getTranslation("cases.needs", needs));
             says.addClassName("case-needs");
-            row.add(says);
+            what.add(says);
         });
+        row.add(what);
+
+        if (placed.group() == CaseRules.Group.RENDERABLE) {
+            placed.target().ifPresent(target -> {
+                var link = new RouterLink(getTranslation("cases.seeOne"), target.view(), target.parameters());
+                link.setQueryParameters(target.query());
+                link.addClassName("case-link");
+                row.add(link);
+            });
+        } else {
+            var chip = new Badge(getTranslation("cases.chip." + placed.group().name()));
+            chip.addClassName("case-chip");
+            if (placed.group() == CaseRules.Group.IMPOSSIBLE) {
+                chip.addThemeVariants(BadgeVariant.ERROR);
+            }
+            row.add(chip);
+        }
         return row;
     }
 }

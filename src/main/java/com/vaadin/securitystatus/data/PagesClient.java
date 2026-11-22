@@ -53,8 +53,41 @@ final class PagesClient {
         this.http = RestClient.builder().requestFactory(transport).build();
     }
 
-    /** Fetches a document, conditionally when an {@code ETag} of it is known. */
+    /**
+     * Fetches a document, conditionally when an {@code ETag} of it is known. A
+     * server error is asked again once before it counts: GitHub Pages answers
+     * some paths with a 503 now and then, missing ones above all, and the
+     * second request usually gets the real answer, D-190.
+     */
     Answer fetch(String path, @Nullable String etag) throws UnreachableException {
+        try {
+            return fetchOnce(path, etag);
+        } catch (UnreachableException first) {
+            if (!serverError(first)) {
+                throw first;
+            }
+            return fetchOnce(path, etag);
+        }
+    }
+
+    /** The host answered with a status of the 5xx family. */
+    private static final class ServerError extends IOException {
+
+        ServerError(int status) {
+            super("status " + status);
+        }
+    }
+
+    private static boolean serverError(Throwable failure) {
+        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ServerError) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Answer fetchOnce(String path, @Nullable String etag) throws UnreachableException {
         try {
             Answer answer = http.get().uri(uri(path)).headers(headers -> {
                 if (etag != null) {
@@ -66,7 +99,7 @@ final class PagesClient {
                 case 200 -> new Answer.Body(response.getBody().readAllBytes(), response.getHeaders().getETag());
                 case 304 -> new Answer.NotModified();
                 case 404 -> new Answer.NotFound();
-                default -> throw new IOException("status " + status);
+                default -> throw status >= 500 ? new ServerError(status) : new IOException("status " + status);
                 };
             });
             if (answer == null) {

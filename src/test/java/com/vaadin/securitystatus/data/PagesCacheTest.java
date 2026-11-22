@@ -145,7 +145,18 @@ class PagesCacheTest {
         clock.advance(SecurityDataService.DOCUMENT_FRESH_FOR.plusSeconds(1));
 
         assertThat(service.version(MEASURED)).containsSame(answer);
-        assertThat(host.requestsFor(VERSION)).extracting(Request::status).containsExactly(200, 500);
+        // A server error is asked again once before it counts, D-190.
+        assertThat(host.requestsFor(VERSION)).extracting(Request::status).containsExactly(200, 500, 500);
+    }
+
+    @Test
+    void a_single_503_is_asked_again_and_the_second_answer_counts() {
+        host.answerNextWith(503);
+
+        assertThat(service.cve("CVE-1999-0001")).isEmpty();
+
+        assertThat(host.requestsFor("cases/cve/CVE-1999-0001.json")).extracting(Request::status)
+                .containsExactly(503, 404);
     }
 
     @Test

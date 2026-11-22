@@ -13,6 +13,8 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
@@ -41,9 +43,14 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
     void three_groups_in_the_source_order_with_their_counts() {
         navigate(CasesView.class);
 
-        // The view's own title is the answer's H2 under the shell, D-169; the groups follow it.
-        assertThat($(H2.class).all()).extracting(H2::getText).containsExactly("Cases", "Cannot be rendered (5)",
-                "None today (3)", "Renderable (31)");
+        // The prototype's heading is the answer's H2, the groups its H3s with their asides, D-195.
+        assertThat($(H2.class).all()).extracting(H2::getText).containsExactly("Every case, with a real example");
+        assertThat($(H3.class).all()).extracting(H3::getText).containsExactly(
+                "What the design asks for and the measurements cannot give", "Cases that do not occur today",
+                "Cases you can go and look at");
+        assertThat($(Span.class).withClassName("section-aside").all()).extracting(Span::getText).containsExactly(
+                "Measured on the payload of 2026-11-21", "5 of them", "The layout exists and nothing reaches it",
+                "31 of them");
         assertThat(ids("cases-impossible")).containsExactly("fix_eta", "advisory_published", "api_changes",
                 "ticket_answer", "notify");
         assertThat(ids("cases-none_today")).containsExactly("cve.no_workaround", "cve.fix_means.mitigated",
@@ -58,8 +65,17 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
         List<Div> rows = rows("cases-renderable");
         assertThat(rows).hasSize(31).allSatisfy(row -> {
             assertThat($(RouterLink.class, row).single().getText()).isEqualTo("See one");
-            assertThat(row.getElement().getTextRecursively()).containsPattern("\\d+ today");
+            assertThat($(Span.class, row).withClassName("case-count").single().getText()).matches("\\d+");
         });
+        // The most frequent first, as the prototype orders them, D-195.
+        List<Integer> counts = rows.stream()
+                .map(row -> Integer.valueOf($(Span.class, row).withClassName("case-count").single().getText())).toList();
+        assertThat(counts).isSortedAccordingTo(java.util.Comparator.reverseOrder());
+        // A case that cannot be drawn has no count and the cannot chip; none today counts 0.
+        assertThat($(Span.class, row("fix_eta")).withClassName("case-count").exists()).isFalse();
+        assertThat(row("fix_eta").getElement().getTextRecursively()).contains("cannot");
+        assertThat($(Span.class, row("cve.no_workaround")).withClassName("case-count").single().getText())
+                .isEqualTo("0");
         assertThat(link("version.secure").getHref()).isEqualTo("version/7.7.50");
         assertThat(link("version.spring_pinned").getHref()).isEqualTo("version/23.6.0?boot=1");
         assertThat(link("cve.applicability.risk").getHref()).isEqualTo("cve/CVE-2016-1000027/23.6.19");
@@ -90,7 +106,7 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
         navigate(CasesView.class);
 
         assertThat(row("fix_eta").getElement().getTextRecursively())
-                .contains("fix_expected_version filled in when a verdict promises a release");
+                .contains("Would need: fix_expected_version filled in when a verdict promises a release");
     }
 
     // Edge case: a case pointing at data that no longer exhibits it moves to none today

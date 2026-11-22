@@ -8,16 +8,22 @@ The full catalogue for the reader who wants the list, and the demo case index. C
 
 ### Advisories
 
-- A Grid over `index.advisories`, sorted worst severity first, then oldest, then id, the source ordering rule 6.4.22.
-- Columns: id, severity badge, owner chip, package, one line impact, verdict chip in customer words.
-- Filter pills above it, one per verdict present, each with its count, driving `?verdict=<applicability>`. The counts are of rows shown against the filter, never a total beside a filtered list, rule 6.3.11.
+Laid out as the live prototype lays it out, compared in `specs/reviews/prototype/advisories.md`.
+
+- Under the customer shell's lookup, the H2 "Every advisory we have measured" with the aside "N in all, newest scan of every line we follow", and the prototype's tip, D-191. The view's title "All advisories" is the trail's leaf.
+- Filter pills: All, then one per verdict present in the prototype's order, affects you first and not on a current release last, each with its count in lighter type, driving `?verdict=<applicability>`. A row is listed under its listed verdict: in triage on no current release is not on a current release, D-192. The counts are of rows shown against the filter, and the line under the pills says the shown count against the total, rule 6.3.11.
+- A Grid over `index.advisories`, sorted worst severity first, then oldest, then id, the source ordering rule 6.4.22. With no published date the oldest step is not applied, D-81, as in the prototype.
+- Columns: id, severity, owner chip, every package whole and one to a line, the verdict in customer words, the risk one in the error badge, and a chevron ending the row, D-194. No impact column, D-82: the prototype has none either.
 - A row navigates to `/cve/<id>`.
-- A context menu per row through `GridContextMenu` with dynamic content: copy the id, open the record at cve.org or GitHub, ask about this on my version, which jumps to the lookup with the id carried. Dynamic because the record link depends on the row.
-- The Grid AI controller attaches here for signed in `SECURITY` sessions only, and the ask box simply does not exist for anyone else: the view asks the security context once at build time. The attachment itself is epic 11's work, AST-05, because it needs the provider plumbing; this epic ships the grid AI ready and unaware.
+- A context menu per row through `GridContextMenu` with dynamic content: copy the id, open the record at cve.org or GitHub, ask about this on my version, which jumps to the lookup with the id carried. Dynamic because the record link depends on the row. Not in the prototype, kept, D-193.
+- The Grid AI controller attaches here for signed in `SECURITY` sessions only, between the pills and the total line, and the ask box simply does not exist for anyone else: the view asks the security context once at build time. The attachment itself is epic 11's work, AST-05, because it needs the provider plumbing; this epic ships the grid AI ready and unaware.
 
 ### Cases
 
-- `/cases`, unlisted, no link from anywhere: the catalogue of every state the customer screens can show, in the source page's three groups, cannot be rendered, none today, renderable with a count and a See one link. Fed by `cases/cases.json`.
+Laid out as the live prototype's `#cases` lays it out, compared in `specs/reviews/prototype/cases.md`.
+
+- `/cases`, unlisted, no link from anywhere, titled "Every case": the H2 "Every case, with a real example" with the catalogue's date, the prototype's tip, and every state the customer screens can show in the source page's three groups, each headed by the prototype's words with its aside: what the design asks for and the measurements cannot give, cases that do not occur today, cases you can go and look at. Fed by `cases/cases.json`.
+- Within a group the most frequent first. A row: the count, the title with the screen word under it, "Would need:" and the catalogue's `needs` where it has one, and a See one link, or a cannot or none today chip, D-195.
 - It exists for demos and review: walking every state without hunting for data that exhibits it.
 
 ## Edge cases
@@ -56,7 +62,8 @@ The full catalogue for the reader who wants the list, and the demo case index. C
 Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
 
 - AC1: the list is ordered by severity, then by id; the oldest first step is not applied because the index carries no published date, `AdvisoryRules.ordered`, D-81, D-92. The same gap keeps US-7.1's first task, the grid in the source order, from being true.
-- No one line impact column: `index.advisories` carries no impact text, `AdvisoriesView.configureGrid`, D-82.
+- No one line impact column: `index.advisories` carries no impact text, `AdvisoriesView.configureGrid`, D-82, and the prototype shows none either, D-193.
+- Why an impossible case cannot be drawn is not published, only its `needs`, and for one case of five: a data need row in `FEEDBACK-25.4.md`, D-195.
 - A case whose fact the index does not carry is checked only for its example's existence, so it can stay renderable after the data stops exhibiting it, `CaseRules.exhibits`, D-88.
 - Workaround to remove when draft 21 is answered: the Grid AI controller drives a hidden `Grid<AIDataRow>` over an in memory copy of the catalogue, and the ids it settles on narrow the advisories grid, `assistant/AdvisoryAsk`, D-140.
 - Workaround to remove when draft 17 is answered: `@Uses` on `AdvisoriesView` so that the production bundle carries the ask box, D-149.

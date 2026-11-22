@@ -12,6 +12,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
@@ -22,9 +23,12 @@ import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -43,7 +47,6 @@ import com.vaadin.securitystatus.base.nav.Address;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -77,6 +80,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     private final GridContextMenu<AdvisoryCatalogEntry> menu = new GridContextMenu<>(grid);
     private final Nav pills = new Nav();
     private final Paragraph total = new Paragraph();
+    private final Span aside = new Span();
     private final Div outage = new Div();
     /** The index's customer words for the verdicts, as last drawn. */
     private Map<String, String> labels = Map.of();
@@ -92,7 +96,14 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         outage.addClassName("advisories-outage");
         configureGrid();
         configureMenu();
-        getContent().add(ViewHeading.ofAnswer(), outage, pills);
+        // The prototype's heading, aside and tip as the answer's H2; the view's title stays the
+        // trail's leaf and the document's title, D-191.
+        var heading = new Div(new H2(getTranslation("advisories.heading")), aside);
+        heading.addClassName("section-row");
+        aside.addClassName("section-aside");
+        var tip = new Paragraph(getTranslation("advisories.tip"));
+        tip.addClassName("section-tip");
+        getContent().add(heading, tip, outage, pills);
         // The ask exists only for the team, and the security context is asked
         // once, here: an anonymous reader gets no box and so no model call, D-141.
         if (authentication.hasRole(Roles.SECURITY)) {
@@ -143,6 +154,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         boolean reachable = loaded.index().isPresent();
         pills.setVisible(reachable);
         total.setVisible(reachable);
+        aside.setVisible(reachable);
         grid.setVisible(reachable);
         if (!reachable) {
             outage.add(new DataOutageNotice());
@@ -157,9 +169,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         List<AdvisoryCatalogEntry> rows = ask.map(ids -> AdvisoryRules.filtered(all, shown).stream()
                 .filter(row -> ids.contains(row.cve())).toList()).orElseGet(() -> AdvisoryRules.filtered(all, shown));
 
-        pills.add(pill(getTranslation("advisories.pill.all", all.size()), Optional.empty(), shown.isEmpty()));
-        counts.forEach((word, count) -> pills.add(pill(
-                getTranslation("advisories.pill", verdictWords(index, word), count), Optional.of(word),
+        aside.setText(getTranslation("advisories.aside", all.size()));
+        pills.add(pill(getTranslation("advisories.pill.all"), all.size(), Optional.empty(), shown.isEmpty()));
+        counts.forEach((word, count) -> pills.add(pill(verdictWords(index, word), count, Optional.of(word),
                 shown.filter(word::equals).isPresent())));
 
         // Rule 6.3.11: the total, and under a filter the shown count against it.
@@ -172,8 +184,12 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     }
 
     /** A pill is a real link writing the flag, so it can be opened in a new tab and the back button undoes it. */
-    private Component pill(String text, Optional<String> word, boolean active) {
+    private Component pill(String text, int count, Optional<String> word, boolean active) {
         var link = new RouterLink(text, AdvisoriesView.class);
+        // The count in its own lighter span, as the prototype sets it; passed as text, not a quantity to group.
+        var number = new Span(String.valueOf(count));
+        number.addClassName("pill-count");
+        link.add(number);
         link.setQueryParameters(Address.of("advisories").with(QueryFlag.VERDICT, word).query());
         link.addClassName("verdict-pill");
         word.ifPresent(value -> link.addClassName("verdict-" + value));
@@ -186,22 +202,23 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     /** The customer's words for a verdict: the index's label, else our short word for it. */
     private String verdictWords(CasesIndex index, String word) {
-        return Optional.ofNullable(index.labels().get(word)).orElseGet(() -> getTranslation("verdict.short." + word));
+        return AdvisoryRules.label(index, word, this::getTranslation).orElseGet(() -> getTranslation("verdict.short." + word));
     }
 
     // The grid
 
     private void configureGrid() {
         grid.addClassName("advisories-grid");
-        grid.addThemeVariants(GridVariant.ROW_STRIPES);
+        // Long package names wrap rather than being cut at the column's width, D-194.
+        grid.addThemeVariants(GridVariant.ROW_STRIPES, GridVariant.WRAP_CELL_CONTENT);
         grid.addComponentColumn(this::idCell).setHeader(getTranslation("advisories.col.id")).setKey("id")
                 .setAutoWidth(true).setFlexGrow(0);
         grid.addComponentColumn(this::severityCell).setHeader(getTranslation("advisories.col.severity"))
                 .setKey("severity").setAutoWidth(true).setFlexGrow(0);
         grid.addComponentColumn(this::ownerCell).setHeader(getTranslation("advisories.col.owner")).setKey("owner")
                 .setAutoWidth(true).setFlexGrow(0);
-        grid.addColumn(row -> String.join(", ", row.packages())).setHeader(getTranslation("advisories.col.package"))
-                .setKey("package").setFlexGrow(1).setTooltipGenerator(row -> String.join(", ", row.packages()));
+        grid.addComponentColumn(this::packagesCell).setHeader(getTranslation("advisories.col.package"))
+                .setKey("package").setFlexGrow(1);
         grid.addComponentColumn(this::verdictCell).setHeader(getTranslation("advisories.col.verdict"))
                 .setKey("verdict").setAutoWidth(true).setFlexGrow(0);
         grid.addItemClickListener(click -> open(click.getItem()));
@@ -235,17 +252,44 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         }).orElse(null);
     }
 
+    /** Every package, one to a line, whole: none is cut at the column's width, D-194. */
+    private @Nullable Component packagesCell(AdvisoryCatalogEntry row) {
+        if (row.packages().isEmpty()) {
+            return null;
+        }
+        var cell = new Div();
+        cell.addClassName("advisory-packages");
+        row.packages().forEach(name -> cell.add(new Span(name)));
+        return cell;
+    }
+
+    /**
+     * The listed verdict, the risk one in the error badge and every other in
+     * the plain one, then the row's chevron, as the prototype and the home
+     * page's recent rows draw them, D-194.
+     */
     private @Nullable Component verdictCell(AdvisoryCatalogEntry row) {
-        return row.applicability().flatMap(word -> chipWords(word).map(words -> {
+        return AdvisoryRules.listed(row).flatMap(word -> chipWords(word).map(words -> {
             var chip = new Badge(words);
             chip.addClassNames("verdict-chip", "verdict-" + word);
-            return (Component) chip;
+            if ("risk".equals(word)) {
+                chip.addThemeVariants(BadgeVariant.ERROR);
+            }
+            Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
+            chevron.addClassName("advisory-chevron");
+            chevron.getElement().setAttribute("aria-hidden", "true");
+            var cell = new Span(chip, chevron);
+            cell.addClassName("advisory-verdict");
+            return (Component) cell;
         })).orElse(null);
     }
 
     /** The index's label for a verdict, else our short word for one of the closed vocabulary, else nothing. */
     private Optional<String> chipWords(String word) {
-        return Optional.ofNullable(labels.get(word)).or(() -> AdvisoryRules.VERDICTS.contains(word)
+        return Optional.ofNullable(labels.get(word))
+                .or(() -> "not_current".equals(word) ? Optional.of(getTranslation("verdict.label.not_current"))
+                        : Optional.empty())
+                .or(() -> AdvisoryRules.VERDICTS.contains(word)
                 ? Optional.of(getTranslation("verdict.short." + word)) : Optional.empty());
     }
 

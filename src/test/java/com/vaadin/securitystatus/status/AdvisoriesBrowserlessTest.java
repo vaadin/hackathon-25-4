@@ -24,6 +24,7 @@ import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.FixturePages;
@@ -79,12 +80,33 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         var view = navigate(AdvisoriesView.class);
         var grid = test(view.grid());
 
-        assertThat(grid.getCellText(0, 3)).isEqualTo("org.springframework:spring-web");
+        assertThat(text(grid.getCellComponent(0, "package"))).isEqualTo("org.springframework:spring-web");
         assertThat(text(grid.getCellComponent(0, "id"))).isEqualTo("CVE-2016-1000027");
         assertThat(text(grid.getCellComponent(0, "severity"))).isEqualTo("Critical");
         assertThat(text(grid.getCellComponent(0, "owner"))).isEqualTo("Vaadin issue");
         assertThat(text(grid.getCellComponent(0, "verdict"))).isEqualTo("affects you");
-        assertThat(grid.getCellComponent(0, "verdict")).isInstanceOf(Badge.class);
+        // The risk verdict in the error badge, then the row's chevron, D-194.
+        Badge risk = $(Badge.class, grid.getCellComponent(0, "verdict")).single();
+        assertThat(risk.getElement().getThemeList()).contains("error");
+        assertThat(grid.getCellComponent(0, "verdict").getElement().getChildren()
+                .anyMatch(child -> child.getClassList().contains("advisory-chevron"))).isTrue();
+        // Any other verdict in the plain badge.
+        Badge other = $(Badge.class, grid.getCellComponent(1, "verdict")).single();
+        assertThat(other.getElement().getThemeList()).doesNotContain("error");
+    }
+
+    // D-194: a row with several packages lists every one whole, one to a line, never joined and cut
+    @Test
+    void every_package_of_a_row_is_listed_whole() {
+        var view = navigate(AdvisoriesView.class);
+        var grid = test(view.grid());
+        List<AdvisoryCatalogEntry> rows = rows(view.grid());
+
+        int several = java.util.stream.IntStream.range(0, rows.size()).filter(i -> rows.get(i).packages().size() > 1)
+                .findFirst().orElseThrow();
+        Component cell = grid.getCellComponent(several, "package");
+        assertThat(cell.getChildren().map(child -> child.getElement().getText()).toList())
+                .containsExactlyElementsOf(rows.get(several).packages());
     }
 
     // AC1: owner chips follow the fix owner rule, D-51
@@ -113,7 +135,8 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
     void the_risk_pill_shows_only_risk_rows_and_writes_the_flag() {
         navigate(AdvisoriesView.class);
         RouterLink risk = pill("verdict-risk");
-        assertThat(risk.getText()).isEqualTo("affects you 150");
+        assertThat(text(risk)).isEqualTo("affects you150");
+        assertThat($(Span.class, risk).withClassName("pill-count").single().getText()).isEqualTo("150");
         assertThat(risk.getHref()).isEqualTo("advisories?verdict=risk");
 
         var view = navigate(risk.getHref(), AdvisoriesView.class);
@@ -126,17 +149,19 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
                 .isEqualTo("150 of 535 advisories shown: affects you");
         // The All pill takes the filter away.
         assertThat(pills().get(0).getHref()).isEqualTo("advisories");
-        assertThat(pills().get(0).getText()).isEqualTo("All 535");
+        assertThat(text(pills().get(0))).isEqualTo("All535");
     }
 
-    // AC1: one pill per verdict present, worst first, counts as each would show
+    // AC1: one pill per verdict present, in the prototype's order, counts as each would show, D-192.
+    // Every advisory in triage on the fixture is on no current release, so it is listed as such.
     @Test
     void one_pill_per_verdict_present_with_its_count() {
         navigate(AdvisoriesView.class);
 
-        assertThat(pills()).extracting(RouterLink::getText).containsExactly("All 535", "not assessed yet 122",
-                "affects you 150", "used only in specific configurations 114", "used, no risk 74",
-                "not used by Vaadin 32", "scanner false positive 38", "already fixed in a release 5");
+        assertThat(pills()).extracting(pill -> pill.getText() + " " + $(Span.class, pill).single().getText())
+                .containsExactly("All 535", "affects you 150", "used only in specific configurations 114",
+                        "used, no risk 74", "not used by Vaadin 32", "scanner false positive 38",
+                        "already fixed in a release 5", "not on a current release 122");
     }
 
     // Edge cases: an unknown verdict is ignored, and so is one no advisory carries
@@ -146,9 +171,9 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows(view.grid())).hasSize(535);
         assertThat(pills().get(0).hasClassName("active")).isTrue();
 
-        view = navigate("advisories?verdict=not_current", AdvisoriesView.class);
+        view = navigate("advisories?verdict=in_triage", AdvisoriesView.class);
         assertThat(rows(view.grid())).hasSize(535);
-        assertThat(pills()).noneMatch(pill -> pill.hasClassName("verdict-not_current"));
+        assertThat(pills()).noneMatch(pill -> pill.hasClassName("verdict-in_triage"));
     }
 
     // A row navigates to its answer by CVE

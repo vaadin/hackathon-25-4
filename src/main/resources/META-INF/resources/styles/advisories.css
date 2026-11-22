@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    max-width: 80rem;
+    min-width: 0;
 }
 
 .verdict-pills {
@@ -25,9 +25,17 @@
 }
 
 .verdict-pill.active {
-    border-color: var(--vaadin-text-color, currentColor);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.06));
+    border-color: color-mix(in srgb, var(--aura-accent-color, #1a73e8) 40%, transparent);
+    background: color-mix(in srgb, var(--aura-accent-color, #1a73e8) 10%, transparent);
     font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+/* The count in lighter type beside the verdict's words, as the prototype sets it, D-192. */
+.verdict-pill .pill-count {
+    margin-inline-start: 0.375rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
+    font-weight: normal;
 }
 
 .advisories-total {
@@ -47,50 +55,129 @@
     font-weight: var(--aura-font-weight-semibold, 600);
 }
 
+/* Every package whole, one to a line, wrapping inside a long name rather than cut, D-194. */
+.advisories-grid .advisory-packages {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.advisories-grid .advisory-packages span {
+    overflow-wrap: anywhere;
+}
+
+.advisories-grid .advisory-verdict {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.advisories-grid .advisory-chevron {
+    width: 1rem;
+    height: 1rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
 .advisories-outage:empty {
     display: none;
 }
 
-/* The case catalogue */
+/* The case catalogue, as the prototype lays it out, D-195: the count, what the case is, its chip or link. */
 .cases-body {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    max-width: 64rem;
+    gap: 1rem;
 }
 
-.cases-group h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
+.cases-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cases-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .case-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr) auto;
+    align-items: center;
     gap: 0.25rem 1rem;
-    padding: 0.5rem 0;
-    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
 }
 
-.case-title {
-    flex: 1 1 18rem;
+.case-row.case-impossible {
+    border-style: dashed;
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+}
+
+.case-count {
+    grid-column: 1;
+    text-align: end;
+    font-weight: var(--aura-font-weight-semibold, 600);
+    font-variant-numeric: tabular-nums;
+}
+
+.case-what {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
 }
 
 .case-screen,
-.case-count,
 .case-needs {
     font-size: 0.875rem;
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
-.case-needs {
-    flex-basis: 100%;
+.case-link,
+.case-chip {
+    grid-column: 3;
+    justify-self: end;
 }
 
 /* A link alone in a row is the row's one action: big enough to hit. */
 .case-link {
     display: inline-block;
     padding-block: 0.25rem;
+}
+
+@media (max-width: 40em) {
+    .case-row {
+        grid-template-columns: 3rem minmax(0, 1fr);
+    }
+
+    .case-link,
+    .case-chip {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
+
+/* The prototype's heading row on both screens: the H2 of the answer, its aside at the right, D-191, D-195. */
+:is(.advisories-view, .cases-body) .section-row {
+    margin-block-end: 0;
+}
+
+:is(.advisories-view, .cases-body) .section-row h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.3;
+}
+
+.cases-group .section-row h3 {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+:is(.advisories-view, .cases-body) .section-tip {
+    margin: 0;
 }
