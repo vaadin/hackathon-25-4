@@ -23,7 +23,7 @@ final class SpringRules {
 
     /** The groups of one Spring Boot release: what it asks of the reader first. */
     enum Kind {
-        RISK(true), UNJUDGED(true), ANSWERED(false);
+        RISK(true), UNJUDGED(false), ANSWERED(false);
 
         private final boolean startsOpen;
 
@@ -31,7 +31,7 @@ final class SpringRules {
             this.startsOpen = startsOpen;
         }
 
-        /** The explorer's fold rule, 6.6.2: the two that ask for work start open. */
+        /** The prototype's folds, D-219: the risks open, the rest shut. */
         boolean startsOpen() {
             return startsOpen;
         }
@@ -86,13 +86,17 @@ final class SpringRules {
         return kind(other).ordinal() < kind(one).ordinal() ? other : one;
     }
 
-    /** A real risk, not judged yet, or answered: {@code in_triage} is the absence of a verdict. */
+    /**
+     * A real risk, not judged yet, or answered, by the explorer's rule of
+     * D-205: a verdict outside the five ruled out verdicts and not {@code
+     * risk} is not judged, as the prototype reads it, D-219.
+     */
     static Kind kind(Finding finding) {
-        var verdict = finding.verdict().filter(word -> !"in_triage".equals(word));
-        if (verdict.isEmpty()) {
-            return Kind.UNJUDGED;
-        }
-        return "risk".equals(verdict.get()) ? Kind.RISK : Kind.ANSWERED;
+        return switch (ExplorerRules.stateOf(finding)) {
+            case VULNERABLE -> Kind.RISK;
+            case UNJUDGED -> Kind.UNJUDGED;
+            case NOT_AFFECTED -> Kind.ANSWERED;
+        };
     }
 
     /** The groups present, in their order, each worst first. */

@@ -83,10 +83,9 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
 
     static final String PATH = "findings";
 
-    private static final List<String> KINDS = List.of("RISK", "UNJUDGED", "ANSWERED");
-
     private final SecurityDataService data;
     private final ProductSelection selection;
+    private final SeriesParts parts;
 
     private final ValueSignal<String> query = new ValueSignal<>("");
     private final ValueSignal<Optional<String>> opened = new ValueSignal<>(Optional.empty());
@@ -106,13 +105,10 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         this.selection = selection;
         addClassName("explorer-view");
 
+        this.parts = new SeriesParts(this, data, selection);
         buildPanel();
 
-        var help = new Button("?", click -> legendOpen.set(true));
-        help.addClassName("explorer-help");
-        help.setAriaLabel(getTranslation("explorer.legend.open"));
-        help.addThemeVariants(ButtonVariant.PRIMARY);
-        help.bindVisible(legendOpen.map(open -> !open));
+        var help = parts.legendButton(legendOpen);
 
         lead.addClassName("explorer-lead");
         heading.addClassName("explorer-series-heading");
@@ -122,9 +118,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         var main = new Div(help, outage, lead, series);
         main.addClassName("explorer-main");
 
-        var legend = legend();
-        legend.bindVisible(legendOpen);
-        getContent().add(main, legend);
+        getContent().add(main, parts.legend(legendOpen));
         Shortcuts.addShortcutListener(this, () -> legendOpen.set(false), Key.ESCAPE);
 
         var generatedAt = refresh.generatedAt();
@@ -593,24 +587,18 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             scanned.getElement().setAttribute("title", getTranslation("explorer.row.scanned.title"));
             summary.add(scanned);
         });
-        var vaadin = badge("vaadin", state,
-                getTranslation("explorer.badge.vaadin", getTranslation("explorer.state." + state.name())));
-        vaadin.getElement().setAttribute("title", getTranslation("explorer.state." + state.name() + ".means"));
-        summary.add(vaadin);
+        summary.add(parts.vaadinBadge(state));
         ExplorerAnswer.springState(line, shape).ifPresent(theirs -> {
-            var spring = badge("spring", theirs,
-                    getTranslation("explorer.badge.spring", getTranslation("explorer.state." + theirs.name())));
             String against = line.springBootDeclared().or(line::springBoot).map(VersionNumber::toString)
                     .orElseGet(() -> getTranslation("explorer.badge.spring.declares"));
-            spring.getElement().setAttribute("title", getTranslation("explorer.badge.spring.title", against));
-            summary.add(spring);
+            summary.add(parts.springBadge(theirs, getTranslation("explorer.badge.spring.title", against)));
         });
-        sentence(line, shape, state).ifPresent(text -> {
+        parts.sentence(line, shape, state).ifPresent(text -> {
             var says = new Span(text);
             says.addClassName("explorer-row-says");
             summary.add(says);
         });
-        summary.add(rings(line, catalogue, shape, asked));
+        summary.add(parts.rings(line, catalogue, shape, asked));
 
         var details = new Details();
         details.setSummary(summary);
@@ -628,59 +616,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             }
         });
         return details;
-    }
-
-    /** What the row says beside the badge, counted over the same findings as the badge, D-205. */
-    private Optional<String> sentence(Line line, Shape shape, ExplorerRules.Badge state) {
-        List<Finding> mine = ExplorerAnswer.stateFindings(line, shape);
-        long risks = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.VULNERABLE)
-                .count();
-        long open = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.UNJUDGED)
-                .count();
-        switch (state) {
-            case VULNERABLE:
-                return Optional.of(open > 0 ? getTranslation("explorer.says.riskOpen", (int) risks, (int) open)
-                        : getTranslation("explorer.says.risk", (int) risks));
-            case UNJUDGED:
-                return Optional.of(!ExplorerAnswer.measured(line, shape) || mine.isEmpty()
-                        ? getTranslation("explorer.says.unmeasured")
-                        : getTranslation("explorer.says.unjudged", (int) open));
-            default:
-                Groups theirs = ExplorerAnswer.split(line, shape, Asked.nothing()).theirs();
-                int waiting = theirs.risk().size() + theirs.pending().size();
-                return waiting > 0 ? Optional.of(getTranslation("explorer.says.spring", waiting)) : Optional.empty();
-        }
-    }
-
-    private static Badge badge(String side, ExplorerRules.Badge state, String text) {
-        var badge = new Badge(text);
-        badge.addClassNames("explorer-badge", side, "badge-" + state.name().toLowerCase(java.util.Locale.ROOT));
-        return badge;
-    }
-
-    /** One ring per product that is on, in catalogue order, with its count, the noughts drawn too, D-207. */
-    private Component rings(Line line, List<Product> catalogue, Shape shape, Asked asked) {
-        var rings = new Span();
-        rings.addClassName("explorer-rings");
-        for (Product product : catalogue) {
-            if (!shape.on().contains(product.name())) {
-                continue;
-            }
-            int count = ExplorerAnswer.arrivesThrough(line, product.name(), shape, asked).size();
-            var ring = new Span(String.valueOf(count));
-            ring.addClassName("explorer-ring");
-            if (count > 0) {
-                ring.addClassNames("product-ring", "ring-" + product.ring());
-                ring.getElement().setAttribute("title",
-                        getTranslation("explorer.ring.some", count, product.name()));
-            } else {
-                ring.addClassName("none");
-                ring.getElement().setAttribute("title", getTranslation("explorer.ring.none", product.name()));
-            }
-            ring.getElement().setAttribute("data-product", product.name());
-            rings.add(ring);
-        }
-        return rings;
     }
 
     // The opened series
@@ -717,54 +652,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
 
         Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
         var routes = new FindingGrid.Routes(registry, shape, shape.hidden(line), optional);
-        boolean halves = split.theirs().size() > 0 && !shape.plain();
-        if (halves) {
-            detail.add(halfTitle("explorer.half.ours"));
-        }
-        groups(detail, line, "", split.ours(), routes);
-        if (split.ours().risk().isEmpty() && split.ours().pending().isEmpty()) {
-            detail.add(hint(getTranslation("explorer.detail.nothing")));
-        }
-
-        List<Finding> blind = split.unattributed().stream().filter(finding -> finding.bundledIn().isEmpty())
-                .toList();
-        int frontend = (int) blind.stream().filter(FindingGrid::frontend).count();
-        if (frontend > 0) {
-            detail.add(hint(getTranslation("explorer.detail.frontend", frontend)));
-        }
-        if (blind.size() - frontend > 0) {
-            detail.add(hint(getTranslation("explorer.detail.untraced", blind.size() - frontend)));
-        }
-        if (split.elsewhere() > 0) {
-            detail.add(hint(getTranslation("explorer.detail.elsewhere", split.elsewhere())));
-        }
-
-        if (halves) {
-            var half = new Div();
-            half.addClassName("explorer-half");
-            half.add(halfTitle("explorer.half.theirs"));
-            var says = new Paragraph();
-            says.addClassName("explorer-hint");
-            String against = line.springBoot().map(VersionNumber::toString)
-                    .orElseGet(() -> getTranslation("explorer.half.theirs.unknown"));
-            var text = new StringBuilder(getTranslation("explorer.half.theirs.lead", split.theirs().size(), against));
-            line.springBootDeclared().filter(declared -> line.springBoot().isPresent()
-                    && !declared.equals(line.springBoot().get())).ifPresent(declared -> text.append(' ')
-                            .append(getTranslation("explorer.half.theirs.declared", declared.toString())));
-            text.append(' ').append(getTranslation("explorer.half.theirs.moves")).append(' ');
-            says.add(text.toString());
-            var link = new RouterLink(getTranslation("explorer.half.theirs.link"), SpringView.class);
-            link.addClassName("explorer-spring-link");
-            says.add(link);
-            half.add(says);
-            groups(half, line, "SPRING_", split.theirs(), routes);
-            detail.add(half);
-        }
-
-        if (!split.build().isEmpty()) {
-            detail.add(group(line, "BUILD", getTranslation("explorer.group.BUILD", split.build().size()), null,
-                    "explorer.group.BUILD.note", split.build(), false, routes));
-        }
+        parts.halves(detail, line, split, routes, false);
 
         detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));
         others(line).ifPresent(detail::add);
@@ -775,57 +663,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         release.addClassName("explorer-release-link");
         detail.add(release);
         return detail;
-    }
-
-    private Component halfTitle(String key) {
-        var title = new Paragraph(getTranslation(key));
-        title.addClassName("explorer-half-title");
-        title.getElement().setAttribute("title", getTranslation(key + ".title"));
-        return title;
-    }
-
-    private void groups(Div into, Line line, String prefix, Groups groups, FindingGrid.Routes routes) {
-        List<List<Finding>> members = List.of(groups.risk(), groups.pending(), groups.ruled());
-        for (int i = 0; i < KINDS.size(); i++) {
-            List<Finding> findings = members.get(i);
-            if (findings.isEmpty()) {
-                continue;
-            }
-            String kind = KINDS.get(i);
-            String heading = getTranslation("explorer.half.group", findings.size(),
-                    getTranslation("explorer.half.group." + kind));
-            into.add(group(line, prefix + kind, heading, getTranslation("explorer.half.group." + kind + ".title"),
-                    null, findings, !"ANSWERED".equals(kind), routes));
-        }
-    }
-
-    private Component group(Line line, String key, String heading, String title, String noteKey,
-            List<Finding> findings, boolean startsOpen, FindingGrid.Routes routes) {
-        var label = new Span(heading);
-        label.addClassName("explorer-group-label");
-        if (title != null) {
-            label.getElement().setAttribute("title", title);
-        }
-        var details = new Details(label);
-        details.addClassNames("explorer-group", "group-" + key.toLowerCase(java.util.Locale.ROOT));
-        details.getElement().setAttribute("data-group", key);
-        details.setOpened(selection.isOpen(key, startsOpen));
-        details.addOpenedChangeListener(change -> {
-            if (change.isFromClient()) {
-                // Rule 6.7.4: recorded when it happens, keyed on the part of the heading that does not move.
-                selection.open(key, change.isOpened());
-            }
-        });
-        if (noteKey != null) {
-            details.add(lead("explorer-group-note", getTranslation(noteKey)));
-        }
-        ExplorerRules.Capped capped = ExplorerRules.capped(findings);
-        details.add(new FindingGrid(capped.shown(), routes, finding -> findingDetails(line, finding,
-                routes.shape().plain())));
-        if (capped.more() > 0) {
-            details.add(lead("explorer-group-more", getTranslation("explorer.group.more", capped.more())));
-        }
-        return details;
     }
 
     /** The other releases of the series this row answers for, each a link to its page, D-212. */
@@ -882,71 +719,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             }
         });
         return holder;
-    }
-
-    /**
-     * An opened finding, read from the release's own record, which is fetched
-     * the first time a finding of that release is opened and cached by the
-     * data layer.
-     */
-    private Component findingDetails(Line line, Finding finding, boolean springOff) {
-        Optional<ExplorerVersion.Finding> full;
-        try {
-            full = data.explorerVersion(line.version())
-                    .flatMap(version -> version.findings().stream()
-                            .filter(candidate -> candidate.cve().equals(finding.cve())).findFirst());
-        } catch (DataUnreachableException unreachable) {
-            var box = new Div(new DataOutageNotice());
-            box.addClassName("explorer-finding");
-            return box;
-        }
-        return new FindingDetail(finding.cve(), line.version(), full, springOff);
-    }
-
-    // The legend
-
-    /** The panel the "?" opens, in the prototype's words, D-211. */
-    private Aside legend() {
-        var legend = new Aside();
-        legend.addClassName("explorer-legend");
-        var title = new H2(getTranslation("explorer.legend.heading"));
-        var close = new Button(VaadinIcon.CLOSE.create(), click -> legendOpen.set(false));
-        close.addThemeVariants(ButtonVariant.TERTIARY);
-        close.setAriaLabel(getTranslation("explorer.legend.close"));
-        close.addClassName("explorer-legend-close");
-        var top = new Div(title, close);
-        top.addClassName("explorer-legend-top");
-        legend.add(top, hint(getTranslation("explorer.legend.lead")));
-
-        var states = new LinkedHashMap<String, String>();
-        for (ExplorerRules.Badge state : ExplorerRules.Badge.values()) {
-            states.put(getTranslation("explorer.state." + state.name()),
-                    getTranslation("explorer.state." + state.name() + ".means"));
-        }
-        legend.add(new H3(getTranslation("explorer.legend.badges")), terms(states));
-
-        var groups = new LinkedHashMap<String, String>();
-        KINDS.forEach(kind -> groups.put(getTranslation("explorer.half.group." + kind),
-                getTranslation("explorer.half.group." + kind + ".title")));
-        legend.add(new H3(getTranslation("explorer.legend.groups")), terms(groups));
-
-        var depth = new LinkedHashMap<String, String>();
-        depth.put(getTranslation("explorer.legend.reviewed"), getTranslation("explorer.legend.reviewed.means"));
-        depth.put(getTranslation("explorer.legend.reproduced"), getTranslation("explorer.legend.reproduced.means"));
-        legend.add(new H3(getTranslation("explorer.legend.depth")), terms(depth));
-
-        legend.add(new H3(getTranslation("explorer.legend.measuring")),
-                hint(getTranslation("explorer.legend.measuring.shape")),
-                hint(getTranslation("explorer.legend.measuring.missing")));
-        return legend;
-    }
-
-    private static DescriptionList terms(Map<String, String> entries) {
-        var list = new DescriptionList();
-        list.addClassName("explorer-legend-list");
-        entries.forEach((term, description) -> list.add(new DescriptionList.Term(term),
-                new DescriptionList.Description(description)));
-        return list;
     }
 
     // Small parts

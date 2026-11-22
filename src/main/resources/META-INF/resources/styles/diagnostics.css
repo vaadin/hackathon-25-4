@@ -4,6 +4,9 @@
     grid-template-columns: repeat(auto-fit, minmax(32rem, 1fr));
     gap: 1rem 2rem;
     max-width: 120rem;
+    /* The same content padding as the other internal pages, which sit beside no panel either. */
+    padding: 1.5rem;
+    box-sizing: border-box;
 }
 
 .diagnostics-view > .view-heading,
@@ -70,4 +73,10 @@
 .diagnostics-csp table,
 .diagnostics-assistant table {
     width: 100%;
+}
+
+/* A table wider than its column scrolls inside its panel instead of running under the next one. */
+.diagnostics-panel {
+    min-width: 0;
+    overflow-x: auto;
 }

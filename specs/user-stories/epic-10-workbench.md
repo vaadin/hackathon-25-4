@@ -9,7 +9,7 @@
 ### US-10.1: The queue
 
 **Tasks:**
-- [x] Grid over the queue fixture order, series filter in the address
+- [x] Grid over the queue fixture order, series filter in the address (since D-220 one disclosure per package instead of the grid)
 - [x] The summary, Charts or figures, decided and recorded
 - [x] Row selection prefills the form
 

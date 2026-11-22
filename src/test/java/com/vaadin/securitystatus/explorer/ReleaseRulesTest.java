@@ -22,30 +22,51 @@ class ReleaseRulesTest {
     private final ExplorerFront front = data.explorerFront();
     private final ExplorerVersion record = data.explorerVersion(VersionNumber.of("24.9.21")).orElseThrow();
 
-    @Test
-    void an_update_removes_only_what_a_vaadin_release_moves_after_this_release() {
-        List<ExplorerVersion.Finding> removed = ReleaseRules.removedBy(record);
-
-        assertThat(removed).hasSize(22);
-        assertThat(removed).allSatisfy(finding -> {
-            assertThat(finding.owner()).isNotEqualTo(Optional.of("spring-boot"));
-            assertThat(finding.fixedIn().orElseThrow()).isGreaterThan(VersionNumber.of("24.9.21"))
-                    .isLessThanOrEqualTo(VersionNumber.of("24.9.26"));
-        });
-        // The build only finding carries a fixed_in before the release itself, which no update removes.
-        assertThat(removed).noneMatch(finding -> finding.owner().equals(Optional.of("build")));
-        assertThat(ReleaseRules.removedBy(data.explorerVersion(VersionNumber.of("25.3.5")).orElseThrow())).isEmpty();
+    private ExplorerAnswer.Shape shape(java.util.Set<String> off) {
+        return ExplorerAnswer.shape(front, ExplorerAnswer.catalogue(ExplorerRules.products(front), front), off);
     }
 
     @Test
-    void the_record_reads_into_the_explorer_groups_with_its_own_counts() {
-        var groups = ExplorerRules.grouped(ReleaseRules.findings(record, front.moduleNames()));
+    void an_update_removes_the_readers_own_findings_fixed_after_this_release_in_the_records_order() {
+        var line = ReleaseRules.asLine(front, record);
+        var everything = shape(java.util.Set.of());
+        List<String> removed = ReleaseRules.removedBy(record, line, everything);
 
-        assertThat(groups.get(ExplorerRules.Group.RISK)).hasSize(record.counts().get("risk"));
-        assertThat(groups.get(ExplorerRules.Group.UNJUDGED)).hasSize(record.counts().get("unjudged"));
-        assertThat(groups.get(ExplorerRules.Group.SPRING)).hasSize(record.counts().get("from_spring_boot"));
-        assertThat(groups.get(ExplorerRules.Group.BUILD)).hasSize(record.counts().get("in_the_build"));
-        assertThat(groups.get(ExplorerRules.Group.ANSWERED)).hasSize(record.counts().get("ruled_out"));
+        assertThat(removed).isNotEmpty();
+        var byId = new java.util.HashMap<String, ExplorerVersion.Finding>();
+        record.findings().forEach(finding -> byId.putIfAbsent(finding.cve(), finding));
+        assertThat(removed).allSatisfy(id -> {
+            ExplorerVersion.Finding finding = byId.get(id);
+            assertThat(finding.owner()).contains("vaadin");
+            assertThat(finding.fixedIn().orElseThrow()).isGreaterThan(VersionNumber.of("24.9.21"))
+                    .isLessThanOrEqualTo(VersionNumber.of("24.9.26"));
+        });
+        // In the record's order, as the prototype names them.
+        List<String> order = record.findings().stream().map(ExplorerVersion.Finding::cve).distinct()
+                .filter(removed::contains).toList();
+        assertThat(removed).containsExactlyElementsOf(order);
+        // A product turned off takes its findings out of what an update is said to remove.
+        var narrowed = ReleaseRules.removedBy(record, line, shape(java.util.Set.copyOf(
+                ExplorerAnswer.countedByDefault(ExplorerAnswer.catalogue(ExplorerRules.products(front), front)))));
+        assertThat(narrowed.size()).isLessThanOrEqualTo(removed.size());
+        var newest = data.explorerVersion(VersionNumber.of("25.3.5")).orElseThrow();
+        assertThat(ReleaseRules.removedBy(newest, ReleaseRules.asLine(front, newest), everything)).isEmpty();
+    }
+
+    @Test
+    void the_record_reads_into_the_explorers_halves_so_badge_and_groups_agree() {
+        var line = ReleaseRules.asLine(front, record);
+        var split = ExplorerAnswer.split(line, shape(java.util.Set.of()), ExplorerAnswer.Asked.nothing());
+
+        // Everything on: every finding is in a half or in the build group, none elsewhere.
+        assertThat(split.elsewhere()).isZero();
+        assertThat(split.ours().size() + split.theirs().size() + split.build().size())
+                .isEqualTo(record.findings().size());
+        // The Spring Boot half holds Spring Boot's own findings and the versions it pins, D-205.
+        long theirs = record.findings().stream().filter(finding -> finding.owner().equals(Optional.of("spring-boot"))
+                || finding.owner().equals(Optional.of("vaadin")) && Boolean.TRUE.equals(finding.springPins())).count();
+        assertThat(split.theirs().size()).isEqualTo((int) theirs).isGreaterThan(record.counts().get("from_spring_boot"));
+        assertThat(split.build()).hasSize(record.counts().get("in_the_build"));
     }
 
     @Test

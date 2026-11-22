@@ -1,5 +1,4 @@
 /* The explorer front door and the release page. */
-.internal-shell .release-view,
 .internal-shell .spring-view {
     padding: 1.5rem;
     display: flex;
@@ -21,45 +20,6 @@
 .release-lookup {
     width: 24rem;
     max-width: 100%;
-}
-
-.release-card,
-.spring-boot {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 1rem 1.25rem;
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
-    border-radius: var(--vaadin-radius-l, 0.75rem);
-}
-
-.release-card-top,
-.spring-boot-top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.5rem 0.75rem;
-}
-
-.release-card-version {
-    font-size: 1.25rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
-}
-
-.spring-boot-release {
-    margin: 0;
-    font-size: 1.25rem;
-}
-
-.release-card-line,
-.spring-boot-lines {
-    color: var(--vaadin-text-color-secondary, inherit);
-}
-
-.release-card-scanned {
-    margin-inline-start: auto;
-    color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.8125rem;
 }
 
 .release-card-summary,
@@ -100,12 +60,10 @@
     max-width: 48rem;
 }
 
-.spring-supply-chip.supply-commercial {
+/* The supply in a few words on a Spring Boot row, said only where free patches have ended. */
+.spring-supply-note {
     color: var(--status-fix);
-}
-
-.spring-supply-chip.supply-ended {
-    color: var(--status-unresolved);
+    font-size: 0.8125rem;
 }
 
 .spring-group > vaadin-details-summary {
@@ -141,10 +99,7 @@
 }
 
 .release-others {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.5rem;
-    align-items: baseline;
+    margin: 0;
 }
 
 /* The explorer front door in the prototype's distribution, D-203 to D-212: the filter and
@@ -702,4 +657,43 @@
     width: auto;
     height: 1.25rem;
     border-width: 2px;
+}
+
+/* The release page in the explorer's frame, D-216: its products are buttons, since its address
+   names a release and not a choice of products. */
+button.explorer-chip {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: start;
+    cursor: pointer;
+}
+
+button.explorer-chip:disabled {
+    cursor: default;
+}
+
+button.explorer-chip:focus-visible {
+    outline: 2px solid var(--vaadin-focus-ring-color, #1676f3);
+    outline-offset: 2px;
+}
+
+.release-main {
+    max-width: 80rem;
+}
+
+.release-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.release-footer {
+    margin: 0.5rem 0 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 0.8125rem;
 }

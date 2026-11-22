@@ -17,6 +17,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
@@ -34,41 +35,71 @@ import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 @WithMockUser(username = "team", roles = Roles.SECURITY)
 class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    org.springframework.beans.factory.ObjectProvider<ProductSelection> selections;
+
     // REL-01
     @Test
     void a_measured_release_shows_its_card_and_advice_from_the_fixture() {
         navigate("findings/release/24.9/24.9.21", ReleaseView.class);
 
-        // Rule 6.1.7: the heading names the version, and the document title follows.
-        assertThat($(H1.class).single().getText()).isEqualTo("Release 24.9.21");
-        assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Release 24.9.21");
-        Div card = $(Div.class).withClassName("release-card").single();
+        // Rule 6.1.7: the heading names the version, and the document title follows, in the prototype's words.
+        assertThat($(H1.class).single().getText()).isEqualTo("Vaadin 24.9.21 security status");
+        assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Vaadin 24.9.21 security status");
+        Details card = $(Details.class).withClassName("release-card").single();
         assertThat(card.getElement().getAttribute("data-version")).isEqualTo("24.9.21");
+        assertThat(card.isOpened()).isTrue();
+        // The badges and the groups read the same halves, D-205, D-216.
         assertThat($(Badge.class).withClassName("explorer-badge").all())
                 .extracting(badge -> badge.getElement().getTextRecursively())
-                .containsExactly("Vaadin: vulnerable", "Spring Boot 3.5.15: vulnerable");
-        // The record's own counts: 2 risk, 15 unjudged, 41 from Spring Boot, 1 in the build, 76 ruled out.
-        assertThat(paragraph("release-card-summary")).isEqualTo(
-                "135 findings: 2 to act on, 15 not assessed yet, 41 from Spring Boot, 1 only in the build, 76 answered.");
-        assertThat(paragraph("release-advice-update")).isEqualTo(
-                "Updating to 24.9.26, a patch of the 24.9 line you are on, removes 22 of these: CVE-2026-116804, "
-                        + "CVE-2026-8763, CVE-2026-102276, CVE-2026-102278, CVE-2026-102554, CVE-2026-112942 "
-                        + "and 16 more. Read 24.9.26");
-        assertThat(paragraph("release-advice-spring")).isEqualTo(
-                "41 findings on this release come with Spring Boot rather than with Vaadin. They were measured "
-                        + "against Spring Boot 3.5.15, which this release also declares. Spring Boot 3.5.15 can move "
-                        + "to 3.5.16, the newest patch of that line. That is where fixes for these arrive, and no "
-                        + "Vaadin release moves them. What Spring Boot brings");
+                .containsExactly("Vaadin: Vulnerable", "Spring Boot: Vulnerable");
+        assertThat(paragraph("explorer-detail-summary")).isEqualTo("117 findings: 1 to act on, 11 not assessed yet, 70 from Spring Boot, 1 only in the build, 34 answered.");
+        assertThat(paragraph("release-advice-update")).isEqualTo("You are not on the newest of this series. Updating to 24.9.26 removes 18 of these: "
+                + "CVE-2026-102276, CVE-2026-102277, CVE-2026-102278, CVE-2026-102554, CVE-2026-109344, "
+                + "CVE-2026-109345 and 12 more. It is a patch of the line you are already on. Read 24.9.26");
+        assertThat(paragraph("release-advice-spring")).isEqualTo("70 findings on this release come with Spring Boot rather than with Vaadin. Measured "
+                + "against 3.5.15, which is also what this release declares. There is somewhere to upgrade to: Spring "
+                + "Boot 3.5.16, the newest patch of that line. That is where fixes for those arrive, and no Vaadin "
+                + "release moves them. See what Spring Boot brings.");
         assertThat(link("release-spring-link").getHref()).isEqualTo("findings/spring");
         // Rule 6.3.14: 24.9.21 has no scanner files, only its record and its CSV.
         assertThat($(Anchor.class).withClassName("release-file").all()).extracting(Anchor::getText)
-                .containsExactly("JSON record", "CSV");
-        assertThat($(Details.class).withClassName("explorer-group").all())
-                .extracting(details -> details.getElement().getAttribute("data-group"))
-                .containsExactly("RISK", "UNJUDGED", "SPRING", "BUILD", "ANSWERED");
+                .containsExactly("JSON", "CSV");
+        List<Details> groups = $(Details.class).withClassName("explorer-group").all();
+        assertThat(groups).extracting(details -> details.getElement().getAttribute("data-group"))
+                .containsExactly("RISK", "UNJUDGED", "ANSWERED", "SPRING_RISK", "SPRING_ANSWERED", "BUILD");
+        // Every group shut on arrival, as the prototype's release page has them.
+        assertThat(groups).noneMatch(Details::isOpened);
+        assertThat(footer()).isEqualTo("Scanned 2026-11-15. Measured against an application shaped like the "
+                + "starter of its own major.");
+        // The left panel: the filter holding the version, and every product of the catalogue.
         assertThat(lookup().getValue()).isEqualTo("24.9.21");
+        assertThat($(NativeButton.class).withClassName("explorer-chip").all()).hasSize(15);
         // Rule 6.1.6: one way back, above the content.
         assertThat(link("release-back").getHref()).isEqualTo("findings");
+    }
+
+    @Test
+    void a_product_turned_off_on_the_release_narrows_it_and_the_explorer_shares_the_choice() {
+        navigate("findings/release/24.9/24.9.21", ReleaseView.class);
+        // 24.9.21 was measured both with and without Spring, so its starter is a control; vaadin never is.
+        assertThat(chip("vaadin-spring-boot-starter").isEnabled()).isTrue();
+        assertThat(chip("vaadin").isEnabled()).isFalse();
+        assertThat(chip("control-center-starter").getElement().getAttribute("aria-checked")).isEqualTo("false");
+        String before = paragraph("explorer-detail-summary");
+        assertThat(hints()).anyMatch(hint -> hint.startsWith("18 findings on this release arrive only through products "
+                + "you have switched off"));
+
+        // Turning the discontinued product on lists what only it brings, on this page and on the explorer.
+        test(chip("control-center-starter")).click();
+
+        assertThat(chip("control-center-starter").getElement().getAttribute("aria-checked")).isEqualTo("true");
+        assertThat(paragraph("explorer-detail-summary")).isNotEqualTo(before);
+        assertThat(hints()).noneMatch(hint -> hint.contains("only through products you have switched off"));
+        assertThat(selection().off().peek()).doesNotContain("control-center-starter");
+        test(chip("control-center-starter")).click();
+        assertThat(selection().off().peek()).contains("control-center-starter");
+        assertThat(paragraph("explorer-detail-summary")).isEqualTo(before);
     }
 
     @Test
@@ -77,14 +108,13 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(paragraph("release-advice-update")).isEqualTo("This is the newest measured release of 25.3.");
         assertThat($(Anchor.class).withClassName("release-file").all()).extracting(Anchor::getText).containsExactly(
-                "JSON record", "CSV", "VEX", "Dependency-Check suppressions", "osv-scanner config",
-                "bomber ignore list");
+                "JSON", "CSV", "VEX", "dependency-check", "osv-scanner", "bomber");
     }
 
     @Test
     void an_opened_finding_reads_the_release_record() {
         navigate("findings/release/24.9/24.9.21", ReleaseView.class);
-        Grid<Finding> grid = grid("RISK");
+        Grid<Finding> grid = gridOf("CVE-2026-45292");
         Finding risk = grid.getGenericDataView().getItems().filter(item -> item.cve().equals("CVE-2026-45292"))
                 .findFirst().orElseThrow();
 
@@ -102,16 +132,16 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
         navigate("findings/release/24.9/24.9.15", ReleaseView.class);
 
         assertThat(location()).isEqualTo("findings/release/24.9/24.9.15");
-        assertThat($(Div.class).withClassName("release-card").exists()).isFalse();
+        assertThat($(Details.class).withClassName("release-card").exists()).isFalse();
         assertThat(paragraph("release-unmeasured")).isEqualTo("We hold no measurement of 24.9.15. The newest "
-                + "measured release of 24.9 is 24.9.26, a patch of the line you are already on, and the one to "
-                + "update to.");
+                + "maintenance release of 24.9 is 24.9.26, and that is the one to update to: it is a patch of the "
+                + "line you are already on. It is the release we measure and answer for.");
         assertThat(link("release-go").getHref()).isEqualTo("findings/release/24.9/24.9.26");
         List<RouterLink> others = $(RouterLink.class).withClassName("release-other").all();
         assertThat(others).hasSize(12);
         assertThat(others.getFirst().getText()).isEqualTo("24.9.25");
         assertThat(others.getFirst().getHref()).isEqualTo("findings/release/24.9/24.9.25");
-        assertThat(paragraph("release-others")).startsWith("Other measured releases of 24.9: 24.9.25 24.9.24")
+        assertThat(paragraph("release-others")).startsWith("Other releases of 24.9 we have measured: 24.9.25, 24.9.24")
                 .endsWith("and 13 more");
     }
 
@@ -120,7 +150,7 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
         navigate("findings/release/24.4/24.9.21", ReleaseView.class);
 
         assertThat(location()).isEqualTo("findings/release/24.9/24.9.21");
-        assertThat($(Div.class).withClassName("release-card").single().getElement().getAttribute("data-version"))
+        assertThat($(Details.class).withClassName("release-card").single().getElement().getAttribute("data-version"))
                 .isEqualTo("24.9.21");
     }
 
@@ -132,14 +162,16 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
                         + "than it.");
 
         navigate("findings/release/24.8/24.8.3", ReleaseView.class);
-        assertThat(paragraph("release-unmeasured")).isEqualTo("We hold no measurement of 24.8.3, and 24.8 is not a "
-                + "line we follow. The line we follow on Vaadin 24 is 24.10, whose newest measured release is "
-                + "24.10.14.");
+        assertThat(paragraph("release-unmeasured")).isEqualTo("We hold no measurement of 24.8.3. 24.8 is out of "
+                + "maintenance. The line we follow on Vaadin 24 is 24.10, whose newest release is 24.10.14, and that "
+                + "is the one to update to. It is the release we measure and answer for.");
 
         navigate("findings/release/22.0/22.0.1", ReleaseView.class);
-        assertThat(paragraph("release-unmeasured")).startsWith("We hold no measurement of 22.0.1, and its line is "
-                + "not one we follow.");
-        assertThat($(RouterLink.class).withClassName("release-go").exists()).isFalse();
+        assertThat(paragraph("release-unmeasured")).isEqualTo("We hold no measurement of 22.0.1, and we do not "
+                + "follow that series. Vaadin measures the maintained lines, and the status page lists them: moving "
+                + "to one of those is what gets you an answer.");
+        assertThat(link("release-go").getText()).isEqualTo("See the maintained series");
+        assertThat(link("release-go").getHref()).isEqualTo("findings");
     }
 
     @Test
@@ -167,11 +199,30 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
     void a_reader_without_the_role_is_refused() {
         navigate("findings/release/24.9/24.9.21", NotFoundView.class);
 
-        assertThat($(Div.class).withClassName("release-card").exists()).isFalse();
+        assertThat($(Details.class).withClassName("release-card").exists()).isFalse();
     }
 
     private String paragraph(String className) {
         return $(Paragraph.class).withClassName(className).single().getElement().getTextRecursively();
+    }
+
+    private List<String> hints() {
+        return $(Paragraph.class).withClassName("explorer-hint").all().stream()
+                .map(hint -> hint.getElement().getTextRecursively()).toList();
+    }
+
+    private String footer() {
+        return paragraph("release-footer");
+    }
+
+    private NativeButton chip(String product) {
+        return $(NativeButton.class).withClassName("explorer-chip").all().stream()
+                .filter(chip -> product.equals(chip.getElement().getAttribute("data-product"))).findFirst()
+                .orElseThrow();
+    }
+
+    private ProductSelection selection() {
+        return selections.getObject();
     }
 
     private RouterLink link(String className) {
@@ -183,10 +234,11 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Grid<Finding> grid(String key) {
-        Details group = $(Details.class).withClassName("explorer-group").all().stream()
-                .filter(details -> key.equals(details.getElement().getAttribute("data-group"))).findFirst()
-                .orElseThrow();
-        return (Grid<Finding>) group.getContent().filter(Grid.class::isInstance).findFirst().orElseThrow();
+    private Grid<Finding> gridOf(String cve) {
+        return $(Details.class).withClassName("explorer-group").all().stream()
+                .flatMap(details -> details.getContent().filter(Grid.class::isInstance))
+                .map(grid -> (Grid<Finding>) grid)
+                .filter(grid -> grid.getGenericDataView().getItems().anyMatch(item -> item.cve().equals(cve)))
+                .findFirst().orElseThrow();
     }
 }

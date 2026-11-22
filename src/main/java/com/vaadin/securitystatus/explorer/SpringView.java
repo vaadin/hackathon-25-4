@@ -9,14 +9,11 @@ import java.util.Set;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
@@ -97,56 +94,77 @@ public final class SpringView extends Composite<Div> {
             }
         }
         boots.add(lead("spring-caveat", differing.isEmpty() ? getTranslation("spring.caveat.same")
-                : getTranslation("spring.caveat.differs", String.join(", ", differing))));
+                : getTranslation("spring.caveat.differs", String.join(" and ", differing))));
         boots.add(lead("spring-footer", getTranslation("spring.footer")));
     }
 
+    /**
+     * One Spring Boot release as the prototype draws it, D-219: a row shut on
+     * arrival naming the release, the Vaadin lines on it, its state, what it
+     * brings and, where free patches have ended, its supply in a few words;
+     * opened, the supply, the advice and the three groups.
+     */
     private Component boot(ExplorerFront front, Boot boot) {
         String release = boot.release().toString();
         Optional<SpringBootSupply> supply = Optional.ofNullable(front.springBootSupply().get(release));
         Optional<SpringBootTried> tried = Optional.ofNullable(front.springBootTried().get(release));
         Map<Kind, List<Finding>> groups = SpringRules.grouped(boot.findings());
         int risks = groups.getOrDefault(Kind.RISK, List.of()).size();
-
-        var section = new Section();
-        section.addClassName("spring-boot");
-        section.getElement().setAttribute("data-boot", release);
-
-        var top = new Div();
-        top.addClassName("spring-boot-top");
-        var title = new H2(getTranslation("spring.release", release));
-        title.addClassName("spring-boot-release");
-        var lines = new Span(getTranslation("spring.lines", String.join(", ", boot.lines())));
-        lines.addClassName("spring-boot-lines");
-        top.add(title, lines);
-
-        var badges = new Div();
-        badges.addClassName("explorer-row-badges");
         ExplorerRules.Badge state = ExplorerRules.springBadge(boot.findings());
-        var stateBadge = new Badge(getTranslation("explorer.badge.state." + state.name()));
-        stateBadge.addClassNames("explorer-badge", "spring", "badge-" + state.name().toLowerCase(Locale.ROOT));
-        badges.add(stateBadge);
-        supply.flatMap(SpringBootSupply::state).filter(SUPPLY_STATES::contains).ifPresent(word -> {
-            var chip = new Badge(getTranslation("spring.supply.chip." + word));
-            chip.addClassNames("spring-supply-chip", "supply-" + word);
-            badges.add(chip);
+
+        var summary = new Div();
+        summary.addClassNames("explorer-row-summary", "spring-boot-top");
+        var title = new Span(release);
+        title.addClassNames("explorer-row-line", "spring-boot-release");
+        var lines = new Span(getTranslation("spring.lines", String.join(", ", boot.lines())));
+        lines.addClassNames("explorer-row-version", "spring-boot-lines");
+        var stateBadge = SeriesParts.badge("spring", state, getTranslation("explorer.state." + state.name()));
+        int count = boot.findings().size();
+        var says = new Span(risks > 0 ? getTranslation("spring.summary.risk", count, risks)
+                : getTranslation("spring.summary", count));
+        says.addClassNames("explorer-row-says", "spring-boot-summary");
+        summary.add(title, lines, stateBadge, says);
+        supply.flatMap(found -> note(found)).ifPresent(note -> {
+            var chip = new Span(note);
+            chip.addClassName("spring-supply-note");
+            summary.add(chip);
         });
 
-        int count = boot.findings().size();
-        String summary = risks > 0 ? getTranslation("spring.summary.risk", count, risks)
-                : getTranslation(count == 1 ? "spring.summary.one" : "spring.summary.many", count);
-        section.add(top, badges, lead("spring-boot-summary", summary));
-
+        var detail = new Div();
+        detail.addClassNames("explorer-detail", "spring-boot-detail");
         supply.ifPresent(found -> {
+            supplyTable(boot, found, tried).ifPresent(detail::add);
             found.state().filter(SUPPLY_STATES::contains).ifPresent(
-                    word -> section.add(lead("spring-supply", getTranslation("spring.supply.state." + word))));
-            supplyTable(boot, found, tried).ifPresent(section::add);
+                    word -> detail.add(lead("spring-supply", getTranslation("spring.supply.state." + word))));
         });
         Optional.ofNullable(front.springBootLatest().get(release))
-                .ifPresent(latest -> section.add(advice(latest, supply, tried)));
+                .ifPresent(latest -> detail.add(advice(latest, supply, tried)));
+        groups.forEach((kind, members) -> detail.add(group(kind, members, tried)));
 
-        groups.forEach((kind, members) -> section.add(group(kind, members, tried)));
+        var section = new Details();
+        section.setSummary(summary);
+        section.add(detail);
+        section.setOpened(false);
+        section.addClassNames("explorer-row", "spring-boot", "state-" + state.name().toLowerCase(Locale.ROOT));
+        section.getElement().setAttribute("data-boot", release);
         return section;
+    }
+
+    /**
+     * The supply in a few words, for a reader who has not opened the row;
+     * silent while the line still gets free patches, and where nothing could
+     * look, D-219.
+     */
+    private Optional<String> note(SpringBootSupply supply) {
+        String state = supply.state().orElse("");
+        if ("ended".equals(state)) {
+            return Optional.of(getTranslation("spring.supply.note.row.ended"));
+        }
+        if ("commercial".equals(state)) {
+            return supply.commercial()
+                    .map(commercial -> getTranslation("spring.supply.note.row.commercial", commercial.toString()));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -202,10 +220,12 @@ public final class SpringView extends Composite<Div> {
         var advice = new Div();
         advice.addClassName("spring-advice");
         if (latest.patch().isPresent()) {
-            VersionNumber patch = latest.patch().get();
-            boolean measured = tried.flatMap(SpringBootTried::to).filter(patch::equals).isPresent();
-            advice.add(lead("spring-advice-patch", getTranslation(
-                    measured ? "spring.advice.patch.tried" : "spring.advice.patch.untried", patch.toString())));
+            String patch = latest.patch().get().toString();
+            String text = supply.isPresent()
+                    ? getTranslation("spring.advice.patch.supply")
+                            + (tried.isPresent() ? "" : " " + getTranslation("spring.advice.patch.untried"))
+                    : getTranslation("spring.advice.patch", patch);
+            advice.add(lead("spring-advice-patch", text));
         } else {
             boolean sold = supply.flatMap(SpringBootSupply::commercial).isPresent();
             advice.add(lead("spring-advice-none",
@@ -213,13 +233,16 @@ public final class SpringView extends Composite<Div> {
         }
         latest.minor().ifPresent(minor -> advice.add(
                 lead("spring-advice-minor", getTranslation("spring.advice.minor", minor.toString()))));
-        advice.add(lead("spring-advice-property", getTranslation("spring.advice.property")));
+        var property = lead("spring-advice-property", getTranslation("spring.advice.property"));
+        property.addClassName("explorer-hint");
+        advice.add(property);
         return advice;
     }
 
     /** One fold of a release's findings, under the explorer's fold and cap rules, 6.6.2 and 6.6.10. */
     private Component group(Kind kind, List<Finding> findings, Optional<SpringBootTried> tried) {
-        var details = new Details(getTranslation("spring.group." + kind.name(), findings.size()));
+        var details = new Details(getTranslation("spring.group", findings.size(),
+                getTranslation("spring.group." + kind.name())));
         details.addClassNames("spring-group", "group-" + kind.name().toLowerCase(Locale.ROOT));
         details.getElement().setAttribute("data-group", kind.name());
         details.setOpened(kind.startsOpen());

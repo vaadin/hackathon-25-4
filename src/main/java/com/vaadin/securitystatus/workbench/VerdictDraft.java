@@ -102,6 +102,8 @@ public class VerdictDraft {
     @Lob
     private String workaround = "";
 
+    /** The writer of cve-status refuses a verdict without one, as the prototype does, D-223. */
+    @NotBlank(groups = Ready.class, message = "workbench.invalid.required")
     @Lob
     private String commentary = "";
 

@@ -194,8 +194,8 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat(location()).isEqualTo("findings/release/24.9/24.9.21");
         // The title takes the route parameters in the template's order: the version, not the line.
-        assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Release 24.9.21");
-        assertThat($(Div.class).withClassName("release-card").single().getElement().getAttribute("data-version"))
+        assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Vaadin 24.9.21 security status");
+        assertThat($(Details.class).withClassName("release-card").single().getElement().getAttribute("data-version"))
                 .isEqualTo("24.9.21");
     }
 

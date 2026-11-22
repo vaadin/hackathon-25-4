@@ -237,8 +237,8 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
         // a cell with no ring in it rather than an empty element.
         assertThat(sweep()).isNotEmpty().allSatisfy(blank -> assertThat(blank).matches("explorer-findings column3 \\d+"));
         assertThat(find(Anchor.class).withClassName("release-file").all()).extracting(Anchor::getText)
-                .containsExactly("JSON record", "CSV");
-        assertThat(pageText()).doesNotContain("Scanned");
+                .containsExactly("JSON", "CSV");
+        assertThat(pageText()).doesNotContain("Scanned").doesNotContain("scanned");
     }
 
     // Spring Boot: one release with no supply entry, beside one that has it
@@ -252,13 +252,13 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
         assertThat(classesIn(bootSection("3.4.13"))).anyMatch(name -> name.startsWith("spring-supply"));
     }
 
-    // Workbench: queue entries not owned by Spring Boot leave the owner cell without text
+    // Workbench: a package not owned by Spring Boot says nothing about Spring Boot, and leaves no blank behind
     @Test
-    void workbench_the_owner_cell_is_blank_only_where_the_queue_names_no_spring_boot_origin() {
+    void workbench_a_package_not_owned_by_spring_boot_says_nothing_about_it() {
         navigate(WorkbenchView.class);
 
-        List<String> blanks = sweep();
-        assertThat(blanks).isNotEmpty().allSatisfy(blank -> assertThat(blank).startsWith("workbench-queue owner "));
+        assertThat(sweep()).isEmpty();
+        assertThat(pageText()).contains("node-forge");
     }
 
     // Diagnostics: before the browser describes itself, nothing about it is drawn
@@ -433,7 +433,7 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private Component bootSection(String release) {
-        return find(com.vaadin.flow.component.html.Section.class).withClassName("spring-boot").all().stream()
+        return find(com.vaadin.flow.component.details.Details.class).withClassName("spring-boot").all().stream()
                 .filter(section -> release.equals(section.getElement().getAttribute("data-boot"))).findFirst()
                 .orElseThrow();
     }

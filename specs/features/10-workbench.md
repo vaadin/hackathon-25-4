@@ -6,25 +6,31 @@ The queue of what one verdict would close, and the form that composes it. The ou
 
 ## Behaviour
 
+The layout and the words are the prototype's, compared past its gate on 2026-11-22 in `specs/reviews/prototype/workbench.md`.
+
 ### The queue
 
-- A Grid over `data/queue.json`: one row per package, ranked by how much one verdict would close, with the advisories it answers, the series it touches, and a series filter held in the address.
-- A summary over the queue, counts by severity and by line, drawn with Charts if the numbers earn a picture and left as figures if they do not; the epic decides and records which.
-- Selecting a row opens the form with the package and advisory prefilled.
+- `/findings/workbench`, titled "The verdict queue", with its destination in the bar named "Verdict workbench", D-220. The "All series" link back, the lead, "N findings carry no verdict on the heads of the series we follow, over M packages. The first row below is worth P per cent of that on its own.", and the prototype's hint on what a row is.
+- The series as chips, "every series" and one per series with what waits there, held in the address as `?series`, D-130.
+- One disclosure per package of `data/queue.json`, ranked by how much one verdict would close: the count, the package, "to judge" or "answered", and "N advisories on M series, ..." with the Spring Boot sentence where Spring Boot owns the version, D-220. One row is open at a time.
+- Opened, a row shows the check lists that already list its advisories and the branches nobody could read; on a series, the advisories that reach other series only; and the evidence: what it resolves to on each series, the chains that bring it and who declares them, the CPEs matched, the scanners that reported it, what upstream fixed or does not list, and the frontend hint for an npm package, D-221.
+- The summary over the queue, counts by severity and by series in figures, D-119, after the queue and shut.
 
 ### The form
 
-- A FormLayout over the `VerdictDraft` entity with `BeanValidationBinder`, validation groups per `01-domain-model.md`: `Draft` to save, `Ready` to export. Labels sit beside the fields through the 25.4 side label support with `LabelTextAlign`, because a verdict form is read down a narrow left edge.
-- Fields: advisory id, package coordinate, applicability from the closed vocabulary, depth, affects, impact, workaround, commentary, fix expected, fix expected version, fix PRs, evidence, supersedes.
-- A paste box above it: prose in, fields filled by the Form AI controller per `06-ai.md`, markers on what the model wrote, nothing saved until a person says so. The box is this screen's shape but epic 11's work, because it needs the provider plumbing: epic 10 ships the form complete without it, and US-11.5 adds the box.
-- Drafts persist in H2 and survive a restart. One draft per advisory and package pair, newest wins, listed under the form.
+- Inside an opened row, the fold "Write a verdict" holds the one form, prefilled with the package and the advisories nobody has judged, or every advisory when all are answered, D-124. With no row open it waits at the foot of the page for a package typed by hand.
+- "This package already carries a verdict": a "fill from X" per verdict the package carries; filling takes that verdict's words and promises, points `supersedes` at it and ticks the advisories it answered; a package carrying one verdict arrives filled from it, D-222.
+- "Which advisories this verdict answers": one tick per advisory, with its severity, its series and what is known of it; the ticks write the advisories field, D-221.
+- A FormLayout over the `VerdictDraft` entity with `BeanValidationBinder`, validation groups per `01-domain-model.md`: `Draft` to save, `Ready` to export, the commentary among the required, D-223. Labels sit beside the fields through the 25.4 side label support with `LabelTextAlign`.
+- Fields, labelled and explained in the prototype's words where it has them: verdict id, package coordinate, advisories, what we are saying from the closed vocabulary with each word's sentence, how far it was taken, which Vaadin versions it applies to, what it means for your application, what the reader can do today, why, what it is waiting on, the release that will carry the fix, the pull requests that fix it, what was checked, supersedes, who assessed it.
+- A paste box above it: prose in, fields filled by the Form AI controller per `06-ai.md`, markers on what the model wrote, nothing saved until a person says so.
+- Drafts persist in H2 and survive a restart. One draft per advisory and package pair, newest wins, listed at the foot of the page.
 
 ### The output
 
-- The YAML the cve-status repository expects, rendered live beside the form in a Markdown code block as the reader types, so what will be committed is what is being read.
-- One sentence under it saying what this verdict would close, from the queue's own numbers.
-- Open in GitHub: a `NativeForm` GET to `https://github.com/vaadin/cve-status/new/main` with `filename=data/assessments/<draft id>.yaml` and `value=<yaml>`, which opens GitHub's editor prefilled, where GitHub's authentication and review take over. The JavaScript workbench refuses the link above 7000 characters because browsers 414 somewhere past that, and this one keeps the same cap. A copy control beside it for the YAML alone.
-- The warning the JavaScript workbench carries comes too: the matching vaadin/platform pull requests are still needed, as one sentence.
+- The YAML the cve-status repository expects, rendered live beside the form in a Markdown code block as the reader types.
+- "This closes N advisories on M series, ..., which is K findings off the page", with what it silences, from the queue's own numbers; the platform branches that would still go red; where the file belongs; and the check script to run, in the prototype's words.
+- Open in GitHub: a `NativeForm` GET to `https://github.com/vaadin/cve-status/new/main` with `filename=data/assessments/<draft id>.yaml` and `value=<yaml>`, enabled once Export has validated the `Ready` group, D-127. The 7000 character cap of the JavaScript workbench holds. A copy control beside it for the YAML alone.
 
 ## Edge cases
 
@@ -68,11 +74,12 @@ The AI fill's test case lives in `features/11-assistant.md` as AST-08, with the 
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the end of epic 13 and brought up to date after the prototype comparison of 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
 
-- The queue row shows how many advisories it answers, not which: the ids appear only once the row prefills the form, `WorkbenchView.configureQueue`, column `advisories`.
-- The platform pull request warning appears only for a verdict that silences, and only when some branch's check list misses an advisory of the package. It is not always present, `WorkbenchView.drawOutput`, `QueueRules.stillRed`. No decision row.
+- One row is open at a time, where the prototype opens as many as the reader likes: the form is one, `WorkbenchView.opened`, D-220.
+- The platform pull request warning appears only for a verdict that silences, and only when some branch's check list misses an advisory of the package, `WorkbenchView.drawOutput`, `QueueRules.stillRed`.
 - Open in GitHub is two steps, not one form: Export validates the `Ready` group, and only then is the `NativeForm` submit enabled. Any edit withdraws it, `WorkbenchView.export`, D-127.
-- The YAML GitHub receives has CR LF line breaks, and the 7000 character cap is measured on the form encoded address, `VerdictYaml.handover`, D-129. Whether GitHub keeps the CR LF is P-17.
-- The `Ready` group follows `01-domain-model.md` only in part: it also requires impact for `no_risk`, and it does not enforce a fix version when `fixExpected` names a release, `VerdictDraft`, `VerdictForm`, D-123.
+- The YAML GitHub receives has CR LF line breaks, and the 7000 character cap is measured on the form encoded address, `VerdictYaml.handover`, D-129. Whether GitHub keeps the CR LF is P-17, the person's to check.
+- The YAML carries no header comment and no null keys, where the prototype writes both, `VerdictYaml`, D-122.
+- The `Ready` group follows `01-domain-model.md` only in part: it also requires impact for `no_risk` and the commentary, and it does not enforce a fix version when `fixExpected` names a release, `VerdictDraft`, `VerdictForm`, D-123, D-223.
 - The Definition of Done says the YAML round trips on every fixture draft; there is no set of fixture drafts, `VerdictYamlTest` round trips one full draft and one minimal draft built in the test.

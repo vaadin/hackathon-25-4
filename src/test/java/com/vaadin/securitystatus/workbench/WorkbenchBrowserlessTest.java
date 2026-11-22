@@ -67,8 +67,13 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows).extracting(Row::closes).containsOnly(0);
         assertThat(rows.get(4).here()).hasSize(44);
         assertThat(text("workbench-lead"))
-                .isEqualTo("Nothing on the series we follow is waiting for a verdict. "
+                .isEqualTo("Nothing on the heads of the series we follow is waiting for a verdict. "
                         + "The 101 packages below are all answered.");
+        // The prototype's row: what it would close, the package, its state and what it holds.
+        assertThat(view.row("org.springframework:spring-core").getElement().getTextRecursively()).isEqualTo(
+                "0org.springframework:spring-coreanswered44 advisories on 8 series, 24.10, 24.9, 24.7, 24.4, 23.6, "
+                        + "14.14, 8.32, 7.7. Spring Boot owns the version, so a bump is not one of the answers here");
+        assertThat(text("workbench-hint")).startsWith("A verdict is keyed by a package with no version");
         assertThat(text("workbench-summary-total")).isEqualTo("721 findings over 101 packages, 0 of them with no verdict.");
         assertThat(summary("workbench-summary-severity")).containsExactly("Critical 76 0", "High 308 0",
                 "Moderate 289 0", "Low 48 0");
@@ -83,7 +88,8 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
                 .filter(candidate -> "24.9".equals(candidate.getElement().getAttribute("data-series"))).findFirst()
                 .orElseThrow();
         assertThat(link.getHref()).isEqualTo("findings/workbench?series=24.9");
-        assertThat(link.getText()).isEqualTo("24.9 (0)");
+        assertThat(link.getText()).isEqualTo("24.9 0");
+        assertThat(link.getElement().getAttribute("title")).isEqualTo("0 advisories to judge on 24.9");
 
         view = navigate("findings/workbench?series=24.9", WorkbenchView.class);
 
@@ -94,9 +100,9 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows.getFirst().name()).isEqualTo("com.fasterxml.jackson.core:jackson-core");
         assertThat(rows.getFirst().here()).hasSize(2);
         assertThat(rows.getFirst().elsewhere()).isEqualTo(3);
-        assertThat(text("workbench-lead")).startsWith("Nothing on series 24.9 is waiting for a verdict.");
+        assertThat(text("workbench-lead")).startsWith("Nothing on the head of 24.9 is waiting for a verdict.");
         assertThat(summary("workbench-summary-line")).containsExactly("24.9 214 0");
-        assertThat($(RouterLink.class).withClassName("active").single().getText()).isEqualTo("24.9 (0)");
+        assertThat($(RouterLink.class).withClassName("active").single().getText()).isEqualTo("24.9 0");
 
         // A series the queue does not know narrows nothing.
         view = navigate("findings/workbench?series=99.9", WorkbenchView.class);
@@ -120,10 +126,79 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(com.vaadin.flow.component.html.H2.class).withClassName("workbench-composing").single().getText())
                 .isEqualTo("A verdict on com.fasterxml.jackson.core:jackson-core");
         assertThat(text("workbench-elsewhere")).startsWith("You are looking at 24.9, and 3 advisories of this package");
-        assertThat(text("workbench-reach")).isEqualTo("This verdict answers 5 advisories on 8 series, "
-                + "24.10, 24.9, 24.7, 24.4, 23.6, 14.14, 8.32, 7.7: 25 findings, 0 of them with no verdict now.");
+        assertThat(text("workbench-reach")).startsWith("This closes 5 advisories on 8 series, "
+                + "24.10, 24.9, 24.7, 24.4, 23.6, 14.14, 8.32, 7.7, which is 25 findings off the page; 0 of them carry "
+                + "no verdict now.");
         assertThat(yaml(view)).contains("purl: pkg:maven/com.fasterxml.jackson.core/jackson-core\ncves:\n"
                 + "- CVE-2025-52999\n");
+    }
+
+    // D-220, D-221: a row opened shows the evidence the queue carries, and the form follows it
+    @Test
+    void an_opened_row_shows_the_evidence_and_holds_the_form() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+
+        view.open("org.apache.tomcat.embed:tomcat-embed-core");
+
+        com.vaadin.flow.component.details.Details row = view.row("org.apache.tomcat.embed:tomcat-embed-core");
+        assertThat(row.isOpened()).isTrue();
+        String evidence = $(com.vaadin.flow.component.html.Div.class, row).withClassName("workbench-evidence").single()
+                .getElement().getTextRecursively();
+        assertThat(evidence).contains("Resolves to", "Arrives by", "declared by spring-boot-starter-tomcat",
+                "CPE matched", "netapp:ontap_tools:vmware_vsphere",
+                "Reported by bomber, dependency-check, osv-scanner.", "Of 61 advisories here, upstream has fixed");
+        assertThat(text("workbench-acknowledged")).endsWith("We could not read the list of 8.32, 7.7, so nothing "
+                + "is claimed about them.");
+        // The advisories as ticks, each with what is known of it, and the verdicts the package carries.
+        List<com.vaadin.flow.component.checkbox.Checkbox> ticks = $(com.vaadin.flow.component.checkbox.Checkbox.class,
+                row).withClassName("workbench-pick-box").all();
+        assertThat(ticks).hasSize(61);
+        assertThat($(Button.class, row).withClassName("workbench-reuse-chip").all()).hasSize(17);
+        assertThat($(Button.class, row).withClassName("workbench-save").exists()).isTrue();
+
+        // One row at a time: opening another moves the form there.
+        view.open("highcharts");
+        assertThat(row.isOpened()).isFalse();
+        assertThat($(Button.class, view.row("highcharts")).withClassName("workbench-save").exists()).isTrue();
+        assertThat(text("workbench-acknowledged")).startsWith("Already in the check list of 25.4 (5 of 7), 25.3 (5 of 7)");
+        assertThat($(com.vaadin.flow.component.html.Div.class, view.row("highcharts"))
+                .withClassName("workbench-evidence").single().getElement().getTextRecursively())
+                .contains("Frontend. Compare the upstream fix date");
+    }
+
+    // D-221: a tick writes the advisories field, and the field moves the ticks
+    @Test
+    void the_ticks_write_the_advisories_and_follow_them() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+        view.open("highcharts");
+        List<com.vaadin.flow.component.checkbox.Checkbox> ticks = $(com.vaadin.flow.component.checkbox.Checkbox.class)
+                .withClassName("workbench-pick-box").all();
+        String first = ticks.getFirst().getLabel();
+        assertThat(ticks).allMatch(com.vaadin.flow.component.checkbox.Checkbox::getValue);
+
+        test(ticks.getFirst()).click();
+
+        assertThat(view.form().fields().get("advisories").getValue()).asString().doesNotContain(first);
+        type(view, "advisories", first);
+        assertThat(ticks.getFirst().getValue()).isTrue();
+        assertThat(ticks.get(1).getValue()).isFalse();
+    }
+
+    // D-222: a package that carries one verdict arrives filled from it, superseding it
+    @Test
+    void a_package_with_one_verdict_arrives_filled_from_it() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+
+        view.open("com.vaadin:vaadin-swing-kit-flow");
+
+        Map<String, HasValue<?, ?>> fields = view.form().fields();
+        assertThat(fields.get("supersedes").getValue()).isEqualTo("maven-com-vaadin-vaadin-swing-kit-flow");
+        assertThat(fields.get("depth").getValue()).isEqualTo("cursory");
+        assertThat(fields.get("applicability").getValue()).isNotNull();
+        assertThat((String) fields.get("commentary").getValue()).isNotBlank();
+        assertThat(text("workbench-filled")).startsWith("Filled from maven-com-vaadin-vaadin-swing-kit-flow, which "
+                + "answers 1 advisory here. Composing now writes a new file that supersedes it");
+        assertThat(yaml(view)).contains("supersedes: maven-com-vaadin-vaadin-swing-kit-flow");
     }
 
     // AC2: the vocabulary is the closed set and nothing else is offered
@@ -199,7 +274,8 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
 
         click("workbench-export");
 
-        assertThat(text("workbench-refused")).isEqualTo("Not exported: Impact still needs an answer.");
+        assertThat(text("workbench-refused"))
+                .isEqualTo("Not exported: What it means for your application still needs an answer.");
         assertThat(((TextArea) view.form().fields().get("impact")).getErrorMessage())
                 .isEqualTo("A risk or no risk verdict answers nothing without an impact sentence");
 
@@ -228,8 +304,9 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(input("filename").getValue()).isEqualTo("data/assessments/npm-wrk-05-2026-11-21.yaml");
         assertThat(input("value").getElement().getAttribute("name")).isEqualTo("value");
         assertThat(input("value").getValue()).isEqualTo(yaml(view)).contains("purl: pkg:npm/wrk-05\n");
-        assertThat(text("workbench-path"))
-                .isEqualTo("It goes to data/assessments/npm-wrk-05-2026-11-21.yaml in vaadin/cve-status.");
+        assertThat(text("workbench-path")).isEqualTo("It belongs at data/assessments/npm-wrk-05-2026-11-21.yaml. "
+                + "The writer refuses to overwrite an existing file, which is how the rule against editing a verdict "
+                + "in place is enforced.");
 
         // An edit withdraws the export: what is on screen is no longer what was approved.
         type(view, "commentary", "Changed after the export.");
@@ -279,12 +356,12 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
 
         choose(view, "applicability", "risk");
         assertThat($(Paragraph.class).withClassName("workbench-platform").exists()).isFalse();
-        assertThat(text("workbench-reach")).endsWith("It takes nothing off the check list: a risk says the reader "
-                + "is exposed.");
+        assertThat(text("workbench-reach")).endsWith("It silences nothing: a risk is us saying the reader is exposed, "
+                + "so it stays on the page and stays out of the check list.");
 
         choose(view, "applicability", "false_positive");
-        assertThat(text("workbench-platform")).startsWith(
-                "The build of 25.4, 25.3, 24.10, 24.9, 24.7, 24.4, 23.6, 14.14 still goes red until the check list");
+        assertThat(text("workbench-platform")).startsWith("This does not turn a build green on its own. "
+                + "25.4, 25.3, 24.10, 24.9, 24.7, 24.4, 23.6, 14.14 would still go red");
     }
 
     // The edge case: two team members drafting the same pair, the last save wins and is named
@@ -331,7 +408,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     void a_reader_without_the_role_is_refused() {
         navigate("findings/workbench", NotFoundView.class);
 
-        assertThat($(Grid.class).withClassName("workbench-queue").exists()).isFalse();
+        assertThat($(com.vaadin.flow.component.html.Div.class).withClassName("workbench-queue").exists()).isFalse();
     }
 
     /**
@@ -396,7 +473,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     // Helpers
 
     private List<Row> rows(WorkbenchView view) {
-        return view.queue().getListDataView().getItems().toList();
+        return view.rows();
     }
 
     private static List<VerdictDraft> items(Grid<VerdictDraft> grid) {
@@ -404,8 +481,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private void select(WorkbenchView view, String name) {
-        Row row = rows(view).stream().filter(candidate -> candidate.name().equals(name)).findFirst().orElseThrow();
-        view.queue().asSingleSelect().setValue(row);
+        view.open(name);
     }
 
     private void type(WorkbenchView view, String property, String text) {
@@ -429,6 +505,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         type(view, "purl", "pkg:npm/" + name);
         type(view, "advisories", "CVE-2026-116796");
         choose(view, "applicability", "fixed");
+        type(view, "commentary", "The version we resolve carries the fix.");
     }
 
     private void click(String className) {

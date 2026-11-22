@@ -98,5 +98,5 @@ Written at the prototype alignment, 2026-11-22. Each line names where the code s
 - A full version goes to its release page measured or not, where the prototype answers an unmeasured one in the note, `ExplorerView.submit`, D-209; so the prototype's "You asked for X. This answers for Y" note is never reached here.
 - `?off` addresses products by registry name; switch to the short codes when `module_codes` lands in `data/front.json`, data need in `FEEDBACK-25.4.md`.
 - The texts of an opened finding stay whole where the prototype cuts them with "more", and its routes keep this application's layout rather than the prototype's arrows, `FindingDetail`, D-213.
-- The release page still groups its findings by owner first, D-95, and is aligned in its own session; its badges already answer by the halves, D-205.
+- The release page draws this page's series row for one release, its groups by the same halves as its badges and its products in a left panel of its own, D-216; the two pages share the choice of products.
 - Workaround to remove when browserless-test#29 is fixed, draft 20b: the tests open item details with `setDetailsVisible`, `ExplorerBrowserlessTest`.
