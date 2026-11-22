@@ -67,6 +67,8 @@ Not Vaadin findings: fields a screen needed that the published JSON does not car
 | Advisories | A one line impact per advisory in the catalogue, `index.advisories` | Feature 07 asks for an impact column. The catalogue entry has none, only the few verdicts in `recent` carry an impact, and filling 535 rows would mean fetching 535 advisory documents. The column is left out, D-82 |
 | Advisories | The date an advisory was published, in the catalogue | Rule 6.4.22 orders worst first, then oldest, then by id. With no date the list is ordered by severity and id, D-81. `cases/cases.json` already lists `advisory_published` as impossible |
 | Customer shell | The reader's subscription, which the prototype's header shows as a chip "Enterprise" | The prototype writes that chip as a fixed word in its markup; no published document carries a customer's plan, and this application signs in no customer. The chip is left out, `specs/reviews/prototype/home.md`. It needs a source per reader, an account service rather than an export of cve-status |
+| Answer by version | Whether a release changes the public API, per release or per upgrade target | The prototype draws a "No API changes" badge beside Same minor and marks it itself as measured by nothing: the measurements are about dependencies. The badge is left out, D-178, `specs/reviews/prototype/version.md` |
+| Answer by version | The date each advisory was published, for the not assessed notice | The prototype writes "Published" there and marks the date as not carried; the version document and the index carry when the scan first saw an advisory, a different date. Nothing is drawn, D-179. The same field the catalogue's order needs, D-81 |
 
 ## The SDD starter
 
