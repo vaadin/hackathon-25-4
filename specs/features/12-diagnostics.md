@@ -21,11 +21,11 @@ The view that proves the 25.4 lifecycle events on real traffic. The contract is 
 ## Acceptance criteria
 
 ### AC1: Events are counted
-- [ ] A navigation increments its route and outcome
-- [ ] A failed navigation counts as failed
+- [x] A navigation increments its route and outcome
+- [x] A failed navigation counts as failed
 
 ### AC2: The view is live
-- [ ] A navigation in session two moves the numbers in session one without a reload
+- [x] A navigation in session two moves the numbers in session one without a reload
 
 ## Test cases
 

@@ -10,7 +10,7 @@
 
 **Tasks:**
 - [ ] Service init listener registering navigation, request, session, CSP and interception listeners
-- [ ] The signal singleton with counters and ring tails
+- [x] The signal singleton with counters and ring tails
 
 **25.4 APIs:** `NavigationStartedEvent`, `NavigationEndedEvent` outcomes, `RequestStartedEvent`, `RequestEndedEvent`.
 **Verified by:** `DiagnosticsBrowserlessTest`
@@ -20,7 +20,7 @@
 ### US-12.2: The view
 
 **Tasks:**
-- [ ] The four live panels plus the reader's extended client details
+- [x] The four live panels plus the reader's extended client details
 
 **25.4 APIs:** extended client details typed accessors.
 **Verified by:** `DiagnosticsBrowserlessTest`
@@ -29,4 +29,4 @@
 
 ## Definition of Done
 
-- [ ] Every acceptance criterion in `features/12-diagnostics.md` is checked
+- [x] Every acceptance criterion in `features/12-diagnostics.md` is checked

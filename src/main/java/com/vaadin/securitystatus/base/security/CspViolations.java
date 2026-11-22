@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
+
 /**
  * What browsers reported against the policy: logged as it arrives and kept, the
  * newest first and bounded, for the diagnostics view to read.
@@ -25,6 +28,12 @@ public class CspViolations {
     private static final Logger LOG = LoggerFactory.getLogger(CspViolations.class);
 
     private final Deque<Violation> newestFirst = new ArrayDeque<>();
+    private final SharedValueSignal<Long> received = new SharedValueSignal<>(Long.class);
+    private long count;
+
+    public CspViolations() {
+        received.set(0L);
+    }
 
     public synchronized void record(String report) {
         String bounded = report.length() > MAX_REPORT_LENGTH ? report.substring(0, MAX_REPORT_LENGTH) : report;
@@ -34,6 +43,15 @@ public class CspViolations {
         while (newestFirst.size() > KEPT) {
             newestFirst.removeLast();
         }
+        received.set(++count);
+    }
+
+    /**
+     * How many reports arrived since the start, as a signal every session may
+     * read, so a view showing them redraws when one arrives.
+     */
+    public Signal<Long> received() {
+        return received.asReadonly();
     }
 
     public synchronized List<Violation> newestFirst() {

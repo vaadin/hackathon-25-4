@@ -8,6 +8,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
+
 /**
  * The last exchanges of every assistant surface, for the diagnostics view: the
  * prompts as they went out, each tool call with its arguments and outcome, and
@@ -45,20 +48,33 @@ public class AssistantTail {
 
     private final Clock clock;
     private final Deque<Entry> entries = new ArrayDeque<>();
+    private final SharedValueSignal<Long> newestSignal = new SharedValueSignal<>(Long.class);
     private long recorded;
 
     public AssistantTail(Clock clock) {
         this.clock = clock;
+        newestSignal.set(0L);
     }
 
     public void record(String surface, String user, Kind kind, String text) {
         String kept = text.length() > TEXT_LIMIT ? text.substring(0, TEXT_LIMIT) + "…" : text;
+        long number;
         synchronized (entries) {
-            entries.addLast(new Entry(++recorded, clock.instant(), surface, user, kind, kept));
+            number = ++recorded;
+            entries.addLast(new Entry(number, clock.instant(), surface, user, kind, kept));
             while (entries.size() > KEEP) {
                 entries.removeFirst();
             }
         }
+        newestSignal.update(current -> Math.max(current, number));
+    }
+
+    /**
+     * The number of the newest entry as a signal every session may read, so a
+     * view showing the tail redraws when an entry arrives.
+     */
+    public Signal<Long> newestSignal() {
+        return newestSignal.asReadonly();
     }
 
     /** The number of the newest entry, 0 before the first. */

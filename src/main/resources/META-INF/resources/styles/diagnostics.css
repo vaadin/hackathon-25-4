@@ -1,0 +1,73 @@
+/* The diagnostics view: four live panels and the reader's browser. A desktop screen. */
+.diagnostics-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(32rem, 1fr));
+    gap: 1rem 2rem;
+    max-width: 120rem;
+}
+
+.diagnostics-view > .view-heading,
+.diagnostics-since,
+.diagnostics-tails {
+    grid-column: 1 / -1;
+}
+
+.diagnostics-since {
+    margin: 0;
+}
+
+.diagnostics-panel h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.diagnostics-panel h3 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1rem;
+}
+
+.diagnostics-panel table {
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.diagnostics-panel th,
+.diagnostics-panel td {
+    padding: 0.25rem 0.75rem 0.25rem 0;
+    text-align: start;
+    vertical-align: top;
+    border-bottom: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.12));
+}
+
+.diagnostics-panel thead th {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.diagnostics-total th,
+.diagnostics-total td {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.diagnostics-request-tables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: flex-start;
+}
+
+.diagnostics-note {
+    margin: 0.5rem 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.diagnostics-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: var(--aura-font-family-mono, ui-monospace, monospace);
+    font-size: 0.875rem;
+}
+
+.diagnostics-csp table,
+.diagnostics-assistant table {
+    width: 100%;
+}
