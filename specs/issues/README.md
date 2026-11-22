@@ -135,6 +135,7 @@ Died when somebody tried to reproduce it. The draft file is kept with a one line
 | A real click on the Sign out button does nothing, while a scripted click signs out | Not the button and not Vaadin. After a form sign in Chrome shows its save password bubble, and the first real click on the page closes the bubble instead of reaching the page: the first click on a bare heading is lost the same way, the second one arrives. Chrome's password manager is switched off in `CspIT` and the click works |
 | `05` an unknown address lands on the login page | Not withdrawn as a fact, withdrawn as an issue: it is the open question at the end of the maintainer's answer on flow#25576, so it went there as a comment |
 | `07` no way to apply a remembered color scheme before first paint | The same: flow#26391 and flow#26390 already ask for it, so the measurement went there as a comment |
+| `NativeForm` on no documentation page, epic 10 | Not drafted: vaadin/docs#6625, "docs: document the NativeForm component", is an open pull request doing exactly this, found by `gh search issues --repo vaadin/docs "NativeForm"`. A comment saying it is still missing on beta2 would add nothing the pull request does not already know |
 
 ### Corrected by its own reproduction
 
