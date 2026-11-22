@@ -56,9 +56,11 @@ The one place that talks to GitHub Pages, the cache in front of it, the read mod
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment. Each line names where the code shows it and the decision or draft behind it.
 
 - A moved `generated_at` does not drop the per version and per CVE entries: `PagesCache.expireAllExcept` makes every document except the index due for revalidation and keeps it as the stale answer, D-30, D-31.
 - The index also moves the signal when a reader's `index()` call finds it changed, not only through the scheduled revalidation, `SecurityDataService.index`.
 - Workaround to remove when draft 11 is answered: that publish is deferred through `VaadinSession.access` in `DataConfiguration.afterTheCurrentRequest`, D-36.
 - Where the live JSON differs from `01-domain-model.md` and `02-data-source.md`, the read models in `data/model/` follow the live site: summary buckets are counts, a line's kind is `ga` or `prerelease`, `fix_expected_version` is kept as a map, D-21.
+- A server error from GitHub Pages is asked again once before it counts as an outage, only for a 5xx and only in `PagesClient.fetch`, D-190: Pages answers a path with no file with 503 now and then instead of 404, so a 503 that repeats still shows the outage notice where the prototype would say the advisory is unknown. Proven by `PagesCacheTest`.
+- No fixture holds a measured prerelease or a second record of a line other than 24.9, D-108, so the per version cache is exercised on 25.3.5, 24.9.21, 24.4.28 and 24.7.19 only.

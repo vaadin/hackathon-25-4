@@ -74,7 +74,7 @@ The AI fill's test case lives in `features/11-assistant.md` as AST-08, with the 
 
 ## Still open
 
-Written from the code at the end of epic 13 and brought up to date after the prototype comparison of 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
+Written from the code as it stands at the close of the prototype alignment, 2026-11-22, after session six rebuilt the queue, D-220 to D-223. Each line names where the code shows it and the decision or draft behind it.
 
 - One row is open at a time, where the prototype opens as many as the reader likes: the form is one, `WorkbenchView.opened`, D-220.
 - The platform pull request warning appears only for a verdict that silences, and only when some branch's check list misses an advisory of the package, `WorkbenchView.drawOutput`, `QueueRules.stillRed`.
@@ -82,4 +82,7 @@ Written from the code at the end of epic 13 and brought up to date after the pro
 - The YAML GitHub receives has CR LF line breaks, and the 7000 character cap is measured on the form encoded address, `VerdictYaml.handover`, D-129. Whether GitHub keeps the CR LF is P-17, the person's to check.
 - The YAML carries no header comment and no null keys, where the prototype writes both, `VerdictYaml`, D-122.
 - The `Ready` group follows `01-domain-model.md` only in part: it also requires impact for `no_risk` and the commentary, and it does not enforce a fix version when `fixExpected` names a release, `VerdictDraft`, `VerdictForm`, D-123, D-223.
+- The queue fixture has no unjudged advisory, so the ranking by what one verdict would close on a series is proven only by `QueueRulesTest` on a queue built in the test.
+- Kept as app extras the prototype does not have: the summary in figures, the live YAML beside the form, Save, Export in two steps, Copy, the drafts, the paste box and the id rule of D-124, D-220.
+- No browser test covers the workbench; the closed list names none, and `CspIT` covers only its `form-action`, D-128.
 - The Definition of Done says the YAML round trips on every fixture draft; there is no set of fixture drafts, `VerdictYamlTest` round trips one full draft and one minimal draft built in the test.

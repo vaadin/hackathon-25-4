@@ -92,11 +92,15 @@ The security team's reading: every maintained series, narrowed by the products a
 
 ## Still open
 
-Written at the prototype alignment, 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment, 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
 
 - Every control is a navigation and a history entry, where the prototype replaces the address in place, `ExplorerView.address`, D-210, D-98.
 - A full version goes to its release page measured or not, where the prototype answers an unmeasured one in the note, `ExplorerView.submit`, D-209; so the prototype's "You asked for X. This answers for Y" note is never reached here.
 - `?off` addresses products by registry name; switch to the short codes when `module_codes` lands in `data/front.json`, data need in `FEEDBACK-25.4.md`.
 - The texts of an opened finding stay whole where the prototype cuts them with "more", and its routes keep this application's layout rather than the prototype's arrows, `FindingDetail`, D-213.
+- The row sentence counts what nobody has assessed over the same findings as the groups under it, where the prototype's sentence leaves out findings that arrive only through a frontend package and so prints fewer than its own group, 6 over 11 on 24.9.21, `SeriesParts.sentence`, `ExplorerAnswer.stateFindings`, D-224. An observation about vaadin/cve-status in `REPORT.md`, not a Vaadin finding.
+- The build only group after both halves is an app extra: the prototype puts `build` findings in neither half, D-205, D-212.
+- The 150 cap is proven by `ExplorerRulesTest` alone: no fixture group reaches 150.
+- The Master Detail Layout of the 25.2 coverage is no longer used anywhere since D-204; US-8.1 keeps its tasks for what they ask, the rows and the overlaying drawer, which the App Layout now gives.
 - The release page draws this page's series row for one release, its groups by the same halves as its badges and its products in a left panel of its own, D-216; the two pages share the choice of products.
 - Workaround to remove when browserless-test#29 is fixed, draft 20b: the tests open item details with `setDetailsVisible`, `ExplorerBrowserlessTest`.

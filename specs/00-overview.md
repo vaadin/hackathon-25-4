@@ -217,13 +217,15 @@ Every feature lands in exactly one epic unless two are named. If an epic is cut,
 
 ### Still open in the coverage
 
-Written at the end of epic 13, from the code.
+Written at the end of epic 13, from the code, and brought up to date at the close of the prototype alignment.
 
 - Typed JavaScript from the server is covered in part. Declared `@JsDefinition` snippets with `@JsExpression` are used for the scroll actions of epic 04, the lookup's key filters and field clearing of epic 03, and the theme switch, whose system preference read returns the typed `JavaScriptResult<Boolean>`, D-157. `callJsFunction` and `addJsInitializer` are used nowhere: the copy answer control of epic 05 uses the platform's Clipboard API instead, D-63, and no existing code has a lifecycle an initializer would fit. The table's claim for epics 04 and 05 is true only for `JsExpression`, `JsSnippet` and return values.
 - `ShortcutFilterJs` is internal, so the slash key is a filtered `keydown` listener and not a shortcut registration, draft 12b.
 - `CspMode` and the 25.4 strict mode are not used; the policy is our own with `vaadin.csp=warn`, D-02.
 - The JUnit 6 browserless extensions are used for the one test that needs no Spring context, `AssistantPanelBrowserlessTest`; every view test extends `SpringBrowserlessTest`, which the documentation says the extensions do not replace.
 - `QueryPage` is not used for tool results, D-143. `RequestStartedEvent` is not listened to, only `RequestEndedEvent`.
+- ComboBox partial match mode, claimed for epic 03 in the 25.3 table, is not used: 25.4.0-beta2 refuses it beside custom values, D-40, and the requirement left feature 03 with D-173.
+- Master Detail Layout, claimed for epic 08, left the explorer with D-204, and the drawer the internal shell used for its menu holds only a route's own filter and products since D-203: what the overview names for those two screens is now the App Layout's left panel and an opened `Details` per series.
 
 ### 25.4 arrivals no epic claims
 

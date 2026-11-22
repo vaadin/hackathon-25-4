@@ -9,9 +9,9 @@
 ### US-10.1: The queue
 
 **Tasks:**
-- [x] Grid over the queue fixture order, series filter in the address (since D-220 one disclosure per package instead of the grid)
-- [x] The summary, Charts or figures, decided and recorded
-- [x] Row selection prefills the form
+- [x] The queue in the fixture's order, series filter in the address: a grid in epic 10, since D-220 one disclosure per package
+- [x] The summary, Charts or figures, decided and recorded, D-119, after the queue since D-220
+- [x] Opening a row prefills the form, D-124, the form moving into the row since D-220
 
 **Verified by:** `WorkbenchBrowserlessTest`
 

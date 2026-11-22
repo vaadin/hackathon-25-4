@@ -73,10 +73,12 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment. Each line names where the code shows it and the decision or draft behind it.
 
 - The customer shell is an automatic `@Layout`, `base/ui/CustomerLayout`, not a `@RouteParent` layout; `@RouteParent(HomeView.class)` only gives the breadcrumb hierarchy of the status views.
 - The lookup is mounted in the customer column under the H1 and the purpose, not in the bar, through the `ShellLookup` bean, `CustomerLayout`, D-164, which superseded D-38. A customer view's own title is the H2 of its answer, `ViewHeading.ofAnswer()`, D-169.
+- The internal shell, `base/ui/InternalLayout`, has no menu in its left panel since D-203: the panel holds only what a route gives through `base/ui/DrawerContent`, the explorer's and the release page's filter and products, and a route without it, the Spring Boot page, the workbench and diagnostics, gets no panel and no toggle. The four destinations are `RouterLink`s in the bar, still built from `@Menu`, D-03; the page's H1 is drawn by the shell, `ViewHeading`; the assistant is an `Aside` on the right, shut on arrival, opened by the Assistant button before Sign out.
+- Below about 1500 pixels the internal bar wraps, `::part(navbar)` with `flex-wrap: wrap` in `styles/shell.css`, because it carries the H1, four links, the trail, the chip, the switch, Assistant and Sign out; the bar is two rows high on a laptop. Not compared with the prototype, whose bar holds less.
 - `VaadinExpiredSessionStrategy` is installed but idle because there is no session limit, `SecurityConfig`, D-06; the one notice and the reload come from `CustomizedSystemMessages` in `base/security/SessionExpiredNotice`. US-1.2 keeps its tick on that basis, D-161.
 - The enforced policy is our own, with `'unsafe-inline'` and `'unsafe-eval'` in `script-src`, `base/security/CspPolicy`, and `vaadin.csp=warn`, not the 25.4 strict mode; `CspMode` is not used, D-02, draft 08.
 - Workaround to remove when draft 10 is answered: the policy is set again on the bootstrap page by `base/security/CspOnBootstrapPage`.

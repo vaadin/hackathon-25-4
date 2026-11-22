@@ -9,7 +9,7 @@
 ### US-1.1: The customer shell
 
 **Tasks:**
-- [x] `@RouteParent` layout with Breadcrumbs, the measured chip, the lookup mount
+- [x] Customer layout with Breadcrumbs, the measured chip, the lookup mount: an automatic `@Layout`, with `@RouteParent` giving the trail's hierarchy; since D-164 the lookup sits in the centered column under the H1
 - [x] Document title follows the heading, one writer
 - [x] Delete the walking skeleton's example feature
 
@@ -23,7 +23,7 @@
 **As a** team member **I want** the internal screens behind a real sign in **so that** the deterrent gates of the static site become a boundary.
 
 **Tasks:**
-- [x] Internal parent with the drawer and assistant mount
+- [x] Internal parent with the drawer and assistant mount: since D-203 the left panel holds the route's own `DrawerContent`, the destinations are links in the bar, and the assistant mount is a panel on the right
 - [x] `VaadinSecurityConfigurer`, login view, the two users, route rules
 - [x] Return to the asked route after sign in
 - [x] `VaadinExpiredSessionStrategy` with the one notice

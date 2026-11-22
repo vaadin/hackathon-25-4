@@ -58,7 +58,7 @@ Per `specs/04-security.md`, every loosened directive is a fact the teams want, r
 
 ## Data needs toward cve-status
 
-Not Vaadin findings: fields a screen needed that the published JSON does not carry, per `specs/02-data-source.md`. Each becomes an additive export in the cve-status pipeline, never a computation here.
+Not Vaadin findings: fields a screen needed that the published JSON does not carry, per `specs/02-data-source.md`. Each becomes an additive export in the cve-status pipeline, never a computation here. The first four rows came from the epics; the last four from the alignment with the prototype, where the prototype itself shows the datum or marks it missing. Two things the alignment found about the prototype that are neither a data need nor a Vaadin finding, how it counts a CycloneDX file and what its per row "not assessed" sentence counts, are observations about vaadin/cve-status in `REPORT.md`, not rows here.
 
 | Screen | Field | Why nothing present covers it |
 | --- | --- | --- |

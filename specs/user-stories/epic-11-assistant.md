@@ -24,7 +24,7 @@
 **As a** team member **I want** the assistant to quote the measurement or say it cannot **so that** its answers are citable in a ticket.
 
 **Tasks:**
-- [x] `AIOrchestrator`, `AIMessageList`, `AIInput` in the internal drawer, history kept
+- [x] `AIOrchestrator`, `AIMessageList`, `AIInput` in the internal shell, history kept: since D-203 in a panel on the right opened by the Assistant button, no longer in the drawer
 - [ ] The five tools, `ToolException` refusals, `QueryPage` paging
 - [x] The limit sentence for `ToolCallLimitExceededException`
 

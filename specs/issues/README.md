@@ -132,7 +132,8 @@ Rows that are records rather than requests, each with the reason.
 | --- | --- |
 | `FEEDBACK-25.4.md`, CSP directives the components forced open, every row but `form-action` | A record of what the policy had to admit and why, kept because `specs/04-security.md` asks for it. Each loosened directive is what Vaadin's own strict mode also needs, or nothing was loosened, so there is nothing for a team to change |
 | `FEEDBACK-25.4.md`, CSP directives, `form-action https://github.com` | The fact belongs on the `NativeForm` documentation page, which does not exist yet: vaadin/docs#6625 is the open pull request writing it, the same reason as the `NativeForm` row under Withdrawn. A review note on that pull request is for the person to write, if at all |
-| `FEEDBACK-25.4.md`, Data needs toward cve-status, all four rows | Not Vaadin findings: fields the published JSON of vaadin/cve-status does not carry. They go to that project's pipeline as additive exports, `specs/02-data-source.md`, not through this directory |
+| `FEEDBACK-25.4.md`, Data needs toward cve-status, all eight rows, four from the epics and four from the alignment with the prototype | Not Vaadin findings: fields the published JSON of vaadin/cve-status does not carry. They go to that project's pipeline as additive exports, `specs/02-data-source.md`, not through this directory |
+| `REPORT.md`, two observations about the prototype of vaadin/cve-status: on a CycloneDX report it names components by `bom-ref` and counts the file's own findings twice, 55/2/21 against the application's 52/1/18, `specs/reviews/prototype/scan.md`, D-201; its per row "not assessed" sentence leaves out the findings that arrive only through frontend packages, D-224 | Not Vaadin findings and not data needs: defects of the JavaScript prototype the application rebuilds. They belong to vaadin/cve-status, and are recorded for the person, who decides whether that project hears of them |
 
 ### Withdrawn
 

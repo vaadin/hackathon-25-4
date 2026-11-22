@@ -94,17 +94,16 @@ The layout follows the prototype, compared past its gate on 2026-11-22 in `specs
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment, after D-228. Each line names where the code shows it and the decision or draft behind it.
 
-- The version ComboBox does not use `PartialMatchMode`, because 25.4.0-beta2 refuses it beside custom values; free text is kept, `Lookup.versionPanel`, D-40. The requirement left this document with D-173; the first task of US-3.1 stays unticked in the epic, which records what was asked.
+- The version ComboBox does not use `PartialMatchMode`, because 25.4.0-beta2 refuses it beside custom values; free text is kept, `Lookup.versionPanel`, D-40. The requirement left this document with D-173, and the task of US-3.1 that asked for it now reads as removed rather than open, D-228.
 - The slash key is not a shortcut registration: it is a `keydown` listener on the UI with a declared filter, `Lookup.KeysJs`, because `ShortcutFilterJs` is internal. Workaround to remove when flow#5473 is answered, draft 12b; US-3.1 keeps its tick on that basis, D-161.
 - Workaround to remove when draft 13 is answered: Check's enabled state is set from a `Signal.effect` instead of `bindEnabled`, which is refused beside disable on click, `Lookup.checkButton`.
 - Clearing a field navigates home only when the answer of that field is on screen, `Lookup.goHomeFrom`; clearing the version beside the ids asks the same ids again without a version, `Lookup.withdrawIdsVersion`.
 - The ids field is a single line `TextField`, `Lookup.idsPanel`; splitting on newlines in `LookupInput.splitIds` has not been checked against what a browser keeps of a pasted multi line list.
 - The tier badge appears only for the extended tier, reads "Extended" and has the prototype's sentence as hover text, built from published fields, `HomeView.extendedSentence`, D-167, which superseded D-44. A `title`, not a Vaadin tooltip, so a keyboard reader does not reach it; the badge is not focusable either way.
-- A card whose release has no summary row shows no state word and no icon, where the reference shows Not assessed yet, `HomeView.card`, D-45.
+- A card whose release has no summary row shows no state word and no icon, where the reference shows Not assessed yet, `HomeView.card`, D-45. The prototype could not settle it: no card lacked a summary row on the day of the comparison.
 - The action line puts Upgrade to X first, then On X or later, then Newest is X, `HomeView.actionLine`, D-46. The prototype did not settle the order: no card on the day of the comparison carried an upgrade.
-- A card whose release has no summary row was not observable in the prototype on the day of the comparison, so D-45 stands.
 - A recent row with no impact shows the first sentence of `commentary` instead, `HomeView.firstSentence`; a recent row with no applicability gets the `in_triage` chip, which the glossary defines as the absence of a verdict, `HomeView.recentRow`.
 - The pointer box keeps the designer's words, which send the reader to the version field, and does not point at the report tab, D-47, confirmed by the prototype, D-168.
 - Tab changes do not navigate, unlike the prototype, D-165. The prototype's lookup tip and Enterprise chip are not drawn, D-166 and the data need row.

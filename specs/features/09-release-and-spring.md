@@ -21,7 +21,7 @@ One release in full, and what Spring Boot brings, the two deep reads the explore
 - `/findings/spring`, titled "What Spring Boot brings", the prototype's lead and the way back.
 - One row per Spring Boot release the lines were measured with, newest first, shut on arrival: the release, "Vaadin a, b", its state, "N findings arrive with this release, M of them a real risk", and, only where free patches have ended, the supply in a few words, D-219.
 - Opened: the open release and, where newer, the commercial one, each with what is known of it; the supply in a sentence; the advice from `spring_boot_latest`; and the groups "we have judged a real risk", open, "nobody has judged yet" and "we have answered, nothing to do", shut, each finding with its record link, CVE to NVD and GHSA to GitHub, D-113.
-- The caveat when the lines on one release resolve different sets, and the footer, in the prototype's words.
+- The caveat, which says either that every series on a Spring Boot release resolves the same set or which releases do not, and the footer, in the prototype's words.
 
 ## Edge cases
 
@@ -32,7 +32,7 @@ One release in full, and what Spring Boot brings, the two deep reads the explore
 | A version of a line nobody follows any more, its major followed | The prototype's sentence naming the followed line of the major |
 | A major nobody follows | The prototype's sentence and "See the maintained series" |
 | A release listed by the front door whose record is not published | Says so, and offers the files the line has, D-110 |
-| A version that belongs to another line than the address claims | Answered under its real line, the address corrected in place |
+| A version that belongs to another line than the address claims | Forwarded to the address of its own line |
 | A release measured with Spring only | Its starter is drawn ticked and still |
 | A Spring release with supply ended | The row says so and still lists its findings |
 
@@ -56,10 +56,14 @@ One release in full, and what Spring Boot brings, the two deep reads the explore
 
 ## Still open
 
-Written from the code at the end of epic 13 and brought up to date after the prototype comparison of 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
+Written from the code as it stands at the close of the prototype alignment, 2026-11-22, after session six rebuilt both pages, D-216 to D-219. Each line names where the code shows it and the decision or draft behind it.
 
 - The release page's row sentence counts what nobody has assessed over the same findings as the groups; the prototype's sentence counts fewer, `SeriesParts.sentence`, D-224.
 - The release page rings a finding through every product on its route, as the prototype's does, because the record carries no `needs_spring`, `ReleaseRules.asLine`, D-216.
 - A GHSA id on the Spring Boot page links to GitHub's advisory database, not to NVD, `SpringRules.recordUrl`, D-113.
 - An unmeasured release lists twelve of the line's measured releases and counts the rest, not all of them, `ReleaseView.unmeasured`, D-118.
-- The prototype's "Same answer as X" on a second finding carrying the same workaround is not built: the opened finding shows its workaround whole.
+- The prototype's "Same answer as X" on a second finding carrying the same workaround is not built: the opened finding shows its workaround whole, `FindingDetail`, D-213.
+- The app keeps extras the prototype does not have: on the release page the count of five, the build only group, the scan date on the row, the "Read X" link and the sentences of D-110, D-115 and D-118; on the Spring Boot page the table header, the supply sentence inside an opened release and the GHSA link, D-218, D-219.
+- The "nothing newer published openly" sentence of the release advice is exercised only on live data: no fixture record sits on a Spring Boot whose `spring_boot_latest` entry is empty, `ReleaseView.springAdvice`.
+- Whether advisory ids still break at their hyphen in the update sentence, a finding of the epic 09 review, was not measured again after D-218, P-16.
+- No browser test covers either page; the closed list of `08-testing.md` names none, and both were checked in a browser against the prototype in session six.

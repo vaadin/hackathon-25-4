@@ -75,13 +75,14 @@ Per `01-domain-model.md`: each reported finding joins `scan-index` and the reade
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment, 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
 
 - Two files dropped at once: the first is read and the second is refused as too many files, but the "One file at a time" sentence does not stay on screen, because the read of the first sets the refusal back to empty, `Lookup.took`. `ScanViewBrowserlessTest.of_two_reports_dropped_at_once_the_first_is_read_and_the_second_refused` asserts the upload statuses.
 - "Parsed streaming" for a huge report is met only as streamed from the request: the body is read into a JSON tree, not parsed in constant memory, with a 32 MB cap, `Lookup.receive`, `ReportParser.parse`, D-68.
-- SCN-02's "same buckets" holds for osv-scanner, OWASP and bomber only: a CycloneDX file also gets every advisory measured on its coordinates, so its triage carries more rows, `Triage.of`, D-70.
+- SCN-02's "same buckets" holds for osv-scanner, OWASP and bomber only: a CycloneDX file also gets every advisory measured on its coordinates, so its triage carries more rows, `Triage.of`, D-70. Each finding is counted once; the prototype, on the same CycloneDX fixture, names components by their `bom-ref` and counts the file's own finding and the supplied one twice, 55 secure, 2 fix available and 21 unresolved against this application's 52, 1 and 18, `specs/reviews/prototype/scan.md`, D-201. An observation about vaadin/cve-status in `REPORT.md`, not a Vaadin finding.
 - The lines naming the version and `generated_at` are `#` comment lines before the column names, not a data row, `TriageFiles.csv`, D-75, D-197.
 - The prototype's layout and wording since the comparison of `specs/reviews/prototype/scan.md`, D-197 to D-202. Progress for a large upload is still not shown; the prototype has none either, P-13.
+- Kept as app extras where the prototype says less or something false, D-201: the not kept sentences in place of "Read in this browser", the actions that name Vaadin or the reader, the discontinued action, the downloads of a version nobody measured, any file name accepted, the version field kept after an answer, D-199, the bucket detail left out over a zero count, and the PDF preview after the release notes.
 - The audit PDF writes `?` for any character Helvetica's WinAnsi encoding cannot draw, `TriageFiles.pdf`, D-71.
 - The PDF preview sits behind the experimental flag `pdfViewerComponent`, with the plain download as fallback; remove both when the PDF Viewer leaves experimental, `base/ui/PdfPreview`, `CHANGELOG-RISK.md`.
 - Workaround to remove when draft 17 is answered: `@Uses(Lookup.class)` on `HomeView` so that the production bundle carries the upload pieces, D-79.

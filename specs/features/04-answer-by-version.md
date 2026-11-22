@@ -87,7 +87,7 @@ The screen follows the prototype's distribution, compared past its gate in `spec
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment, D-174 to D-185 included. Each line names where the code shows it and the decision or draft behind it.
 
 - View release notes is offered only beside an upgrade, and links the notes of the target release, `VersionView.verdictCard`, D-52.
 - The three layers are three separate `Details`, `FindingCard.Layers`, not an `Accordion`: several can be open at once. US-4.2 keeps its tick on that basis, D-161.
@@ -96,4 +96,8 @@ Written from the code at the end of epic 13. Each line names where the code show
 - The Spring Boot supply sentence is written only for `commercial` and `ended`, and only when both release numbers are present; an `open` supply shows the newest release of the line instead, `VersionView.supplySentence`.
 - The all versions table leaves a cell empty for an absent open count, support label or scan date, `VersionView.drawLines`, and the Spring Boot and discontinued tables do the same for an advisory with no catalogue entry, `VersionView.packages`. `AbsenceSweepBrowserlessTest` holds this to exactly those cells, D-159.
 - An unresolved version with no upgrade and nothing stuck is headed with our own wording, "N findings are not assessed yet", D-53, P-08. The prototype could not answer it: no version on the published data is in that state.
+- The prototype's "No API changes" badge and the publication date on the not assessed notice are not drawn: nothing published carries them, D-178, D-179, both data need rows in `specs/FEEDBACK-25.4.md`.
+- Where a verdict carries no workaround, fix text or tracking, the field is left out, where the prototype prints the missing field's name; the ruled out table shows the catalogue's label where the prototype prints the raw code, D-185.
+- The verdict prose is drawn whole, as on the prototype, so on 24.7.19 the red card's actions sit low in the card, P-07. Text links under 24 pixels were not measured against the prototype and are as they were.
+- At 390 pixels the versions table hides its Maintenance column and the page does not scroll sideways, where the prototype's does, `specs/reviews/prototype/version.md`.
 - Workaround to remove when draft 14 is answered: `QueryParameters` reorders flags, so `VersionAddress.address` writes a fixed order and `VersionViewBrowserlessTest.assertAddress` compares the query as a map.

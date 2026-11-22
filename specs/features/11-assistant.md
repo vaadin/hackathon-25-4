@@ -70,8 +70,10 @@ The chat panel on the internal screens, its tools over the measured data, the im
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment. Each line names where the code shows it and the decision or draft behind it.
 
+- The panel is an `Aside` on the right of the internal content since D-203, shut on arrival and opened by the Assistant button in the bar, `InternalLayout.showAssistant`. A component hidden with `setVisible(false)` sends no children to the browser, so the message input exists in the page only once the panel has been opened; the tests open it through the `assistant-toggle` button first. The prototype has no assistant: the panel is an app extra, kept by the person's choice.
+- The workbench's paste box sits in the form's column, which since D-220 moves into the package row opened and back to the fold at the foot of the page when the row shuts; `WorkbenchAiBrowserlessTest` fills the form wherever it is.
 - `QueryPage` pages no tool result: 25.4 defines it only for a lazily loading grid through a `DatabaseProvider`. `openFindings` pages through its own `offset` and `limit` arguments, at most 25 lines, and the other tools are unpaged, `AssistantTools.openFindings`, D-143.
 - Request interception records only the prompt: tool calls and refusals reach the tail from the tools' own wrapper, and answers from the response listener, `AssistantPanel.intercept`, `AssistantTools.tools`, `AssistantPanel.ended`, D-146.
 - Grid AI narrows a `Grid<AIDataRow>` nobody sees, over an in memory copy of the catalogue, and its ids then narrow the real grid. It is not the same grid with the same data provider. Workaround to remove when draft 21 is answered: `AdvisoryAsk`, `AdvisoryCatalogue`, D-140.

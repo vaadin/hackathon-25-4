@@ -59,10 +59,13 @@ Laid out as the live prototype's `#cases` lays it out, compared in `specs/review
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written from the code at the close of the prototype alignment, 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
 
 - AC1: the list is ordered by severity, then by id; the oldest first step is not applied because the index carries no published date, `AdvisoryRules.ordered`, D-81, D-92. The same gap keeps US-7.1's first task, the grid in the source order, from being true.
 - No one line impact column: `index.advisories` carries no impact text, `AdvisoriesView.configureGrid`, D-82, and the prototype shows none either, D-193.
+- No search over the catalogue for a customer: the prototype has none either, so none was added, P-14.
+- The context menu is announced by nothing on the screen; the prototype has no menu, so there is no wording to transcribe, and it stays as an app extra, D-193, P-14.
+- An unknown `?verdict` is ignored and everything shown, where the prototype shows an empty list, D-84, D-193.
 - Why an impossible case cannot be drawn is not published, only its `needs`, and for one case of five: a data need row in `FEEDBACK-25.4.md`, D-195.
 - A case whose fact the index does not carry is checked only for its example's existence, so it can stay renderable after the data stops exhibiting it, `CaseRules.exhibits`, D-88.
 - Workaround to remove when draft 21 is answered: the Grid AI controller drives a hidden `Grid<AIDataRow>` over an in memory copy of the catalogue, and the ids it settles on narrow the advisories grid, `assistant/AdvisoryAsk`, D-140.

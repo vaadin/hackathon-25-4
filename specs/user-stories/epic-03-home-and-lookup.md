@@ -13,12 +13,12 @@
 **Tasks:**
 - [x] Three tabs over `LookupState` session signals
 - [x] Version cleanup, the CVE jump, the ids splitter
-- [ ] ComboBox with `PartialMatchMode` over measured versions, free text allowed
+- Removed with D-173, not done: ~~ComboBox with `PartialMatchMode` over measured versions~~. The requirement left feature 03 because neither the prototype nor the application has it, and 25.4.0-beta2 refuses partial match beside custom values, D-40. What stands is a ComboBox over measured versions with free text allowed, D-228
 - [x] Check with `DisableOnClickMode`, clear and Escape withdraw to home
 - [x] Slash shortcut with a JS filter
 - [x] The help dialogs per tab
 
-**25.x APIs:** `PartialMatchMode`, `DisableOnClickMode`, `ShortcutFilterJs`, value change modes.
+**25.x APIs:** `DisableOnClickMode`; `PartialMatchMode` removed with D-173,, `ShortcutFilterJs`, value change modes.
 **Verified by:** `LookupBrowserlessTest`
 
 ---

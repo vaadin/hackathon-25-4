@@ -23,7 +23,7 @@
 
 **Tasks:**
 - [x] Compose the plain text answer from the card's facts only
-- [ ] Clipboard API write, success read back through the typed JS call, one notice
+- [ ] Clipboard API write, success read back through the typed JS call, one notice. Not done as written: the write and the read back of success go through the platform's observed `Clipboard.onClick(...).writeText(text, onCopied, onError)`, with no typed JavaScript call, D-63, confirmed by D-189; `callJsFunction` and `addJsInitializer` stay unused, D-157
 
 **25.x APIs:** Clipboard, `JsExpression` return values.
 **Verified by:** `CopyAnswerIT`
