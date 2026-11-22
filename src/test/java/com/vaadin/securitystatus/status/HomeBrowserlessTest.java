@@ -114,10 +114,25 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
 
         List<Badge> tiers = find(Badge.class).withClassName("line-card-tier").all();
         assertThat(tiers).hasSize(8);
-        assertThat(tiers).allSatisfy(badge -> {
-            assertThat(badge.getText()).isEqualTo("Extended");
-            assertThat(badge.getElement().getAttribute("title")).isEqualTo("Extended maintenance");
-        });
+        assertThat(tiers).allSatisfy(badge -> assertThat(badge.getText()).isEqualTo("Extended"));
+        // The prototype's sentence, built from the line's published label, major and end of free maintenance.
+        assertThat(tiers.get(0).getElement().getAttribute("title")).isEqualTo(
+                "Extended maintenance. Free maintenance for Vaadin 24 ended on 2026-06-16, and every release since then "
+                        + "needs a subscription. Whether yours covers it is between you and Vaadin: we do not know what "
+                        + "a given customer holds.");
+    }
+
+    @Test
+    void the_extended_mark_falls_back_to_the_label_when_the_line_does_not_say_when_free_maintenance_ended() {
+        String index = fixtures.transport().fixture(INDEX);
+        String without = index.replace("\"free_ended\":\"2026-06-16\",", "");
+        assertThat(without).isNotEqualTo(index);
+        replaceIndex(without);
+
+        reopenHome();
+
+        assertThat(find(Badge.class).withClassName("line-card-tier").all().get(0).getElement().getAttribute("title"))
+                .isEqualTo("Extended maintenance");
     }
 
     // HOM-02
@@ -155,6 +170,10 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
                 "affects you", "used only in specific configurations", "not used by Vaadin", "not used by Vaadin",
                 "not used by Vaadin", "not used by Vaadin", "not used by Vaadin", "not used by Vaadin");
         assertThat(texts("recent-date").get(0)).isEqualTo("2026-11-17");
+        // Only the verdict that affects the reader is drawn in the error variant.
+        assertThat(find(Badge.class).withClassName("verdict-chip").all())
+                .extracting(chip -> chip.getThemeNames().contains("error"))
+                .containsExactly(true, false, false, false, false, false, false, false);
     }
 
     // HOM-08: one row per advisory, though a verdict is written per package

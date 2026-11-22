@@ -83,7 +83,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         this.scan = scan;
         addClassName("scan-view");
         body.addClassName("scan-body");
-        getContent().add(new ViewHeading(), body);
+        getContent().add(ViewHeading.ofAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(body, () -> {

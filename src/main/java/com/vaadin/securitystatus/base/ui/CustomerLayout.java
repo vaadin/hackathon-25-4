@@ -5,7 +5,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -13,22 +15,32 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 
 /**
- * The shell of the public routes: the app bar, the lookup under it, and no
- * navigation menu.
+ * The shell of the public routes: the app bar, then one centered column that
+ * opens every page the same way, the H1, the purpose and the lookup, above
+ * the route's own content. No navigation menu.
  */
 @Layout
 @AnonymousAllowed
 public final class CustomerLayout extends Composite<Div> implements RouterLayout {
 
     private final Div lookupMount = new Div();
-    private final Main main = new Main();
+    private final Div content = new Div();
 
     CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
             ObjectProvider<ShellLookup> lookup) {
         addClassName("customer-shell");
+
+        var heading = new H1(getTranslation("shell.customer.title"));
+        heading.addClassName("view-heading");
+        var purpose = new Paragraph(getTranslation("shell.customer.purpose"));
+        purpose.addClassName("customer-purpose");
         lookupMount.addClassName("lookup-mount");
         lookup.ifAvailable(provider -> lookupMount.add(provider.create()));
-        getContent().add(new AppBar(dataRefresh, authentication), lookupMount, main);
+        content.addClassName("customer-content");
+
+        var column = new Main(heading, purpose, lookupMount, content);
+        column.addClassName("customer-column");
+        getContent().add(AppBar.customer(dataRefresh, authentication), column);
     }
 
     /** Where the lookup is mounted, once per window. */
@@ -37,15 +49,15 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
     }
 
     @Override
-    public void showRouterLayoutContent(HasElement content) {
-        main.getElement().removeAllChildren();
-        if (content != null) {
-            main.getElement().appendChild(content.getElement());
+    public void showRouterLayoutContent(HasElement routeContent) {
+        content.getElement().removeAllChildren();
+        if (routeContent != null) {
+            content.getElement().appendChild(routeContent.getElement());
         }
     }
 
     @Override
     public void removeRouterLayoutContent(HasElement oldContent) {
-        main.getElement().removeAllChildren();
+        content.getElement().removeAllChildren();
     }
 }

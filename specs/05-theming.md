@@ -23,6 +23,10 @@ Three states and four severities, each a token pair defined once in `styles.css`
 
 State words always accompany the color, Secure, Fix available, N findings open, because color alone fails a color blind reader and a printed ticket.
 
+## The customer page
+
+One centered column, at most 60rem with 1.5rem of padding, which is the prototype's 912 pixels of content, D-170. In it, in this order on every customer route: the H1, the purpose in the secondary text color, the lookup in a box on the container background, then the route. Home's line cards are tinted by state from the three status tokens through `color-mix`, and in Recently reviewed only the risk verdict takes the error variant of the badge, D-172.
+
 ## Layout rules that carry over from the source spec
 
 - A long value is never laid out underneath its own label, and a label column never takes a whole phone's width.

@@ -35,7 +35,7 @@ Flow views, Java only. The route tree mirrors the questions, not the implementat
 | `/findings/workbench` | WorkbenchView | `SECURITY` |
 | `/diagnostics` | DiagnosticsView | `SECURITY` |
 
-The customer routes hang under one `@RouteParent` layout that carries the app bar with Breadcrumbs, the measured chip and the lookup; the internal routes under a second parent that adds the drawer. Two parents because the two halves are two whole answers, which is rule 6.10.2 of the source spec: neither links into the middle of the other.
+The customer routes hang under one `@RouteParent` layout that carries the app bar with Breadcrumbs and the measured chip, then one centered column opening every page with the H1, the purpose and the lookup above the route's content, the prototype's distribution, D-164 and D-169; the internal routes under a second parent that adds the drawer. Two parents because the two halves are two whole answers, which is rule 6.10.2 of the source spec: neither links into the middle of the other.
 
 ### Query flags
 
@@ -54,7 +54,7 @@ The 25.3 rule continues: cross component state is a signal.
 
 ## The lookup, once
 
-One component, three tabs, version, advisory ids, report, mounted in the customer parent layout and feeding `LookupState`. Submitting navigates to the route that answers; clearing a field or Escape withdraws the question and navigates home. The input cleanup carries over: `V24.9.20`, `Vaadin 24.9.20` and `24.9.20` are the same question, and a CVE pasted into the version field jumps to the advisory tab. The slash key focuses the lookup from anywhere, through a shortcut with a JS filter so it does not fire while typing in another field.
+One component, three tabs, version, advisory ids, report, mounted in the customer parent layout, in its column under the H1 and the purpose, and feeding `LookupState`. Submitting navigates to the route that answers; clearing a field or Escape withdraws the question and navigates home. The input cleanup carries over: `V24.9.20`, `Vaadin 24.9.20` and `24.9.20` are the same question, and a CVE pasted into the version field jumps to the advisory tab. The slash key focuses the lookup from anywhere, through a shortcut with a JS filter so it does not fire while typing in another field.
 
 ## Grids and tables
 

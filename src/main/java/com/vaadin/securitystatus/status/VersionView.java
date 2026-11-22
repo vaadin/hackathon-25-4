@@ -154,7 +154,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         addClassName("version-view");
         var body = new Div(card, noFix, triage, fixes, spring, discontinued, details, ruledOut, lines);
         body.addClassName("version-body");
-        getContent().add(new ViewHeading(), body);
+        getContent().add(ViewHeading.ofAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         answer = Signal.computed(() -> {

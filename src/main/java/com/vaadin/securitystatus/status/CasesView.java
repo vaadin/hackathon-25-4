@@ -49,7 +49,7 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
         this.data = data;
         addClassName("cases-view");
         body.addClassName("cases-body");
-        getContent().add(new ViewHeading(), body);
+        getContent().add(ViewHeading.ofAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -32,7 +33,6 @@ import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.base.nav.Address;
 import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -67,7 +67,8 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         this.data = data;
         addClassName("home-view");
         body.addClassName("home-body");
-        getContent().add(new ViewHeading(), body);
+        // The customer shell draws the page's H1, the purpose and the lookup above this.
+        getContent().add(body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {
@@ -130,9 +131,10 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private Component linesSection(CasesIndex index, boolean withPrereleases) {
-        var heading = new H2(getTranslation("home.lines.title"));
-        var lead = new Paragraph(getTranslation("home.lines.lead"));
-        lead.addClassName("section-lead");
+        var aside = new Span(getTranslation("home.lines.lead"));
+        aside.addClassName("section-aside");
+        var heading = new Div(new H2(getTranslation("home.lines.title")), aside);
+        heading.addClassName("section-heading");
         var cards = new Div();
         cards.addClassName("line-cards");
         for (CasesIndex.Line line : shownLines(index, withPrereleases)) {
@@ -140,7 +142,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         }
         var tip = new Paragraph(getTranslation("home.lines.tip"));
         tip.addClassName("home-tip");
-        var section = new Section(heading, lead, cards, tip);
+        var section = new Section(heading, cards, tip);
         section.addClassName("home-lines");
         return section;
     }
@@ -187,9 +189,21 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
                 .map(support -> {
                     var badge = new Badge(getTranslation("home.card.extended"));
                     badge.addClassName("line-card-tier");
-                    support.label().ifPresent(label -> badge.getElement().setAttribute("title", label));
+                    extendedSentence(support).ifPresent(text -> badge.getElement().setAttribute("title", text));
                     return badge;
                 });
+    }
+
+    /**
+     * The hover text of the Extended mark: the prototype's sentence when the
+     * line publishes its label, its major and the day free maintenance ended,
+     * else the label alone.
+     */
+    private Optional<String> extendedSentence(CasesIndex.Support support) {
+        return support.label().map(label -> support.major()
+                .flatMap(major -> support.freeEnded()
+                        .map(ended -> getTranslation("home.card.extended.title", label, major, ended)))
+                .orElse(label));
     }
 
     private static boolean notAssessedOnly(CasesIndex.Summary row) {
@@ -302,6 +316,10 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         Optional.ofNullable(index.labels().get(applicability)).ifPresent(words -> {
             var chip = new Badge(words);
             chip.addClassNames("verdict-chip", "verdict-" + applicability);
+            if ("risk".equals(applicability)) {
+                // The one verdict that asks something of the reader stands out, as in the prototype.
+                chip.addThemeVariants(BadgeVariant.ERROR);
+            }
             parts.add(chip);
         });
         verdict.assessedAt().ifPresent(day -> {
@@ -309,6 +327,12 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             when.addClassName("recent-date");
             parts.add(when);
         });
+        if (cve.isPresent()) {
+            Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
+            chevron.addClassName("recent-chevron");
+            chevron.getElement().setAttribute("aria-hidden", "true");
+            parts.add(chevron);
+        }
         Component[] children = parts.toArray(Component[]::new);
         if (cve.isPresent()) {
             var row = new RouterLink(CveView.class, new RouteParameters(CveView.IDS, cve.get()));

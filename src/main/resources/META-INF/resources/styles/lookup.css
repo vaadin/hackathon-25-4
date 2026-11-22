@@ -1,7 +1,15 @@
-/* The lookup, under the app bar of the customer shell. */
+/* The lookup, in a tinted box under the purpose of every customer page. */
 .lookup-mount {
-    padding: 0.75rem 1.5rem 1rem;
-    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    margin-block-start: 1.75rem;
+    padding: 1.5rem;
+    border-radius: var(--vaadin-radius-l, 0.75rem);
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+}
+
+@media (max-width: 40rem) {
+    .lookup-mount {
+        padding: 1rem;
+    }
 }
 
 .lookup {

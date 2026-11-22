@@ -8,7 +8,7 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 
 ### The customer shell
 
-- One `@RouteParent` layout for the public routes: an app bar with Breadcrumbs reading Vaadin, Security status, then the leaf the route names; the measured chip bound to `DataRefreshSignal`; and the lookup component, mounted once (epic 03 fills its behaviour).
+- One `@RouteParent` layout for the public routes: an app bar with Breadcrumbs reading Vaadin, My account, Security status, then the leaf the route names, as the prototype's trail does, D-162; the measured chip bound to `DataRefreshSignal` with the prototype's hover sentence, D-163; and under the bar one centered column of 912 pixels that opens every page with the H1 Security status, the purpose paragraph and the lookup component, mounted once (epic 03 fills its behaviour), above the route's content, D-164, D-169, D-170.
 - No navigation menu. The customer screens are reached by asking, not by browsing, which is the source design's shape.
 - The document title follows the heading, one writer, because a reader keeps several answers open in tabs.
 
@@ -76,7 +76,7 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
 
 - The customer shell is an automatic `@Layout`, `base/ui/CustomerLayout`, not a `@RouteParent` layout; `@RouteParent(HomeView.class)` only gives the breadcrumb hierarchy of the status views.
-- The lookup is mounted under the app bar, not in it, through the `ShellLookup` bean, `CustomerLayout`, D-38.
+- The lookup is mounted in the customer column under the H1 and the purpose, not in the bar, through the `ShellLookup` bean, `CustomerLayout`, D-164, which superseded D-38. A customer view's own title is the H2 of its answer, `ViewHeading.ofAnswer()`, D-169.
 - `VaadinExpiredSessionStrategy` is installed but idle because there is no session limit, `SecurityConfig`, D-06; the one notice and the reload come from `CustomizedSystemMessages` in `base/security/SessionExpiredNotice`. US-1.2 keeps its tick on that basis, D-161.
 - The enforced policy is our own, with `'unsafe-inline'` and `'unsafe-eval'` in `script-src`, `base/security/CspPolicy`, and `vaadin.csp=warn`, not the 25.4 strict mode; `CspMode` is not used, D-02, draft 08.
 - Workaround to remove when draft 10 is answered: the policy is set again on the bootstrap page by `base/security/CspOnBootstrapPage`.

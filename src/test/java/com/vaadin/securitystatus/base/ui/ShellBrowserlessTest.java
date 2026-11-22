@@ -15,6 +15,9 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -34,7 +37,7 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
     @AnonymousAllowed
     public static class LeafView extends Div {
         public LeafView() {
-            add(new ViewHeading());
+            add(ViewHeading.ofAnswer());
         }
     }
 
@@ -50,10 +53,16 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
         navigate(HomeView.class);
 
         List<BreadcrumbsItem> trail = $(BreadcrumbsItem.class).all();
-        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "Security status");
+        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "My account",
+                "Security status");
         assertThat(trail.get(0).getPath()).isEqualTo(AppBar.VAADIN_HOME);
-        assertThat(trail.get(1).getPath()).isNull();
+        assertThat(trail.get(1).getPath()).isNotNull();
+        assertThat(trail.get(2).getPath()).isNull();
         assertThat($(H1.class).single().getText()).isEqualTo("Security status");
+        assertThat($(Paragraph.class).withClassName("customer-purpose").single().getText())
+                .startsWith("Find out whether your Vaadin version is safe");
+        assertThat($(Badge.class).withClassName("measured-chip").single().getElement().getAttribute("title"))
+                .isEqualTo("These are the real measurements of that date, not sample data");
         assertThat(documentTitle()).isEqualTo("Security status");
     }
 
@@ -65,11 +74,28 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
         navigate(LeafView.class);
 
         List<BreadcrumbsItem> trail = $(BreadcrumbsItem.class).all();
-        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "Security status", "More");
-        assertThat(trail.get(1).getPath()).isNotNull();
-        assertThat(trail.get(2).getPath()).isNull();
-        assertThat($(H1.class).single().getText()).isEqualTo("More");
+        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "My account",
+                "Security status", "More");
+        assertThat(trail.get(2).getPath()).isNotNull();
+        assertThat(trail.get(3).getPath()).isNull();
+        // The shell draws the page's one H1 on every customer route; the view's title is its answer's H2.
+        assertThat($(H1.class).single().getText()).isEqualTo("Security status");
+        assertThat($(H2.class).withClassName("answer-heading").single().getText()).isEqualTo("More");
         assertThat(documentTitle()).isEqualTo("More");
+    }
+
+    // The prototype's distribution: one column that opens every customer page with the H1, the purpose and the lookup.
+    @Test
+    void every_customer_route_opens_with_the_heading_the_purpose_and_the_lookup_above_its_content() {
+        RouteConfiguration.forSessionScope().setAnnotatedRoute(LeafView.class);
+
+        for (Class<? extends com.vaadin.flow.component.Component> route : List.of(HomeView.class, LeafView.class)) {
+            navigate(route);
+            Main column = $(Main.class).withClassName("customer-column").single();
+            assertThat(column.getChildren().map(child -> child.getElement().getAttribute("class")))
+                    .containsExactly("view-heading", "customer-purpose", "lookup-mount", "customer-content");
+            assertThat($(CustomerLayout.class).single().getLookupMount().getChildren().count()).isEqualTo(1);
+        }
     }
 
     @Test
@@ -77,7 +103,8 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
         navigate("nothing-here", RouteNotFoundError.class);
 
         List<BreadcrumbsItem> trail = $(BreadcrumbsItem.class).all();
-        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "Security status");
+        assertThat(trail).extracting(BreadcrumbsItem::getText).containsExactly("Vaadin", "My account",
+                "Security status");
         assertThat(trail.get(1).getPath()).isNotNull();
     }
 

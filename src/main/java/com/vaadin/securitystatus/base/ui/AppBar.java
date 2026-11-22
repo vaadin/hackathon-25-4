@@ -4,6 +4,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -37,8 +38,20 @@ public final class AppBar extends Composite<Header> {
     private static final DateTimeFormatter MEASURED_DATE = DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC);
 
     private final Breadcrumbs breadcrumbs = new Breadcrumbs(Breadcrumbs.Mode.MANUAL);
+    private final boolean customer;
 
+    /** The bar of the internal shell: the trail starts at Vaadin and goes straight to the route. */
     AppBar(DataRefreshSignal dataRefresh, AuthenticationContext authentication) {
+        this(dataRefresh, authentication, false);
+    }
+
+    /** The bar of the customer shell: the trail passes through My account, as the prototype's does. */
+    static AppBar customer(DataRefreshSignal dataRefresh, AuthenticationContext authentication) {
+        return new AppBar(dataRefresh, authentication, true);
+    }
+
+    private AppBar(DataRefreshSignal dataRefresh, AuthenticationContext authentication, boolean customer) {
+        this.customer = customer;
         addClassName("app-bar");
 
         breadcrumbs.setAriaLabel(getTranslation("shell.breadcrumbs.label"));
@@ -50,6 +63,7 @@ public final class AppBar extends Composite<Header> {
         var measured = new Badge(generatedAt.map(
                 at -> at == null ? "" : getTranslation("shell.measured", MEASURED_DATE.format(at))));
         measured.addClassName("measured-chip");
+        measured.getElement().setAttribute("title", getTranslation("shell.measured.title"));
         measured.bindVisible(generatedAt.map(Objects::nonNull));
 
         getContent().add(breadcrumbs, measured, new ThemeSwitch());
@@ -65,9 +79,18 @@ public final class AppBar extends Composite<Header> {
         return RouteConfiguration.forSessionScope().isRouteRegistered(target);
     }
 
+    private static Optional<Class<? extends Component>> homeRoute() {
+        return VaadinService.getCurrent().getRouter().resolveNavigationTarget(new Location(""))
+                .map(NavigationState::getNavigationTarget);
+    }
+
     private void showTrail(RouterState state) {
         breadcrumbs.removeAll();
         breadcrumbs.add(new BreadcrumbsItem(getTranslation("shell.crumb.vaadin"), VAADIN_HOME));
+        if (customer) {
+            homeRoute().ifPresent(
+                    home -> breadcrumbs.add(new BreadcrumbsItem(getTranslation("shell.crumb.account"), home)));
+        }
         if (state.navigationTarget() == null) {
             return;
         }
@@ -76,8 +99,7 @@ public final class AppBar extends Composite<Header> {
         var router = VaadinService.getCurrent().getRouter();
         if (hierarchy.stream().noneMatch(entry -> isRegistered(entry.navigationTarget()))) {
             // An error view has no place in the hierarchy, so the trail leads home.
-            router.resolveNavigationTarget(new Location("")).map(NavigationState::getNavigationTarget)
-                    .ifPresent(home -> router.resolvePageTitle(home, RouteParameters.empty())
+            homeRoute().ifPresent(home -> router.resolvePageTitle(home, RouteParameters.empty())
                             .filter(text -> !text.isBlank())
                             .ifPresent(title -> breadcrumbs.add(new BreadcrumbsItem(title, home))));
             return;

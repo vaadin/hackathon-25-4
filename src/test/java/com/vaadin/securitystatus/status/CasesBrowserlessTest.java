@@ -41,7 +41,8 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
     void three_groups_in_the_source_order_with_their_counts() {
         navigate(CasesView.class);
 
-        assertThat($(H2.class).all()).extracting(H2::getText).containsExactly("Cannot be rendered (5)",
+        // The view's own title is the answer's H2 under the shell, D-169; the groups follow it.
+        assertThat($(H2.class).all()).extracting(H2::getText).containsExactly("Cases", "Cannot be rendered (5)",
                 "None today (3)", "Renderable (31)");
         assertThat(ids("cases-impossible")).containsExactly("fix_eta", "advisory_published", "api_changes",
                 "ticket_answer", "notify");

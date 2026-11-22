@@ -93,7 +93,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         this.data = data;
         addClassName("cve-view");
         body.addClassNames("version-body", "cve-body");
-        getContent().add(new ViewHeading(), body);
+        getContent().add(ViewHeading.ofAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         Signal<Answer> answer = Signal.computed(() -> {

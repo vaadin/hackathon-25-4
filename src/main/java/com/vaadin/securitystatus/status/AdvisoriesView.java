@@ -92,7 +92,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         outage.addClassName("advisories-outage");
         configureGrid();
         configureMenu();
-        getContent().add(new ViewHeading(), outage, pills);
+        getContent().add(ViewHeading.ofAnswer(), outage, pills);
         // The ask exists only for the team, and the security context is asked
         // once, here: an anonymous reader gets no box and so no model call, D-141.
         if (authentication.hasRole(Roles.SECURITY)) {
