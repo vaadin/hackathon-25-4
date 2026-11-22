@@ -66,6 +66,7 @@ Not Vaadin findings: fields a screen needed that the published JSON does not car
 | Answer by CVE | An alias map, GHSA id to the tracked id, in `cases/index.json` or as `cases/cve/<alias>.json` redirects | An advisory is published under its tracked id only, and the catalogue in the index carries no aliases, so a pasted GHSA alias of a tracked CVE cannot be answered without fetching every advisory document. Until the export lands the screen answers it only when another asked id names it, D-62 |
 | Advisories | A one line impact per advisory in the catalogue, `index.advisories` | Feature 07 asks for an impact column. The catalogue entry has none, only the few verdicts in `recent` carry an impact, and filling 535 rows would mean fetching 535 advisory documents. The column is left out, D-82 |
 | Advisories | The date an advisory was published, in the catalogue | Rule 6.4.22 orders worst first, then oldest, then by id. With no date the list is ordered by severity and id, D-81. `cases/cases.json` already lists `advisory_published` as impossible |
+| Customer shell | The reader's subscription, which the prototype's header shows as a chip "Enterprise" | The prototype writes that chip as a fixed word in its markup; no published document carries a customer's plan, and this application signs in no customer. The chip is left out, `specs/reviews/prototype/home.md`. It needs a source per reader, an account service rather than an export of cve-status |
 
 ## The SDD starter
 
