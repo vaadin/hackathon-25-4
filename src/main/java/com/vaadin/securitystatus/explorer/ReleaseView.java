@@ -27,7 +27,6 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
@@ -76,7 +75,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             }
         });
 
-        getContent().add(new ViewHeading(), back(), lookup, body);
+        getContent().add(back(), lookup, body);
     }
 
     /**
@@ -106,7 +105,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         if (version.isPresent()) {
             ui.navigate(ReleaseView.class, parameters(version.get()));
         } else if (!typed.isBlank()) {
-            ExplorerView.address(typed, List.of()).go(ui);
+            ExplorerView.search(typed).go(ui);
         }
     }
 
@@ -187,7 +186,10 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         card.add(top, badges, summary, rings(findings, registry));
         card.add(advice(front, record, size(groups, Group.SPRING)));
         card.add(new ReleaseFiles(data, record.version(), ReleaseRules.files(record.scannerFiles())));
-        groups.forEach((group, members) -> card.add(group(record, group, members, registry)));
+        List<Product> catalogue = ExplorerAnswer.catalogue(registry, front);
+        var routes = FindingGrid.everything(registry, ExplorerAnswer.shape(front, catalogue, Set.of()),
+                Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of())));
+        groups.forEach((group, members) -> card.add(group(record, group, members, routes)));
         return card;
     }
 
@@ -301,7 +303,8 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         return says;
     }
 
-    private Component group(ExplorerVersion record, Group group, List<Finding> findings, List<Product> registry) {
+    private Component group(ExplorerVersion record, Group group, List<Finding> findings,
+            FindingGrid.Routes routes) {
         String key = group.name();
         String heading = group == Group.SPRING && record.springBoot().isPresent()
                 ? getTranslation("explorer.group.SPRING.version", record.springBoot().get().toString(),
@@ -320,7 +323,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             details.add(lead("explorer-group-note", getTranslation("explorer.group." + key + ".note")));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
-        details.add(new FindingGrid(capped.shown(), registry, Set.of(),
+        details.add(new FindingGrid(capped.shown(), routes,
                 finding -> new FindingDetail(finding.cve(), record.version(), record.findings().stream()
                         .filter(candidate -> candidate.cve().equals(finding.cve())).findFirst(), false)));
         if (capped.more() > 0) {

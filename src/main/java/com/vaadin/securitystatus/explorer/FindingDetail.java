@@ -17,7 +17,8 @@ import com.vaadin.securitystatus.data.model.ExplorerVersion;
 
 /**
  * An opened finding, read from its release's record: the summary, what it
- * means, what to do today, the fix and the routes per coordinate. A field the
+ * means, what Vaadin says, what to do today, the fix and the routes per
+ * coordinate, under the prototype's headings, D-213. A field the
  * record does not carry is left out, rule 6.4.11; a release whose record is
  * not published says so in one sentence. The advisory record link is always
  * there, because it is built from the id.
@@ -32,14 +33,15 @@ final class FindingDetail extends Composite<Div> {
             box.add(lead("explorer-finding-missing", getTranslation("explorer.finding.missing", release.toString())));
         }
         record.ifPresent(found -> {
-            found.summary().ifPresent(text -> box.add(field("summary", text)));
+            found.summary().ifPresent(text -> box.add(lead("explorer-finding-summary", text)));
             found.impact().ifPresent(text -> box.add(field("impact", text)));
+            found.commentary().ifPresent(text -> box.add(field("commentary", text)));
             found.workaround().ifPresent(text -> box.add(field("workaround", text)));
             found.fixedIn().map(version -> getTranslation("explorer.finding.fixedIn", version.toString()))
                     .or(found::fixExpected).ifPresent(text -> box.add(field("fix", text)));
             routes(found, springOff).ifPresent(box::add);
         });
-        var link = new Anchor(recordUrl(cve), getTranslation("explorer.finding.record", cve));
+        var link = new Anchor(recordUrl(cve), getTranslation("explorer.finding.record"));
         link.setTarget(AnchorTarget.BLANK);
         link.addClassName("explorer-finding-record");
         box.add(link);

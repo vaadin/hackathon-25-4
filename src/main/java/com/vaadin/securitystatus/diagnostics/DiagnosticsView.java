@@ -29,7 +29,6 @@ import com.vaadin.securitystatus.base.observe.AssistantTail;
 import com.vaadin.securitystatus.base.security.CspViolations;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.diagnostics.DiagnosticsCounters.Kind;
 import com.vaadin.securitystatus.diagnostics.DiagnosticsCounters.Minute;
@@ -75,7 +74,7 @@ public final class DiagnosticsView extends Composite<Div> {
         var since = new Paragraph(getTranslation("diagnostics.since", AT.format(counters.since())));
         since.addClassName("diagnostics-since");
 
-        getContent().add(new ViewHeading(), since, navigationsPanel(counters.navigations()),
+        getContent().add(since, navigationsPanel(counters.navigations()),
                 requestsPanel(counters.requests()), sessionsPanel(counters.sessions(), refresh.generatedAt()),
                 clientPanel(), tailsPanel(violations, tail));
 

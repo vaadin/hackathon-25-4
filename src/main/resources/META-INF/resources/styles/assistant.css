@@ -1,14 +1,8 @@
 /* The assistant: the chat panel in the internal drawer, the ask over the
    advisories list and the paste box of the workbench. Epic 11. */
 
-.internal-shell::part(drawer) {
-    width: 22rem;
-    max-width: 100vw;
-}
-
 .assistant-mount {
-    border-block-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    margin-block-start: 0.5rem;
+    flex: 1 1 auto;
 }
 
 .assistant-panel {

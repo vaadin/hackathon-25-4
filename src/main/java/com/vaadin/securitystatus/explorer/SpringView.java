@@ -27,7 +27,6 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -68,7 +67,7 @@ public final class SpringView extends Composite<Div> {
         boots.addClassName("spring-boots");
         var lead = new Paragraph(getTranslation("spring.lead"));
         lead.addClassName("spring-lead");
-        getContent().add(new ViewHeading(), ReleaseView.back(), lead, boots);
+        getContent().add(ReleaseView.back(), lead, boots);
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {
             generatedAt.get();

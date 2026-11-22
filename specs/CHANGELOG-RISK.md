@@ -18,7 +18,7 @@ Everything in this application that depends on an API that is preview, experimen
 | FormLayout side labels, `LabelTextAlign` | New in 25.4. Verified on beta2 in epic 10: `setLabelsAside(true)` with `setLabelTextAlign(END)` in auto responsive mode puts the labels beside the fields, `has-labels-aside` set on the host; fields stay narrow until `setExpandColumns` and `setExpandFields` are set | Epic 10, `VerdictForm` | Part names, responsive behaviour |
 | Switch | Since 25.3. Verified on beta2 in US-1.3: renders and reports its value with no feature flag set | Epics 01 and 08 | Nothing known |
 | Breadcrumbs | Since 25.2. Verified on beta2 in US-1.1: renders and navigates with no feature flag set | Epic 01 | Whether `ROUTER` mode learns to take a fixed leading item, which would delete the manual trail in `CustomerLayout` |
-| Master Detail Layout | Since 25.2 | Epic 08 | Overlay breakpoint behaviour |
+| Master Detail Layout | Since 25.2 | Epic 08, removed from the explorer by D-204 | Overlay breakpoint behaviour, no longer in use |
 | `browserless-test-spring` | Versioned independently, managed by the BOM | Every browserless test | Never hand pin |
 | Dev loop CLI | Verified on beta2 in US-1.5: `vaadin:install-dev-cli` exists under the `vaadin` prefix. Costs measured in `specs/10-dev-loop.md` | Tooling | Nothing known |
 

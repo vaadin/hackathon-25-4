@@ -26,7 +26,8 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
  * The address is the truth for the products: the view sets the selection from
  * every address it arrives at, and a remembered selection is only ever applied
  * by writing it into the address, rule 6.7.5. Storage that throws or comes
- * back empty leaves everything on, silently.
+ * back empty leaves the default, silently: everything on but what Vaadin no
+ * longer develops, D-206. An empty value stored is everything on.
  */
 @SpringComponent
 @VaadinSessionScope
@@ -65,9 +66,19 @@ public class ProductSelection {
         save();
     }
 
-    /** A selection to write into an address that carries none: what this session turned off, when anything. */
-    boolean remembers() {
-        return settled && !off.peek().isEmpty();
+    /**
+     * A selection to write into an address that carries none: what this
+     * session decided, when it differs from the default, D-206.
+     */
+    boolean remembers(Set<String> defaults) {
+        return settled && !off.peek().equals(defaults);
+    }
+
+    /** What is off when nothing has said otherwise: the default, which settles nothing and is not saved. */
+    void useDefault(Set<String> defaults) {
+        if (!settled && !off.peek().equals(defaults)) {
+            off.set(Set.copyOf(defaults));
+        }
     }
 
     /** Whether nothing has said anything about the products yet in this session. */
@@ -105,10 +116,14 @@ public class ProductSelection {
             groups.set(merged);
         });
         WebStorage.getItem(ui, WebStorage.Storage.LOCAL_STORAGE, OFF_KEY).thenAccept(stored -> {
+            if (stored == null) {
+                // Nothing remembered: the default stands.
+                return;
+            }
             List<String> names = parseNames(stored);
             names.stream().filter(name -> !products.contains(name)).forEach(elsewhere::add);
             List<String> known = names.stream().filter(products::contains).toList();
-            if (!settled && !known.isEmpty()) {
+            if (!settled && !Set.copyOf(known).equals(off.peek())) {
                 restore.accept(known);
             }
         });

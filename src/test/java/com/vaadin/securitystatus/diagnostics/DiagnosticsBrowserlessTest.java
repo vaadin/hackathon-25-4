@@ -188,6 +188,8 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
     void the_assistant_used_once_is_in_the_tail_prompt_tool_call_and_answer() {
         navigate(DiagnosticsView.class);
         long started = tail.newest();
+        // The panel is on the right of the internal shell, shut until the Assistant button opens it, D-203.
+        test($(com.vaadin.flow.component.button.Button.class).withClassName("assistant-toggle").single()).click();
 
         test($(MessageInput.class).withClassName("assistant-input").single()).send("Is 24.9.21 safe?");
 

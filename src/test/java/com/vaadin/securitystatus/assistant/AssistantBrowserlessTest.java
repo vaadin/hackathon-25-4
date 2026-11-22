@@ -48,6 +48,12 @@ class AssistantBrowserlessTest extends SpringBrowserlessTest {
     void openAnInternalScreen() {
         started = tail.newest();
         UI.getCurrent().navigate("findings");
+        openPanel();
+    }
+
+    /** The panel is on the right of the internal shell, shut until the Assistant button opens it, D-203. */
+    private void openPanel() {
+        test($(com.vaadin.flow.component.button.Button.class).withClassName("assistant-toggle").single()).click();
     }
 
     // US-11.1: the mock is the default, and says so
@@ -202,6 +208,7 @@ class AssistantBrowserlessTest extends SpringBrowserlessTest {
 
         UI.getCurrent().navigate("");
         UI.getCurrent().navigate("findings/workbench");
+        openPanel();
 
         assertThat(messages()).extracting(MessageListItem::getText).first().isEqualTo("Is 24.9.21 safe?");
         assertThat(messages()).hasSize(2);

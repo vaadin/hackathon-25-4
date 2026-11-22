@@ -17,10 +17,20 @@
 }
 
 .internal-shell .app-bar {
-    flex: 1 1 0;
-    flex-wrap: nowrap;
+    flex: 1 1 24rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     min-width: 0;
     padding-inline-start: 0.5rem;
+}
+
+/* The bar wraps onto a second row rather than push Sign out off a laptop's screen. */
+.internal-shell::part(navbar) {
+    flex-wrap: wrap;
+}
+
+.internal-shell .app-bar > vaadin-breadcrumbs {
+    flex: 1 1 12rem;
 }
 
 .app-bar > vaadin-breadcrumbs {
@@ -77,8 +87,63 @@
     }
 }
 
-.internal-shell .explorer-view {
-    padding: 1.5rem;
+/* The internal shell, D-203: the H1 and the destinations in the bar after the toggle, the
+   route and the assistant side by side under it. */
+.internal-shell > [slot="navbar"].view-heading,
+.internal-shell .view-heading {
+    font-size: 1.125rem;
+    white-space: nowrap;
+}
+
+.internal-shell vaadin-drawer-toggle[hidden] {
+    display: none;
+}
+
+.internal-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    margin-inline-start: 1.25rem;
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+    white-space: nowrap;
+}
+
+.internal-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    color: var(--vaadin-text-color-secondary, inherit);
+    text-decoration: none;
+}
+
+.internal-nav-link[highlight] {
+    color: var(--vaadin-text-color, inherit);
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.internal-frame {
+    display: flex;
+    align-items: stretch;
+    min-height: 100%;
+}
+
+.internal-route {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.assistant-aside {
+    flex: 0 0 22rem;
+    box-sizing: border-box;
+    border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    display: flex;
+    flex-direction: column;
+}
+
+.assistant-close {
+    align-self: flex-end;
+    margin: 0.25rem 0.5rem 0;
 }
 
 .login-view {

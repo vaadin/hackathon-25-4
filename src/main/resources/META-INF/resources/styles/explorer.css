@@ -147,32 +147,249 @@
     align-items: baseline;
 }
 
+/* The explorer front door in the prototype's distribution, D-203 to D-212: the filter and
+   the products in the shell's left panel, the series in the content, the legend on the right. */
 .explorer-view {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    height: 100%;
+    align-items: flex-start;
+    min-height: 100%;
     box-sizing: border-box;
 }
 
-.explorer-layout {
+.explorer-main {
+    position: relative;
     flex: 1 1 0;
-    min-height: 32rem;
-    border-top: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
-}
-
-.explorer-master {
-    height: 100%;
-    box-sizing: border-box;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 0.75rem 1rem 1rem 0;
-    overflow: auto;
+    padding: 1.5rem 1.5rem 2rem 2.5rem;
+}
+
+.explorer-help {
+    position: absolute;
+    inset-block-start: 1.25rem;
+    inset-inline-end: 1.5rem;
+    min-width: 2rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    padding: 0;
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.explorer-lead {
+    margin: 0;
+}
+
+.explorer-series {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.explorer-series-heading,
+.explorer-panel-heading {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+/* The left panel. */
+.internal-shell::part(drawer) {
+    width: 20rem;
+    max-width: 100vw;
+}
+
+.explorer-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem;
+}
+
+.explorer-lookup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-block-end: 1rem;
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.explorer-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
 }
 
 .explorer-search {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.explorer-note {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.explorer-note:empty {
+    display: none;
+}
+
+.explorer-note-says {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.explorer-profile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.explorer-profile-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+
+.explorer-chips-head,
+.explorer-chip {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 1.75rem;
+    font-size: 0.875rem;
+}
+
+.explorer-chips-head {
+    padding-block-end: 0.25rem;
+    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-col-count {
+    text-align: end;
+}
+
+.explorer-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.explorer-chip {
+    color: inherit;
+    text-decoration: none;
+}
+
+.explorer-chip > .chip-count {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+/* What Vaadin no longer develops says so under the name, as in the prototype. */
+.explorer-chip > .chip-discontinued {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+}
+
+.explorer-chip.off,
+.explorer-chip.fixed {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-chip.impossible {
+    opacity: 0.6;
+}
+
+/* A drawn box, as the prototype's controls have, ticked, a dash, or empty. */
+.chip-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--vaadin-border-color, rgb(0 0 0 / 0.35));
+    border-radius: 0.2rem;
+    box-sizing: border-box;
+}
+
+.chip-box.ticked {
+    border-color: var(--vaadin-accent-color, #1676f3);
+    background: var(--vaadin-accent-color, #1676f3);
+}
+
+.chip-box.ticked::after {
+    content: "";
+    width: 0.3rem;
+    height: 0.55rem;
+    margin-block-start: -0.1rem;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.explorer-chip.fixed .chip-box.ticked {
+    opacity: 0.5;
+}
+
+.chip-box.some {
+    border-color: var(--vaadin-accent-color, #1676f3);
+    background: var(--vaadin-accent-color, #1676f3);
+}
+
+.chip-box.some::after {
+    content: "";
+    width: 0.5rem;
+    height: 2px;
+    background: #fff;
+}
+
+.explorer-all {
+    display: inline-flex;
+    min-height: 1.5rem;
+    align-items: center;
+}
+
+.chip-discontinued {
+    padding: 0 0.25rem;
+    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border-radius: 0.2rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+/* The number in a ring, colored when the product is on and brings something. */
+.chip-count,
+.explorer-ring {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.25rem;
+    padding: 0 0.25rem;
+    border: 2px solid var(--ring, var(--vaadin-border-color, rgb(0 0 0 / 0.15)));
+    border-radius: 999px;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    background: transparent;
+}
+
+.chip-count.none,
+.explorer-ring.none {
+    border-color: var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.08));
+    color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.35));
 }
 
 /* The palette the rings and dots take, by registry position. */
@@ -206,59 +423,8 @@
     background: var(--ring, currentColor);
 }
 
-.product-ring.dot.off {
-    opacity: 0.25;
-}
 
-.explorer-products {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.explorer-products-heading {
-    margin: 0;
-    font-size: 1rem;
-}
-
-.explorer-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-}
-
-.explorer-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    min-height: 2rem;
-    padding: 0 0.75rem;
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
-    border-radius: 999px;
-    color: inherit;
-    font-size: 0.875rem;
-    text-decoration: none;
-}
-
-.explorer-chip.off {
-    border-style: dashed;
-    color: var(--vaadin-text-color-secondary, inherit);
-}
-
-.explorer-chip.off .chip-name {
-    text-decoration: line-through;
-}
-
-/* Rule 6.5.10: the count is quieter than the name. */
-.chip-count,
-.chip-discontinued {
-    color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.8125rem;
-}
-
-.explorer-silent,
-.explorer-search-count,
-.explorer-hidden,
+.explorer-hint,
 .explorer-group-note,
 .explorer-group-more,
 .explorer-spring-only,
@@ -268,51 +434,55 @@
     font-size: 0.875rem;
 }
 
+/* The series rows, each opened in place, marked at its start by its state. */
 .explorer-rows {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.625rem;
 }
 
 .explorer-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-    width: 100%;
-    padding: 0.75rem;
     border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border-inline-start: 4px solid var(--status-secure);
     border-radius: var(--vaadin-radius-m, 0.5rem);
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    cursor: pointer;
+    background: var(--vaadin-background-color, transparent);
 }
 
-.explorer-row.open {
-    border-color: var(--vaadin-text-color, currentColor);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+.explorer-row.state-vulnerable {
+    border-inline-start-color: var(--status-unresolved);
 }
 
-.explorer-row:focus-visible {
-    outline: 2px solid var(--vaadin-focus-ring-color, currentColor);
-    outline-offset: 2px;
+.explorer-row.state-unjudged {
+    border-inline-start-color: var(--status-fix);
 }
 
-.explorer-row-top {
+.explorer-row > vaadin-details-summary {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    box-sizing: border-box;
+}
+
+.explorer-row-summary {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
+    align-items: center;
+    gap: 0.375rem 0.75rem;
+    width: 100%;
+    font-size: 0.875rem;
 }
 
 .explorer-row-line {
-    font-size: 1.125rem;
+    min-width: 3rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+    color: var(--vaadin-accent-color, inherit);
+}
+
+.explorer-row-version {
+    font-size: 1.0625rem;
     font-weight: var(--aura-font-weight-semibold, 600);
 }
 
 .explorer-row-scanned {
-    margin-inline-start: auto;
     color: var(--vaadin-text-color-secondary, inherit);
     font-size: 0.8125rem;
 }
@@ -335,12 +505,15 @@
     color: var(--status-secure);
 }
 
-.explorer-row-summary {
-    margin: 0;
-    font-size: 0.875rem;
+
+.explorer-rings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    flex: 1 0 100%;
 }
 
-.explorer-rings,
 .explorer-dots {
     display: flex;
     flex-wrap: wrap;
@@ -349,13 +522,93 @@
 }
 
 .explorer-detail {
-    height: 100%;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 0.75rem 1rem 1.5rem;
-    overflow: auto;
+    padding: 0 0.75rem 1rem;
+}
+
+.explorer-half {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.explorer-half-title {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    font-weight: var(--aura-font-weight-semibold, 600);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-group {
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: var(--vaadin-radius-m, 0.5rem);
+}
+
+.explorer-group.group-risk,
+.explorer-group.group-spring_risk {
+    background: color-mix(in srgb, var(--status-unresolved) 7%, transparent);
+}
+
+.explorer-group.group-unjudged,
+.explorer-group.group-spring_unjudged {
+    background: color-mix(in srgb, var(--status-fix) 7%, transparent);
+}
+
+.explorer-group > vaadin-details-summary {
+    padding-inline: 0.5rem;
+}
+
+.explorer-releases a,
+.explorer-spring-link,
+.explorer-release-link {
+    display: inline-block;
+    min-height: 1.5rem;
+    line-height: 1.5rem;
+}
+
+/* The legend on the right, opened by the "?". */
+.explorer-legend {
+    flex: 0 0 22.5rem;
+    box-sizing: border-box;
+    align-self: stretch;
+    padding: 1rem 1.25rem;
+    border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.03));
+    font-size: 0.875rem;
+}
+
+.explorer-legend-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.explorer-legend h2 {
+    margin: 0;
+    font-size: 1.0625rem;
+}
+
+.explorer-legend h3 {
+    margin: 1rem 0 0.375rem;
+    font-size: 0.9375rem;
+}
+
+.explorer-legend-list {
+    margin: 0;
+}
+
+.explorer-legend-list dt {
+    font-weight: var(--aura-font-weight-semibold, 600);
+}
+
+.explorer-legend-list dd {
+    margin: 0 0 0.5rem;
+    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .explorer-detail-head {
@@ -367,7 +620,7 @@
 
 .explorer-detail-title {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1rem;
 }
 
 .explorer-detail-summary {
@@ -432,12 +685,6 @@
     border-top: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
 }
 
-/* The panes scroll; what is inside them keeps its height. */
-.explorer-master > *,
-.explorer-detail > * {
-    flex: 0 0 auto;
-}
-
 /* Text links on the deep pages are 24 pixels tall at least, like the rest of the application. */
 .release-advice a,
 .release-view .release-file,
@@ -446,4 +693,13 @@
     display: inline-block;
     min-height: 1.5rem;
     line-height: 1.5rem;
+}
+
+/* A ring holding a number: the palette's color on the border, the number centered. */
+.chip-count.product-ring,
+.explorer-ring.product-ring {
+    display: inline-flex;
+    width: auto;
+    height: 1.25rem;
+    border-width: 2px;
 }

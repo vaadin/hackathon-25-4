@@ -93,7 +93,7 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
 
         assertThat($(Div.class).withClassName("explorer-finding").single().getElement().getTextRecursively())
                 .contains("OpenTelemetry Java SDK has Unbounded Memory Allocation",
-                        "Advisory record of CVE-2026-45292");
+                        "What Vaadin says", "Read the advisory");
     }
 
     // REL-02

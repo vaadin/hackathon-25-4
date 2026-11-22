@@ -2,53 +2,63 @@
 
 ## Overview
 
-The security team's reading: every maintained line, narrowed by the products an application actually uses. The behaviour contract is sections 6.2 and 6.5 to 6.7 of the source requirements. Covers T2 to T6.
+The security team's reading: every maintained series, narrowed by the products an application actually uses. The behaviour contract is sections 6.2 and 6.5 to 6.7 of the source requirements, and the layout and the answers are the prototype's, compared past its gate on 2026-11-22 in `specs/reviews/prototype/explorer.md`. Covers T2 to T6.
 
 ## Behaviour
 
 ### The layout
 
-- `MasterDetailLayout`: the series list is the master, the opened line's detail the detail pane, which is the 25.2 component doing the job the source page did with one open details row at a time, rule 6.3.4's spirit: choosing replaces, not extends.
-- The drawer holds the search and the product chips. Below 800 pixels it overlays, which the component gives for free.
+- The internal shell's left panel holds the filter and the products and nothing else, D-203. Below the App Layout's breakpoint it overlays, which the component gives for free, as the prototype's does below 800 pixels.
+- The bar over the content holds the drawer toggle and the H1 "Vaadin security status"; the internal destinations, the trail, the measured chip, the dark switch, the Assistant button and Sign out follow it as app extras.
+- The content: a round "?" at the top right, the lead under a search, the heading "Series (10 maintained)", or "Series" under a search, and one row per maintained series. Each row is a disclosure opened in place under itself, one at a time; the opened series is in the address as `?open=<line>`, D-204.
+- The "?" opens the legend on the right, "What the words on this page mean", with the prototype's sections: The badge on a series, The groups inside a series, How far a verdict was taken, What this page is measuring. Close and Escape shut it, D-211.
 
 ### Search
 
-- One field, filter by advisory, version or dependency, held in `?q`. Typing a full version navigates to the release page, the source shortcut.
+- "Filter by advisory, version or dependency": one field and a Filter button, held in `?q`, submitted on Enter or with the button; clearing the field clears the search. A number is read as a version first and keeps the series it names, then an advisory id, then an advisory no series carries any more, read from `history`, then a coordinate of `packages`, D-209.
+- The note under the field says what was found in the prototype's words: "Showing N advisories matching X.", "Showing what arrives through a coordinate matching X: N advisories.", "Showing the X series and nothing else.", the series that last carried an advisory no series carries any more, "We do not follow X. ..." for a number nothing matches, "We report nothing under that on any series we follow." for a name. The lead over the series counts what is standing and its states.
+- A full version typed goes to its release page, the source shortcut, D-103.
 
-### Product chips
+### Products
 
-- One chip per product from the registry `data/front.json` carries: `module_names` is the usage order, most widely used first, never alphabetical, and `profile` says which are optional, discontinued, fixed or carried inside another. Each chip shows its per line count and a colour ring assigned from one fixed palette by registry order, a presentation detail the builder owns.
-- Everything starts on. The address names only what is off, `?off=<name>,<name>`, by product name until the short code export lands, per the data need recorded in `specs/FEEDBACK-25.4.md` and the source spec's 6.2.6 fallback. The selection is remembered through web storage, merged, restored only when the address carries no selection of its own, rules 6.2.4, 6.7.3, 6.7.6.
-- The tri state all control reads the chips: all on shows checked, all off unchecked, anything else mixed. Clicking it turns everything on unless everything is already on, in which case it turns the optional products off, which is the useful second state, and a second click restores all on.
-- A finding is hidden only when every product it arrives through is off, and a finding with no product recorded is never hidden, rules 6.5.11 and 6.5.12.
-- Counts are marginal, recomputed against what else is off, quieter than the names, rules 6.5.8 to 6.5.10.
-- Turning the Spring Boot starter off switches the line to the measurement taken without Spring, the source behaviour.
+- "Narrow the list to your application", with the prototype's explanation on a mark beside it. One chip per product of the profile's `on` and `off` lists that `module_names` knows: what comes with Vaadin first, drawn ticked and still; then the choices; then what Vaadin no longer develops, marked "discontinued". A product nobody chooses, a frontend package, is no control and always counts as on, D-206.
+- Everything is on except what Vaadin no longer develops. The address names what is off, `?off=<name>,<name>`, by product name until the short code export lands, per the data need recorded in `specs/FEEDBACK-25.4.md`; no `?off` is the default and a bare `?off` is everything on. The selection is remembered through web storage and restored only when the address carries no selection of its own, rules 6.2.4, 6.7.3, 6.7.6.
+- The box heading the list, beside "Product" and "Advisories", is ticked when every product counted by default is on, a dash when some are, empty when none. Ticked, it turns them all off, "Count only what comes with Vaadin"; otherwise it goes back to the default, "Count every product".
+- A finding of ours is the reader's when any product it arrives through is on, or is no control, and always when no product is recorded, rules 6.5.11 and 6.5.12.
+- A chip's number is how many different advisories on the series shown arrive through it, asked as if it were on, D-207. Each chip says on hover what it does, in the prototype's words.
+- Turning the Spring Boot starter off reads every series on its measurement without Spring; the products that need Spring cannot be had there and are drawn off and still.
 
 ### The series rows
 
-- One row per maintained line: the line, the exact version, scanned date, the Vaadin badge, vulnerable, not assessed yet, or not affected, the Spring Boot badge, a summary sentence, per product rings.
-- The opened line shows the groups: a real risk, not assessed yet, and answered closed by default, the with Spring Boot half, the frontend bundle and switched off products notes. The two groups that ask for work start open, the ones that inform start closed, rule 6.6.2. Which groups the reader opened persists, keyed on the heading's stable part, rules 6.7.1 and 6.7.2.
-- Each finding row: id, severity badge, through N of M products or only with X or bundled inside X, the coloured route dots. Opening it loads the per version document lazily and shows summary, impact, workaround, fix, routes, advisory link. Groups cap at 150 with the remainder counted.
-- Grid texts localise through the Grid i18n API, which is where that 25.3 arrival earns its row.
+- One row per maintained series: the series, the release, "scanned <date>", "Vaadin: <state>", "Spring Boot: <state>" when anything is Spring Boot's, a sentence, and one ring per product that is on with its count, noughts drawn so a product keeps its column.
+- The two halves, D-205: the Vaadin badge answers for the findings Vaadin can move, owner `vaadin` on a version Spring Boot does not pin, through the products on; the Spring Boot badge for Spring Boot's own findings and the versions it pins. A state is Vulnerable, Not assessed yet or Not affected, each with the prototype's explanation on hover.
+- The sentence: "N findings here are a real risk. Each one says what to do.", with ", and M more nobody has assessed yet" when there are; on a series clear of ours, "N findings arrive with your Spring Boot" when that half has anything open.
 
-### Downloads
+### An opened series
 
-Per release: JSON, CSV, VEX, dependency check suppressions, osv-scanner toml, bomber ignore, each streamed through the proxy of epic 02 with the `Download` API.
+- From Vaadin, when the other half has anything: "a real risk" and "not assessed yet", open; "answered, nothing to do", shut; each with the prototype's explanation on hover, worst first. "Nothing on this release is waiting for you: ..." when neither of the first two has anything.
+- The frontend bundle sentence, the untraced sentence, and the sentence for what only a switched off product brings.
+- With Spring Boot: "N findings on this series come with Spring Boot rather than with Vaadin, measured against X. ... See what Spring Boot brings", linking the Spring Boot page, then its own three groups.
+- "For your own tooling:" with JSON and CSV always, and VEX, dependency-check, osv-scanner and bomber where the release has scanner files, each streamed through the proxy of epic 02 with the `Download` API. Then "Other measured releases of X", each a link to its release page, D-212.
+- Each finding row: id, severity, "only with X", "through N products", "through M of N products", "bundled inside X", "in the frontend bundle Vaadin publishes" or "we could not establish which product brings this", and a dot per product that is on, D-208. Opening it loads the release's record lazily and shows the summary, What it means for your application, What Vaadin says, What you can do today, The fix, the routes and Read the advisory, D-213. Groups cap at 150 with the remainder counted. Grid texts localise through the Grid i18n API.
+- App extras kept, D-212: the title and close button at the top, the switch "Without Spring Boot", the sentence of five counts, the build only group after both halves, and the link to the head release's page.
 
 ## Edge cases
 
 | Scenario | Behaviour |
 | --- | --- |
-| A chip that can hide nothing | Not shown, accounted for in the one sentence, rule 6.5.6 |
+| A product nothing anywhere arrives through | Not offered, unless it is fixed, cannot be had, or the reader decided about it |
 | An `?off` name matching no product on this data | Dropped from the address, rule 6.2.7 |
-| Storage empty or unreadable | Everything on, silently |
-| A line measured without Spring only | The Spring toggle explains itself on that line |
+| An `?off` naming exactly the default | Written away |
+| Storage empty or unreadable | The default, silently |
+| A line measured without Spring only | The Spring switch explains itself on that line |
+| The shape without Spring not measured on a series | The series reads Not assessed yet and its panel says the second scan has not been made |
 
 ## Acceptance criteria
 
 ### AC1: The filter is the source filter
 - [x] Off only addressing by registry name, unknown names dropped
-- [x] Marginal counts move when another chip turns off
+- [x] A chip's count is the advisories through it, and does not move when it is turned off
 - [x] A finding with two products needs both off to hide
 - [x] The no product finding never hides
 
@@ -69,23 +79,24 @@ Per release: JSON, CSV, VEX, dependency check suppressions, osv-scanner toml, bo
 | Id | Given | When | Then | Tier | Verified by |
 | --- | --- | --- | --- | --- | --- |
 | EXP-01 | The front fixture | Opening findings as team | One row per line, badges match | browserless | `ExplorerBrowserlessTest` |
-| EXP-02 | Two chips off | Reading the address | `?off` names them and nothing else | browserless | `ExplorerBrowserlessTest` |
-| EXP-03 | A finding through two products | One off | Still shown; both off, hidden | browserless | `ExplorerFilterBrowserlessTest` |
-| EXP-04 | A chip's count | Turning a second chip off | The count changes marginally | browserless | `ExplorerFilterBrowserlessTest` |
+| EXP-02 | Two chips off | Reading the address | `?off` names them and the default's discontinued product, nothing else | browserless | `ExplorerBrowserlessTest` |
+| EXP-03 | A finding of ours through two products | One off | Still shown; both off, hidden and counted as switched off | browserless | `ExplorerFilterBrowserlessTest` |
+| EXP-04 | A chip's count | Turning it off, then searching | The count stays, then narrows to what the search names | browserless | `ExplorerFilterBrowserlessTest` |
 | EXP-05 | Groups opened, reload | Reopening the line | The same groups open | browserless | `ExplorerBrowserlessTest` |
 | EXP-06 | A version typed in search | Submitting | The release route | browserless | `ExplorerBrowserlessTest` |
 | EXP-07 | The six download links | Fetching each | 200 with the expected content type | testbench | `ExportsProxyIT` |
-| EXP-08 | Spring starter chip off | Reading the line | The without Spring measurement renders | browserless | `ExplorerFilterBrowserlessTest` |
+| EXP-08 | Spring starter chip off | Reading the line | The without Spring measurement renders, with no Spring Boot badge | browserless | `ExplorerFilterBrowserlessTest` |
+| EXP-09 | A series, an id, nothing, a number nobody follows | Searching each | The note and the lead in the prototype's words | browserless | `ExplorerBrowserlessTest` |
+| EXP-10 | The "?" | Pressing it | The legend with its four sections | browserless | `ExplorerBrowserlessTest` |
+| EXP-11 | A finding Spring Boot pins | Reading its series | It is on the Spring Boot badge and in the With Spring Boot half | unit | `ExplorerRulesTest` |
 
 ## Still open
 
-Written from the code at the end of epic 13. Each line names where the code shows it and the decision or draft behind it.
+Written at the prototype alignment, 2026-11-22. Each line names where the code shows it and the decision or draft behind it.
 
-- There is no drawer: the search, the tri state control and the chips sit at the top of the master pane, and what overlays is the detail pane over them, D-94. Measured in epic 13: at a 760 pixel window the detail overlays; the threshold is the layout's own width, 26rem plus 24rem, so with the internal drawer open it also overlays up to a window of about 1180 pixels, D-160.
-- `?off` addresses products by registry name; switch to the short codes when `module_codes` lands in `data/front.json`, `ExplorerRules`, data need in `FEEDBACK-25.4.md`.
-- A product the profile marks `fixed` has no chip and cannot be turned off; a chip's count is over the opened line, or over every shown line when none is open, not per line, `ExplorerView.drawProducts`, D-96.
-- A full version navigates to the release page on Enter or on leaving the field, not as it is typed, `ExplorerView.submit`, D-103.
-- Each filter change adds a history entry instead of rewriting the address in place, and a remembered selection reaches the address only after the first paint, `ExplorerView.beforeEnter`, `ProductSelection`, D-98.
-- There is no frontend bundle note on the opened line: a bundled finding says "bundled inside X" in its row, and build only findings form an "Only in the build" group, `FindingGrid`, `ExplorerRules.group`, D-95.
-- The opened line offers its files only when its record says `scanner_files`, `ExplorerView.detail`, D-109.
+- Every control is a navigation and a history entry, where the prototype replaces the address in place, `ExplorerView.address`, D-210, D-98.
+- A full version goes to its release page measured or not, where the prototype answers an unmeasured one in the note, `ExplorerView.submit`, D-209; so the prototype's "You asked for X. This answers for Y" note is never reached here.
+- `?off` addresses products by registry name; switch to the short codes when `module_codes` lands in `data/front.json`, data need in `FEEDBACK-25.4.md`.
+- The texts of an opened finding stay whole where the prototype cuts them with "more", and its routes keep this application's layout rather than the prototype's arrows, `FindingDetail`, D-213.
+- The release page still groups its findings by owner first, D-95, and is aligned in its own session; its badges already answer by the halves, D-205.
 - Workaround to remove when browserless-test#29 is fixed, draft 20b: the tests open item details with `setDetailsVisible`, `ExplorerBrowserlessTest`.

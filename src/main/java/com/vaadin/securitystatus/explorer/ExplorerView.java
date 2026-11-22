@@ -2,7 +2,7 @@ package com.vaadin.securitystatus.explorer;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,20 +11,23 @@ import java.util.Set;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.html.Aside;
+import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -40,51 +43,61 @@ import com.vaadin.securitystatus.base.nav.Address;
 import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
+import com.vaadin.securitystatus.base.ui.DrawerContent;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
+import com.vaadin.securitystatus.data.model.ExplorerFront.History;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerVersion;
-import com.vaadin.securitystatus.explorer.ExplorerRules.Group;
+import com.vaadin.securitystatus.explorer.ExplorerAnswer.Asked;
+import com.vaadin.securitystatus.explorer.ExplorerAnswer.Groups;
+import com.vaadin.securitystatus.explorer.ExplorerAnswer.Shape;
+import com.vaadin.securitystatus.explorer.ExplorerAnswer.Split;
 import com.vaadin.securitystatus.explorer.ExplorerRules.Product;
 
 import jakarta.annotation.security.RolesAllowed;
 
 /**
- * The security team's front door: one row per maintained line, narrowed by
- * the products an application uses. The series list is the master of a
- * Master Detail Layout and the opened line its detail, so choosing a line
- * replaces the one open before, rule 6.3.4's spirit. The search and the
- * products are on top of the list.
+ * The security team's front door, in the prototype's distribution: the left
+ * panel holds the filter and the products, the content one row per maintained
+ * series, each opened in place under itself, one at a time, D-203, D-204.
  *
  * <p>
- * The address carries the search, {@code ?q}, and the products turned off,
- * {@code ?off=<name>,<name>}, written by {@link Address}. The selection is
- * remembered in {@link ProductSelection} and only ever applied by writing it
- * into the address.
+ * The address carries the search, {@code ?q}, the opened series, {@code
+ * ?open}, and the products turned off, {@code ?off=<name>,<name>}, written by
+ * {@link Address}. No {@code ?off} is the default, everything on but what
+ * Vaadin no longer develops; a bare {@code ?off} is everything on, D-206. The
+ * selection is remembered in {@link ProductSelection} and only ever applied by
+ * writing it into the address.
  */
 @Route(value = "findings", layout = InternalLayout.class)
 @PageTitle("explorer.title")
-@Menu(order = 0, title = "explorer.title")
+@Menu(order = 0, title = "explorer.menu")
 @RolesAllowed(Roles.SECURITY)
-public final class ExplorerView extends Composite<Div> implements BeforeEnterObserver {
+public final class ExplorerView extends Composite<Div> implements BeforeEnterObserver, DrawerContent {
 
     static final String PATH = "findings";
+
+    private static final List<String> KINDS = List.of("RISK", "UNJUDGED", "ANSWERED");
 
     private final SecurityDataService data;
     private final ProductSelection selection;
 
     private final ValueSignal<String> query = new ValueSignal<>("");
     private final ValueSignal<Optional<String>> opened = new ValueSignal<>(Optional.empty());
+    private final ValueSignal<Boolean> legendOpen = new ValueSignal<>(false);
 
-    private final MasterDetailLayout layout = new MasterDetailLayout();
+    private final Div panel = new Div();
     private final TextField search = new TextField();
-    private final Div products = new Div();
+    private final Div note = new Div();
+    private final Div profile = new Div();
+    private final Paragraph lead = new Paragraph();
+    private final H2 heading = new H2();
     private final Div rows = new Div();
     private final Div outage = new Div();
 
@@ -93,30 +106,26 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         this.selection = selection;
         addClassName("explorer-view");
 
-        search.addClassName("explorer-search");
-        search.setLabel(getTranslation("explorer.search.label"));
-        search.setHelperText(getTranslation("explorer.search.helper"));
-        search.setClearButtonVisible(true);
-        search.setPrefixComponent(VaadinIcon.SEARCH.create());
-        search.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                submit(change.getValue());
-            }
-        });
+        buildPanel();
 
-        products.addClassName("explorer-products");
+        var help = new Button("?", click -> legendOpen.set(true));
+        help.addClassName("explorer-help");
+        help.setAriaLabel(getTranslation("explorer.legend.open"));
+        help.addThemeVariants(ButtonVariant.PRIMARY);
+        help.bindVisible(legendOpen.map(open -> !open));
+
+        lead.addClassName("explorer-lead");
+        heading.addClassName("explorer-series-heading");
         rows.addClassName("explorer-rows");
-        var master = new Div(search, products, rows);
-        master.addClassName("explorer-master");
+        var series = new Section(heading, rows);
+        series.addClassName("explorer-series");
+        var main = new Div(help, outage, lead, series);
+        main.addClassName("explorer-main");
 
-        layout.addClassName("explorer-layout");
-        layout.setMasterSize("26rem");
-        layout.setDetailSize("24rem", true);
-        layout.setMaster(master);
-        layout.addBackdropClickListener(click -> opened.set(Optional.empty()));
-        layout.addDetailEscapePressListener(escape -> opened.set(Optional.empty()));
-
-        getContent().add(new ViewHeading(), outage, layout);
+        var legend = legend();
+        legend.bindVisible(legendOpen);
+        getContent().add(main, legend);
+        Shortcuts.addShortcutListener(this, () -> legendOpen.set(false), Key.ESCAPE);
 
         var generatedAt = refresh.generatedAt();
         var off = selection.off();
@@ -129,55 +138,66 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
                 return null;
             }
             try {
-                Set<String> names = new HashSet<>();
-                ExplorerRules.products(data.explorerFront()).stream().filter(Product::switchable)
-                        .forEach(product -> names.add(product.name()));
+                ExplorerFront front = data.explorerFront();
+                Set<String> names = new LinkedHashSet<>();
+                catalogue(front).stream().filter(Product::switchable).forEach(product -> names.add(product.name()));
                 selection.readStorage(ui, names, restored -> {
                     if (selection.unsettled()) {
-                        address(query.peek(), restored).go(ui);
+                        address(query.peek(), new LinkedHashSet<>(restored), opened.peek()).go(ui);
                     }
                 });
             } catch (DataUnreachableException unreachable) {
-                // Nothing to restore against; everything stays on.
+                // Nothing to restore against; the default stays.
             }
             return null;
         });
     }
 
-    /** The master detail layout, for the tests. */
-    MasterDetailLayout layout() {
-        return layout;
+    @Override
+    public Component drawerContent() {
+        return panel;
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         QueryParameters asked = event.getLocation().getQueryParameters();
         String q = Address.first(asked, QueryFlag.Q).orElse("");
-        List<Product> registry;
+        Optional<String> open = Address.first(asked, QueryFlag.OPEN).filter(text -> !text.isBlank());
+        ExplorerFront front;
         try {
-            registry = ExplorerRules.products(data.explorerFront());
+            front = data.explorerFront();
         } catch (DataUnreachableException unreachable) {
-            query.set(q);
+            set(q, open);
             return;
         }
+        List<Product> catalogue = catalogue(front);
+        Set<String> defaults = ExplorerAnswer.defaultOff(catalogue);
         if (Address.has(asked, QueryFlag.OFF)) {
             List<String> written = Address.list(asked, QueryFlag.OFF);
-            List<String> known = ExplorerRules.known(written, registry);
+            List<String> known = ExplorerAnswer.known(written, catalogue);
             selection.select(known);
-            if (!known.equals(written) || written.isEmpty()) {
-                // Rule 6.2.7: a name that hides nothing here does not stay in the address, and a bare
-                // ?off, everything on, is written away once it has cleared the remembered selection.
-                event.forwardTo(PATH, address(q, known).query());
+            if (!known.equals(written) || Set.copyOf(known).equals(defaults)) {
+                // Rule 6.2.7: a name that hides nothing here does not stay in the address, and the
+                // default is written as no flag at all.
+                event.forwardTo(PATH, address(q, new LinkedHashSet<>(known), open).query());
                 return;
             }
-        } else if (selection.remembers()) {
-            // Rule 6.7.5: what the reader turned off earlier is written into the address, never applied behind it.
-            List<String> remembered = ExplorerRules.known(new ArrayList<>(selection.off().peek()), registry);
-            event.forwardTo(PATH, address(q, remembered).query());
+        } else if (selection.remembers(defaults)) {
+            // Rule 6.7.5: what the reader chose earlier is written into the address, never applied behind it.
+            event.forwardTo(PATH, address(q, selection.off().peek(), open).query());
             return;
+        } else {
+            selection.useDefault(defaults);
         }
+        set(q, open);
+    }
+
+    private void set(String q, Optional<String> open) {
         if (!q.equals(query.peek())) {
             query.set(q);
+        }
+        if (!open.equals(opened.peek())) {
+            opened.set(open);
         }
         if (!search.getValue().equals(q)) {
             search.setValue(q);
@@ -186,219 +206,450 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
 
     // Writing the address
 
-    /** The explorer's address for a search and a selection. */
-    static Address address(String q, List<String> off) {
-        return Address.of(PATH).with(QueryFlag.Q, q.isBlank() ? Optional.empty() : Optional.of(q.strip()))
-                .list(QueryFlag.OFF, off);
+    /** The explorer's address for a search alone, which the release page sends a search to. */
+    static Address search(String q) {
+        return Address.of(PATH).with(QueryFlag.Q, q.isBlank() ? Optional.empty() : Optional.of(q.strip()));
     }
 
     /**
-     * The address that says everything is on. A bare {@code ?off} is read as
-     * an empty selection and written away again, so turning everything back
-     * on is not undone by the remembered selection.
+     * The explorer's address for a search, a selection and an opened series:
+     * no {@code ?off} when the selection is the default, a bare one when
+     * everything is on, the names in catalogue order otherwise.
      */
-    static Address allOn(String q) {
-        return address(q, List.of()).with(QueryFlag.OFF, Optional.of(""));
+    private Address address(String q, Set<String> off, Optional<String> open) {
+        return address(q, off, open, false);
+    }
+
+    /**
+     * The same, and with {@code said} the selection is written even when it is
+     * the default: a control that changes the products says so in the address,
+     * which the view then writes away, so the remembered selection follows the
+     * reader back to the default rather than being restored over it.
+     */
+    private Address address(String q, Set<String> off, Optional<String> open, boolean said) {
+        Address address = search(q).with(QueryFlag.OPEN, open);
+        try {
+            List<Product> catalogue = catalogue(data.explorerFront());
+            if (!said && off.equals(ExplorerAnswer.defaultOff(catalogue))) {
+                return address;
+            }
+            if (off.isEmpty()) {
+                return address.with(QueryFlag.OFF, Optional.of(""));
+            }
+            return address.list(QueryFlag.OFF, ExplorerAnswer.known(new ArrayList<>(off), catalogue));
+        } catch (DataUnreachableException unreachable) {
+            return address.list(QueryFlag.OFF, new ArrayList<>(off));
+        }
+    }
+
+    private void go(Set<String> off) {
+        address(query.peek(), off, opened.peek(), true).go(UI.getCurrentOrThrow());
     }
 
     private void submit(String typed) {
         UI ui = UI.getCurrentOrThrow();
         Optional<VersionNumber> version = ExplorerRules.fullVersion(typed);
         if (version.isPresent()) {
-            // The source shortcut: a full version is a release to read, not a filter.
+            // The source shortcut: a full version is a release to read, not a filter, D-103.
             ui.navigate(ReleaseView.class, new RouteParameters(Map.of(ReleaseView.LINE, version.get().line(),
                     ReleaseView.VERSION, version.get().toString())));
             return;
         }
-        List<String> off = new ArrayList<>(selection.off().peek());
-        (off.isEmpty() ? allOn(typed) : address(typed, ordered(off))).go(ui);
+        address(typed, selection.off().peek(), opened.peek()).go(ui);
     }
 
-    private List<String> ordered(Iterable<String> names) {
-        var wanted = new HashSet<String>();
-        names.forEach(wanted::add);
-        try {
-            return ExplorerRules.known(new ArrayList<>(wanted), ExplorerRules.products(data.explorerFront()));
-        } catch (DataUnreachableException unreachable) {
-            return new ArrayList<>(wanted);
-        }
+    private static List<Product> catalogue(ExplorerFront front) {
+        return ExplorerAnswer.catalogue(ExplorerRules.products(front), front);
+    }
+
+    // The left panel
+
+    private void buildPanel() {
+        panel.addClassName("explorer-panel");
+
+        var lookupHeading = new H2(getTranslation("explorer.lookup.heading"));
+        lookupHeading.addClassName("explorer-panel-heading");
+        search.addClassName("explorer-search");
+        search.setAriaLabel(getTranslation("explorer.lookup.heading"));
+        search.setHelperText(getTranslation("explorer.search.helper"));
+        search.setClearButtonVisible(true);
+        search.addValueChangeListener(change -> {
+            if (change.isFromClient()) {
+                submit(change.getValue());
+            }
+        });
+        var filter = new Button(VaadinIcon.SEARCH.create(), click -> submit(search.getValue()));
+        filter.addThemeVariants(ButtonVariant.PRIMARY);
+        filter.setAriaLabel(getTranslation("explorer.search.button"));
+        filter.addClassName("explorer-filter");
+        var form = new Div(search, filter);
+        form.addClassName("explorer-form");
+        note.addClassName("explorer-note");
+        var lookup = new Section(lookupHeading, form, note);
+        lookup.addClassName("explorer-lookup");
+
+        profile.addClassName("explorer-profile");
+        panel.add(lookup, profile);
     }
 
     // Drawing
 
     private void draw(Set<String> off, String q, Optional<String> open) {
         outage.removeAll();
-        products.removeAll();
+        profile.removeAll();
         rows.removeAll();
+        note.removeAll();
         ExplorerFront front;
         try {
             front = data.explorerFront();
         } catch (DataUnreachableException unreachable) {
             outage.add(new DataOutageNotice());
-            layout.setVisible(false);
+            lead.setVisible(false);
+            heading.setVisible(false);
             return;
         }
-        layout.setVisible(true);
+        heading.setVisible(true);
         List<Product> registry = ExplorerRules.products(front);
-        Set<String> named = ExplorerRules.named(front, q);
+        List<Product> catalogue = ExplorerAnswer.catalogue(registry, front);
+        Shape shape = ExplorerAnswer.shape(front, catalogue, off);
+        Asked asked = ExplorerAnswer.asked(q, front);
 
-        var shownLines = new ArrayList<Line>();
+        drawProducts(front, catalogue, off, shape, asked);
+        drawNote(front, asked);
+
+        var counts = new LinkedHashMap<ExplorerRules.Badge, Integer>();
+        int shown = 0;
         for (Line line : front.lines()) {
-            List<Finding> visible = ExplorerRules.searched(line, ExplorerRules.visible(line, off, registry), q,
-                    named);
-            if (q.isBlank() || ExplorerRules.namesLine(line, q) || !visible.isEmpty()) {
-                shownLines.add(line);
+            if (!asked.keeps(line)) {
+                continue;
             }
+            Split split = ExplorerAnswer.split(line, shape, asked);
+            if (asked.ids().isPresent() && split.ours().size() + split.theirs().size() == 0) {
+                continue;
+            }
+            shown++;
+            ExplorerRules.Badge state = ExplorerAnswer.state(line, shape);
+            counts.merge(state, 1, Integer::sum);
+            boolean isOpen = open.filter(line.line()::equals).isPresent();
+            rows.add(row(front, line, registry, catalogue, shape, asked, state, isOpen, off));
         }
 
-        Optional<Line> openLine = open.flatMap(name -> shownLines.stream().filter(line -> line.line().equals(name))
-                .findFirst());
-        // The counts are about the opened line, or every line shown when none is open.
-        List<Line> scope = openLine.map(List::of).orElse(shownLines);
-        drawProducts(registry, off, q, scope);
-
-        if (!q.isBlank()) {
-            rows.add(lead("explorer-search-count",
-                    getTranslation("explorer.search.count", shownLines.size(), front.lines().size())));
+        int all = front.lines().size();
+        heading.setText(asked.raw().isEmpty() ? getTranslation("explorer.heading", all)
+                : getTranslation("explorer.heading.filtered"));
+        lead.setVisible(!asked.raw().isEmpty());
+        if (!asked.raw().isEmpty()) {
+            lead.setText(leadText(asked, shown, all, counts));
         }
-        for (Line line : shownLines) {
-            rows.add(row(line, registry, off, q, named, openLine.filter(line::equals).isPresent()));
-        }
-        layout.setDetail(openLine.map(line -> (Component) detail(line, registry, off, q, named)).orElse(null));
     }
 
-    private void drawProducts(List<Product> registry, Set<String> off, String q, List<Line> scope) {
-        var all = new Checkbox(getTranslation("explorer.products.all"));
-        all.addClassName("explorer-all");
-        boolean allOn = off.isEmpty();
-        all.setValue(allOn);
-        all.setIndeterminate(!allOn && !ExplorerRules.allOff(off, registry));
-        all.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                Set<String> next = ExplorerRules.allToggled(off, registry);
-                (next.isEmpty() ? allOn(q) : address(q, ordered(next))).go(UI.getCurrentOrThrow());
-            }
-        });
+    private String leadText(Asked asked, int shown, int all, Map<ExplorerRules.Badge, Integer> counts) {
+        if (shown == 0) {
+            return ExplorerAnswer.number(asked.raw())
+                    ? getTranslation("explorer.lead.unfollowed", all, asked.raw())
+                    : getTranslation("explorer.lead.none", all, asked.raw());
+        }
+        var said = new ArrayList<String>();
+        if (counts.getOrDefault(ExplorerRules.Badge.VULNERABLE, 0) > 0) {
+            said.add(getTranslation("explorer.lead.vulnerable", counts.get(ExplorerRules.Badge.VULNERABLE)));
+        }
+        if (counts.getOrDefault(ExplorerRules.Badge.UNJUDGED, 0) > 0) {
+            said.add(getTranslation("explorer.lead.unjudged", counts.get(ExplorerRules.Badge.UNJUDGED)));
+        }
+        if (counts.getOrDefault(ExplorerRules.Badge.NOT_AFFECTED, 0) > 0) {
+            said.add(getTranslation("explorer.lead.clear", counts.get(ExplorerRules.Badge.NOT_AFFECTED)));
+        }
+        return shown == all ? getTranslation("explorer.lead.all", all, asked.raw(), String.join(", ", said))
+                : getTranslation("explorer.lead.some", shown, all, asked.raw(), String.join(", ", said));
+    }
 
-        var heading = new H2(getTranslation("explorer.products.heading"));
-        heading.addClassName("explorer-products-heading");
+    /** What the search found or did not, said under the field, D-209. */
+    private void drawNote(ExplorerFront front, Asked asked) {
+        if (asked.raw().isEmpty()) {
+            return;
+        }
+        if (!asked.found()) {
+            if (ExplorerAnswer.number(asked.raw())) {
+                note.add(says(getTranslation("explorer.note.unfollowed", asked.raw())),
+                        hint(getTranslation("explorer.note.unfollowed.hint")));
+            } else {
+                note.add(says(getTranslation("explorer.note.nothing")),
+                        hint(getTranslation("explorer.note.nothing.hint")));
+            }
+            return;
+        }
+        int ids = asked.ids().map(Set::size).orElse(0);
+        List<History> past = ids == 0 ? asked.past().stream().limit(8).toList() : List.of();
+        for (History entry : past) {
+            var line = new Paragraph(entry.cve() + ": ");
+            line.addClassName("explorer-note-says");
+            boolean first = true;
+            for (var span : new java.util.TreeMap<>(entry.lines()).entrySet()) {
+                String until = span.getValue().until().map(VersionNumber::toString).orElse("");
+                line.add((first ? "" : " ") + getTranslation("explorer.past.until", span.getKey(), until) + " ");
+                first = false;
+                Optional<VersionNumber> fixed = span.getValue().fixedIn();
+                if (fixed.isPresent()) {
+                    line.add(getTranslation("explorer.past.gone", fixed.get().toString()) + " ");
+                    line.add(releaseLink(span.getKey(), fixed.get(),
+                            getTranslation("explorer.past.see", fixed.get().toString())));
+                    line.add(".");
+                } else {
+                    line.add(getTranslation("explorer.past.kept"));
+                }
+            }
+            note.add(line);
+        }
+        if (!past.isEmpty()) {
+            String more = asked.past().size() > past.size()
+                    ? " " + getTranslation("explorer.past.more", asked.past().size() - past.size())
+                    : "";
+            note.add(hint(getTranslation("explorer.past.hint") + more));
+        }
+        if (asked.kind() == ExplorerAnswer.Kind.VERSION) {
+            note.add(hint(getTranslation("explorer.note.series", String.join(", ", asked.series()))));
+            return;
+        }
+        if (ids == 0) {
+            return;
+        }
+        String advisories = getTranslation("explorer.count.advisories", ids);
+        String text = asked.kind() == ExplorerAnswer.Kind.PACKAGE
+                ? getTranslation("explorer.note.package", asked.raw(), advisories)
+                : getTranslation("explorer.note.ids", advisories, asked.raw());
+        if (!asked.past().isEmpty()) {
+            text += getTranslation("explorer.note.past", getTranslation("explorer.count.others", asked.past().size()));
+        } else {
+            text += ".";
+        }
+        note.add(hint(text));
+    }
+
+    // The products
+
+    private void drawProducts(ExplorerFront front, List<Product> catalogue, Set<String> off, Shape shape,
+            Asked asked) {
+        Set<String> defaults = ExplorerAnswer.defaultOff(catalogue);
+        Set<String> plainOnly = shape.plain() ? Set.of(shape.starter()) : Set.of();
+        Shape everything = ExplorerAnswer.shape(front, catalogue, plainOnly);
+
         var chips = new Div();
         chips.addClassName("explorer-chips");
-        int silent = 0;
-        for (Product product : registry) {
-            if (!product.switchable()) {
-                continue;
+        for (Product product : catalogue) {
+            String name = product.name();
+            boolean cannot = shape.cannot().contains(name);
+            boolean isOn = product.fixed() || (!cannot && !off.contains(name));
+            int brings = cannot ? 0 : ExplorerAnswer.chipCount(front, name, shape, asked);
+            boolean decided = off.contains(name) != defaults.contains(name);
+            boolean offer = product.fixed() || cannot || decided || brings > 0
+                    || ExplorerAnswer.chipCount(front, name, everything, Asked.nothing()) > 0;
+            if (offer) {
+                chips.add(chip(product, isOn, cannot, brings, off));
             }
-            boolean isOff = off.contains(product.name());
-            int count = ExplorerRules.marginal(product, scope, off, registry);
-            if (count == 0 && !isOff) {
-                // Rule 6.5.6: a control that cannot hide anything is not shown. Only one that
-                // carries findings here is counted in the sentence; one that carries none is no control.
-                if (carries(product, scope, off, registry)) {
-                    silent++;
-                }
-                continue;
-            }
-            chips.add(chip(product, isOff, count, off, q));
         }
-        products.add(heading, all, chips);
-        if (silent > 0) {
-            products.add(lead("explorer-silent", getTranslation("explorer.products.silent", silent)));
-        }
-    }
 
-    private static boolean carries(Product product, List<Line> scope, Set<String> off, List<Product> registry) {
-        boolean springOff = ExplorerRules.springOff(off, registry);
-        return scope.stream().flatMap(line -> ExplorerRules.measured(line, springOff).stream())
-                .anyMatch(finding -> finding.modules().contains(product.index()));
+        var titleRow = new Div();
+        titleRow.addClassName("explorer-profile-title");
+        var title = new H2(getTranslation("explorer.profile.heading"));
+        title.addClassName("explorer-panel-heading");
+        titleRow.add(title);
+        if (chips.getComponentCount() == 0) {
+            profile.add(titleRow, hint(getTranslation("explorer.profile.none")));
+            return;
+        }
+        var mark = new Button(VaadinIcon.INFO_CIRCLE_O.create());
+        mark.addThemeVariants(ButtonVariant.TERTIARY);
+        mark.addClassName("explorer-hint-mark");
+        mark.setAriaLabel(getTranslation("explorer.profile.hint"));
+        mark.setTooltipText(getTranslation("explorer.profile.hint"));
+        titleRow.add(mark);
+
+        profile.add(titleRow, allBox(catalogue, off, shape), chips);
     }
 
     /**
-     * One product: a real link to the address with this product toggled, so
-     * it can be copied or opened in a new tab, rule 6.2.13, with its ring, its
-     * name and its marginal count, rule 6.5.8.
+     * The box at the head of the list, D-206: ticked when every product
+     * counted by default is on, a dash when some are, empty when none.
+     * Ticked, it turns them all off; otherwise it goes back to the default.
      */
-    private Component chip(Product product, boolean isOff, int count, Set<String> off, String q) {
-        var next = new LinkedHashSet<>(off);
-        if (isOff) {
-            next.remove(product.name());
+    private Component allBox(List<Product> catalogue, Set<String> off, Shape shape) {
+        List<String> counted = ExplorerAnswer.countedByDefault(catalogue).stream()
+                .filter(name -> !shape.cannot().contains(name)).toList();
+        long on = counted.stream().filter(name -> !off.contains(name)).count();
+        boolean all = !counted.isEmpty() && on == counted.size();
+        String state = all ? "ticked" : on > 0 ? "some" : "none";
+
+        Set<String> target;
+        if (all) {
+            target = new LinkedHashSet<>(off);
+            catalogue.stream().filter(Product::switchable).forEach(product -> target.add(product.name()));
         } else {
-            next.add(product.name());
+            target = ExplorerAnswer.defaultOff(catalogue);
         }
-        Address target = next.isEmpty() ? allOn(q) : address(q, ordered(next));
         var link = new RouterLink(ExplorerView.class);
-        link.setQueryParameters(target.query());
-        link.addClassNames("explorer-chip", isOff ? "off" : "on");
-        link.getElement().setAttribute("role", "switch");
-        link.getElement().setAttribute("aria-checked", String.valueOf(!isOff));
-        link.getElement().setAttribute("data-product", product.name());
+        link.setQueryParameters(address(query.peek(), target, opened.peek(), true).query());
+        link.addClassNames("explorer-all", state);
+        link.getElement().setAttribute("aria-label",
+                getTranslation(all ? "explorer.all.off" : "explorer.all.on"));
+        link.getElement().setAttribute("data-state", state);
+        var box = new Span();
+        box.addClassNames("chip-box", state);
+        box.getElement().setAttribute("aria-hidden", "true");
+        link.add(box);
+
+        var product = new Span(getTranslation("explorer.profile.product"));
+        product.addClassName("explorer-col-name");
+        var advisories = new Span(getTranslation("explorer.profile.advisories"));
+        advisories.addClassName("explorer-col-count");
+        var head = new Div(link, product, advisories);
+        head.addClassName("explorer-chips-head");
+        head.setVisible(!counted.isEmpty());
+        return head;
+    }
+
+    /**
+     * One product: a real link to the address with this product toggled, rule
+     * 6.2.13, or, for one the reader cannot change, a still mark; its box, its
+     * name, and its number in its ring, D-207.
+     */
+    private Component chip(Product product, boolean isOn, boolean cannot, int brings, Set<String> off) {
+        boolean still = product.fixed() || cannot;
+        Component chip;
+        if (still) {
+            chip = new Span();
+            chip.getElement().setAttribute("aria-disabled", "true");
+        } else {
+            var next = new LinkedHashSet<>(off);
+            if (isOn) {
+                next.add(product.name());
+            } else {
+                next.remove(product.name());
+            }
+            var link = new RouterLink(ExplorerView.class);
+            link.setQueryParameters(address(query.peek(), next, opened.peek(), true).query());
+            chip = link;
+        }
+        var element = chip.getElement();
+        element.getClassList().addAll(List.of("explorer-chip", isOn ? "on" : "off"));
+        if (product.fixed()) {
+            element.getClassList().add("fixed");
+        }
+        if (cannot) {
+            element.getClassList().add("impossible");
+        }
+        element.setAttribute("role", "switch");
+        element.setAttribute("aria-checked", String.valueOf(isOn));
+        element.setAttribute("data-product", product.name());
+
+        var box = new Span();
+        box.addClassNames("chip-box", isOn ? "ticked" : "none");
+        box.getElement().setAttribute("aria-hidden", "true");
         var name = new Span(product.name());
         name.addClassName("chip-name");
-        var number = new Span(String.valueOf(count));
-        number.addClassName("chip-count");
-        link.add(ring(product), name, number);
+        element.appendChild(box.getElement(), name.getElement());
         if (product.discontinued()) {
             var mark = new Span(getTranslation("explorer.products.discontinued"));
             mark.addClassName("chip-discontinued");
-            link.add(mark);
+            element.appendChild(mark.getElement());
         }
-        link.getElement().setAttribute("title", getTranslation(
-                isOff ? "explorer.chip.show" : "explorer.chip.hide", count, product.name()));
-        return link;
+        var number = new Span(String.valueOf(brings));
+        number.addClassName("chip-count");
+        if (isOn && brings > 0) {
+            number.addClassNames("product-ring", "ring-" + product.ring());
+        } else {
+            number.addClassName("none");
+        }
+        element.appendChild(number.getElement());
+        element.setAttribute("title", chipTitle(product, isOn, cannot));
+        return chip;
+    }
+
+    private String chipTitle(Product product, boolean isOn, boolean cannot) {
+        String gone = product.discontinued() ? getTranslation("explorer.chip.gone") + " " : "";
+        if (cannot) {
+            return gone + getTranslation("explorer.chip.cannot");
+        }
+        if (product.fixed()) {
+            return gone + getTranslation("explorer.chip.fixed");
+        }
+        return gone + getTranslation(isOn ? "explorer.chip.on" : "explorer.chip.off") + " "
+                + getTranslation("explorer.chip.narrows");
     }
 
     // The series rows
 
-    private Component row(Line line, List<Product> registry, Set<String> off, String q, Set<String> named,
-            boolean isOpen) {
-        List<Finding> visible = ExplorerRules.searched(line, ExplorerRules.visible(line, off, registry), q, named);
-        var button = new NativeButton();
-        button.addClassNames("explorer-row", isOpen ? "open" : "closed");
-        button.getElement().setAttribute("aria-pressed", String.valueOf(isOpen));
-        button.getElement().setAttribute("data-line", line.line());
-        button.addClickListener(click -> opened.set(isOpen ? Optional.empty() : Optional.of(line.line())));
-
-        var top = new Div();
-        top.addClassName("explorer-row-top");
+    private Component row(ExplorerFront front, Line line, List<Product> registry, List<Product> catalogue,
+            Shape shape, Asked asked, ExplorerRules.Badge state, boolean isOpen, Set<String> off) {
+        var summary = new Div();
+        summary.addClassName("explorer-row-summary");
         var name = new Span(line.line());
         name.addClassName("explorer-row-line");
         var version = new Span(line.version().toString());
         version.addClassName("explorer-row-version");
-        top.add(name, version);
+        summary.add(name, version);
         line.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
-            var scanned = new Span(getTranslation("explorer.row.scanned", day.toString()));
+            var scanned = new Span(getTranslation("explorer.row.scannedOn", day.toString()));
             scanned.addClassName("explorer-row-scanned");
-            top.add(scanned);
+            scanned.getElement().setAttribute("title", getTranslation("explorer.row.scanned.title"));
+            summary.add(scanned);
         });
+        var vaadin = badge("vaadin", state,
+                getTranslation("explorer.badge.vaadin", getTranslation("explorer.state." + state.name())));
+        vaadin.getElement().setAttribute("title", getTranslation("explorer.state." + state.name() + ".means"));
+        summary.add(vaadin);
+        ExplorerAnswer.springState(line, shape).ifPresent(theirs -> {
+            var spring = badge("spring", theirs,
+                    getTranslation("explorer.badge.spring", getTranslation("explorer.state." + theirs.name())));
+            String against = line.springBootDeclared().or(line::springBoot).map(VersionNumber::toString)
+                    .orElseGet(() -> getTranslation("explorer.badge.spring.declares"));
+            spring.getElement().setAttribute("title", getTranslation("explorer.badge.spring.title", against));
+            summary.add(spring);
+        });
+        sentence(line, shape, state).ifPresent(text -> {
+            var says = new Span(text);
+            says.addClassName("explorer-row-says");
+            summary.add(says);
+        });
+        summary.add(rings(line, catalogue, shape, asked));
 
-        var badges = new Div();
-        badges.addClassName("explorer-row-badges");
-        badges.add(badge("vaadin", ExplorerRules.vaadinBadge(visible),
-                getTranslation("explorer.badge.vaadin", getTranslation(badgeKey(ExplorerRules.vaadinBadge(visible))))));
-        springBadge(line, visible, ExplorerRules.springOff(off, registry)).ifPresent(badges::add);
-
-        var summary = new Paragraph(summary(line, visible, off, registry));
-        summary.addClassName("explorer-row-summary");
-
-        button.add(top, badges, summary, rings(visible, registry));
-        return button;
+        var details = new Details();
+        details.setSummary(summary);
+        details.addClassNames("explorer-row", "state-" + state.name().toLowerCase(java.util.Locale.ROOT));
+        details.getElement().setAttribute("data-line", line.line());
+        details.setOpened(isOpen);
+        if (isOpen) {
+            details.add(detail(front, line, registry, catalogue, shape, asked, off));
+        }
+        details.addOpenedChangeListener(change -> {
+            if (change.isFromClient()) {
+                // One at a time, and the one the address names, D-204.
+                address(query.peek(), selection.off().peek(),
+                        change.isOpened() ? Optional.of(line.line()) : Optional.empty()).go(UI.getCurrentOrThrow());
+            }
+        });
+        return details;
     }
 
-    private Optional<Component> springBadge(Line line, List<Finding> visible, boolean springOff) {
-        if (Boolean.TRUE.equals(line.noSpring())) {
-            return Optional.empty();
+    /** What the row says beside the badge, counted over the same findings as the badge, D-205. */
+    private Optional<String> sentence(Line line, Shape shape, ExplorerRules.Badge state) {
+        List<Finding> mine = ExplorerAnswer.stateFindings(line, shape);
+        long risks = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.VULNERABLE)
+                .count();
+        long open = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.UNJUDGED)
+                .count();
+        switch (state) {
+            case VULNERABLE:
+                return Optional.of(open > 0 ? getTranslation("explorer.says.riskOpen", (int) risks, (int) open)
+                        : getTranslation("explorer.says.risk", (int) risks));
+            case UNJUDGED:
+                return Optional.of(!ExplorerAnswer.measured(line, shape) || mine.isEmpty()
+                        ? getTranslation("explorer.says.unmeasured")
+                        : getTranslation("explorer.says.unjudged", (int) open));
+            default:
+                Groups theirs = ExplorerAnswer.split(line, shape, Asked.nothing()).theirs();
+                int waiting = theirs.risk().size() + theirs.pending().size();
+                return waiting > 0 ? Optional.of(getTranslation("explorer.says.spring", waiting)) : Optional.empty();
         }
-        if (springOff) {
-            var without = new Badge(getTranslation("explorer.badge.spring.without"));
-            without.addClassNames("explorer-badge", "spring", "badge-without");
-            return Optional.of(without);
-        }
-        ExplorerRules.Badge state = ExplorerRules.springBadge(visible);
-        String words = getTranslation(badgeKey(state));
-        String text = line.springBoot()
-                .map(version -> getTranslation("explorer.badge.spring.version", version.toString(), words))
-                .orElseGet(() -> getTranslation("explorer.badge.spring", words));
-        return Optional.of(badge("spring", state, text));
     }
 
     private static Badge badge(String side, ExplorerRules.Badge state, String text) {
@@ -407,86 +658,117 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         return badge;
     }
 
-    private static String badgeKey(ExplorerRules.Badge state) {
-        return "explorer.badge.state." + state.name();
-    }
-
-    /** One sentence: what is shown against the whole, and how it splits into the groups. */
-    private String summary(Line line, List<Finding> visible, Set<String> off, List<Product> registry) {
-        Map<Group, List<Finding>> groups = ExplorerRules.grouped(visible);
-        int total = ExplorerRules.measured(line, ExplorerRules.springOff(off, registry)).size();
-        String split = getTranslation("explorer.summary.split", size(groups, Group.RISK),
-                size(groups, Group.UNJUDGED), size(groups, Group.SPRING), size(groups, Group.BUILD),
-                size(groups, Group.ANSWERED));
-        return visible.size() == total ? getTranslation("explorer.summary.all", total, split)
-                : getTranslation("explorer.summary.shown", visible.size(), total, split);
-    }
-
-    private static int size(Map<Group, List<Finding>> groups, Group group) {
-        return groups.getOrDefault(group, List.of()).size();
-    }
-
-    /** One ring per product the shown findings arrive through, in registry order. */
-    private Component rings(List<Finding> visible, List<Product> registry) {
-        var counts = new int[registry.size()];
-        for (Finding finding : visible) {
-            for (Product product : ExplorerRules.through(finding, registry)) {
-                counts[product.index()]++;
-            }
-        }
-        var rings = new Div();
+    /** One ring per product that is on, in catalogue order, with its count, the noughts drawn too, D-207. */
+    private Component rings(Line line, List<Product> catalogue, Shape shape, Asked asked) {
+        var rings = new Span();
         rings.addClassName("explorer-rings");
-        for (Product product : registry) {
-            if (counts[product.index()] > 0) {
-                var ring = ring(product);
-                ring.getElement().setAttribute("title",
-                        getTranslation("explorer.ring", product.name(), counts[product.index()]));
-                rings.add(ring);
+        for (Product product : catalogue) {
+            if (!shape.on().contains(product.name())) {
+                continue;
             }
+            int count = ExplorerAnswer.arrivesThrough(line, product.name(), shape, asked).size();
+            var ring = new Span(String.valueOf(count));
+            ring.addClassName("explorer-ring");
+            if (count > 0) {
+                ring.addClassNames("product-ring", "ring-" + product.ring());
+                ring.getElement().setAttribute("title",
+                        getTranslation("explorer.ring.some", count, product.name()));
+            } else {
+                ring.addClassName("none");
+                ring.getElement().setAttribute("title", getTranslation("explorer.ring.none", product.name()));
+            }
+            ring.getElement().setAttribute("data-product", product.name());
+            rings.add(ring);
         }
         return rings;
     }
 
-    private static Span ring(Product product) {
-        return FindingGrid.ring(product);
-    }
+    // The opened series
 
-    // The opened line
-
-    private Component detail(Line line, List<Product> registry, Set<String> off, String q, Set<String> named) {
+    private Component detail(ExplorerFront front, Line line, List<Product> registry, List<Product> catalogue,
+            Shape shape, Asked asked, Set<String> off) {
         var detail = new Div();
         detail.addClassName("explorer-detail");
         detail.getElement().setAttribute("data-line", line.line());
 
-        var close = new Button(VaadinIcon.CLOSE.create(), click -> opened.set(Optional.empty()));
+        var close = new Button(VaadinIcon.CLOSE.create(), click -> address(query.peek(), selection.off().peek(),
+                Optional.empty()).go(UI.getCurrentOrThrow()));
         close.addThemeVariants(ButtonVariant.TERTIARY);
         close.setAriaLabel(getTranslation("explorer.detail.close"));
         close.addClassName("explorer-detail-close");
-        var title = new H2(getTranslation("explorer.detail.title", line.line(), line.version().toString()));
+        var title = new H3(getTranslation("explorer.detail.title", line.line(), line.version().toString()));
         title.addClassName("explorer-detail-title");
         var head = new Div(title, close);
         head.addClassName("explorer-detail-head");
-        detail.add(head);
+        detail.add(head, springSwitch(line, catalogue, shape, off));
 
-        boolean springOff = ExplorerRules.springOff(off, registry);
-        detail.add(springSwitch(line, registry, springOff, off, q));
-
-        List<Finding> measured = ExplorerRules.measured(line, springOff);
-        List<Finding> visible = ExplorerRules.searched(line, ExplorerRules.visible(line, off, registry), q, named);
-        detail.add(lead("explorer-detail-summary", summary(line, visible, off, registry)));
-        int hidden = ExplorerRules.visible(line, off, registry).size() < measured.size()
-                ? measured.size() - ExplorerRules.visible(line, off, registry).size()
-                : 0;
-        if (hidden > 0) {
-            detail.add(lead("explorer-hidden", getTranslation("explorer.detail.hidden", hidden)));
+        Split split = ExplorerAnswer.split(line, shape, asked);
+        if (!split.measured()) {
+            detail.add(hint(getTranslation("explorer.detail.unmeasured")));
+            return detail;
+        }
+        detail.add(lead("explorer-detail-summary", getTranslation("explorer.summary.all",
+                split.ours().size() + split.theirs().size() + split.build().size(),
+                getTranslation("explorer.summary.split", split.ours().risk().size(), split.ours().pending().size(),
+                        split.theirs().size(), split.build().size(), split.ours().ruled().size()))));
+        if (shape.plain()) {
+            detail.add(hint(getTranslation("explorer.detail.plain")));
         }
 
-        Map<Group, List<Finding>> groups = ExplorerRules.grouped(visible);
-        groups.forEach((group, findings) -> detail.add(group(line, group, findings, registry, off, springOff)));
-
-        if (Boolean.TRUE.equals(line.scannerFiles())) {
-            detail.add(new ReleaseFiles(data, line.version()));
+        Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
+        var routes = new FindingGrid.Routes(registry, shape, shape.hidden(line), optional);
+        boolean halves = split.theirs().size() > 0 && !shape.plain();
+        if (halves) {
+            detail.add(halfTitle("explorer.half.ours"));
         }
+        groups(detail, line, "", split.ours(), routes);
+        if (split.ours().risk().isEmpty() && split.ours().pending().isEmpty()) {
+            detail.add(hint(getTranslation("explorer.detail.nothing")));
+        }
+
+        List<Finding> blind = split.unattributed().stream().filter(finding -> finding.bundledIn().isEmpty())
+                .toList();
+        int frontend = (int) blind.stream().filter(FindingGrid::frontend).count();
+        if (frontend > 0) {
+            detail.add(hint(getTranslation("explorer.detail.frontend", frontend)));
+        }
+        if (blind.size() - frontend > 0) {
+            detail.add(hint(getTranslation("explorer.detail.untraced", blind.size() - frontend)));
+        }
+        if (split.elsewhere() > 0) {
+            detail.add(hint(getTranslation("explorer.detail.elsewhere", split.elsewhere())));
+        }
+
+        if (halves) {
+            var half = new Div();
+            half.addClassName("explorer-half");
+            half.add(halfTitle("explorer.half.theirs"));
+            var says = new Paragraph();
+            says.addClassName("explorer-hint");
+            String against = line.springBoot().map(VersionNumber::toString)
+                    .orElseGet(() -> getTranslation("explorer.half.theirs.unknown"));
+            var text = new StringBuilder(getTranslation("explorer.half.theirs.lead", split.theirs().size(), against));
+            line.springBootDeclared().filter(declared -> line.springBoot().isPresent()
+                    && !declared.equals(line.springBoot().get())).ifPresent(declared -> text.append(' ')
+                            .append(getTranslation("explorer.half.theirs.declared", declared.toString())));
+            text.append(' ').append(getTranslation("explorer.half.theirs.moves")).append(' ');
+            says.add(text.toString());
+            var link = new RouterLink(getTranslation("explorer.half.theirs.link"), SpringView.class);
+            link.addClassName("explorer-spring-link");
+            says.add(link);
+            half.add(says);
+            groups(half, line, "SPRING_", split.theirs(), routes);
+            detail.add(half);
+        }
+
+        if (!split.build().isEmpty()) {
+            detail.add(group(line, "BUILD", getTranslation("explorer.group.BUILD", split.build().size()), null,
+                    "explorer.group.BUILD.note", split.build(), false, routes));
+        }
+
+        detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));
+        others(line).ifPresent(detail::add);
+
         var release = new RouterLink(getTranslation("explorer.detail.release", line.version().toString()),
                 ReleaseView.class, new RouteParameters(Map.of(ReleaseView.LINE, line.line(), ReleaseView.VERSION,
                         line.version().toString())));
@@ -495,67 +777,111 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         return detail;
     }
 
-    /**
-     * The switch between the full measurement and the one without Spring. It
-     * is the Spring Boot starter's chip in another shape, so it writes the same
-     * address. A line measured without Spring only says so instead.
-     */
-    private Component springSwitch(Line line, List<Product> registry, boolean springOff, Set<String> off,
-            String q) {
-        var holder = new Div();
-        holder.addClassName("explorer-spring");
-        Optional<Product> starter = registry.stream().filter(Product::switchesShape).findFirst();
-        var toggle = new Switch(getTranslation("explorer.spring.switch"));
-        toggle.addClassName("explorer-spring-switch");
-        holder.add(toggle);
-        if (Boolean.TRUE.equals(line.noSpring()) || starter.isEmpty()) {
-            toggle.setValue(true);
-            toggle.setEnabled(false);
-            holder.add(lead("explorer-spring-only", getTranslation("explorer.spring.only")));
-            return holder;
-        }
-        toggle.setValue(springOff);
-        toggle.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                var next = new LinkedHashSet<>(off);
-                if (change.getValue()) {
-                    next.add(starter.get().name());
-                } else {
-                    next.remove(starter.get().name());
-                }
-                (next.isEmpty() ? allOn(q) : address(q, ordered(next))).go(UI.getCurrentOrThrow());
-            }
-        });
-        return holder;
+    private Component halfTitle(String key) {
+        var title = new Paragraph(getTranslation(key));
+        title.addClassName("explorer-half-title");
+        title.getElement().setAttribute("title", getTranslation(key + ".title"));
+        return title;
     }
 
-    private Component group(Line line, Group group, List<Finding> findings, List<Product> registry,
-            Set<String> off, boolean springOff) {
-        String key = group.name();
-        String heading = group == Group.SPRING && line.springBoot().isPresent()
-                ? getTranslation("explorer.group.SPRING.version", line.springBoot().get().toString(),
-                        findings.size())
-                : getTranslation("explorer.group." + key, findings.size());
-        var details = new Details(heading);
+    private void groups(Div into, Line line, String prefix, Groups groups, FindingGrid.Routes routes) {
+        List<List<Finding>> members = List.of(groups.risk(), groups.pending(), groups.ruled());
+        for (int i = 0; i < KINDS.size(); i++) {
+            List<Finding> findings = members.get(i);
+            if (findings.isEmpty()) {
+                continue;
+            }
+            String kind = KINDS.get(i);
+            String heading = getTranslation("explorer.half.group", findings.size(),
+                    getTranslation("explorer.half.group." + kind));
+            into.add(group(line, prefix + kind, heading, getTranslation("explorer.half.group." + kind + ".title"),
+                    null, findings, !"ANSWERED".equals(kind), routes));
+        }
+    }
+
+    private Component group(Line line, String key, String heading, String title, String noteKey,
+            List<Finding> findings, boolean startsOpen, FindingGrid.Routes routes) {
+        var label = new Span(heading);
+        label.addClassName("explorer-group-label");
+        if (title != null) {
+            label.getElement().setAttribute("title", title);
+        }
+        var details = new Details(label);
         details.addClassNames("explorer-group", "group-" + key.toLowerCase(java.util.Locale.ROOT));
         details.getElement().setAttribute("data-group", key);
-        details.setOpened(selection.isOpen(key, group.startsOpen()));
+        details.setOpened(selection.isOpen(key, startsOpen));
         details.addOpenedChangeListener(change -> {
             if (change.isFromClient()) {
                 // Rule 6.7.4: recorded when it happens, keyed on the part of the heading that does not move.
                 selection.open(key, change.isOpened());
             }
         });
-        if (group == Group.SPRING || group == Group.BUILD) {
-            details.add(lead("explorer-group-note", getTranslation("explorer.group." + key + ".note")));
+        if (noteKey != null) {
+            details.add(lead("explorer-group-note", getTranslation(noteKey)));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
-        details.add(new FindingGrid(capped.shown(), registry, off,
-                finding -> findingDetails(line, finding, springOff)));
+        details.add(new FindingGrid(capped.shown(), routes, finding -> findingDetails(line, finding,
+                routes.shape().plain())));
         if (capped.more() > 0) {
             details.add(lead("explorer-group-more", getTranslation("explorer.group.more", capped.more())));
         }
         return details;
+    }
+
+    /** The other releases of the series this row answers for, each a link to its page, D-212. */
+    private Optional<Component> others(Line line) {
+        List<VersionNumber> others = line.releases().stream().filter(release -> !release.equals(line.version()))
+                .toList();
+        if (others.isEmpty()) {
+            return Optional.empty();
+        }
+        var list = new Paragraph(getTranslation("explorer.releases", line.line()) + " ");
+        list.addClassNames("explorer-hint", "explorer-releases");
+        for (int i = 0; i < others.size(); i++) {
+            if (i > 0) {
+                list.add(", ");
+            }
+            list.add(releaseLink(line.line(), others.get(i), others.get(i).toString()));
+        }
+        return Optional.of(list);
+    }
+
+    private static RouterLink releaseLink(String line, VersionNumber version, String text) {
+        return new RouterLink(text, ReleaseView.class,
+                new RouteParameters(Map.of(ReleaseView.LINE, line, ReleaseView.VERSION, version.toString())));
+    }
+
+    /**
+     * The switch between the full measurement and the one without Spring. It
+     * is the Spring Boot starter's chip in another shape, so it writes the same
+     * address. A line measured without Spring only says so instead.
+     */
+    private Component springSwitch(Line line, List<Product> catalogue, Shape shape, Set<String> off) {
+        var holder = new Div();
+        holder.addClassName("explorer-spring");
+        var toggle = new Switch(getTranslation("explorer.spring.switch"));
+        toggle.addClassName("explorer-spring-switch");
+        holder.add(toggle);
+        boolean starter = catalogue.stream().anyMatch(Product::switchesShape);
+        if (Boolean.TRUE.equals(line.noSpring()) || !starter) {
+            toggle.setValue(true);
+            toggle.setEnabled(false);
+            holder.add(lead("explorer-spring-only", getTranslation("explorer.spring.only")));
+            return holder;
+        }
+        toggle.setValue(shape.plain());
+        toggle.addValueChangeListener(change -> {
+            if (change.isFromClient()) {
+                var next = new LinkedHashSet<>(off);
+                if (change.getValue()) {
+                    next.add(shape.starter());
+                } else {
+                    next.remove(shape.starter());
+                }
+                go(next);
+            }
+        });
+        return holder;
     }
 
     /**
@@ -577,9 +903,65 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         return new FindingDetail(finding.cve(), line.version(), full, springOff);
     }
 
+    // The legend
+
+    /** The panel the "?" opens, in the prototype's words, D-211. */
+    private Aside legend() {
+        var legend = new Aside();
+        legend.addClassName("explorer-legend");
+        var title = new H2(getTranslation("explorer.legend.heading"));
+        var close = new Button(VaadinIcon.CLOSE.create(), click -> legendOpen.set(false));
+        close.addThemeVariants(ButtonVariant.TERTIARY);
+        close.setAriaLabel(getTranslation("explorer.legend.close"));
+        close.addClassName("explorer-legend-close");
+        var top = new Div(title, close);
+        top.addClassName("explorer-legend-top");
+        legend.add(top, hint(getTranslation("explorer.legend.lead")));
+
+        var states = new LinkedHashMap<String, String>();
+        for (ExplorerRules.Badge state : ExplorerRules.Badge.values()) {
+            states.put(getTranslation("explorer.state." + state.name()),
+                    getTranslation("explorer.state." + state.name() + ".means"));
+        }
+        legend.add(new H3(getTranslation("explorer.legend.badges")), terms(states));
+
+        var groups = new LinkedHashMap<String, String>();
+        KINDS.forEach(kind -> groups.put(getTranslation("explorer.half.group." + kind),
+                getTranslation("explorer.half.group." + kind + ".title")));
+        legend.add(new H3(getTranslation("explorer.legend.groups")), terms(groups));
+
+        var depth = new LinkedHashMap<String, String>();
+        depth.put(getTranslation("explorer.legend.reviewed"), getTranslation("explorer.legend.reviewed.means"));
+        depth.put(getTranslation("explorer.legend.reproduced"), getTranslation("explorer.legend.reproduced.means"));
+        legend.add(new H3(getTranslation("explorer.legend.depth")), terms(depth));
+
+        legend.add(new H3(getTranslation("explorer.legend.measuring")),
+                hint(getTranslation("explorer.legend.measuring.shape")),
+                hint(getTranslation("explorer.legend.measuring.missing")));
+        return legend;
+    }
+
+    private static DescriptionList terms(Map<String, String> entries) {
+        var list = new DescriptionList();
+        list.addClassName("explorer-legend-list");
+        entries.forEach((term, description) -> list.add(new DescriptionList.Term(term),
+                new DescriptionList.Description(description)));
+        return list;
+    }
+
+    // Small parts
+
     private static Paragraph lead(String className, String text) {
         var paragraph = new Paragraph(text);
         paragraph.addClassName(className);
         return paragraph;
+    }
+
+    private static Paragraph hint(String text) {
+        return lead("explorer-hint", text);
+    }
+
+    private static Paragraph says(String text) {
+        return lead("explorer-note-says", text);
     }
 }

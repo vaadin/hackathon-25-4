@@ -223,8 +223,8 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
         navigate(ExplorerView.class);
 
         assertThat(sweep()).isEmpty();
-        assertThat(rowText("25.3")).doesNotContain("Scanned");
-        assertThat(rowText("24.9")).contains("Scanned 2026-11-21");
+        assertThat(rowText("25.3")).doesNotContain("scanned");
+        assertThat(rowText("24.9")).contains("scanned 2026-11-21");
     }
 
     // Release: a record with no scanner files flag, no scan date and no Spring Boot version
@@ -421,7 +421,7 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private String rowText(String line) {
-        return find(com.vaadin.flow.component.html.NativeButton.class).all().stream()
+        return find(com.vaadin.flow.component.details.Details.class).withClassName("explorer-row").all().stream()
                 .filter(button -> line.equals(button.getElement().getAttribute("data-line"))).findFirst()
                 .orElseThrow().getElement().getTextRecursively();
     }

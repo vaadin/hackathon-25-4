@@ -18,9 +18,11 @@ import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 
 /**
- * The explorer's questions answered without components: which products a
- * reader can turn off, what is hidden when they do, the marginal counts, the
- * five groups, the badges and the search. Everything here reads
+ * The questions the explorer and the release page share, answered without
+ * components: the registry of products, the measurement a line is read from,
+ * the five groups of the release page, the two halves the badges answer for,
+ * D-205, and the full version a search jumps to. The front door's own
+ * questions are in {@link ExplorerAnswer}. Everything here reads
  * {@code data/front.json} and nothing else.
  */
 final class ExplorerRules {
@@ -104,23 +106,6 @@ final class ExplorerRules {
     }
 
     /**
-     * The names an address asked to turn off that are products a reader can
-     * turn off on this data, in registry order. Anything else is dropped,
-     * rule 6.2.7.
-     */
-    static List<String> known(List<String> asked, List<Product> products) {
-        var wanted = new HashSet<>(asked);
-        return products.stream().filter(Product::switchable).map(Product::name).filter(wanted::contains).toList();
-    }
-
-    /** Whether the product that switches a line to its measurement without Spring is off. */
-    static boolean springOff(Set<String> off, List<Product> products) {
-        return products.stream().anyMatch(product -> product.switchesShape() && off.contains(product.name()));
-    }
-
-    // What is shown
-
-    /**
      * The findings of the measurement a line is read from: the one without
      * Spring when the Spring Boot starter is off and the line has one, the
      * full one otherwise.
@@ -131,66 +116,6 @@ final class ExplorerRules {
         }
         var without = new HashSet<>(line.withoutSpring());
         return line.findings().stream().filter(finding -> without.contains(finding.cve())).toList();
-    }
-
-    /**
-     * Whether a finding is hidden: only when every product it arrives through
-     * is off, and never when no product is recorded, rules 6.5.11 and 6.5.12.
-     */
-    static boolean hidden(Finding finding, Set<Integer> offIndexes) {
-        return !finding.modules().isEmpty() && offIndexes.containsAll(finding.modules());
-    }
-
-    /** The findings of a line a reader with these products off sees. */
-    static List<Finding> visible(Line line, Set<String> off, List<Product> products) {
-        Set<Integer> offIndexes = indexes(off, products);
-        return measured(line, springOff(off, products)).stream().filter(finding -> !hidden(finding, offIndexes))
-                .toList();
-    }
-
-    /**
-     * The marginal count of a product over some lines, rule 6.5.9: on a product
-     * that is on, how many findings turning it off would hide; on one that is
-     * off, how many turning it back on would show. It is recomputed against
-     * whatever else is off.
-     */
-    static int marginal(Product product, List<Line> lines, Set<String> off, List<Product> products) {
-        boolean isOff = off.contains(product.name());
-        var toggled = new HashSet<>(off);
-        if (isOff) {
-            toggled.remove(product.name());
-        } else {
-            toggled.add(product.name());
-        }
-        int count = 0;
-        for (Line line : lines) {
-            Set<String> now = cves(visible(line, off, products));
-            Set<String> then = cves(visible(line, toggled, products));
-            if (isOff) {
-                then.removeAll(now);
-                count += then.size();
-            } else {
-                now.removeAll(then);
-                count += now.size();
-            }
-        }
-        return count;
-    }
-
-    /** What the tri state control does when clicked: everything on, or, from everything on, the optional ones off. */
-    static Set<String> allToggled(Set<String> off, List<Product> products) {
-        if (!off.isEmpty()) {
-            return Set.of();
-        }
-        var optional = new LinkedHashSet<String>();
-        products.stream().filter(Product::switchable).filter(Product::optional).map(Product::name)
-                .forEach(optional::add);
-        return optional;
-    }
-
-    /** True when every product a reader can turn off is off. */
-    static boolean allOff(Set<String> off, List<Product> products) {
-        return products.stream().filter(Product::switchable).allMatch(product -> off.contains(product.name()));
     }
 
     // Groups
@@ -253,28 +178,53 @@ final class ExplorerRules {
 
     // Badges
 
-    /** What Vaadin's own findings say about a line: everything that is neither Spring Boot's nor only the build's. */
-    static Badge vaadinBadge(List<Finding> visible) {
-        return badge(visible.stream().filter(finding -> {
-            Group group = group(finding);
-            return group != Group.SPRING && group != Group.BUILD;
-        }).toList());
+    /**
+     * What Vaadin's own half of a list of findings says: the ones Vaadin can
+     * move, owner {@code vaadin} and a version Spring Boot does not pin, D-205.
+     */
+    static Badge vaadinBadge(List<Finding> findings) {
+        return worst(findings.stream().filter(ExplorerRules::ours).toList());
     }
 
-    /** What the findings that arrive through the reader's Spring Boot say. */
-    static Badge springBadge(List<Finding> visible) {
-        return badge(visible.stream().filter(finding -> group(finding) == Group.SPRING).toList());
+    /** What the other half says: Spring Boot's own findings and the versions Spring Boot pins, D-205. */
+    static Badge springBadge(List<Finding> findings) {
+        return worst(findings.stream().filter(ExplorerRules::theirs).toList());
     }
 
-    private static Badge badge(List<Finding> findings) {
-        if (findings.stream().anyMatch(finding -> finding.verdict().filter("risk"::equals).isPresent())) {
+    /** The verdicts that answer a finding. Anything else that is not a risk is not assessed yet. */
+    static final Set<String> RULED_OUT = Set.of("not_affected", "configuration", "no_risk", "false_positive",
+            "fixed");
+
+    /** The worst state of a set of findings: a named risk, then one nobody judged, then answered. */
+    static Badge worst(List<Finding> findings) {
+        Badge worst = Badge.NOT_AFFECTED;
+        for (Finding finding : findings) {
+            Badge state = stateOf(finding);
+            if (state.ordinal() < worst.ordinal()) {
+                worst = state;
+            }
+        }
+        return worst;
+    }
+
+    /** The state one finding gives a release. */
+    static Badge stateOf(Finding finding) {
+        String verdict = finding.verdict().orElse("");
+        if ("risk".equals(verdict)) {
             return Badge.VULNERABLE;
         }
-        if (findings.stream()
-                .anyMatch(finding -> finding.verdict().filter(word -> !"in_triage".equals(word)).isEmpty())) {
-            return Badge.UNJUDGED;
-        }
-        return Badge.NOT_AFFECTED;
+        return RULED_OUT.contains(verdict) ? Badge.NOT_AFFECTED : Badge.UNJUDGED;
+    }
+
+    /** A finding a Vaadin release moves: Vaadin's, on a version the release itself publishes. */
+    static boolean ours(Finding finding) {
+        return "vaadin".equals(finding.owner().orElse("")) && !Boolean.TRUE.equals(finding.springPins());
+    }
+
+    /** A finding the reader's Spring Boot brings or pins, which no Vaadin release moves. */
+    static boolean theirs(Finding finding) {
+        String owner = finding.owner().orElse("");
+        return "spring-boot".equals(owner) || ("vaadin".equals(owner) && Boolean.TRUE.equals(finding.springPins()));
     }
 
     // Search
@@ -289,69 +239,7 @@ final class ExplorerRules {
         return matcher.matches() ? Optional.of(VersionNumber.of(matcher.group(1))) : Optional.empty();
     }
 
-    /** Whether a search names the line itself, by its minor or its version. */
-    static boolean namesLine(Line line, String query) {
-        String asked = normal(query);
-        return !asked.isEmpty() && (line.line().contains(asked) || line.version().toString().contains(asked));
-    }
-
-    /**
-     * The advisories a search names: by id, or through a dependency whose name
-     * contains it. Empty when the search is empty.
-     */
-    static Set<String> named(ExplorerFront front, String query) {
-        String asked = normal(query);
-        var advisories = new HashSet<String>();
-        if (asked.isEmpty()) {
-            return advisories;
-        }
-        for (Line line : front.lines()) {
-            for (Finding finding : line.findings()) {
-                if (finding.cve().toLowerCase(Locale.ROOT).contains(asked)) {
-                    advisories.add(finding.cve());
-                }
-            }
-        }
-        front.packages().forEach((name, ids) -> {
-            if (name.toLowerCase(Locale.ROOT).contains(asked)) {
-                advisories.addAll(ids);
-            }
-        });
-        return advisories;
-    }
-
-    /**
-     * The findings a search leaves of a line: all of them when it is empty or
-     * names the line, the ones it names otherwise.
-     */
-    static List<Finding> searched(Line line, List<Finding> findings, String query, Set<String> named) {
-        if (normal(query).isEmpty() || namesLine(line, query)) {
-            return findings;
-        }
-        return findings.stream().filter(finding -> named.contains(finding.cve())).toList();
-    }
-
-    static String normal(String query) {
-        return query.strip().toLowerCase(Locale.ROOT);
-    }
-
     // Small parts
-
-    static Set<Integer> indexes(Set<String> off, List<Product> products) {
-        var indexes = new HashSet<Integer>();
-        for (Product product : products) {
-            if (off.contains(product.name())) {
-                indexes.add(product.index());
-            }
-        }
-        return indexes;
-    }
-
-    static Set<String> cves(List<Finding> findings) {
-        var ids = new HashSet<String>();
-        findings.forEach(finding -> ids.add(finding.cve()));
-        return ids;
-    }
 
     /** The products a finding arrives through, in registry order, unknown positions left out. */
     static List<Product> through(Finding finding, List<Product> products) {

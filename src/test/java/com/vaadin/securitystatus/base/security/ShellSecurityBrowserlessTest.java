@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WrappedHttpSession;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
@@ -78,9 +78,11 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     void team_reaches_findings_inside_the_internal_shell() {
         navigate(ExplorerView.class);
 
-        assertThat($(H1.class).single().getText()).isEqualTo("Findings");
-        assertThat($(SideNavItem.class).all()).extracting(SideNavItem::getLabel).containsExactly("Findings",
-                "What Spring Boot brings", "Verdict workbench", "Diagnostics");
+        // D-203: the shell draws the H1 in its bar, the explorer's title the prototype's, and the four
+        // destinations are links in the bar beside it, so the left panel holds only the filter.
+        assertThat($(H1.class).single().getText()).isEqualTo("Vaadin security status");
+        assertThat($(RouterLink.class).withClassName("internal-nav-link").all()).extracting(RouterLink::getText)
+                .containsExactly("Findings", "What Spring Boot brings", "Verdict workbench", "Diagnostics");
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 
@@ -90,7 +92,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     void guest_is_refused_on_findings() {
         navigate("findings", NotFoundView.class);
 
-        assertThat($(SideNavItem.class).exists()).isFalse();
+        assertThat($(RouterLink.class).withClassName("internal-nav-link").exists()).isFalse();
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 }

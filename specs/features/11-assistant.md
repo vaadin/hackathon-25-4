@@ -8,7 +8,7 @@ The chat panel on the internal screens, its tools over the measured data, the im
 
 ### The panel
 
-- `AIMessageList` and `AIInput` in the internal drawer, present on every internal screen, backed by one `AIOrchestrator` per session with history per `06-ai.md`.
+- `AIMessageList` and `AIInput` in the assistant panel on the right of the internal shell, opened by the Assistant button in its bar, D-203, present on every internal screen, backed by one `AIOrchestrator` per session with history per `06-ai.md`.
 - The five tools of `06-ai.md`, each reading `SecurityDataService`, refusing through `ToolException`, paging through `QueryPage`.
 - A tool refusal renders as the assistant's own correction, the model asks again or says what it could not find; the limit exception renders as the gave up sentence. Neither is ever a stack trace.
 - Every exchange is logged through request interception into the diagnostics tail.

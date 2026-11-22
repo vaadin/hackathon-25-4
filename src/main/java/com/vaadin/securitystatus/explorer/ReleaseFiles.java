@@ -25,16 +25,30 @@ final class ReleaseFiles extends Composite<Div> {
 
     /** Only the files given, in the order of {@link ExportKind}. */
     ReleaseFiles(SecurityDataService data, VersionNumber version, Set<ExportKind> kinds) {
+        this(data, version, kinds, false);
+    }
+
+    /**
+     * The files, and with {@code tooling} the explorer's row in the
+     * prototype's words: "For your own tooling:", the short names, and what
+     * each is for on hover, D-212.
+     */
+    ReleaseFiles(SecurityDataService data, VersionNumber version, Set<ExportKind> kinds, boolean tooling) {
         var row = getContent();
         row.addClassName("release-files-row");
-        var label = new Span(getTranslation("explorer.files", version.toString()));
+        var label = new Span(tooling ? getTranslation("explorer.files.tooling")
+                : getTranslation("explorer.files", version.toString()));
         label.addClassName("release-files-version");
         row.add(label);
         for (ExportKind kind : EnumSet.copyOf(kinds)) {
-            var link = Downloads.link(getTranslation("export." + kind.name()), kind.fileName(version),
+            var link = Downloads.link(getTranslation((tooling ? "explorer.file." : "export.") + kind.name()),
+                    kind.fileName(version),
                     () -> data.export(version, kind).map(
                             file -> new Downloads.Content(file.body(), file.contentType(), file.length())));
             link.addClassName("release-file");
+            if (tooling) {
+                link.getElement().setAttribute("title", getTranslation("explorer.file." + kind.name() + ".title"));
+            }
             row.add(link);
         }
     }

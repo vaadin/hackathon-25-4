@@ -63,6 +63,9 @@ class AssistantPanelIT {
         WebElement password = driver.findElement(By.cssSelector("vaadin-login-form input[name=password]"));
         password.sendKeys("team");
         password.sendKeys(Keys.ENTER);
+        // The panel is on the right of the internal shell, shut until the Assistant button opens it, D-203.
+        await("vaadin-button.assistant-toggle");
+        driver.findElement(By.cssSelector("vaadin-button.assistant-toggle")).click();
         await(".assistant-panel vaadin-message-input textarea");
 
         assertThat(driver.findElement(By.cssSelector(".assistant-mock")).getText())

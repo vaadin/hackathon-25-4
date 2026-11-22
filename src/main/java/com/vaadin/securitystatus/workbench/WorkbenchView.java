@@ -43,7 +43,6 @@ import com.vaadin.securitystatus.base.nav.QueryFlag;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
-import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -125,7 +124,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         outage.addClassName("workbench-outage");
         configureQueue();
 
-        getContent().add(new ViewHeading(), outage, lead, filter, summary, queue, compose(), draftsSection());
+        getContent().add(outage, lead, filter, summary, queue, compose(), draftsSection());
 
         var generatedAt = refresh.generatedAt();
         Signal<Optional<VerdictQueue>> read = Signal.computed(() -> {

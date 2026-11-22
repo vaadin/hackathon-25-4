@@ -101,7 +101,8 @@ class CspIT {
                 document.querySelector('vaadin-login-form vaadin-button[slot=submit]').click();
                 """);
 
-        await("vaadin-side-nav-item");
+        // The destinations are links in the internal bar since D-203.
+        await("a.internal-nav-link");
         assertThat(driver.getCurrentUrl()).contains("/findings");
         assertThat(violations()).isEmpty();
 

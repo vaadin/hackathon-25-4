@@ -257,6 +257,6 @@ The brief asks for all of 25.4, so what is not claimed is named, with a decision
 | Service event bus | 12 |
 | Dev Loop CLI | Tooling, `specs/10-dev-loop.md` |
 | Breadcrumbs, a 25.2 arrival | 01, the app bar |
-| Master Detail Layout, a 25.2 arrival | 08, the series list and its open row |
+| Master Detail Layout, a 25.2 arrival | 08 used it for the series list and its open row until the prototype alignment opened each series in place, D-204; no screen uses it now |
 | Date picker metadata, DateTimePicker defaults | Out. Nothing here picks a date. Recorded so nobody claims coverage |
 | Kotlin in Copilot | Out. One language in this codebase |

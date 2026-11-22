@@ -12,12 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.badge.Badge;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
@@ -26,23 +25,25 @@ import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 
 /**
- * EXP-03, EXP-04 and EXP-08: the filter is the source filter. A finding is
- * hidden only when every product it arrives through is off, a finding with no
- * product never hides, the counts are marginal, and the Spring Boot starter
- * switches the line to its measurement without Spring.
+ * EXP-03, EXP-04 and EXP-08: the filter is the prototype's filter, D-206 and
+ * D-207. A finding of ours is the reader's when any product it arrives through
+ * is on, a finding with no product recorded never hides, what the reader's
+ * Spring Boot brings is not narrowed at all, a chip counts the different
+ * advisories that arrive through it as if it were on, and the Spring Boot
+ * starter switches the page to its measurement without Spring.
  *
  * <p>
- * The line is 25.3.5 of the fixture: CVE-2026-53914 arrives through
- * flow-webpush and hilla-spring-boot-starter, CVE-2022-31691 through no
- * recorded product, and twelve of its fifteen findings are measured without
+ * The fixture: on 24.7.19, CVE-2026-45292 is ours and arrives through
+ * vaadin-testbench and observability-kit-starter; on 25.3.5, CVE-2022-31691 is
+ * Spring Boot's and twelve of its fifteen findings are measured without
  * Spring.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @WithMockUser(username = "team", roles = Roles.SECURITY)
 class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
 
-    private static final String TWO_PRODUCTS = "CVE-2026-53914";
-    private static final String NO_PRODUCT = "CVE-2022-31691";
+    private static final String TWO_PRODUCTS = "CVE-2026-45292";
+    private static final String SPRING_BOOTS = "CVE-2022-31691";
 
     @Autowired
     FixturePages fixtures;
@@ -55,78 +56,91 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
     // EXP-03
     @Test
     void a_finding_through_two_products_needs_both_off_to_hide() {
-        navigate("findings?off=flow-webpush", ExplorerView.class);
-        open("25.3");
+        navigate("findings?open=24.7&off=vaadin-testbench,control-center-starter", ExplorerView.class);
         assertThat(shown()).contains(TWO_PRODUCTS);
         assertThat(through(TWO_PRODUCTS)).isEqualTo("through 1 of 2 products");
+        assertThat(badgeTexts("24.7")).first().isEqualTo("Vaadin: Vulnerable");
 
-        navigate("findings?off=flow-webpush,hilla-spring-boot-starter", ExplorerView.class);
+        navigate("findings?open=24.7&off=vaadin-testbench,observability-kit-starter,control-center-starter",
+                ExplorerView.class);
 
-        assertThat(shown()).doesNotContain(TWO_PRODUCTS).hasSize(14);
-        assertThat($(Paragraph.class).withClassName("explorer-hidden").single().getText())
-                .isEqualTo("1 findings are hidden because every product they arrive through is off.");
-        assertThat($(Paragraph.class).withClassName("explorer-detail-summary").single().getText()).startsWith(
-                "14 of 15 findings shown:");
+        assertThat(shown()).doesNotContain(TWO_PRODUCTS);
+        assertThat($(Paragraph.class).withClassName("explorer-hint").all()).extracting(Paragraph::getText)
+                .anyMatch(text -> text.endsWith(
+                        "only through products you have switched off, so they are not listed here. They still count towards the state above, which answers for the release rather than for one application."));
+        // The colour answers for the reader, over the findings the list shows.
+        assertThat(badgeTexts("24.7")).first().isEqualTo("Vaadin: Not affected");
     }
 
-    // AC1: the no product finding never hides
+    // AC1: the no product finding never hides, and Spring Boot's half is not narrowed
     @Test
     void a_finding_with_no_product_recorded_never_hides() {
-        navigate(ExplorerView.class);
-        open("25.3");
-        // Turn every product a reader can turn off, off, through the chips' own addresses.
-        var everything = new ArrayList<String>();
-        ExplorerRules.products(FixturePages.offline().explorerFront()).stream().filter(ExplorerRules.Product::switchable)
-                .filter(product -> !product.switchesShape()).forEach(product -> everything.add(product.name()));
-        navigate("findings?off=" + String.join(",", everything), ExplorerView.class);
+        navigate("findings?open=25.3", ExplorerView.class);
+        assertThat(shown()).contains(SPRING_BOOTS, "CVE-2025-15056");
 
-        assertThat(shown()).contains(NO_PRODUCT);
-        // The fixed product, vaadin, has no chip and cannot be turned off.
-        assertThat($(RouterLink.class).withClassName("explorer-chip").all())
-                .noneMatch(chip -> "vaadin".equals(chip.getElement().getAttribute("data-product")));
+        var everything = new ArrayList<String>();
+        var front = FixturePages.offline().explorerFront();
+        ExplorerAnswer.catalogue(ExplorerRules.products(front), front).stream()
+                .filter(ExplorerRules.Product::switchable).filter(product -> !product.switchesShape())
+                .forEach(product -> everything.add(product.name()));
+        navigate("findings?open=25.3&off=" + String.join(",", everything), ExplorerView.class);
+
+        // The bundled finding has no product recorded; Spring Boot's is not the reader's to narrow.
+        assertThat(shown()).contains(SPRING_BOOTS, "CVE-2025-15056");
+        // The fixed product, vaadin, is drawn ticked and cannot be clicked.
+        Span vaadin = $(Span.class).withClassName("explorer-chip").all().stream()
+                .filter(chip -> "vaadin".equals(chip.getElement().getAttribute("data-product"))).findFirst()
+                .orElseThrow();
+        assertThat(vaadin.getElement().getAttribute("aria-checked")).isEqualTo("true");
+        assertThat(vaadin.getElement().getAttribute("aria-disabled")).isEqualTo("true");
     }
 
     // EXP-04
     @Test
-    void a_chip_count_moves_when_another_chip_turns_off() {
+    void a_chip_counts_its_advisories_as_if_it_were_on() {
         navigate(ExplorerView.class);
-        open("25.3");
-        // Alone, hilla-spring-boot-starter hides nothing on 25.3: CVE-2026-53914 comes through flow-webpush too.
-        assertThat(chipNamed("hilla-spring-boot-starter")).isEmpty();
-        assertThat(chipNamed("flow-webpush")).isEmpty();
-        assertThat($(Paragraph.class).withClassName("explorer-silent").single().getText())
-                .endsWith("only findings you also have through the ones shown.");
+        int webpush = count("flow-webpush");
+        int testbench = count("vaadin-testbench");
+        assertThat(webpush).isPositive();
 
-        navigate("findings?off=flow-webpush", ExplorerView.class);
+        navigate("findings?off=flow-webpush,control-center-starter", ExplorerView.class);
 
-        // Now turning it off would hide that finding: its count is the marginal one, 1.
-        assertThat(count("hilla-spring-boot-starter")).isEqualTo(1);
-        // And flow-webpush, off, says what turning it back on would show: nothing, as hilla still carries it.
+        // Turning it off moves the rows below it, not its own number.
+        assertThat(count("flow-webpush")).isEqualTo(webpush);
+        assertThat(count("vaadin-testbench")).isEqualTo(testbench);
+
+        // A search narrows the counts to what it names: one advisory, through TestBench.
+        navigate("findings?q=" + TWO_PRODUCTS, ExplorerView.class);
+        assertThat(count("vaadin-testbench")).isEqualTo(1);
         assertThat(count("flow-webpush")).isZero();
     }
 
     // EXP-08
     @Test
     void the_spring_starter_off_renders_the_measurement_without_spring() {
-        navigate(ExplorerView.class);
-        open("25.3");
-        assertThat(shown()).hasSize(15).contains(NO_PRODUCT);
+        navigate("findings?open=25.3", ExplorerView.class);
+        assertThat(shown()).hasSize(15).contains(SPRING_BOOTS);
 
         test($(Switch.class).withClassName("explorer-spring-switch").single()).switchOn();
 
         assertThat(ExplorerBrowserlessTest.query().getParameters().get("off"))
-                .containsExactly("vaadin-spring-boot-starter");
-        // The fixture's without_spring list for 25.3: twelve findings, and the Spring Boot one is not among them.
-        assertThat(shown()).hasSize(12).doesNotContain(NO_PRODUCT, TWO_PRODUCTS);
-        assertThat(badgeTexts("25.3")).containsExactly("Vaadin: not affected", "Measured without Spring Boot");
+                .containsExactly("vaadin-spring-boot-starter,control-center-starter");
+        // The fixture's without_spring list for 25.3: twelve findings, and Spring Boot's are not among them.
+        assertThat(shown()).hasSize(12).doesNotContain(SPRING_BOOTS);
+        // The shape without Spring has no Spring Boot half, so no second badge.
+        assertThat(badgeTexts("25.3")).containsExactly("Vaadin: Not affected");
         assertThat($(Switch.class).withClassName("explorer-spring-switch").single().getValue()).isTrue();
+        // The products that need Spring cannot be had on that shape: drawn off, not clickable.
+        Span hilla = $(Span.class).withClassName("explorer-chip").all().stream()
+                .filter(chip -> "hilla-spring-boot-starter".equals(chip.getElement().getAttribute("data-product")))
+                .findFirst().orElseThrow();
+        assertThat(hilla.getElement().getClassList()).contains("impossible");
     }
 
     // Edge case: a line measured without Spring only explains itself
     @Test
     void a_line_measured_without_spring_only_says_so() {
-        navigate(ExplorerView.class);
-        open("8.32");
+        navigate("findings?open=8.32", ExplorerView.class);
 
         Switch toggle = $(Switch.class).withClassName("explorer-spring-switch").single();
         assertThat(toggle.isEnabled()).isFalse();
@@ -134,34 +148,26 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
                 .isEqualTo("This line was measured without Spring only.");
     }
 
-    // The tri state control reads the chips
+    // The select all box reads the chips, and its two targets are the prototype's, D-206
     @Test
-    void the_all_control_is_checked_mixed_or_unchecked_and_its_second_state_turns_the_optional_ones_off() {
+    void the_select_all_box_turns_everything_off_and_then_back_to_the_default() {
         navigate(ExplorerView.class);
-        Checkbox all = all();
-        assertThat(all.getValue()).isTrue();
-        assertThat(all.isIndeterminate()).isFalse();
+        assertThat(allBox().getElement().getAttribute("data-state")).isEqualTo("ticked");
+        assertThat(allBox().getElement().getAttribute("aria-label")).isEqualTo("Count only what comes with Vaadin");
 
-        test(all).click();
+        test(allBox()).click();
 
-        // The profile's optional products are off, and the control is mixed.
         assertThat(ExplorerBrowserlessTest.query().getParameters().get("off").get(0)).contains(
-                "vaadin-spreadsheet-flow", "kubernetes-kit-starter", "hilla-spring-boot-starter")
-                .doesNotContain("flow-webpush");
-        assertThat(all().isIndeterminate()).isTrue();
+                "vaadin-spring-boot-starter", "flow-webpush", "vaadin-spreadsheet-flow", "control-center-starter");
+        assertThat(allBox().getElement().getAttribute("data-state")).isEqualTo("none");
+        assertThat(allBox().getElement().getAttribute("aria-label")).isEqualTo("Count every product");
 
-        test(all()).click();
+        test(allBox()).click();
         assertThat(ExplorerBrowserlessTest.location()).isEqualTo("findings");
-        assertThat(all().getValue()).isTrue();
+        assertThat(allBox().getElement().getAttribute("data-state")).isEqualTo("ticked");
     }
 
     // Helpers
-
-    private void open(String line) {
-        test($(NativeButton.class).withClassName("explorer-row").all().stream()
-                .filter(row -> line.equals(row.getElement().getAttribute("data-line"))).findFirst().orElseThrow())
-                .click();
-    }
 
     @SuppressWarnings("unchecked")
     private List<String> shown() {
@@ -182,34 +188,31 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
                         .findFirst();
                 if (found.isPresent()) {
                     int row = grid.getGenericDataView().getItems().toList().indexOf(found.get());
-                    return test(grid).getCellText(row, 2);
+                    return test(grid).getCellComponent(row, 2).getElement().getTextRecursively();
                 }
             }
         }
         throw new AssertionError(cve + " is not shown");
     }
 
-    private java.util.Optional<RouterLink> chipNamed(String product) {
-        return $(RouterLink.class).withClassName("explorer-chip").all().stream()
-                .filter(link -> product.equals(link.getElement().getAttribute("data-product"))).findFirst();
-    }
-
     private int count(String product) {
-        RouterLink chip = chipNamed(product).orElseThrow();
+        var chip = $(Component.class).withClassName("explorer-chip").all().stream()
+                .filter(candidate -> product.equals(candidate.getElement().getAttribute("data-product")))
+                .findFirst().orElseThrow();
         return Integer.parseInt(chip.getChildren().filter(Span.class::isInstance).map(Span.class::cast)
                 .filter(span -> span.hasClassName("chip-count")).findFirst().orElseThrow().getText());
     }
 
     private List<String> badgeTexts(String line) {
         var texts = new ArrayList<String>();
-        $(NativeButton.class).withClassName("explorer-row").all().stream()
+        $(Details.class).withClassName("explorer-row").all().stream()
                 .filter(row -> line.equals(row.getElement().getAttribute("data-line"))).findFirst().orElseThrow()
-                .getChildren().forEach(child -> child.getChildren().filter(Badge.class::isInstance)
-                        .forEach(badge -> texts.add(badge.getElement().getTextRecursively())));
+                .getSummary().getChildren().filter(Badge.class::isInstance)
+                .forEach(badge -> texts.add(badge.getElement().getTextRecursively()));
         return texts;
     }
 
-    private Checkbox all() {
-        return $(Checkbox.class).withClassName("explorer-all").single();
+    private RouterLink allBox() {
+        return $(RouterLink.class).withClassName("explorer-all").single();
     }
 }

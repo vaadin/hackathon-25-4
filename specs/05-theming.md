@@ -38,6 +38,10 @@ One centered column, at most 60rem with 1.5rem of padding, which is the prototyp
 
 The views listed here are verified at phone width during UI verification, the rest are desktop screens by declaration: HomeView, VersionView, CveView, ScanView, AdvisoriesView. The explorer and workbench are team screens used on laptops, and claiming phone support for a verdict queue nobody will work from a phone is polish spent where nobody stands.
 
+## The internal shell
+
+The internal pages follow the prototype's distribution, D-203: a left panel about 20rem wide that holds the explorer's filter and products and nothing else, overlaying below the App Layout's own breakpoint; a bar over the content with the drawer toggle, the page's H1 at 18 pixels, the internal destinations as quiet links, the measured chip, the dark switch, the Assistant button and Sign out; the content; and on the right, when opened, the explorer's legend or the assistant panel, each about 22rem wide. Section headings inside the explorer, "Series", "Filter by advisory, version or dependency", "Narrow the list to your application", "From Vaadin", "With Spring Boot", are small capitals in the secondary text color, as the prototype draws them. A series row is marked at its start by its state's status color, and the risk and unassessed groups inside it are faintly tinted in the same colors. Product rings carry their number and take one of twelve palette colors by the product's place in the registry; a ring with nothing to count is grey. All of it is in `styles/explorer.css` and `styles/shell.css`.
+
 ## CSS discipline
 
 All CSS in `src/main/resources/META-INF/resources`, imported from one `styles.css`, no `@CssImport`, no themes folder. Component customisation through Aura's published tokens first, part selectors second, and anything that needed a part selector gets a comment naming the component version it was written against, because part names move between betas and that comment is what makes the break findable.

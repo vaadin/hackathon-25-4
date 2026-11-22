@@ -75,6 +75,18 @@ public final class AppBar extends Composite<Header> {
         }
     }
 
+    /** Adds a control to the bar's end, before Sign out when there is one. */
+    void addBeforeEnd(Component control) {
+        var bar = getContent().getElement();
+        var signOut = getContent().getChildren()
+                .filter(child -> child.getElement().getClassList().contains("sign-out")).findFirst();
+        if (signOut.isPresent()) {
+            bar.insertChild(bar.indexOfChild(signOut.get().getElement()), control.getElement());
+        } else {
+            getContent().add(control);
+        }
+    }
+
     private static boolean isRegistered(Class<? extends Component> target) {
         return RouteConfiguration.forSessionScope().isRouteRegistered(target);
     }
