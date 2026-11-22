@@ -19,7 +19,10 @@ import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Code;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -102,6 +105,45 @@ class VersionViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(texts(slot("version-triage"), Paragraph.class).get(0))
                 .startsWith("11 advisories on this release are still being reviewed.");
         assertThat(find(RouterLink.class, slot("version-triage")).all()).hasSize(11);
+        // Named as the prototype names them, separated by commas.
+        assertThat(find(Paragraph.class, slot("version-triage")).withClassName("triage-ids").single().getElement()
+                .getTextRecursively()).startsWith("CVE-2026-102276, CVE-2026-102277, ");
+        // Each fix row ends with the decorative chevron.
+        assertThat(rows).allSatisfy(row -> assertThat(row.getChildren()
+                .filter(child -> child.getElement().getClassList().contains("fix-chevron")).count()).isOne());
+    }
+
+    // VER-11: the prototype's distribution, one H1 from the shell, the answer's title as H2, everything under it H3.
+    @Test
+    void the_page_reads_in_heading_order() {
+        open("24.7.19");
+
+        assertThat(find(H1.class).all()).extracting(H1::getText).containsExactly("Security status");
+        assertThat(find(H2.class).all()).extracting(H2::getText).containsExactly("Vaadin 24.7.19");
+        assertThat(cardTitle()).isEqualTo("1 vulnerability has no fix yet");
+        assertThat(find(H3.class).all()).extracting(H3::getText).contains("1 vulnerability has no fix yet",
+                "Details for CVE-2026-45292", "Findings we looked at and ruled out", "All supported versions");
+        // A section heading never jumps back above the answer's title.
+        assertThat(find(H2.class, find(Div.class).withClassName("version-body").single()).exists()).isFalse();
+    }
+
+    // VER-12: the managed property of the Spring Boot tip and the discontinued product are set in code type.
+    @Test
+    void the_tips_set_their_property_and_product_in_code_type() {
+        open("24.7.19?boot=1&disc=1");
+
+        Paragraph bootTip = find(Paragraph.class, slot("version-boot")).withClassName("section-tip").first();
+        assertThat(find(Code.class, bootTip).all()).extracting(Code::getText).containsExactly("<tomcat.version>");
+        assertThat(bootTip.getElement().getTextRecursively())
+                .startsWith("Not managed by Vaadin. Upgrade Spring Boot, or override the managed version in your"
+                        + " build, for example <tomcat.version>.");
+
+        Paragraph discTip = find(Paragraph.class, slot("version-disc")).withClassName("section-tip").single();
+        assertThat(find(Code.class, discTip).all()).extracting(Code::getText).isNotEmpty()
+                .allSatisfy(name -> assertThat(name).isNotBlank().doesNotContain(","));
+        Table disc = find(Table.class, slot("version-disc")).single();
+        assertThat(disc.getBodyRows()).isNotEmpty().allSatisfy(row -> assertThat(row.getElement().getTextRecursively())
+                .endsWith("Override the dependency version in your own build; the advisory's page says the measured one"));
     }
 
     // VER-03
@@ -426,7 +468,7 @@ class VersionViewBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private String cardTitle() {
-        return find(H2.class, card()).first().getText();
+        return find(H3.class, card()).first().getText();
     }
 
     private String cardWhy() {
@@ -438,7 +480,7 @@ class VersionViewBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private List<String> headings(Component within) {
-        return find(H2.class, within).all().stream().map(H2::getText).toList();
+        return find(H3.class, within).all().stream().map(H3::getText).toList();
     }
 
     private <T extends Component> List<String> texts(Component within, Class<T> type) {

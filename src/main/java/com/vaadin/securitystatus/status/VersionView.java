@@ -24,8 +24,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Code;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -81,6 +81,9 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     /** The class a finding the address named carries for a moment, so the reader sees what the link was for. */
     static final String REVEALED = "revealed";
+
+    /** Around a word set in code type while a sentence passes through the bundle; never shown. */
+    private static final String CODE = "\u0000";
 
     /** Declared so the build bundles it and nothing is compiled from a string in the browser. */
     @JsDefinition
@@ -286,7 +289,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         });
 
         Words words = words(index, measured, stuck);
-        words.title().ifPresent(title -> box.add(new H2(title)));
+        words.title().ifPresent(title -> box.add(new H3(title)));
         if (!words.why().isEmpty()) {
             var why = new Paragraph(String.join(" ", words.why()));
             why.addClassName("verdict-why");
@@ -507,7 +510,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         icon.getElement().setAttribute("aria-hidden", "true");
         var row = new Div(icon, new Span(getTranslation("version.card.unmeasured.word")));
         row.addClassName("verdict-state");
-        box.add(row, new H2(getTranslation("version.card.unmeasured.title", version.toString())));
+        box.add(row, new H3(getTranslation("version.card.unmeasured.title", version.toString())));
 
         Optional<VersionRules.Nearest> nearest = VersionRules.nearestMeasured(index, version);
         String why = nearest.map(found -> switch (found.kind()) {
@@ -576,8 +579,15 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         var text = new Paragraph(getTranslation(plural("version.triage.text", ids.size()), ids.size()));
         var list = new Paragraph();
         list.addClassName("triage-ids");
-        ids.stream().limit(VersionRules.TRIAGE_NAMED).forEach(id -> list.add(FindingCard.advisoryLink(id, measured)));
+        List<String> named = ids.subList(0, Math.min(VersionRules.TRIAGE_NAMED, ids.size()));
+        for (int i = 0; i < named.size(); i++) {
+            if (i > 0) {
+                list.add(new Text(getTranslation("version.list.separator")));
+            }
+            list.add(FindingCard.advisoryLink(named.get(i), measured));
+        }
         if (ids.size() > VersionRules.TRIAGE_NAMED) {
+            list.add(new Text(" "));
             var more = new Span(getTranslation("version.triage.more", ids.size() - VersionRules.TRIAGE_NAMED));
             more.addClassName("triage-more");
             list.add(more);
@@ -650,6 +660,10 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 .orElseGet(() -> getTranslation("version.fixes.goneBy", to.toString())));
         end.addClassNames("status-chip", "state-fix_available", "fix-end");
         row.add(end);
+        Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
+        chevron.addClassName("fix-chevron");
+        chevron.getElement().setAttribute("aria-hidden", "true");
+        row.add(chevron);
         return row;
     }
 
@@ -676,7 +690,8 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         };
         if (!table) {
             var note = new Div(new H3(getTranslation("version.boot.note.title")),
-                    new Paragraph(getTranslation("version.boot.note.text")),
+                    new Paragraph(withCode(getTranslation("version.boot.note.text",
+                            code(getTranslation("version.boot.property"))))),
                     sectionLink(getTranslation("version.boot.show"), at -> at.withBoot(true)));
             note.addClassName("boot-note");
             spring.add(note);
@@ -691,7 +706,6 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         Optional<SpringBootLatest> newer = declared.map(boot -> index.springBootLatest().get(boot.toString()));
         Optional<VersionNumber> target = newer.flatMap(found -> found.patch().or(found::minor));
         var tip = new ArrayList<String>();
-        tip.add(getTranslation("version.boot.tip"));
         int pinned = measured.springPinned().size();
         if (pinned > 0) {
             tip.add(getTranslation(plural("version.boot.pinned", pinned), pinned));
@@ -703,7 +717,11 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         } else {
             target.ifPresent(release -> tip.add(getTranslation("version.boot.newest", release.toString())));
         }
-        var paragraph = new Paragraph(String.join(" ", tip));
+        var paragraph = new Paragraph(withCode(getTranslation("version.boot.tip",
+                code(getTranslation("version.boot.property")))));
+        if (!tip.isEmpty()) {
+            paragraph.add(new Text(" " + String.join(" ", tip)));
+        }
         paragraph.addClassName("section-tip");
         spring.add(paragraph);
 
@@ -760,8 +778,9 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         String version = measured.version().toString();
         discontinued.add(heading(getTranslation("version.disc.title"), count(ids.size())));
         String tip = measured.discontinuedThrough().isEmpty() ? getTranslation("version.disc.tip.unnamed", version)
-                : getTranslation("version.disc.tip", String.join(", ", measured.discontinuedThrough()), version);
-        var paragraph = new Paragraph(new Span(tip), new Text(" "), sectionLink(
+                : getTranslation("version.disc.tip", measured.discontinuedThrough().stream().map(VersionView::code)
+                        .collect(java.util.stream.Collectors.joining(getTranslation("version.list.separator"))), version);
+        var paragraph = new Paragraph(new Span(withCode(tip)), new Text(" "), sectionLink(
                 getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withDisc(!open)));
         paragraph.addClassName("section-tip");
         discontinued.add(paragraph);
@@ -950,7 +969,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     private static Component heading(String title, @Nullable Object aside) {
-        var row = new Div(new H2(title));
+        var row = new Div(new H3(title));
         row.addClassName("section-row");
         if (aside instanceof String text) {
             var span = new Span(text);
@@ -974,6 +993,24 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         String text = Optional.ofNullable(index.advisories().get(advisory))
                 .map(entry -> String.join(", ", entry.packages().stream().limit(2).toList())).orElse("");
         return new Span(text);
+    }
+
+    /** Marks a word of the data or of the bundle to be set in code type, inside a translated sentence. */
+    private static String code(String word) {
+        return CODE + word + CODE;
+    }
+
+    /** A translated sentence with its marked words in {@code code} elements, the rest as text. */
+    static Component[] withCode(String text) {
+        String[] parts = text.split(CODE, -1);
+        var out = new ArrayList<Component>();
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].isEmpty()) {
+                continue;
+            }
+            out.add(i % 2 == 1 ? new Code(parts[i]) : new Text(parts[i]));
+        }
+        return out.toArray(Component[]::new);
     }
 
     private String count(int n) {
