@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.RouterLink;
@@ -46,6 +47,25 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         navigate(HomeView.class);
         assertThat($(H1.class).withClassName("view-heading").single().getText()).isEqualTo("Security status");
         assertThat($(Div.class).withClassName("lookup-mount").exists()).isTrue();
+    }
+
+    // D-246: on the customer side the team has a way back to its own pages, a reader does not
+    @Test
+    @WithMockUser(username = "team", roles = Roles.SECURITY)
+    void the_team_finds_its_way_back_from_the_customer_side() {
+        navigate(HomeView.class);
+
+        Anchor back = $(Anchor.class).withClassName("team-pages").single();
+        assertThat(back.getHref()).isEqualTo("findings");
+        assertThat(back.getText()).isEqualTo("Team pages");
+    }
+
+    @Test
+    @WithAnonymousUser
+    void a_reader_has_no_link_to_the_team_pages() {
+        navigate(HomeView.class);
+
+        assertThat($(Anchor.class).withClassName("team-pages").exists()).isFalse();
     }
 
     // FND-01

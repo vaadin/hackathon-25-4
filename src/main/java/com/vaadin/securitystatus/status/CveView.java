@@ -34,6 +34,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
@@ -44,6 +45,7 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.base.ui.AdvisoryIds;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
+import com.vaadin.securitystatus.base.ui.InternalLayout;
 import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
@@ -65,6 +67,8 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
  * advisory or the verdict does not carry is left out, never drawn empty.
  */
 @Route("cve/:ids/:version?")
+// The same answer inside the internal shell, opened from the team's advisories list, D-246.
+@RouteAlias(value = "findings/cve/:ids/:version?", layout = InternalLayout.class)
 @RouteParent(HomeView.class)
 @PageTitle("cve.title")
 @AnonymousAllowed

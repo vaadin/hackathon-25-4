@@ -300,6 +300,17 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         assertThat(pills()).extracting(RouterLink::getHref).contains("findings/advisories?verdict=risk");
     }
 
+    // D-246: from the team's list, an answer opens inside the internal shell too
+    @Test
+    @WithMockUser(username = "team", roles = Roles.SECURITY)
+    void ask_from_the_internal_list_opens_the_internal_answer() {
+        var view = navigate("findings/advisories", AdvisoriesView.class);
+        openMenu(view, 0).clickItem("Ask about CVE-2016-1000027");
+
+        assertThat(getCurrentView()).isInstanceOf(CveView.class);
+        assertThat(currentLocation()).isEqualTo("findings/cve/CVE-2016-1000027");
+    }
+
     private List<RouterLink> pills() {
         return $(RouterLink.class).withClassName("verdict-pill").all();
     }

@@ -25,7 +25,9 @@ import com.vaadin.flow.router.RouterState;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
+import com.vaadin.securitystatus.base.security.Roles;
 
 /**
  * The app bar both shells share: the breadcrumb trail, the measured chip, the dark
@@ -68,6 +70,13 @@ public final class AppBar extends Composite<Header> {
         measured.bindVisible(generatedAt.map(Objects::nonNull));
 
         getContent().add(breadcrumbs, measured, new ThemeSwitch());
+        if (customer && authentication.hasRole(Roles.SECURITY)) {
+            // The way back to the team's pages from the customer side, D-246.
+            var team = new Anchor("findings", getTranslation("shell.teamPages"));
+            team.getElement().setAttribute("router-link", true);
+            team.addClassName("team-pages");
+            getContent().add(team);
+        }
         if (authentication.isAuthenticated()) {
             var signOut = new Button(getTranslation("shell.signOut"), click -> authentication.logout());
             signOut.addThemeVariants(ButtonVariant.TERTIARY);

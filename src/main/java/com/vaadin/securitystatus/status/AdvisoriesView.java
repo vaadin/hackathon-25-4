@@ -238,7 +238,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     }
 
     private void open(AdvisoryCatalogEntry row) {
-        UI.getCurrent().navigate(CveView.class, new RouteParameters(CveView.IDS, row.cve()));
+        answer(row.cve(), "");
     }
 
     private Component idCell(AdvisoryCatalogEntry row) {
@@ -351,6 +351,12 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
                 .addClassName("menu-ask");
     }
 
+    /** Opens the answer for the id on the side the list was opened from, the team's or the customer's. */
+    private void answer(String id, String version) {
+        String base = path.peek().startsWith("findings/") ? "findings/cve/" : "cve/";
+        UI.getCurrent().navigate(base + id + (version.isEmpty() ? "" : "/" + version));
+    }
+
     /** The version the reader already gave the lookup, beside ids or on its own, or nothing. */
     private String knownVersion() {
         String beside = LookupInput.cleanVersion(lookup.idsVersion().peek());
@@ -359,8 +365,6 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     /** Opens the answer for the id, on the reader's version when there is one. */
     private void ask(String id, String version) {
-        UI.getCurrent().navigate(CveView.class, version.isEmpty()
-                ? new RouteParameters(CveView.IDS, id)
-                : new RouteParameters(Map.of(CveView.IDS, id, CveView.VERSION, version)));
+        answer(id, version);
     }
 }
