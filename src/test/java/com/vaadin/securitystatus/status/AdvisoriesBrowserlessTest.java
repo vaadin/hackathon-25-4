@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
@@ -286,6 +288,16 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
     /** The text of each item as a reader sees it: the record item is a link, whose text the tester's getItemTexts does not read. */
     private static List<String> itemTexts(AdvisoriesView view) {
         return view.menu().getItems().stream().map(item -> item.getElement().getTextRecursively()).toList();
+    }
+
+    // D-237: inside the internal shell the pills keep the internal address, so the side panel stays
+    @Test
+    @WithMockUser(username = "team", roles = Roles.SECURITY)
+    void the_pills_keep_the_internal_address_inside_the_internal_shell() {
+        navigate("findings/advisories", AdvisoriesView.class);
+
+        assertThat(pills()).extracting(RouterLink::getHref).first().isEqualTo("findings/advisories");
+        assertThat(pills()).extracting(RouterLink::getHref).contains("findings/advisories?verdict=risk");
     }
 
     private List<RouterLink> pills() {

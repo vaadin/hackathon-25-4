@@ -77,6 +77,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     private final SecurityDataService data;
     private final LookupState lookup;
+    private final ValueSignal<String> path = new ValueSignal<>("advisories");
     private final ValueSignal<Optional<String>> verdict = new ValueSignal<>(Optional.empty());
     /** The advisories a plain language ask narrowed the list to, or empty for no ask. */
     private final ValueSignal<Optional<Set<String>>> narrowed = new ValueSignal<>(Optional.empty());
@@ -120,7 +121,10 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
             generatedAt.get();
             return load();
         });
-        Signal.effect(this, () -> draw(loaded.get(), verdict.get(), narrowed.get()));
+        Signal.effect(this, () -> {
+            path.get();
+            draw(loaded.get(), verdict.get(), narrowed.get());
+        });
     }
 
     /**
@@ -137,6 +141,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // The list is served at /advisories and, inside the internal shell, at /findings/advisories:
+        // its own links keep the address it was opened at, so the team keeps its side panel, D-237.
+        path.set(event.getLocation().getPath());
         verdict.set(AdvisoryRules.verdict(Address.first(event.getLocation().getQueryParameters(),
                 QueryFlag.VERDICT)));
     }
@@ -194,7 +201,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         var number = new Span(String.valueOf(count));
         number.addClassName("pill-count");
         link.add(number);
-        link.setQueryParameters(Address.of("advisories").with(QueryFlag.VERDICT, word).query());
+        Address address = Address.of(path.peek()).with(QueryFlag.VERDICT, word);
+        link.setQueryParameters(address.query());
+        link.getElement().setAttribute("href", address.href());
         link.addClassName("verdict-pill");
         word.ifPresent(value -> link.addClassName("verdict-" + value));
         if (active) {
