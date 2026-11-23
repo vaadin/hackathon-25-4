@@ -120,7 +120,9 @@ See `TO-POST.md`.
 
 Real here, not yet reduced. Each says what it needs.
 
-None at the moment. The last one, the SDD starter's `architecture.md`, became draft 24 once a wizard download confirmed it.
+| Finding | Why, and what it needs |
+| --- | --- |
+| An element effect runs unlocked from a `RequestEndedEvent` listener, `FEEDBACK-25.4.md`, Bugs routed around | Found on 2026-11-23 while building the diagnostics board. Needs a minimal project, a view with an effect on a shared signal written from a request end listener, and a check of 25.3.5 |
 
 ### Needs no draft
 

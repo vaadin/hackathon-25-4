@@ -1,10 +1,12 @@
 package com.vaadin.securitystatus.diagnostics;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.router.NavigationEndedEvent;
 import com.vaadin.flow.router.NavigationStartedEvent;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -78,7 +80,16 @@ class DiagnosticsListeners implements VaadinServiceInitListener {
         String handler = ended.getHandler().<Object>map(found -> found)
                 .or(() -> ended.getSessionlessHandler().map(found -> found))
                 .map(DiagnosticsListeners::kind).orElse(NO_HANDLER);
-        counters.requestEnded(handler, ended.getFailure().isPresent(), ended.getDuration());
+        // The request has let go of the session lock but still names its UI as current, and an element
+        // effect on that UI would then run here, unlocked, instead of through UI.access.
+        // specs/FEEDBACK-25.4.md, "An element effect runs unlocked".
+        Map<Class<?>, CurrentInstance> current = CurrentInstance.getInstances();
+        CurrentInstance.clearAll();
+        try {
+            counters.requestEnded(handler, ended.getFailure().isPresent(), ended.getDuration());
+        } finally {
+            CurrentInstance.restoreInstances(current);
+        }
     }
 
     private static String kind(Object handler) {

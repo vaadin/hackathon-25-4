@@ -133,7 +133,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(H1.class).single().getText()).isEqualTo("Diagnostics");
         assertThat(UI.getCurrent().getInternals().getTitle()).isEqualTo("Diagnostics");
         assertThat($(Paragraph.class).withClassName("diagnostics-since").single().getText())
-                .startsWith("Counting since ").contains(" UTC, when the application started.")
+                .startsWith("Counting started ").contains(" ago, at ").contains(" UTC, when the application started.")
                 .endsWith("a restart sets every number back to zero.");
         assertThat($(DashboardWidget.class).all()).extracting(DashboardWidget::getTitle).containsExactly("Navigations",
                 "Requests", "Sessions", "Your browser", "Policy violations, "
@@ -247,7 +247,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
 
         test($(Button.class).withClassName("diagnostics-edit").single()).click();
         assertThat(board.isEditable()).isTrue();
-        assertThat($(Button.class).withClassName("diagnostics-edit").single().getText()).isEqualTo("Done");
+        assertThat($(Button.class).withClassName("diagnostics-edit").single().getAriaLabel()).contains("Done");
         // Every card is on the board, so there is nothing to add.
         assertThat($(MenuBar.class).withClassName("diagnostics-add").exists()).isFalse();
     }

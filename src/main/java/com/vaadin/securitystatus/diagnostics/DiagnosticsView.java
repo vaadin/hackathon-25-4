@@ -23,6 +23,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -150,8 +151,15 @@ public final class DiagnosticsView extends Composite<Div> {
             DataRefreshSignal refresh) {
         addClassName("diagnostics-view");
 
-        var since = new Paragraph(getTranslation("diagnostics.since", AT.format(counters.since())));
+        var since = new Paragraph();
         since.addClassName("diagnostics-since");
+        // Read again whenever a request ends, so "minutes ago" moves with the page in use and needs no timer.
+        var requests = counters.requests();
+        Signal.effect(since, () -> {
+            requests.get();
+            since.setText(getTranslation("diagnostics.since", ago(counters.since(), Instant.now()),
+                    AT.format(counters.since())));
+        });
 
         builders.put(Card.NAVIGATIONS, widget -> navigationsPanel(counters.navigations()));
         builders.put(Card.REQUESTS, widget -> requestsPanel(counters.requests()));
@@ -170,7 +178,9 @@ public final class DiagnosticsView extends Composite<Div> {
         board.addItemRemovedListener(removed -> save());
         show(Card.DEFAULT);
 
-        getContent().add(since, toolbar(), board);
+        var info = new Div(since, toolbar());
+        info.addClassNames("diagnostics-info", "aura-surface");
+        getContent().add(info, board);
         whenAttached(ui -> {
             WebStorage.getItem(ui, WebStorage.Storage.LOCAL_STORAGE, LAYOUT_KEY).thenAccept(saved -> {
                 List<Placed> placed = Placed.parse(saved);
@@ -193,7 +203,12 @@ public final class DiagnosticsView extends Composite<Div> {
         var edit = new Button();
         edit.addClassName("diagnostics-edit");
         edit.addThemeVariants(ButtonVariant.TERTIARY);
-        edit.bindText(editing.map(on -> getTranslation(on ? "diagnostics.board.done" : "diagnostics.board.edit")));
+        Signal.effect(edit, () -> {
+            String label = getTranslation(editing.get() ? "diagnostics.board.done" : "diagnostics.board.edit");
+            edit.setIcon((editing.get() ? VaadinIcon.CHECK : VaadinIcon.EDIT).create());
+            edit.setAriaLabel(label);
+            edit.setTooltipText(label);
+        });
         edit.addClickListener(click -> {
             editing.set(!editing.peek());
             board.setEditable(editing.peek());
@@ -202,7 +217,9 @@ public final class DiagnosticsView extends Composite<Div> {
         var add = new MenuBar();
         add.addClassName("diagnostics-add");
         add.addThemeVariants(MenuBarVariant.TERTIARY);
-        MenuItem cards = add.addItem(getTranslation("diagnostics.board.add"));
+        MenuItem cards = add.addItem(VaadinIcon.PLUS.create());
+        cards.setAriaLabel(getTranslation("diagnostics.board.add"));
+        add.setTooltipText(cards, getTranslation("diagnostics.board.add"));
         add.bindVisible(absent.map(missing -> !missing.isEmpty()));
         Signal.effect(add, () -> {
             cards.getSubMenu().removeAll();
@@ -214,17 +231,33 @@ public final class DiagnosticsView extends Composite<Div> {
             }
         });
 
-        var restore = new Button(getTranslation("diagnostics.board.restore"), click -> {
+        var restore = new Button(VaadinIcon.ROTATE_LEFT.create(), click -> {
             show(Card.DEFAULT);
             save();
         });
         restore.addClassName("diagnostics-restore");
         restore.addThemeVariants(ButtonVariant.TERTIARY);
+        restore.setAriaLabel(getTranslation("diagnostics.board.restore"));
+        restore.setTooltipText(getTranslation("diagnostics.board.restore"));
         restore.bindVisible(editing);
 
         var bar = new Div(edit, add, restore);
         bar.addClassName("diagnostics-toolbar");
         return bar;
+    }
+
+    /** How long ago, in words: the largest whole unit, down to "less than a minute". */
+    private String ago(Instant then, Instant now) {
+        long minutes = Math.max(0, java.time.Duration.between(then, now).toMinutes());
+        if (minutes < 1) {
+            return getTranslation("diagnostics.ago.now");
+        }
+        if (minutes < 60) {
+            return getTranslation("diagnostics.ago.minutes", minutes);
+        }
+        long hours = minutes / 60;
+        return hours < 48 ? getTranslation("diagnostics.ago.hours", hours)
+                : getTranslation("diagnostics.ago.days", hours / 24);
     }
 
     private Dashboard.DashboardI18n boardI18n() {

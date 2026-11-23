@@ -9,14 +9,32 @@
     box-sizing: border-box;
 }
 
-.diagnostics-toolbar {
+/* The facts about the counting, boxed like the cards although nothing in it is arranged. */
+.diagnostics-info {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-l);
+    background-color: var(--vaadin-background-container);
+}
+
+.diagnostics-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* The cards stand out from the page, which is a surface already. */
+.diagnostics-board vaadin-dashboard-widget {
+    background-color: var(--vaadin-background-container-strong);
 }
 
 .diagnostics-since {
+    flex: 1 1 30rem;
     margin: 0;
 }
 
