@@ -19,18 +19,33 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WrappedHttpSession;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
 import com.vaadin.securitystatus.explorer.ExplorerView;
+import com.vaadin.securitystatus.status.HomeView;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
     WebApplicationContext context;
+
+    // The sign in page is no answer: no heading, purpose or lookup above the form
+    @Test
+    @WithAnonymousUser
+    void the_sign_in_page_stands_alone_and_the_answers_keep_the_lookup() {
+        navigate(LoginView.class);
+        assertThat($(H1.class).withClassName("view-heading").exists()).isFalse();
+        assertThat($(Div.class).withClassName("lookup-mount").exists()).isFalse();
+
+        navigate(HomeView.class);
+        assertThat($(H1.class).withClassName("view-heading").single().getText()).isEqualTo("Security status");
+        assertThat($(Div.class).withClassName("lookup-mount").exists()).isTrue();
+    }
 
     // FND-01
     @Test

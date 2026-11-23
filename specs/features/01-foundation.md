@@ -15,7 +15,7 @@ The two parent layouts, the theme, security, CSP, the dev loop, and everything e
 ### The internal shell
 
 - A second parent for `/findings/**` and `/diagnostics`: the same app bar, with the drawer toggle, the page's H1 and the four internal destinations as links in it; a left panel holding only what the route gives it, the explorer's filter and products, as the prototype's does; and the assistant panel mount point in a panel on the right, opened from the bar, D-203.
-- Signed out users hitting it land on `/login` and return to where they aimed after signing in, through the security configurer's login view and success handling.
+- Signed out users hitting it land on `/login` and return to where they aimed after signing in, through the security configurer's login view and success handling. The sign in page stands alone under the app bar: the customer shell leaves out the heading, the purpose and the lookup there, D-234.
 
 ### Theme
 

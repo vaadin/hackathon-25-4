@@ -9,11 +9,12 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.securitystatus.base.ui.StandsAlone;
 
 @Route("login")
 @PageTitle("login.title")
 @AnonymousAllowed
-public final class LoginView extends Composite<Div> implements BeforeEnterObserver {
+public final class LoginView extends Composite<Div> implements BeforeEnterObserver, StandsAlone {
 
     private final LoginForm form = new LoginForm();
 

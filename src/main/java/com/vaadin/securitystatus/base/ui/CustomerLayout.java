@@ -11,13 +11,15 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 
 /**
  * The shell of the public routes: the app bar, then one centered column that
  * opens every page the same way, the H1, the purpose and the lookup, above
- * the route's own content. No navigation menu.
+ * the route's own content, except a route that {@link StandsAlone}. No
+ * navigation menu.
  */
 @Layout
 @AnonymousAllowed
@@ -25,6 +27,7 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
 
     private final Div lookupMount = new Div();
     private final Div content = new Div();
+    private final ValueSignal<Boolean> asking = new ValueSignal<>(true);
 
     CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
             ObjectProvider<ShellLookup> lookup) {
@@ -37,6 +40,9 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
         lookupMount.addClassName("lookup-mount");
         lookup.ifAvailable(provider -> lookupMount.add(provider.create()));
         content.addClassName("customer-content");
+        heading.bindVisible(asking);
+        purpose.bindVisible(asking);
+        lookupMount.bindVisible(asking);
 
         var column = new Main(heading, purpose, lookupMount, content);
         column.addClassName("customer-column");
@@ -51,6 +57,7 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
     @Override
     public void showRouterLayoutContent(HasElement routeContent) {
         content.getElement().removeAllChildren();
+        asking.set(!(routeContent instanceof StandsAlone));
         if (routeContent != null) {
             content.getElement().appendChild(routeContent.getElement());
         }
