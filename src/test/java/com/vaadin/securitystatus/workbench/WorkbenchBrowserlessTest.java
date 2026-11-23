@@ -22,6 +22,7 @@ import org.springframework.test.context.NestedTestConfiguration.EnclosingConfigu
 import org.springframework.util.FileSystemUtils;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -225,6 +226,20 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(layout.isLabelsAside()).isTrue();
         assertThat(layout.getLabelTextAlign()).isEqualTo(LabelTextAlign.END);
         assertThat(layout.getClassNames()).contains("verdict-form");
+    }
+
+    // A save the formats refuse says so and names the field, instead of doing nothing
+    @Test
+    void a_draft_in_the_wrong_form_is_not_saved_and_the_notice_names_the_field() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+        type(view, "purl", "pkg:npm/wrong-form");
+        type(view, "affects", "all of 24");
+
+        click("workbench-save");
+
+        assertThat(drafts.list()).noneMatch(draft -> draft.getPurl().equals("pkg:npm/wrong-form"));
+        assertThat(test($(Notification.class).last()).getText())
+                .contains("Not saved: Which Vaadin versions it applies to is not in the expected form.");
     }
 
     // WRK-03

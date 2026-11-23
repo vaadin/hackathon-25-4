@@ -926,7 +926,11 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     private void save() {
-        if (!form.validForDraft()) {
+        List<String> invalid = form.invalidForDraft();
+        if (!invalid.isEmpty()) {
+            var refusal = Notification.show(getTranslation("workbench.save.refused", String.join(", ", invalid),
+                    invalid.size()));
+            refusal.addThemeVariants(NotificationVariant.ERROR);
             return;
         }
         VerdictDraft kept = drafts.save(form.draft());

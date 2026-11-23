@@ -124,7 +124,12 @@ public final class VerdictForm extends Composite<FormLayout> {
 
     /** The formats only: whether the draft may be saved. */
     public boolean validForDraft() {
-        return binder.validate(Draft.class).isOk();
+        return invalidForDraft().isEmpty();
+    }
+
+    /** The labels of the fields whose format the {@link Draft} group refuses, in the form's order. */
+    public List<String> invalidForDraft() {
+        return refusedBy(binder.validate(Draft.class));
     }
 
     /**
@@ -133,7 +138,10 @@ public final class VerdictForm extends Composite<FormLayout> {
      * fields until they are edited.
      */
     public List<String> missingForReady() {
-        BinderValidationStatus<VerdictDraft> status = binder.validate(Draft.class, Ready.class);
+        return refusedBy(binder.validate(Draft.class, Ready.class));
+    }
+
+    private List<String> refusedBy(BinderValidationStatus<VerdictDraft> status) {
         var refused = new ArrayList<HasValue<?, ?>>();
         status.getFieldValidationErrors().forEach(error -> refused.add(error.getField()));
         var ordered = new ArrayList<String>();
