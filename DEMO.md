@@ -1,6 +1,6 @@
 # Demo script
 
-One walk, from a customer's question to a filed verdict draft, in two lengths: five minutes for a room that wants to see 25.4, fifteen for a room that wants to see the application. Everything here works on a laptop with no model key and no network, because it runs on the committed fixtures. The assistant replays recorded answers without a key and says so above the chat, which is itself worth showing.
+One walk, from a customer's question to a filed verdict draft, in two lengths: five minutes for a room that wants to see 25.4, fifteen for a room that wants to see the application. Everything here works on a laptop with no network, because it runs on the committed fixtures. The assistant needs a model key in production mode: without one a production build does not offer it at all, D-236, while development mode replays recorded answers and says so above the chat.
 
 The walk was made end to end on the fixtures at the close of epic 13, and again on the screens aligned with the prototype at the close of that pass, on 22 November, with real clicks and typing in an isolated browser context, in development mode, without the model key. The two things it did not do are named where they come: pressing Open in GitHub, which is an act on a real repository, P-17, and asking the live model, P-18.
 
@@ -14,6 +14,8 @@ mkdir -p /tmp/pages && ln -sfn "$PWD/src/test/resources/pages" /tmp/pages/cve-st
 env -u OPENAI_API_KEY VAADIN_LAUNCH_BROWSER=false ./mvnw \
   -Dspring-boot.run.arguments="--securitystatus.pages.base-url=http://localhost:8082/cve-status/"
 ```
+
+For the live assistant, keep `OPENAI_API_KEY` in the environment, that is drop `-u OPENAI_API_KEY`, and the `ai` profile turns on by itself; the log says at startup which mode answers. For production mode, add `-Pproduction`, which needs the Vaadin licence. To show the assistant on a phone, open `http://<the laptop's address on the local network>:8080` on the same Wi-Fi.
 
 To run a second instance beside one already on 8080, which holds the drafts file, add `PORT=8090 SECURITYSTATUS_DRAFTS_DIR=<an empty directory>` in front of `./mvnw`.
 
@@ -44,7 +46,7 @@ The fixtures were published at `generated_at` 2026-11-21T10:13:39Z, so the chip 
 1. **The customer asks** (`/`). Every customer page opens with the same H1, Security status, the purpose and the lookup in one centered column. Type `24.9.21` into Your Vaadin version and press Check; if the list of versions is still open over the button, Enter closes it first. The answer opens under the same lookup, the version still in the field, and is one card, tinted, FIX AVAILABLE: Fix available, upgrade to 24.9.26, all 12 findings gone there, and 11 advisories still being reviewed, so the version stays red until they are. Nothing on the page is wording the data does not carry: a field the data leaves out is not drawn, which `AbsenceSweepBrowserlessTest` walks screen by screen.
    *25.4 to point at: `DisableOnClickMode.UNTIL_RESPONSE` on Check, and the slash key that focuses the lookup from anywhere but a field.*
 
-2. **The customer pastes advisories** (`/cve/CVE-2026-45292,CVE-2026-102276,CVE-2026-8763,CVE-2021-33604,CVE-2019-25028/24.9.21`, or the By CVE tab). Five answers in the order asked, five different states: affects you through Spring Boot, not assessed yet, affects you through control-center-starter, does not affect you, not reported on 24.9.21. Copy answer for your ticket puts the composed answer on the clipboard. An address typed by hand with an id that is no CVE or GHSA id, `/cve/GHSA-aaaa-bbbb-cccc`, answers that it is not in anything we scanned, D-226.
+2. **The customer pastes advisories** (`/cve/CVE-2026-45292,CVE-2026-102276,CVE-2026-8763,CVE-2021-33604,CVE-2019-25028/24.9.21`, or the By CVE tab). Five answers in the order asked, five different states: affects you through Spring Boot, not assessed yet, affects you through control-center-starter, does not affect you, not reported on 24.9.21. Copy answer for your ticket puts the composed answer on the clipboard, with the page's address as its last line, D-229; the answer for an advisory asked without a version has no copy, it answers nothing yet. Choosing another tab of the lookup under an answer goes back to the home page with what was typed, D-230. An address typed by hand with an id that is no CVE or GHSA id, `/cve/GHSA-aaaa-bbbb-cccc`, answers that it is not in anything we scanned, D-226.
    *25.4 to point at: the observed Clipboard API reads the browser's success back to the server.*
 
 3. **The customer uploads the scanner report** (Upload scanner report, Choose a file at the end of the card, `src/test/resources/scan/osv-scanner.json`). The card becomes the file's name over "Vaadin 24.9.21 · 9 findings · osv-scanner", with the help mark and Replace file, and the triage lands at `/scan/24.9.21`: "One upgrade clears 1 of your 6 open findings", 3 already secure, 1 fix available, 5 unresolved, what waits on Spring Boot or the library, with the CSV and the audit PDF to download and Preview the audit report to see the PDF in place. The file is never stored.
@@ -57,7 +59,7 @@ The fixtures were published at `generated_at` 2026-11-21T10:13:39Z, so the chip 
 
 Everything above, plus:
 
-5. **The catalogue** (`/advisories`). "Every advisory we have measured", 535 in all. The pills, affects you 150 first and not on a current release 122 last, filter by verdict and write `?verdict` to the address. Right click a row: the context menu is built per row by the 25.4 dynamic content provider, copy the id, open the record, ask about it on my version. Signed in as the team, the ask box between the pills and the list takes "critical ones still open on 24.9" and narrows the list; without a key it replays the recorded answer.
+5. **The catalogue** (`/advisories`). "Every advisory we have measured", 535 in all. The pills, affects you 150 first and not on a current release 122 last, filter by verdict and write `?verdict` to the address. Right click a row: the context menu is built per row by the 25.4 dynamic content provider, copy the id, open the record, and Ask about it, on my version once a version was given, which opens that answer, D-230. Signed in as the team, the ask box between the pills and the list takes "critical ones still open on 24.9" and narrows the list; without a key it replays the recorded answer.
 
 6. **The cases** (`/cases`, Every case). Three groups in the prototype's words: what the design asks for and the measurements cannot give, 5 of them; cases that do not occur today; and the 31 cases you can go and look at, the most frequent first. Click See one on Advisory judged risk: it opens `CVE-2016-1000027` on 23.6.19.
 
@@ -66,10 +68,11 @@ Everything above, plus:
 
 8. **One release, and Spring Boot** (`/findings/release/24.9/24.9.21`, then What Spring Boot brings in the bar). The release page is the explorer's row for that one release, opened, with its own left panel counting the products on it: "Updating to 24.9.26 removes 18 of these", the Spring Boot paragraph, the files, the two halves. The Spring Boot page has one shut row per Spring Boot release the lines were measured with, saying how many findings arrive with it and whether free patches have ended; open 3.5.16 for the supply table, the advice and the groups.
 
-9. **The assistant** (Assistant in the bar of any internal screen opens the panel on the right). Without a key it replays recorded answers and says so. Ask "Is 24.9.21 safe?", "Is CVE-2026-45292 a problem on 24.9.21?" or "What verdict next?": each answer names the tool call it came from. Press Picture to attach a screenshot of a scanner line; on a phone the button asks for the back camera, which nobody has tried on a device yet, P-18.
+9. **The assistant** (Assistant in the bar of any internal screen opens the panel on the right). With a key the live model answers; in development mode without one it replays recorded answers and says so. Ask "Is 24.9.21 safe?", "Is CVE-2026-45292 a problem on 24.9.21?" or "What verdict next?": each answer names the tool call it came from. Press Picture to attach a screenshot of a scanner line; on a phone the button asks for the back camera, P-18.
    *25.4 to point at: `UploadCapture.ENVIRONMENT`, the tool call limit, the AI components' browserless testing.*
 
-10. **Diagnostics** (`/diagnostics`). Every navigation of this walk counted by route and outcome from the 25.4 navigation events, request timings per minute, sessions open now, the reader's browser from the typed extended client details, and the tails of policy violations and assistant exchanges.
+10. **Diagnostics** (`/diagnostics`). A board of six cards, D-232: every navigation of this walk counted by route, completed, refused or broke, from the 25.4 navigation events, request timings per minute, sessions open now, the reader's browser from the typed extended client details, policy violations and assistant exchanges. The pencil turns on editing: drag a card, resize it, remove it, add it back with the plus, restore the default six; the browser remembers the arrangement. The line above the board says how long ago counting started.
+   *25.4 to point at: the Dashboard with its i18n, `RequestEndedEvent`, and the unlocked effect it led to, vaadin/flow#27187.*
 
 ## If something goes wrong
 
@@ -77,6 +80,7 @@ Everything above, plus:
 | --- | --- |
 | Every number is different from this script | The application is reading the live pages. Start it with the `securitystatus.pages.base-url` argument above |
 | The page says the data is unreachable | The fixture server on 8082 is not running |
+| There is no Assistant button in production mode | No model key in the environment: a production build without a model does not offer the assistant, D-236. Start it with the key |
 | The assistant says it has no recording of the question | Without a key it answers only the recorded questions. Use one of the three in step 9, or start with the key for live answers |
 | Open in GitHub stays disabled | Press Export first; any edit after it withdraws it again until the next Export. "Required to export" under Why means the commentary is empty, which the cve-status writer refuses, D-223 |
 | Check does nothing on the version field | The list of measured versions is open over the button. Press Enter or click elsewhere first |
