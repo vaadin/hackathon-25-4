@@ -89,6 +89,6 @@ Written from the code at the close of the prototype alignment, D-186 to D-196 an
 - An id fixed below the reader's version reads "Fixed for you" only when the reader's line ever reported it; on a line that never did, the word is "Does not affect you", `CveRules.state`, D-66.
 - The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView.lineCard`, D-64, confirmed against the prototype as an app extra, D-189.
 - Kept as app extras where the prototype says less or something false, D-189: the not measured note and its link, the `from_build` sentence, the per package table of every line with its marked difference, `cve.evidence.askedAs`, the copy answer itself, which the prototype does not build.
-- Whether the copied answer should carry a link to the page is not answered, P-10: the prototype has no copy to compare with.
+- The copied answer ends with the address of the page it was copied from, so a ticket can come back to the answer, and the card without a version has no copy action, because it answers nothing yet. Decided by Manolo on 2026-11-23, P-10, D-229. The address is built from the request, so behind a proxy it is right only when the proxy's forwarded headers are honoured.
 - An address whose ids do not parse is answered since D-226; it used to show the H2 and nothing under it.
 - What the prototype shows and the data does not carry: the advisory's publication date after "First seen by our scans", a data need row in `FEEDBACK-25.4.md`, D-179.

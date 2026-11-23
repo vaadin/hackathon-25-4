@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -36,6 +37,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -96,6 +99,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private final SecurityDataService data;
     private final ValueSignal<Question> asked = new ValueSignal<>(new Question(List.of(), List.of(), ""));
     private final Div body = new Div();
+    /** The address of this answer, for the copied text. Null when no request says where the page lives. */
+    private @Nullable String address;
 
     public CveView(SecurityDataService data, DataRefreshSignal refresh) {
         this.data = data;
@@ -115,7 +120,16 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     public void beforeEnter(BeforeEnterEvent event) {
         LookupInput.Ids ids = LookupInput.splitIds(event.getRouteParameters().get(IDS).orElse(""));
         String version = LookupInput.cleanVersion(event.getRouteParameters().get(VERSION).orElse(""));
+        address = address(event.getLocation().getPathWithQueryParameters());
         asked.set(new Question(ids.ids(), ids.unrecognised(), version));
+    }
+
+    private static @Nullable String address(String path) {
+        if (VaadinRequest.getCurrent() instanceof VaadinServletRequest request) {
+            return ServletUriComponentsBuilder.fromContextPath(request.getHttpServletRequest()).path("/" + path)
+                    .build().toUriString();
+        }
+        return null;
     }
 
     // Loading
@@ -276,7 +290,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         })).ifPresent(actions::add);
         Optional<String> scanned = Optional.ofNullable(answer.measured()).flatMap(VersionAnswer::scannedAt)
                 .map(at -> getTranslation("version.scanned", at.toLocalDate().toString()));
-        actions.add(copyButton(one.id(), copyText(words, scanned)));
+        if (!answer.version().isBlank()) {
+            actions.add(copyButton(one.id(), copyText(words, scanned, Optional.ofNullable(address))));
+        }
         scanned.ifPresent(text -> {
             var clock = VaadinIcon.CLOCK.create();
             clock.getElement().setAttribute("aria-hidden", "true");
@@ -376,12 +392,13 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     /** The card's own words, in the order the card shows them, and nothing else. */
-    static String copyText(Words words, Optional<String> scanned) {
+    static String copyText(Words words, Optional<String> scanned, Optional<String> address) {
         var text = new StringBuilder(words.word()).append(": ").append(words.title()).append('\n');
         if (!words.why().isEmpty()) {
             text.append(String.join(" ", words.why())).append('\n');
         }
         scanned.ifPresent(line -> text.append(line).append('\n'));
+        address.ifPresent(line -> text.append(line).append('\n'));
         return text.toString().strip();
     }
 

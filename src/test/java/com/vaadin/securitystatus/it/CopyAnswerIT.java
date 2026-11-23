@@ -63,7 +63,8 @@ class CopyAnswerIT {
         permit("granted");
         driver.get(base + "cve/CVE-2026-89407/24.9.21");
         WebElement copy = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".copy-answer")));
-        assertThat(copy.getAttribute("data-answer")).isEqualTo(EXPECTED);
+        String expected = EXPECTED + "\n" + base + "cve/CVE-2026-89407/24.9.21";
+        assertThat(copy.getAttribute("data-answer")).isEqualTo(expected);
 
         copy.click();
 
@@ -71,7 +72,7 @@ class CopyAnswerIT {
                 .filter(WebElement::isDisplayed).findFirst().orElse(null));
         assertThat(notice.getText()).isEqualTo("The answer for CVE-2026-89407 is on your clipboard");
         assertThat(driver.findElements(By.cssSelector("vaadin-notification-card"))).hasSize(1);
-        assertThat(clipboard()).isEqualTo(EXPECTED);
+        assertThat(clipboard()).isEqualTo(expected);
     }
 
     @Test

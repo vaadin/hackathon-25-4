@@ -78,6 +78,8 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(title(card)).isEqualTo("CVE-2026-89407, across the versions we follow");
         assertThat(why(card)).startsWith("Enter your version above and this answers for it.");
         assertThat(find(Anchor.class, card).withClassName("verdict-action").exists()).isFalse();
+        // Nothing to copy into a ticket until there is a version to answer for, P-10.
+        assertThat(find(Button.class, card).withClassName("copy-answer").exists()).isFalse();
         assertThat(lineCards("CVE-2026-89407")).noneMatch(line -> line.hasClassName("yours"));
         // No verdict is quoted as the reader's: the four verdicts are listed with their coordinates instead.
         Section answer = answer("CVE-2026-89407");
@@ -334,9 +336,13 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
 
         Section card = card("CVE-2026-89407");
         String copied = copy(card).getElement().getAttribute("data-answer");
-        assertThat(copied).isEqualTo("Fix available: CVE-2026-89407 is fixed in 24.9.26\n"
+        assertThat(copied).startsWith("Fix available: CVE-2026-89407 is fixed in 24.9.26\n"
                 + "You are on 24.9.21, which is affected. Upgrade to 24.9.26, a maintenance release in the minor you"
-                + " already use, and you are secure.\nScanned 2026-11-15");
+                + " already use, and you are secure.\nScanned 2026-11-15\n");
+        // The last line is the address of this answer, so a ticket can come back to it, P-10.
+        String address = copied.substring(copied.lastIndexOf('\n') + 1);
+        assertThat(address).endsWith("/cve/CVE-2026-89407/24.9.21");
+        copied = copied.substring(0, copied.lastIndexOf('\n'));
         // It names the id, the verdict, the reader's version and the move.
         assertThat(copied).contains("CVE-2026-89407", "Fix available", "24.9.21", "24.9.26");
         // Every line of it is a text the card shows.
