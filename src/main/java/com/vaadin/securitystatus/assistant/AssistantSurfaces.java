@@ -70,8 +70,13 @@ class AssistantSurfaces implements AiSurfaces {
         return new VerdictFill(providers, tail, user(), form, binder, personOnly);
     }
 
+    @Override
+    public boolean offered() {
+        return providers.offered();
+    }
+
     private boolean team() {
-        return authentication.hasRole(Roles.SECURITY);
+        return authentication.hasRole(Roles.SECURITY) && providers.offered();
     }
 
     private String user() {

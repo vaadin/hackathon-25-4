@@ -18,6 +18,11 @@ import com.vaadin.flow.function.SerializableConsumer;
  */
 public interface AiSurfaces {
 
+    /** Whether the assistant is offered in this deployment; when not, every surface is an empty element. */
+    default boolean offered() {
+        return true;
+    }
+
     /** The chat panel for the drawer of the internal shell, a new one per shell. */
     Component chatPanel();
 

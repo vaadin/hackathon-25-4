@@ -60,7 +60,7 @@ class AssistantPanelBrowserlessTest {
             }
         };
         var providers = new AssistantProviders(new StaticApplicationContext().getBeanProvider(ChatModel.class),
-                false) {
+                false, false) {
             @Override
             LLMProvider create(String unrecorded) {
                 return scripted;

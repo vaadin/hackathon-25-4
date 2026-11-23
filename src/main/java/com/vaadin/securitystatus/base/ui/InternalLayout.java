@@ -90,7 +90,7 @@ public final class InternalLayout extends AppLayout {
         frame.addClassName("internal-frame");
         setContent(frame);
 
-        ai.ifAvailable(surfaces -> {
+        ai.stream().filter(AiSurfaces::offered).findFirst().ifPresent(surfaces -> {
             assistantMount.addClassName("assistant-mount");
             assistantMount.add(surfaces.chatPanel());
             var close = new Button(getTranslation("shell.assistant.close"), click -> assistantOpen.set(false));
