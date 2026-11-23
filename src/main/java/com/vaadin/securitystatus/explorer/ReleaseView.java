@@ -34,6 +34,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.base.security.Roles;
+import com.vaadin.securitystatus.base.ui.AdvisoryIds;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.DrawerContent;
 import com.vaadin.securitystatus.base.ui.InternalLayout;
@@ -430,12 +431,14 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
                 says = SeriesParts.lead("release-advice-update",
                         getTranslation("release.advice.removesNone", newest.get().toString()));
             } else {
-                String named = String.join(", ", removed.stream().limit(ReleaseRules.NAMED).toList());
+                String named = AdvisoryIds.HERE;
                 if (removed.size() > ReleaseRules.NAMED) {
                     named = getTranslation("release.advice.removes.more", named, removed.size() - ReleaseRules.NAMED);
                 }
-                says = SeriesParts.lead("release-advice-update",
-                        getTranslation("release.advice.removes", newest.get().toString(), removed.size(), named));
+                says = SeriesParts.lead("release-advice-update", "");
+                AdvisoryIds.fill(says,
+                        getTranslation("release.advice.removes", newest.get().toString(), removed.size(), named),
+                        removed.stream().limit(ReleaseRules.NAMED).toList());
             }
             says.add(new Text(" "));
             says.add(releaseLink(getTranslation("release.advice.newer", newest.get().toString()), newest.get()));

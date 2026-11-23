@@ -421,7 +421,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             parameters.put(CveView.VERSION, version);
         }
         var link = new RouterLink(advisory, CveView.class, new RouteParameters(parameters));
-        link.addClassName("scan-advisory");
+        link.addClassNames("scan-advisory", "advisory-id");
         return link;
     }
 

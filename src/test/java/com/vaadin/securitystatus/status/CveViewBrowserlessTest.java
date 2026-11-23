@@ -301,7 +301,8 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         open("cve/GHSA-rcgg-9c38-7xpx,CVE-2026-45292/24.9.21");
 
         assertThat(answers()).containsExactly("CVE-2026-45292");
-        assertThat(text(answer("CVE-2026-45292"))).contains("Your scanner may print it as GHSA-rcgg-9c38-7xpx.");
+        assertThat(find(Paragraph.class, answer("CVE-2026-45292")).withClassName("cve-record").single().getElement()
+                .getTextRecursively()).contains("Your scanner may print it as GHSA-rcgg-9c38-7xpx.");
     }
 
     @Test

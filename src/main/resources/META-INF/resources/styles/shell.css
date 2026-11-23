@@ -161,3 +161,8 @@
 .theme-switch {
   width: 7.5em;
 }
+
+/* An advisory id is read and searched whole, so it never breaks at its hyphens. */
+.advisory-id {
+  white-space: nowrap;
+}

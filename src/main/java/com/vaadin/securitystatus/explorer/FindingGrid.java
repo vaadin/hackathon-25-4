@@ -45,7 +45,7 @@ final class FindingGrid extends Grid<Finding> {
                 .setSelectRow(getTranslation("explorer.grid.selectRow"))
                 .setSelectAll(getTranslation("explorer.grid.selectAll"))
                 .setSelectAllUnavailable(getTranslation("explorer.grid.selectAllUnavailable")));
-        grid.addColumn(Finding::cve).setHeader(getTranslation("explorer.grid.advisory")).setSortable(true)
+        grid.addComponentColumn(FindingGrid::advisoryId).setHeader(getTranslation("explorer.grid.advisory")).setSortable(true)
                 .setComparator(Finding::cve).setAutoWidth(true).setFlexGrow(0);
         grid.addComponentColumn(this::severity).setHeader(getTranslation("explorer.grid.severity"))
                 .setSortable(true).setComparator(finding -> ExplorerRules.severityRank(finding.severity()))
@@ -141,5 +141,11 @@ final class FindingGrid extends Grid<Finding> {
         ring.addClassNames("product-ring", "ring-" + product.ring());
         ring.getElement().setAttribute("aria-hidden", "true");
         return ring;
+    }
+
+    private static Span advisoryId(Finding finding) {
+        var id = new Span(finding.cve());
+        id.addClassName("advisory-id");
+        return id;
     }
 }

@@ -268,7 +268,7 @@ public final class SpringView extends Composite<Div> {
         row.getElement().setAttribute("data-cve", finding.cve());
         var record = new Anchor(SpringRules.recordUrl(finding.cve()), finding.cve());
         record.setTarget(AnchorTarget.BLANK);
-        record.addClassName("spring-finding-record");
+        record.addClassNames("spring-finding-record", "advisory-id");
         row.add(record);
         finding.severity().ifPresent(word -> {
             var severity = new Span(getTranslation("severity." + word));

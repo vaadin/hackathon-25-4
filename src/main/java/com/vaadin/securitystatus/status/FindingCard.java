@@ -87,7 +87,7 @@ final class FindingCard extends Composite<Div> {
         var link = new RouterLink(advisory, CveView.class,
                 new RouteParameters(java.util.Map.of(CveView.IDS, advisory, CveView.VERSION,
                         answer.version().toString())));
-        link.addClassName("finding-id");
+        link.addClassNames("finding-id", "advisory-id");
         return link;
     }
 

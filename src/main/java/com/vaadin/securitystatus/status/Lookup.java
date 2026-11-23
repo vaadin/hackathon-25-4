@@ -180,14 +180,14 @@ public final class Lookup extends Composite<Div> {
         // Free text, so a version nobody measured can still be asked. That rules
         // out PartialMatchMode, which the component refuses beside custom values.
         version.setAllowCustomValue(true);
-        version.bindValue(state.version().map(text -> text.isEmpty() ? null : text),
-                value -> state.version().set(value == null ? "" : value));
-
+        // Items first: a combo box refuses a value, even a remembered one, before it has items.
         var generatedAt = refresh.generatedAt();
         Signal.effect(version, () -> {
             generatedAt.get();
             offerMeasuredVersions();
         });
+        version.bindValue(state.version().map(text -> text.isEmpty() ? null : text),
+                value -> state.version().set(value == null ? "" : value));
 
         // The text being typed is not a value until it is committed, and the
         // component does not say what it is. Asked of the element, so the Check

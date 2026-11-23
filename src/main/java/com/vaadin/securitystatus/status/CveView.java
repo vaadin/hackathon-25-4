@@ -42,6 +42,7 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.securitystatus.base.ui.AdvisoryIds;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.base.ui.ViewHeading;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -632,10 +633,13 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 getTranslation("cve.evidence.record", advisory.cve())), new Text("."));
         record.addClassName("cve-record");
         if (!advisory.aliases().isEmpty()) {
-            record.add(new Span(" " + getTranslation("cve.evidence.aliases", String.join(", ", advisory.aliases()))));
+            var aliases = new Span();
+            AdvisoryIds.fill(aliases, " " + getTranslation("cve.evidence.aliases", AdvisoryIds.HERE), advisory.aliases());
+            record.add(aliases);
         }
         if (one.askedAs() != null) {
-            var alias = new Span(" " + getTranslation("cve.evidence.askedAs", one.askedAs()));
+            var alias = new Span();
+            AdvisoryIds.fill(alias, " " + getTranslation("cve.evidence.askedAs", AdvisoryIds.HERE), List.of(one.askedAs()));
             alias.addClassName("asked-as");
             record.add(alias);
         }
