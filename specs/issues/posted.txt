@@ -15,3 +15,5 @@
 03b-comment-on-flow-25576.md -> https://github.com/vaadin/flow/issues/25576#issuecomment-7094873357
 07b-comment-on-flow-26391.md -> https://github.com/vaadin/flow/issues/26391#issuecomment-7094873718
 24-sdd-starter-architecture.md -> https://github.com/vaadin/spec-driven-development-demo/issues/39
+25-effect-unlocked-request-end.md -> https://github.com/vaadin/flow/issues/27187
+26-combo-box-bind-value-before-items.md -> https://github.com/vaadin/flow-components/issues/10779
