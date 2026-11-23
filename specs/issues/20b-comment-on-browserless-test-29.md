@@ -22,3 +22,5 @@ Span "Details of Ada" found by a query: 1
 `clickRow` does what the browser does with the grid's own click behaviour: toggles the row's details when `isDetailsVisibleOnClick()` is true, as `select` already follows the selection mode.
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1, and the same on 25.3.5.
+
+The project: [`20-grid-item-details-tester.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/20-grid-item-details-tester.zip), 4 KB, sources only, `mvn test`. It prints the three lines above.

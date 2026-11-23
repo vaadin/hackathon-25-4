@@ -43,3 +43,13 @@ RESULT setDisableOnClick(UNTIL_RESPONSE), then setEnabled(false): accepted
 ```
 
 Found on 25.4.0-beta2.
+
+### Getting the project
+
+[`13-bind-enabled-until-response.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/13-bind-enabled-until-response.zip), 3 KB, sources only. Unzip it and:
+
+```
+mvn test
+```
+
+It prints the three lines above.

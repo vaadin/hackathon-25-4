@@ -41,3 +41,13 @@ setDynamicContentProvider: java.lang.NullPointerException: Cannot invoke "tools.
 A reproduction is the second line; a fix prints `setDynamicContentProvider: [Email Ada]`.
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1. `requestMenu` on the main branch of browserless-test is unchanged.
+
+### Getting the project
+
+[`18-grid-context-menu-provider-tester.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/18-grid-context-menu-provider-tester.zip), 4 KB, sources only. Unzip it and:
+
+```
+mvn test
+```
+
+It prints the two lines above.

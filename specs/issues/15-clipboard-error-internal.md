@@ -48,3 +48,13 @@ ClipboardBinding.writeText(String, onCopied, onError): onError accepts com.vaadi
 ```
 
 Found on 25.4.0-beta2, and the same on 25.3.5.
+
+### Getting the project
+
+[`15-clipboard-error-internal.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/15-clipboard-error-internal.zip), 3 KB, sources only. Unzip it and:
+
+```
+mvn test
+```
+
+It prints the line above; `-Dvaadin.version=25.3.5` prints the same.

@@ -31,3 +31,5 @@ Two routes, the same page with the two registrations. Click Note and type `a/b`,
 | `/filtered`, listener with a declared filter | `a/b` | Note | focuses Search |
 
 Each route is a page with a Search field and a Note field, and the registration shown for it. The second one is the snippet above.
+
+The project: [`12-shortcut-while-typing.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/12-shortcut-while-typing.zip), 4 KB, sources only, `mvn spring-boot:run`. It listens on 8112, with the two routes `/` and `/filtered`.

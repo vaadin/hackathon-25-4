@@ -32,3 +32,13 @@ public methods of the exception beyond Throwable: []
 ```
 
 Found on 25.4.0-beta2. The sentence is the same on 25.3.5; the exception is new in 25.4.
+
+### Getting the project
+
+[`21-ai-surfaces.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/21-ai-surfaces.zip), 5 KB, sources only. Unzip it and:
+
+```
+mvn test -Dtest=FailureTextTest
+```
+
+It prints the four lines above, with no licence and no key.

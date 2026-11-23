@@ -78,3 +78,13 @@ Three seconds of waiting on `/?by=other` before pressing the button change nothi
 Note the second column of the first row as well: on the request thread `peek()` still returns the old value after the thread that called `set` has finished.
 
 Found on 25.4.0-beta2 and 25.3.5.
+
+### Getting the project
+
+[`11-signal-changed-before-attach.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/11-signal-changed-before-attach.zip), 3 KB, sources only. Unzip it and:
+
+```
+mvn spring-boot:run
+```
+
+It listens on 8111: <http://localhost:8111/?by=other> and <http://localhost:8111/?by=same>.

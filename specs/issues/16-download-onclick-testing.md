@@ -44,3 +44,13 @@ Button attributes: [id=button, data-flow-download-dfc235e2-2cbc-4618-a540-15b362
 and failed with `the file Download.onClick serves cannot be fetched from a test`.
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1.
+
+### Getting the project
+
+[`16-download-onclick-testing.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/16-download-onclick-testing.zip), 4 KB, sources only. Unzip it and:
+
+```
+mvn test
+```
+
+It prints the three lines above.

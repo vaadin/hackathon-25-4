@@ -39,3 +39,13 @@ new Location("version/24.9.21?boot=1&ruled=1&disc=1&open=x").getPathWithQueryPar
 25.3.5 and 24.9.26 print the same three lines.
 
 Found on 25.4.0-beta2, and the same on 25.3.5 and 24.9.26.
+
+### Getting the project
+
+[`14-query-parameters-order.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/14-query-parameters-order.zip), 3 KB, sources only. Unzip it and:
+
+```
+mvn test
+```
+
+It prints the three lines above; `-Dvaadin.version=25.3.5` or `24.9.26` prints the same.

@@ -59,3 +59,13 @@ public class HomeView extends Div {
 The same project was run on each version in the table, changing only the Vaadin and Spring Boot versions.
 
 Found on 25.4.0-beta2.
+
+### Getting the project
+
+[`10-security-headers.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/10-security-headers.zip), 3 KB, sources only. Unzip it and:
+
+```
+mvn spring-boot:run
+```
+
+It listens on 8110, so use that port in the two `curl` commands. To compare versions, change `vaadin.version` and the Spring Boot parent in the `pom.xml`.

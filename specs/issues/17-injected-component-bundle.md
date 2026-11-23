@@ -51,3 +51,13 @@ The project is the three classes above plus one `@JsModule` of its own on the ap
 In the application where it was found, opening the page in the production build logged, for each component the bean builds, `The component class com.vaadin.flow.component.combobox.ComboBox includes '@vaadin/combo-box/src/vaadin-combo-box.js' but this file was not included when creating the production bundle`, and the page drew none of them.
 
 Found on 25.4.0-beta2.
+
+### Getting the project
+
+[`17-injected-component-bundle.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/17-injected-component-bundle.zip), 4 KB, sources only. Unzip it and:
+
+```
+mvn -Pproduction package -DskipTests
+```
+
+Then read `target/classes/META-INF/VAADIN/config/stats.json` as in step 2.
