@@ -60,7 +60,7 @@ class CspIT {
     @Test
     void every_response_carries_the_enforcing_header() {
         driver.get(base + "/");
-        await("vaadin-switch");
+        await("vaadin-select.theme-switch");
 
         for (String path : List.of("/", "/login", "/styles.css", "/nothing-here")) {
             assertThat(header(path, "content-security-policy")).as(path).contains("default-src 'self'")
@@ -89,7 +89,7 @@ class CspIT {
     @Test
     void the_application_boots_signs_in_and_navigates_without_a_violation() {
         driver.get(base + "/");
-        await("vaadin-switch");
+        await("vaadin-select.theme-switch");
         assertThat(violations()).isEmpty();
 
         driver.get(base + "/findings");
@@ -108,14 +108,14 @@ class CspIT {
 
         driver.findElement(By.cssSelector(".sign-out")).click();
         new WebDriverWait(driver, Duration.ofSeconds(20)).until(d -> !d.getCurrentUrl().contains("/findings"));
-        await("vaadin-switch");
+        await("vaadin-select.theme-switch");
         assertThat(violations()).isEmpty();
     }
 
     @Test
     void a_script_from_another_origin_is_blocked() {
         driver.get(base + "/");
-        await("vaadin-switch");
+        await("vaadin-select.theme-switch");
         assertThat(violations()).isEmpty();
 
         driver.executeScript("""
@@ -137,7 +137,7 @@ class CspIT {
     @Test
     void forms_go_to_the_application_and_github_only() {
         driver.get(base + "/");
-        await("vaadin-switch");
+        await("vaadin-select.theme-switch");
 
         assertThat(header("/", "content-security-policy")).contains("form-action 'self' https://github.com;");
 

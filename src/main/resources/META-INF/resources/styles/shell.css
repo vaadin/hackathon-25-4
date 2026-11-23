@@ -157,3 +157,7 @@
     line-height: 1.2;
     font-weight: var(--aura-font-weight-semibold, 600);
 }
+
+.theme-switch {
+  width: 7.5em;
+}

@@ -26,5 +26,6 @@ public class Application implements AppShellConfigurator {
     public void configurePage(AppShellSettings settings) {
         settings.addInlineWithContents(Inline.Position.PREPEND, ThemeMemory.FIRST_PAINT_SCRIPT,
                 Inline.Wrapping.JAVASCRIPT);
+        settings.addFavIcon("icon", "icons/favicon.svg", "any");
     }
 }

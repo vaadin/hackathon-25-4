@@ -6,9 +6,9 @@ Aura, as the walking skeleton ships it, with design tokens over component CSS. T
 
 ## Light and dark
 
-- A Switch in the app bar, both halves of the application.
+- A select in the app bar, both halves of the application, with three choices: System, Light, Dark. System is the default and the way back: choosing it forgets the remembered choice. Decided by Manolo on 2026-11-23, P-02, replacing the Switch, which was 22 pixels tall and had no way back to the system.
 - The default follows the system. A reader who disagrees with their system can say so, and the choice is remembered through the typed `WebStorage` accessors, because a preference query cannot be argued with: that is rule 6.8.6 of the source spec.
-- The choice applies before the first paint, or the page paints light and repaints dark, which is worse than no switch: rule 6.9.1.
+- The choice applies before the first paint, or the page paints light and repaints dark, which is worse than no choice at all: rule 6.9.1.
 
 ## The vocabulary of color
 

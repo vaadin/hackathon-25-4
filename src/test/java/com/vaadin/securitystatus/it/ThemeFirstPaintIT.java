@@ -65,16 +65,16 @@ class ThemeFirstPaintIT {
         awaitSwitch();
 
         assertThat(frames()).isNotEmpty().allMatch(this::isLightText);
-        assertThat(switchedOn()).isTrue();
+        assertThat(chosen()).isEqualTo("System");
     }
 
     @Test
-    void the_switch_overrides_the_system_and_survives_a_reload() {
+    void a_choice_overrides_the_system_survives_a_reload_and_system_forgets_it() {
         driver.get(home);
         awaitSwitch();
         assertThat(frames()).allMatch(this::isLightText);
 
-        driver.findElement(By.cssSelector("vaadin-switch input")).click();
+        choose("Light");
         new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(d -> "light"
                         .equals(driver.executeScript("return localStorage.getItem(arguments[0])", ThemeMemory.KEY)));
@@ -84,18 +84,34 @@ class ThemeFirstPaintIT {
         awaitSwitch();
 
         assertThat(frames()).isNotEmpty().noneMatch(this::isLightText);
-        assertThat(switchedOn()).isFalse();
+        assertThat(chosen()).isEqualTo("Light");
+
+        choose("System");
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> driver.executeScript("return localStorage.getItem(arguments[0])", ThemeMemory.KEY) == null);
+        assertThat(isLightText(currentColor())).isTrue();
+    }
+
+    private void choose(String label) {
+        driver.findElement(By.cssSelector("vaadin-select.theme-switch")).click();
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> d.findElements(By.cssSelector("vaadin-select-item"))
+                .stream().filter(item -> label.equals(item.getText().trim())).findFirst().map(item -> {
+                    item.click();
+                    return true;
+                }).orElse(false));
     }
 
     private void awaitSwitch() {
         new WebDriverWait(driver, Duration.ofSeconds(30))
-                .until(d -> !d.findElements(By.cssSelector("vaadin-switch input")).isEmpty());
-        // The switch learns its position from the browser one round trip after it is attached.
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> isLightText(currentColor()) == switchedOn());
+                .until(d -> !d.findElements(By.cssSelector("vaadin-select.theme-switch")).isEmpty());
+        // The select learns the remembered choice from the browser one round trip after it is attached.
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> !chosen().isEmpty());
     }
 
-    private boolean switchedOn() {
-        return (Boolean) driver.executeScript("return document.querySelector('vaadin-switch').checked");
+    private String chosen() {
+        Object label = driver.executeScript(
+                "return document.querySelector('vaadin-select.theme-switch [slot=value]')?.innerText ?? ''");
+        return String.valueOf(label).trim();
     }
 
     private String currentColor() {
