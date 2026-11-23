@@ -304,6 +304,10 @@
 
 .section-link {
     font-weight: var(--aura-font-weight-semibold, 600);
+    /* A 24 pixel target, WCAG 2.5.8, without moving the text around it. */
+    display: inline-block;
+    padding-block: 4px;
+    margin-block: -4px;
 }
 
 /* The tables */
