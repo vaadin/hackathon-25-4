@@ -10,3 +10,4 @@
 20b-comment-on-browserless-test-29.md -> https://github.com/vaadin/browserless-test/issues/29#issuecomment-7094696694
 21-grid-ai-typed-grid.md -> https://github.com/vaadin/flow-components/issues/10753
 22-ai-failure-text.md -> https://github.com/vaadin/flow-components/issues/10754
+23b-comment-on-flow-26338.md -> https://github.com/vaadin/flow/issues/26338#issuecomment-7094821340
