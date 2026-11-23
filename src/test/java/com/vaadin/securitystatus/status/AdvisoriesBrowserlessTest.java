@@ -25,7 +25,6 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -194,7 +193,7 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         var menu = openMenu(view, 0);
 
         assertThat(itemTexts(view)).containsExactly("Copy CVE-2016-1000027", "Open the record at www.cve.org",
-                "Ask about CVE-2016-1000027 on my version");
+                "Ask about CVE-2016-1000027");
         Anchor record = $(Anchor.class, view.menu()).single();
         assertThat(record.getHref()).isEqualTo("https://www.cve.org/CVERecord?id=CVE-2016-1000027");
         assertThat(record.getTarget()).contains("_blank");
@@ -204,7 +203,7 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         int ghsa = indexOf(view.grid(), "GHSA-gr4j-r575-g665");
         openMenu(view, ghsa);
         assertThat(itemTexts(view)).containsExactly("Copy GHSA-gr4j-r575-g665",
-                "Open the record at github.com", "Ask about GHSA-gr4j-r575-g665 on my version");
+                "Open the record at github.com", "Ask about GHSA-gr4j-r575-g665");
         assertThat($(Anchor.class, view.menu()).single().getHref())
                 .isEqualTo("https://github.com/advisories/GHSA-gr4j-r575-g665");
     }
@@ -221,22 +220,25 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         assertThat(copy.getElement().getAttribute("data-answer")).isEqualTo("CVE-2021-26291");
     }
 
-    // Ask about this on my version: the id goes to the lookup with the version already given
+    // Ask about it, P-14: with no version given, the answer for the id across the lines we follow
     @Test
-    void ask_carries_the_id_and_the_known_version_to_the_lookup() {
-        LookupState lookup = lookups.getObject();
-        lookup.version().set("24.9.21");
+    void ask_opens_the_answer_for_the_id() {
         var view = navigate(AdvisoriesView.class);
-        var menu = openMenu(view, 0);
+        openMenu(view, 0).clickItem("Ask about CVE-2016-1000027");
 
-        menu.clickItem("Ask about CVE-2016-1000027 on my version");
+        assertThat(getCurrentView()).isInstanceOf(CveView.class);
+        assertThat(currentLocation()).isEqualTo("cve/CVE-2016-1000027");
+    }
 
-        assertThat(lookup.ids().peek()).isEqualTo("CVE-2016-1000027");
-        assertThat(lookup.idsVersion().peek()).isEqualTo("24.9.21");
-        assertThat(lookup.tab().peek()).isEqualTo(LookupState.Tab.IDS);
-        assertThat(getCurrentView()).isInstanceOf(AdvisoriesView.class);
-        TextField version = $(TextField.class).withClassName("lookup-ids-version").single();
-        assertThat(version.getValue()).isEqualTo("24.9.21");
+    // Ask about it on my version, P-14: the version the reader already gave goes with it
+    @Test
+    void ask_on_my_version_opens_the_answer_for_the_known_version() {
+        lookups.getObject().version().set("24.9.21");
+        var view = navigate(AdvisoriesView.class);
+        openMenu(view, 0).clickItem("Ask about CVE-2016-1000027 on my version");
+
+        assertThat(getCurrentView()).isInstanceOf(CveView.class);
+        assertThat(currentLocation()).isEqualTo("cve/CVE-2016-1000027/24.9.21");
     }
 
     // Helpers

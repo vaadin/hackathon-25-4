@@ -121,6 +121,20 @@ class LookupBrowserlessTest extends SpringBrowserlessTest {
         assertThat(check().isEnabled()).isTrue();
     }
 
+    // P-14: a tab chosen under an answer starts a new question from the home page
+    @Test
+    void choosing_a_tab_under_an_answer_returns_to_the_home_page_and_keeps_the_question() {
+        navigate("version/24.9.21", VersionView.class);
+
+        test(tabs()).select(1);
+
+        assertThat(getCurrentView()).isInstanceOf(HomeView.class);
+        assertThat(test(tabs()).isSelected(1)).isTrue();
+        test(tabs()).select(0);
+        assertThat(getCurrentView()).isInstanceOf(HomeView.class);
+        assertThat(versionField().getValue()).isEqualTo("24.9.21");
+    }
+
     // HOM-05, AC1
     @Test
     void the_ids_survive_tab_switches_and_an_answer_and_back() {

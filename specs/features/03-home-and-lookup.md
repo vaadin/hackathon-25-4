@@ -17,7 +17,7 @@ The layout follows the prototype, compared past its gate on 2026-11-22 in `specs
 
 ### The lookup
 
-- One component, three tabs: By version, By CVE, Upload scanner report. Mounted once in the customer shell's column, state in the session scoped `LookupState` signals, so switching tabs or navigating never loses what was typed. A tab change shows the tab's fields and does not navigate, where the prototype navigates, D-165.
+- One component, three tabs: By version, By CVE, Upload scanner report. Mounted once in the customer shell's column, state in the session scoped `LookupState` signals, so switching tabs or navigating never loses what was typed. A tab change shows the tab's fields; under an answer it also returns to the home page, so a new question never sits on top of the last answer, as the prototype does. Decided by Manolo on 2026-11-23, P-14, D-230, superseding D-39 and D-165.
 - The prototype's tip under the fields, which promises project linking and change notices, is not shown: this application has neither, D-166.
 - The version field cleans its input: `V24.9.20`, `Vaadin 24.9.20` and `24.9.20` are the same question. Its placeholder shows the newest measured head as an example, written fainter than any real value, and is never prefilled, rule 6.8.4 of the source spec.
 - The version field is a ComboBox over the measured versions that takes free text, so typing `24.9` offers the releases of that line through the ordinary filter, and a version we never measured can still be submitted, because the not measured answer belongs to the version screen, not to the field. The prototype's field is a plain search field; the list of measured versions is an app extra. The requirement for `PartialMatchMode` is removed, D-173.
@@ -106,5 +106,5 @@ Written from the code at the close of the prototype alignment, after D-228. Each
 - The action line puts Upgrade to X first, then On X or later, then Newest is X, `HomeView.actionLine`, D-46. The prototype did not settle the order: no card on the day of the comparison carried an upgrade.
 - A recent row with no impact shows the first sentence of `commentary` instead, `HomeView.firstSentence`; a recent row with no applicability gets the `in_triage` chip, which the glossary defines as the absence of a verdict, `HomeView.recentRow`.
 - The pointer box keeps the designer's words, which send the reader to the version field, and does not point at the report tab, D-47, confirmed by the prototype, D-168.
-- Tab changes do not navigate, unlike the prototype, D-165. The prototype's lookup tip and Enterprise chip are not drawn, D-166 and the data need row.
+- A tab change under an answer returns to the home page, D-230. The prototype's lookup tip and Enterprise chip are not drawn, D-166 and the data need row.
 - Workaround to remove when draft 17 is answered: `@Uses(Lookup.class)` on `HomeView` so that the production bundle includes the lookup, D-79.

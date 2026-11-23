@@ -15,7 +15,7 @@ Laid out as the live prototype lays it out, compared in `specs/reviews/prototype
 - A Grid over `index.advisories`, sorted worst severity first, then oldest, then id, the source ordering rule 6.4.22. With no published date the oldest step is not applied, D-81, as in the prototype.
 - Columns: id, severity, owner chip, every package whole and one to a line, the verdict in customer words, the risk one in the error badge, and a chevron ending the row, D-194. No impact column, D-82: the prototype has none either.
 - A row navigates to `/cve/<id>`.
-- A context menu per row through `GridContextMenu` with dynamic content: copy the id, open the record at cve.org or GitHub, ask about this on my version, which jumps to the lookup with the id carried. Dynamic because the record link depends on the row. Not in the prototype, kept, D-193.
+- A context menu per row through `GridContextMenu` with dynamic content: copy the id, open the record at cve.org or GitHub, and "Ask about <id>", which opens the answer for the id, or "Ask about <id> on my version" when the reader already gave a version, which opens the answer on it, P-14, D-230. Dynamic because the record link depends on the row. Not in the prototype, kept, D-193.
 - The Grid AI controller attaches here for signed in `SECURITY` sessions only, between the pills and the total line, and the ask box simply does not exist for anyone else: the view asks the security context once at build time. The attachment itself is epic 11's work, AST-05, because it needs the provider plumbing; this epic ships the grid AI ready and unaware.
 
 ### Cases
@@ -64,7 +64,7 @@ Written from the code at the close of the prototype alignment, 2026-11-22. Each 
 - AC1: the list is ordered by severity, then by id; the oldest first step is not applied because the index carries no published date, `AdvisoryRules.ordered`, D-81, D-92. The same gap keeps US-7.1's first task, the grid in the source order, from being true.
 - No one line impact column: `index.advisories` carries no impact text, `AdvisoriesView.configureGrid`, D-82, and the prototype shows none either, D-193.
 - No search over the catalogue for a customer: the prototype has none either, so none was added, P-14.
-- The context menu is announced by nothing on the screen; the prototype has no menu, so there is no wording to transcribe, and it stays as an app extra, D-193, P-14.
+- The context menu is announced by nothing on the screen, and stays so: Manolo's call on 2026-11-23, P-14. The prototype has no menu, it is an app extra, D-193.
 - An unknown `?verdict` is ignored and everything shown, where the prototype shows an empty list, D-84, D-193.
 - Why an impossible case cannot be drawn is not published, only its `needs`, and for one case of five: a data need row in `FEEDBACK-25.4.md`, D-195.
 - A case whose fact the index does not carry is checked only for its example's existence, so it can stay renderable after the data stops exhibiting it, `CaseRules.exhibits`, D-88.

@@ -332,29 +332,22 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         record.getElement().setAttribute("rel", "noopener");
         menu.addItem(record).addClassName("menu-record");
 
-        menu.addItem(getTranslation("advisories.menu.ask", id), click -> ask(id)).addClassName("menu-ask");
+        String version = knownVersion();
+        menu.addItem(version.isEmpty() ? getTranslation("advisories.menu.ask", id)
+                : getTranslation("advisories.menu.askOnVersion", id), click -> ask(id, version))
+                .addClassName("menu-ask");
     }
 
-    /**
-     * Carries the id to the lookup's advisory tab, with the version the reader
-     * already gave, and puts the caret where the question is finished.
-     */
-    private void ask(String id) {
-        lookup.ids().set(id);
-        if (lookup.idsVersion().peek().isBlank()) {
-            String known = LookupInput.cleanVersion(lookup.version().peek());
-            if (!known.isEmpty()) {
-                lookup.idsVersion().set(known);
-            }
-        }
-        lookup.tab().set(LookupState.Tab.IDS);
-        UI.getCurrent().getChildren().flatMap(AdvisoriesView::lookups).findFirst().ifPresent(Lookup::focusIdsVersion);
+    /** The version the reader already gave the lookup, beside ids or on its own, or nothing. */
+    private String knownVersion() {
+        String beside = LookupInput.cleanVersion(lookup.idsVersion().peek());
+        return beside.isEmpty() ? LookupInput.cleanVersion(lookup.version().peek()) : beside;
     }
 
-    private static java.util.stream.Stream<Lookup> lookups(Component component) {
-        if (component instanceof Lookup found) {
-            return java.util.stream.Stream.of(found);
-        }
-        return component.getChildren().flatMap(AdvisoriesView::lookups);
+    /** Opens the answer for the id, on the reader's version when there is one. */
+    private void ask(String id, String version) {
+        UI.getCurrent().navigate(CveView.class, version.isEmpty()
+                ? new RouteParameters(CveView.IDS, id)
+                : new RouteParameters(Map.of(CveView.IDS, id, CveView.VERSION, version)));
     }
 }

@@ -117,6 +117,8 @@ public final class Lookup extends Composite<Div> {
     private final ValueSignal<String> typed = new ValueSignal<>("");
     /** What the last Check could not use, said in place. */
     private final ValueSignal<String> note = new ValueSignal<>("");
+    /** Whether an answer, and not the home page, is under the lookup. */
+    private boolean answering;
 
     Lookup(LookupState state, SecurityDataService data, DataRefreshSignal refresh, ScanState scan) {
         this.state = state;
@@ -447,6 +449,10 @@ public final class Lookup extends Composite<Div> {
         // clicks once the field is shown again.
         version.setOpened(false);
         state.tab().set(which);
+        // A new question starts from the home page, not under the answer to the last one.
+        if (answering) {
+            UI.getCurrent().navigate(HomeView.class);
+        }
     }
 
     private void submit() {
@@ -533,14 +539,6 @@ public final class Lookup extends Composite<Div> {
         }
     }
 
-    /**
-     * Asked by the advisories list after it carried an id here: the version
-     * beside the ids is what is left to give, or to confirm with Check.
-     */
-    void focusIdsVersion() {
-        idsVersion.focus();
-    }
-
     /** The field of the tab on show, from anywhere on the page. */
     private void focusQuestion() {
         switch (state.tab().peek()) {
@@ -562,6 +560,7 @@ public final class Lookup extends Composite<Div> {
         }
         var parameters = navigation.getRouteParameters();
         var target = chain.get(0);
+        answering = !(target instanceof HomeView);
         scanVersion.set(target instanceof ScanView ? parameters.get(ScanView.VERSION).orElse("") : "");
         if (target instanceof VersionView) {
             parameters.get(VersionView.VERSION).ifPresent(asked -> {
