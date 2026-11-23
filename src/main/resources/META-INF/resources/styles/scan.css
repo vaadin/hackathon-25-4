@@ -203,3 +203,8 @@
 .scan-table :is(th, td) {
     overflow-wrap: normal;
 }
+
+/* The first column does not touch the table's edge or its header band. */
+.scan-table :is(th, td):first-child {
+    padding-inline-start: 0.75rem;
+}

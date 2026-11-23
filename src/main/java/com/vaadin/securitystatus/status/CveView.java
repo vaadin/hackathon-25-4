@@ -228,6 +228,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private Component oneAnswer(CasesIndex index, Answer answer, One one, boolean several) {
         var section = new Section();
         section.addClassName("cve-answer");
+        if (several) {
+            section.addClassName("framed");
+        }
         section.getElement().setAttribute("data-advisory", one.id());
         CveAnswer advisory = one.advisory();
         VersionAnswer measured = answer.measured();
@@ -250,7 +253,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         var details = new Div(heading(several ? getTranslation("cve.details.for", one.id())
                 : getTranslation("cve.details.title"), null));
         details.addClassName("cve-details");
-        details.add(layers(index, answer, one, advisory, said));
+        details.add(layers(index, answer, one, advisory, said, several));
         section.add(details);
         return section;
     }
@@ -540,7 +543,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     // The three layers
 
-    private Component layers(CasesIndex index, Answer answer, One one, CveAnswer advisory, List<CveRules.Said> said) {
+    private Component layers(CasesIndex index, Answer answer, One one, CveAnswer advisory, List<CveRules.Said> said,
+            boolean several) {
         var layers = new Div();
         layers.addClassName("finding-layers");
         VersionAnswer measured = answer.measured();
@@ -562,7 +566,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         CveRules.applicability(advisory, measured).flatMap(word -> AdvisoryRules.label(index, word, this::getTranslation))
                 .ifPresent(label -> means.add(pair(getTranslation("version.layer.assessment"), new Paragraph(label))));
         source(index, advisory).ifPresent(text -> means.add(pair(getTranslation("cve.layer.source"), new Paragraph(text))));
-        layer(layers, "means", getTranslation("version.layer.means"), means, true);
+        // Shut when several advisories share the page, so each one reads as its card first, D-242.
+        layer(layers, "means", getTranslation("version.layer.means"), means, !several);
 
         // 2. Affected modules and the fix
         var modules = pairs();

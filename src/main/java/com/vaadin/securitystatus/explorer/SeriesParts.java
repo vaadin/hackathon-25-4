@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
@@ -70,14 +71,14 @@ final class SeriesParts {
     /** "Vaadin: <state>" with what the state means on hover. */
     Badge vaadinBadge(ExplorerRules.Badge state) {
         var vaadin = badge("vaadin", state, t("explorer.badge.vaadin", t("explorer.state." + state.name())));
-        vaadin.getElement().setAttribute("title", t("explorer.state." + state.name() + ".means"));
+        Tooltip.forComponent(vaadin).setText(t("explorer.state." + state.name() + ".means"));
         return vaadin;
     }
 
     /** "Spring Boot: <state>", the Spring Boot it was measured against said on hover. */
     Badge springBadge(ExplorerRules.Badge state, String title) {
         var spring = badge("spring", state, t("explorer.badge.spring", t("explorer.state." + state.name())));
-        spring.getElement().setAttribute("title", title);
+        Tooltip.forComponent(spring).setText(title);
         return spring;
     }
 
@@ -116,10 +117,10 @@ final class SeriesParts {
             ring.addClassName("explorer-ring");
             if (count > 0) {
                 ring.addClassNames("product-ring", "ring-" + product.ring());
-                ring.getElement().setAttribute("title", t("explorer.ring.some", count, product.name()));
+                Tooltip.forComponent(ring).setText(t("explorer.ring.some", count, product.name()));
             } else {
                 ring.addClassName("none");
-                ring.getElement().setAttribute("title", t("explorer.ring.none", product.name()));
+                Tooltip.forComponent(ring).setText(t("explorer.ring.none", product.name()));
             }
             ring.getElement().setAttribute("data-product", product.name());
             rings.add(ring);
@@ -200,7 +201,7 @@ final class SeriesParts {
     private Component halfTitle(String key) {
         var title = new Paragraph(t(key));
         title.addClassName("explorer-half-title");
-        title.getElement().setAttribute("title", t(key + ".title"));
+        Tooltip.forComponent(title).setText(t(key + ".title"));
         return title;
     }
 
@@ -224,7 +225,7 @@ final class SeriesParts {
         var label = new Span(heading);
         label.addClassName("explorer-group-label");
         if (title != null) {
-            label.getElement().setAttribute("title", title);
+            Tooltip.forComponent(label).setText(title);
         }
         var details = new Details(label);
         details.addClassNames("explorer-group", "group-" + key.toLowerCase(Locale.ROOT));

@@ -6,6 +6,7 @@ import java.util.Set;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.securitystatus.base.ui.Downloads;
 import com.vaadin.securitystatus.data.ExportKind;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -47,7 +48,7 @@ final class ReleaseFiles extends Composite<Div> {
                             file -> new Downloads.Content(file.body(), file.contentType(), file.length())));
             link.addClassName("release-file");
             if (tooling) {
-                link.getElement().setAttribute("title", getTranslation("explorer.file." + kind.name() + ".title"));
+                Tooltip.forComponent(link).setText(getTranslation("explorer.file." + kind.name() + ".title"));
             }
             row.add(link);
         }

@@ -15,6 +15,7 @@ import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.NavigationState;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -63,7 +64,7 @@ public final class AppBar extends Composite<Header> {
         var measured = new Badge(generatedAt.map(
                 at -> at == null ? "" : getTranslation("shell.measured", MEASURED_DATE.format(at))));
         measured.addClassName("measured-chip");
-        measured.getElement().setAttribute("title", getTranslation("shell.measured.title"));
+        Tooltip.forComponent(measured).setText(getTranslation("shell.measured.title"));
         measured.bindVisible(generatedAt.map(Objects::nonNull));
 
         getContent().add(breadcrumbs, measured, new ThemeSwitch());

@@ -41,6 +41,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
 import com.vaadin.securitystatus.workbench.QueueRules.Row;
+import com.vaadin.flow.component.shared.Tooltip;
 
 /**
  * WRK-01, WRK-02, WRK-03 and WRK-06: the queue in the fixture's order with its
@@ -90,7 +91,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
                 .orElseThrow();
         assertThat(link.getHref()).isEqualTo("findings/workbench?series=24.9");
         assertThat(link.getText()).isEqualTo("24.9 0");
-        assertThat(link.getElement().getAttribute("title")).isEqualTo("0 advisories to judge on 24.9");
+        assertThat(Tooltip.forComponent(link).getText()).isEqualTo("0 advisories to judge on 24.9");
 
         view = navigate("findings/workbench?series=24.9", WorkbenchView.class);
 

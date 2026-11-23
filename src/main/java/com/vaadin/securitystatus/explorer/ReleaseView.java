@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -268,7 +269,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         record.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
             var scanned = new Span(getTranslation("explorer.row.scannedOn", day.toString()));
             scanned.addClassNames("explorer-row-scanned", "release-card-scanned");
-            scanned.getElement().setAttribute("title", getTranslation("explorer.row.scanned.title"));
+            Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
             summary.add(scanned);
         });
         summary.add(parts.vaadinBadge(state));
@@ -396,7 +397,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             number.addClassName("none");
         }
         chip.add(number);
-        chip.getElement().setAttribute("title", stillStarter
+        Tooltip.forComponent(chip).setText(stillStarter
                 ? getTranslation("release.chip.starter", version.toString())
                 : chipTitle(product, isOn, cannot));
         return chip;

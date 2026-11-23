@@ -87,8 +87,8 @@
     }
 }
 
-/* The internal shell, D-203: the H1 and the destinations in the bar after the toggle, the
-   route and the assistant side by side under it. */
+/* The internal shell, D-237: the H1 in the bar after the toggle, the route and the assistant
+   side by side under it. */
 .internal-shell > [slot="navbar"].view-heading,
 .internal-shell .view-heading {
     font-size: 1.125rem;
@@ -99,27 +99,18 @@
     display: none;
 }
 
-.internal-nav {
+/* The destinations at the top of the left panel, D-237; the route's own panel under them. */
+.internal-drawer {
     display: flex;
-    align-items: center;
-    gap: 0.25rem 1rem;
-    margin-inline-start: 1.25rem;
-    font-size: 0.875rem;
-    flex-wrap: wrap;
-    white-space: nowrap;
+    flex-direction: column;
 }
 
-.internal-nav-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    color: var(--vaadin-text-color-secondary, inherit);
-    text-decoration: none;
+.internal-nav {
+    padding: 0.5rem;
 }
 
-.internal-nav-link[highlight] {
-    color: var(--vaadin-text-color, inherit);
-    font-weight: var(--aura-font-weight-semibold, 600);
+.internal-route-panel {
+    border-top: 1px solid var(--vaadin-border-color-secondary);
 }
 
 .internal-frame {
@@ -159,7 +150,7 @@
 }
 
 .theme-switch {
-  width: 7.5em;
+  flex: 0 0 auto;
 }
 
 /* An advisory id is read and searched whole, so it never breaks at its hyphens. */

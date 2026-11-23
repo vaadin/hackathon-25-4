@@ -24,6 +24,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
@@ -60,21 +61,34 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     private static final Pattern SENTENCE_END = Pattern.compile("(?<=\\.)\\s");
 
     private final SecurityDataService data;
+    private final LookupState lookup;
     private final ValueSignal<Boolean> prereleases = new ValueSignal<>(false);
     private final Div body = new Div();
+    private final Div linesHolder = new Div();
+    private final Div recentHolder = new Div();
+    private final Div pointerHolder = new Div();
 
-    public HomeView(SecurityDataService data, DataRefreshSignal refresh) {
+    public HomeView(SecurityDataService data, DataRefreshSignal refresh, LookupState lookup) {
         this.data = data;
+        this.lookup = lookup;
         addClassName("home-view");
         body.addClassName("home-body");
         // The customer shell draws the page's H1, the purpose and the lookup above this.
         getContent().add(body);
+        shownUnder(linesHolder, LookupState.Tab.VERSION);
+        shownUnder(recentHolder, LookupState.Tab.IDS);
+        shownUnder(pointerHolder, LookupState.Tab.REPORT);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {
             generatedAt.get();
             show(prereleases.get());
         });
+    }
+
+    private void shownUnder(Div holder, LookupState.Tab tab) {
+        holder.addClassName("home-part");
+        holder.bindVisible(lookup.tab().map(tab::equals));
     }
 
     @Override
@@ -84,6 +98,9 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
 
     private void show(boolean withPrereleases) {
         body.removeAll();
+        linesHolder.removeAll();
+        recentHolder.removeAll();
+        pointerHolder.removeAll();
         CasesIndex index;
         try {
             index = data.index();
@@ -91,7 +108,12 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             body.add(new DataOutageNotice());
             return;
         }
-        body.add(linesSection(index, withPrereleases), recentSection(index), pointer());
+        // Each tab of the lookup gets what helps its own question, D-241: the lines to the version
+        // tab, the recently reviewed advisories to the ids tab, the Spring Boot pointer to the report tab.
+        linesHolder.add(linesSection(index, withPrereleases));
+        recentHolder.add(recentSection(index));
+        pointerHolder.add(pointer());
+        body.add(linesHolder, recentHolder, pointerHolder);
     }
 
     // The lines
@@ -189,7 +211,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
                 .map(support -> {
                     var badge = new Badge(getTranslation("home.card.extended"));
                     badge.addClassName("line-card-tier");
-                    extendedSentence(support).ifPresent(text -> badge.getElement().setAttribute("title", text));
+                    extendedSentence(support).ifPresent(text -> Tooltip.forComponent(badge).setText(text));
                     return badge;
                 });
     }

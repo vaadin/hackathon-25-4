@@ -35,6 +35,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
@@ -43,6 +44,7 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.base.ai.AiSurfaces;
+import com.vaadin.securitystatus.base.ui.InternalLayout;
 import com.vaadin.securitystatus.base.nav.Address;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.nav.QueryFlag;
@@ -60,6 +62,8 @@ import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
  * lookup to be asked about on the reader's version.
  */
 @Route("advisories")
+// The same list inside the internal shell, so the team keeps its side panel, D-237.
+@RouteAlias(value = "findings/advisories", layout = InternalLayout.class)
 @RouteParent(HomeView.class)
 @PageTitle("advisories.title")
 @AnonymousAllowed

@@ -5,9 +5,16 @@
     gap: 1.5rem;
 }
 
+/* Several advisories on one page: each one in a box of its own, D-242. */
+.cve-answer.framed {
+    padding: 1.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: var(--vaadin-radius-l, 12px);
+    background: var(--vaadin-background-container, transparent);
+}
+
 .cve-answer + .cve-answer {
-    padding-block-start: 2rem;
-    border-block-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    margin-block-start: 1.5rem;
 }
 
 .verdict-card.state-measured {

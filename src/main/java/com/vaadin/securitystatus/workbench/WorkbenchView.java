@@ -37,6 +37,7 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -298,7 +299,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         link.addClassName("workbench-series-link");
         series.ifPresent(word -> link.getElement().setAttribute("data-series", word));
         if (title != null) {
-            link.getElement().setAttribute("title", title);
+            Tooltip.forComponent(link).setText(title);
         }
         if (active) {
             link.addClassName("active");
@@ -316,7 +317,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         closes.addClassName("workbench-row-closes");
         var name = new Span(row.name());
         name.addClassName("workbench-row-package");
-        name.getElement().setAttribute("title", entry.purl().orElse(row.name()));
+        Tooltip.forComponent(name).setText(entry.purl().orElse(row.name()));
         boolean todo = row.closes() > 0;
         var state = new Span(getTranslation(todo ? "workbench.row.todo" : "workbench.row.done"));
         state.addClassNames("workbench-row-state", todo ? "todo" : "done");

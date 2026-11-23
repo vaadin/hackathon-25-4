@@ -65,7 +65,7 @@ class ThemeFirstPaintIT {
         awaitSwitch();
 
         assertThat(frames()).isNotEmpty().allMatch(this::isLightText);
-        assertThat(chosen()).isEqualTo("System");
+        assertThat(chosen()).isEqualTo("system");
     }
 
     @Test
@@ -84,7 +84,7 @@ class ThemeFirstPaintIT {
         awaitSwitch();
 
         assertThat(frames()).isNotEmpty().noneMatch(this::isLightText);
-        assertThat(chosen()).isEqualTo("Light");
+        assertThat(chosen()).isEqualTo("light");
 
         choose("System");
         new WebDriverWait(driver, Duration.ofSeconds(10))
@@ -93,8 +93,8 @@ class ThemeFirstPaintIT {
     }
 
     private void choose(String label) {
-        driver.findElement(By.cssSelector("vaadin-select.theme-switch")).click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> d.findElements(By.cssSelector("vaadin-select-item"))
+        driver.findElement(By.cssSelector("vaadin-menu-bar.theme-switch vaadin-menu-bar-button")).click();
+        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> d.findElements(By.cssSelector("vaadin-menu-bar-item"))
                 .stream().filter(item -> label.equals(item.getText().trim())).findFirst().map(item -> {
                     item.click();
                     return true;
@@ -103,15 +103,15 @@ class ThemeFirstPaintIT {
 
     private void awaitSwitch() {
         new WebDriverWait(driver, Duration.ofSeconds(30))
-                .until(d -> !d.findElements(By.cssSelector("vaadin-select.theme-switch")).isEmpty());
-        // The select learns the remembered choice from the browser one round trip after it is attached.
+                .until(d -> !d.findElements(By.cssSelector("vaadin-menu-bar.theme-switch")).isEmpty());
+        // The menu learns the remembered choice from the browser one round trip after it is attached.
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> !chosen().isEmpty());
     }
 
     private String chosen() {
-        Object label = driver.executeScript(
-                "return document.querySelector('vaadin-select.theme-switch [slot=value]')?.innerText ?? ''");
-        return String.valueOf(label).trim();
+        Object scheme = driver.executeScript(
+                "return document.querySelector('vaadin-menu-bar.theme-switch')?.getAttribute('data-scheme') ?? ''");
+        return String.valueOf(scheme);
     }
 
     private String currentColor() {

@@ -8,7 +8,7 @@ The security team's reading: every maintained series, narrowed by the products a
 
 ### The layout
 
-- The internal shell's left panel holds the filter and the products and nothing else, D-203. Below the App Layout's breakpoint it overlays, which the component gives for free, as the prototype's does below 800 pixels.
+- The internal shell's left panel holds the destinations at its top and, on the explorer, the filter and the products under them, D-237, superseding D-203. An opened series has no close button of its own; its chevron shuts it, D-238. Below the App Layout's breakpoint it overlays, which the component gives for free, as the prototype's does below 800 pixels.
 - The bar over the content holds the drawer toggle and the H1 "Vaadin security status"; the internal destinations, the trail, the measured chip, the dark switch, the Assistant button and Sign out follow it as app extras.
 - The content: a round "?" at the top right, the lead under a search, the heading "Series (10 maintained)", or "Series" under a search, and one row per maintained series. Each row is a disclosure opened in place under itself, one at a time; the opened series is in the address as `?open=<line>`, D-204.
 - The "?" opens the legend on the right, "What the words on this page mean", with the prototype's sections: The badge on a series, The groups inside a series, How far a verdict was taken, What this page is measuring. Close and Escape shut it, D-211.

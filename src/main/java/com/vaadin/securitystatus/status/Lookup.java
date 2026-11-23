@@ -77,6 +77,9 @@ public final class Lookup extends Composite<Div> {
         @JsExpression("return event.key === 'Escape' && !element.opened")
         DomEventFilter escapeWithNothingOpen();
 
+        @JsExpression("return event.key === 'Enter' && !event.isComposing")
+        DomEventFilter enter();
+
         /** A change that left the field empty: its clear control, Escape, or every character deleted. */
         @JsExpression("return element.value === ''")
         DomEventFilter emptied();
@@ -207,6 +210,7 @@ public final class Lookup extends Composite<Div> {
             }
         });
         onEscape(version.getElement(), this::withdrawVersion);
+        onEnter(version.getElement());
 
         var panel = new Div(version);
         panel.addClassName("lookup-panel");
@@ -228,6 +232,7 @@ public final class Lookup extends Composite<Div> {
         });
         onEmptied(ids.getElement(), this::withdrawIds);
         onEscape(ids.getElement(), this::withdrawIds);
+        onEnter(ids.getElement());
 
         idsVersion.addClassName("lookup-ids-version");
         idsVersion.setLabel(getTranslation("lookup.idsVersion.label"));
@@ -236,6 +241,7 @@ public final class Lookup extends Composite<Div> {
         idsVersion.bindValue(state.idsVersion(), state.idsVersion()::set);
         onEmptied(idsVersion.getElement(), this::withdrawIdsVersion);
         onEscape(idsVersion.getElement(), this::withdrawIdsVersion);
+        onEnter(idsVersion.getElement());
 
         var panel = new Div(ids, idsVersion);
         panel.addClassName("lookup-panel");
@@ -283,6 +289,7 @@ public final class Lookup extends Composite<Div> {
         reportVersion.setClearButtonVisible(true);
         reportVersion.setValueChangeMode(ValueChangeMode.EAGER);
         reportVersion.bindValue(state.version(), state.version()::set);
+        onEnter(reportVersion.getElement());
         reportVersion.bindVisible(reportAsks);
 
         // Under the card, as the prototype says it: why the file asks for a version, until
@@ -493,6 +500,10 @@ public final class Lookup extends Composite<Div> {
         LookupInput.Ids parsed = LookupInput.splitIds(state.ids().peek());
         if (parsed.ids().isEmpty()) {
             note.set(getTranslation("lookup.ids.none"));
+            // The refusal is the answer now: the last answer does not stay under it.
+            if (answering) {
+                UI.getCurrent().navigate(HomeView.class);
+            }
             return;
         }
         if (!parsed.unrecognised().isEmpty()) {
@@ -577,6 +588,17 @@ public final class Lookup extends Composite<Div> {
             parameters.get(ScanView.VERSION).ifPresent(state.version()::set);
             state.tab().set(LookupState.Tab.REPORT);
         }
+    }
+
+    /**
+     * Enter in a field asks the question, as Check does. The answer waits for
+     * the end of the round trip, so a value the same Enter commits, such as the
+     * combo box's typed version, is already in the state, D-240.
+     */
+    private void onEnter(Element field) {
+        field.addEventListener("keydown", key -> getUI()
+                .ifPresent(ui -> ui.beforeClientResponse(this, context -> submit())))
+                .setFilterExpression(KEYS.enter());
     }
 
     private static void onEscape(Element field, Runnable action) {

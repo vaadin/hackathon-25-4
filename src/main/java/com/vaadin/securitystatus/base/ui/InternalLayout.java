@@ -11,12 +11,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadFileList;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -29,17 +29,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import jakarta.annotation.security.RolesAllowed;
 
 /**
- * The shell of the internal routes, in the prototype's distribution: a left
- * panel that holds what the route gives it, the explorer's filter and
- * products, and a bar over the content with the drawer toggle and the page's
- * H1, D-203.
- *
- * <p>
- * What the prototype does not have stays, placed where it disturbs least: the
- * four destinations of {@code @Menu} are a row of links in the bar after the
- * heading, the trail, the measured chip, the dark switch and Sign out sit at
- * the bar's end, and the assistant is a panel on the right that the Assistant
- * button opens.
+ * The shell of the internal routes: a left panel with the destinations of
+ * {@code @Menu} and the advisories list, and under them what the route gives
+ * it, the explorer's filter and products, D-237; a bar over the content with
+ * the drawer toggle, the page's H1, the trail, the measured chip, the scheme
+ * choice and Sign out; and the assistant as a panel on the right that the
+ * Assistant button opens.
  */
 @RolesAllowed(Roles.SECURITY)
 // The assistant's panel and the workbench's paste box arrive through a bean,
@@ -58,9 +53,9 @@ public final class InternalLayout extends AppLayout {
     private final Aside assistantPanel = new Aside();
     private final Div routeHolder = new Div();
     private final Div drawer = new Div();
+    private final Div routePanel = new Div();
     private final DrawerToggle toggle = new DrawerToggle();
     private final ValueSignal<Boolean> assistantOpen = new ValueSignal<>(false);
-    private boolean closedByShell;
 
     InternalLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
             ObjectProvider<AiSurfaces> ai) {
@@ -70,19 +65,25 @@ public final class InternalLayout extends AppLayout {
         toggle.setAriaLabel(getTranslation("shell.drawer.toggle"));
         var heading = new ViewHeading();
 
-        var nav = new Nav();
+        var nav = new SideNav();
         nav.addClassName("internal-nav");
         nav.getElement().setAttribute("aria-label", getTranslation("shell.nav.label"));
         MenuConfiguration.getMenuEntries().forEach(entry -> {
-            var link = new RouterLink(getTranslation(entry.title()), entry.menuClass());
-            link.addClassName("internal-nav-link");
-            nav.add(link);
+            var item = new SideNavItem(getTranslation(entry.title()), entry.path());
+            item.addClassName("internal-nav-link");
+            nav.addItem(item);
         });
+        // The customer side's catalogue, which the team reads as often as the explorer.
+        var advisories = new SideNavItem(getTranslation("shell.nav.advisories"), "findings/advisories");
+        advisories.addClassName("internal-nav-link");
+        nav.addItem(advisories);
 
         var appBar = new AppBar(dataRefresh, authentication);
-        addToNavbar(toggle, heading, nav, appBar);
+        addToNavbar(toggle, heading, appBar);
 
+        routePanel.addClassName("internal-route-panel");
         drawer.addClassName("internal-drawer");
+        drawer.add(nav, routePanel);
         addToDrawer(drawer);
 
         routeHolder.addClassName("internal-route");
@@ -119,24 +120,12 @@ public final class InternalLayout extends AppLayout {
         if (content != null) {
             routeHolder.getElement().appendChild(content.getElement());
         }
-        drawer.removeAll();
+        routePanel.removeAll();
         if (content instanceof DrawerContent giving) {
             Component panel = giving.drawerContent();
-            drawer.add(panel);
-            toggle.setVisible(true);
-            removeClassName("no-drawer");
-            if (closedByShell && !isOverlay()) {
-                // Shut by a route without a panel, so opened again; on a narrow window the
-                // panel overlays and stays shut until the toggle, as the prototype's does.
-                setDrawerOpened(true);
-            }
-            closedByShell = false;
-        } else {
-            toggle.setVisible(false);
-            addClassName("no-drawer");
-            closedByShell = isDrawerOpened() || closedByShell;
-            setDrawerOpened(false);
+            routePanel.add(panel);
         }
+        routePanel.setVisible(routePanel.getComponentCount() > 0);
     }
 
     @Override

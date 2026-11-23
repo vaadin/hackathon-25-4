@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,6 +18,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.base.ui.DataOutageNotice;
 import com.vaadin.securitystatus.data.FixturePages;
+import com.vaadin.flow.component.shared.Tooltip;
 
 /**
  * HOM-01, HOM-02 and HOM-08: the line cards tell each line's truth from the
@@ -30,6 +32,9 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
     FixturePages fixtures;
+
+    @Autowired
+    ObjectProvider<LookupState> lookups;
 
     @AfterEach
     void restore() {
@@ -116,7 +121,7 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
         assertThat(tiers).hasSize(8);
         assertThat(tiers).allSatisfy(badge -> assertThat(badge.getText()).isEqualTo("Extended"));
         // The prototype's sentence, built from the line's published label, major and end of free maintenance.
-        assertThat(tiers.get(0).getElement().getAttribute("title")).isEqualTo(
+        assertThat(Tooltip.forComponent(tiers.get(0)).getText()).isEqualTo(
                 "Extended maintenance. Free maintenance for Vaadin 24 ended on 2026-06-16, and every release since then "
                         + "needs a subscription. Whether yours covers it is between you and Vaadin: we do not know what "
                         + "a given customer holds.");
@@ -131,7 +136,7 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
 
         reopenHome();
 
-        assertThat(find(Badge.class).withClassName("line-card-tier").all().get(0).getElement().getAttribute("title"))
+        assertThat(Tooltip.forComponent(find(Badge.class).withClassName("line-card-tier").all().get(0)).getText())
                 .isEqualTo("Extended maintenance");
     }
 
@@ -157,6 +162,7 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void recently_reviewed_lists_eight_advisories_in_the_customers_words() {
         navigate(HomeView.class);
+        showTab(LookupState.Tab.IDS);
 
         List<RouterLink> rows = find(RouterLink.class).withClassName("recent-row").all();
         assertThat(rows).hasSize(8);
@@ -185,6 +191,7 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
         replaceIndex(twice);
 
         reopenHome();
+        showTab(LookupState.Tab.IDS);
 
         assertThat(texts("recent-id")).hasSize(8).doesNotHaveDuplicates().first().isEqualTo("CVE-2026-45292");
         assertThat(texts("recent-says").get(0)).isEqualTo("Said twice.");
@@ -193,10 +200,12 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void the_advisories_link_carries_the_count_and_the_pointer_is_the_designers() {
         navigate(HomeView.class);
+        showTab(LookupState.Tab.IDS);
 
         RouterLink all = find(RouterLink.class).withClassName("recent-all").single();
         assertThat(all.getText()).isEqualTo("All 535 advisories");
         assertThat(all.getHref()).isEqualTo("advisories");
+        showTab(LookupState.Tab.REPORT);
         assertThat(find(Component.class).withClassName("home-pointer").single().getElement().getTextRecursively())
                 .contains("Scanner flagged Tomcat, Spring or logback?").contains("managed by Spring Boot");
     }
@@ -224,6 +233,27 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     }
 
     /** The window opens on home, so the view is built again only after leaving it. */
+    // D-241: each section of the home page shows under the tab it helps
+    @Test
+    void each_tab_shows_its_own_section_of_the_home_page() {
+        navigate(HomeView.class);
+        assertThat(find(Component.class).withClassName("home-lines").exists()).isTrue();
+        assertThat(find(Component.class).withClassName("home-recent").exists()).isFalse();
+
+        showTab(LookupState.Tab.IDS);
+        assertThat(find(Component.class).withClassName("home-lines").exists()).isFalse();
+        assertThat(find(Component.class).withClassName("home-recent").exists()).isTrue();
+
+        showTab(LookupState.Tab.REPORT);
+        assertThat(find(Component.class).withClassName("home-pointer").exists()).isTrue();
+        assertThat(find(Component.class).withClassName("home-recent").exists()).isFalse();
+        showTab(LookupState.Tab.VERSION);
+    }
+
+    private void showTab(LookupState.Tab tab) {
+        lookups.getObject().tab().set(tab);
+    }
+
     private void reopenHome() {
         navigate(AdvisoriesView.class);
         navigate(HomeView.class);

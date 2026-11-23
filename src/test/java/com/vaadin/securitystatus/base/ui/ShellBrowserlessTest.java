@@ -27,6 +27,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.status.HomeView;
+import com.vaadin.flow.component.shared.Tooltip;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class ShellBrowserlessTest extends SpringBrowserlessTest {
@@ -61,7 +62,7 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(H1.class).single().getText()).isEqualTo("Security status");
         assertThat($(Paragraph.class).withClassName("customer-purpose").single().getText())
                 .startsWith("Find out whether your Vaadin version is safe");
-        assertThat($(Badge.class).withClassName("measured-chip").single().getElement().getAttribute("title"))
+        assertThat(Tooltip.forComponent($(Badge.class).withClassName("measured-chip").single()).getText())
                 .isEqualTo("These are the real measurements of that date, not sample data");
         assertThat(documentTitle()).isEqualTo("Security status");
     }

@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -395,7 +396,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             line.getElement().setAttribute("data-advisory", row.advisory());
             line.addDataCell(advisoryLink(row.advisory(), version));
             var component = new Span(row.component());
-            component.setTitle(row.coordinate());
+            Tooltip.forComponent(component).setText(row.coordinate());
             line.addDataCell(component);
             line.addDataCell(getTranslation(ownerKey(row.owner())));
             line.addDataCell(verdictCell(row, index));

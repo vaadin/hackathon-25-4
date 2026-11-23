@@ -27,6 +27,7 @@ import com.vaadin.flow.server.WrappedHttpSession;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
 import com.vaadin.securitystatus.explorer.ExplorerView;
 import com.vaadin.securitystatus.status.HomeView;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
@@ -96,8 +97,10 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         // D-203: the shell draws the H1 in its bar, the explorer's title the prototype's, and the four
         // destinations are links in the bar beside it, so the left panel holds only the filter.
         assertThat($(H1.class).single().getText()).isEqualTo("Vaadin security status");
-        assertThat($(RouterLink.class).withClassName("internal-nav-link").all()).extracting(RouterLink::getText)
-                .containsExactly("Findings", "What Spring Boot brings", "Verdict workbench", "Diagnostics");
+        // D-237: the destinations are the left panel's side navigation, the advisories list among them.
+        assertThat($(SideNavItem.class).withClassName("internal-nav-link").all()).extracting(SideNavItem::getLabel)
+                .containsExactly("Findings", "What Spring Boot brings", "Verdict workbench", "Diagnostics",
+                        "All advisories");
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 
@@ -107,7 +110,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     void guest_is_refused_on_findings() {
         navigate("findings", NotFoundView.class);
 
-        assertThat($(RouterLink.class).withClassName("internal-nav-link").exists()).isFalse();
+        assertThat($(SideNavItem.class).withClassName("internal-nav-link").exists()).isFalse();
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 }

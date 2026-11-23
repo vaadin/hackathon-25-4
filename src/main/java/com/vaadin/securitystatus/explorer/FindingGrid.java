@@ -12,6 +12,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridI18n;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.explorer.ExplorerRules.Product;
@@ -82,7 +83,7 @@ final class FindingGrid extends Grid<Finding> {
             if (all.stream().allMatch(routes.optional()::contains)) {
                 String only = String.join(" " + getTranslation("explorer.through.or") + " ", all);
                 words.setText(getTranslation("explorer.through.only", only));
-                words.getElement().setAttribute("title", getTranslation("explorer.through.only.title", only));
+                Tooltip.forComponent(words).setText(getTranslation("explorer.through.only.title", only));
                 words.addClassName("only");
                 return words;
             }
@@ -95,14 +96,14 @@ final class FindingGrid extends Grid<Finding> {
                 title += " " + getTranslation("explorer.through.also",
                         String.join(", ", all.stream().filter(name -> !mine.contains(name)).toList()));
             }
-            words.getElement().setAttribute("title", title);
+            Tooltip.forComponent(words).setText(title);
             return words;
         }
         if (finding.bundledIn().isPresent()) {
             words.setText(getTranslation("explorer.through.bundled", finding.bundledIn().get()));
         } else if (frontend(finding)) {
             words.setText(getTranslation("explorer.through.frontend"));
-            words.getElement().setAttribute("title", getTranslation("explorer.through.frontend.title"));
+            Tooltip.forComponent(words).setText(getTranslation("explorer.through.frontend.title"));
         } else {
             words.setText(getTranslation("explorer.through.none"));
             words.addClassName("dim");
@@ -128,7 +129,7 @@ final class FindingGrid extends Grid<Finding> {
             if (named.get().contains(product.name()) && routes.shape().on().contains(product.name())) {
                 var dot = ring(product);
                 dot.addClassName("dot");
-                dot.getElement().setAttribute("title", getTranslation("explorer.dot", product.name()));
+                Tooltip.forComponent(dot).setText(getTranslation("explorer.dot", product.name()));
                 dots.add(dot);
             }
         }

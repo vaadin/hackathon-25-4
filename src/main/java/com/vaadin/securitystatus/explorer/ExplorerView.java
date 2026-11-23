@@ -29,6 +29,7 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -554,7 +555,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             number.addClassName("none");
         }
         element.appendChild(number.getElement());
-        element.setAttribute("title", chipTitle(product, isOn, cannot));
+        Tooltip.forComponent(chip).setText(chipTitle(product, isOn, cannot));
         return chip;
     }
 
@@ -584,7 +585,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         line.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
             var scanned = new Span(getTranslation("explorer.row.scannedOn", day.toString()));
             scanned.addClassName("explorer-row-scanned");
-            scanned.getElement().setAttribute("title", getTranslation("explorer.row.scanned.title"));
+            Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
             summary.add(scanned);
         });
         summary.add(parts.vaadinBadge(state));
@@ -626,14 +627,10 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         detail.addClassName("explorer-detail");
         detail.getElement().setAttribute("data-line", line.line());
 
-        var close = new Button(VaadinIcon.CLOSE.create(), click -> address(query.peek(), selection.off().peek(),
-                Optional.empty()).go(UI.getCurrentOrThrow()));
-        close.addThemeVariants(ButtonVariant.TERTIARY);
-        close.setAriaLabel(getTranslation("explorer.detail.close"));
-        close.addClassName("explorer-detail-close");
+        // No close button of its own: the row's own chevron shuts it, D-238.
         var title = new H3(getTranslation("explorer.detail.title", line.line(), line.version().toString()));
         title.addClassName("explorer-detail-title");
-        var head = new Div(title, close);
+        var head = new Div(title);
         head.addClassName("explorer-detail-head");
         detail.add(head, springSwitch(line, catalogue, shape, off));
 

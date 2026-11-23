@@ -18,6 +18,7 @@ final class LookupInput {
     private static final Pattern SEPARATORS = Pattern.compile("[\\s,;]+");
     private static final Pattern CVE = Pattern.compile("CVE-\\d{4}-\\d{4,}");
     private static final Pattern GHSA = Pattern.compile("GHSA(?:-[23456789cfghjmpqrvwx]{4}){3}");
+    private static final Pattern ANY_ID = Pattern.compile("(?i)CVE-\\d{4}-\\d{4,}|GHSA(?:-[a-z0-9]{4}){3}");
 
     /** The ids that parse, in the order given and once each, and the rest. */
     record Ids(List<String> ids, List<String> unrecognised) {
@@ -57,7 +58,19 @@ final class LookupInput {
             String id = normalizeId(token);
             if (CVE.matcher(id).matches() || GHSA.matcher(id).matches()) {
                 ids.add(id);
-            } else {
+                continue;
+            }
+            // An id inside an address or a path, as copied from a scanner or this page's own URL.
+            var inside = ANY_ID.matcher(token);
+            boolean found = false;
+            while (inside.find()) {
+                String candidate = normalizeId(inside.group());
+                if (CVE.matcher(candidate).matches() || GHSA.matcher(candidate).matches()) {
+                    ids.add(candidate);
+                    found = true;
+                }
+            }
+            if (!found) {
                 unrecognised.add(token);
             }
         }
