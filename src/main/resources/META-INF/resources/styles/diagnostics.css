@@ -1,18 +1,19 @@
-/* The diagnostics view: four live panels and the reader's browser. A desktop screen. */
+/* The diagnostics view: one card per panel, on a board the reader arranges. A desktop screen. */
 .diagnostics-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(32rem, 1fr));
-    gap: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     max-width: 120rem;
     /* The same content padding as the other internal pages, which sit beside no panel either. */
     padding: 1.5rem;
     box-sizing: border-box;
 }
 
-.diagnostics-view > .view-heading,
-.diagnostics-since,
-.diagnostics-tails {
-    grid-column: 1 / -1;
+.diagnostics-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .diagnostics-since {
@@ -79,4 +80,9 @@
 .diagnostics-panel {
     min-width: 0;
     overflow-x: auto;
+}
+
+.diagnostics-board .diagnostics-panel {
+    padding: 0 0.75rem 0.75rem;
+    box-sizing: border-box;
 }

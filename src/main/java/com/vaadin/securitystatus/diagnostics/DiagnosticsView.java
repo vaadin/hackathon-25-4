@@ -5,16 +5,29 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.page.WebStorage;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Table;
@@ -64,6 +77,72 @@ public final class DiagnosticsView extends Composite<Div> {
             .withZone(ZoneOffset.UTC);
     private static final DateTimeFormatter MINUTE = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneOffset.UTC);
 
+    /** Where this browser keeps the order, the sizes and the choice of cards. */
+    static final String LAYOUT_KEY = "security-status.diagnostics.cards";
+
+    /** The cards of the board, each one panel, with the span it starts with. */
+    enum Card {
+        NAVIGATIONS("diagnostics.navigations.title", 2), REQUESTS("diagnostics.requests.title", 2),
+        SESSIONS("diagnostics.sessions.title", 1), CLIENT("diagnostics.client.title", 1),
+        POLICY("diagnostics.csp.name", 2), ASSISTANT("diagnostics.assistant.title", 2);
+
+        static final List<Placed> DEFAULT = Arrays.stream(values()).map(card -> new Placed(card, card.colspan, 1))
+                .toList();
+
+        /** The card's name, its title too except where the title carries a count. */
+        final String title;
+        final int colspan;
+
+        Card(String title, int colspan) {
+            this.title = title;
+            this.colspan = colspan;
+        }
+    }
+
+    /** A card on the board, with its size, as the browser remembers it: {@code NAVIGATIONS:2:1;...}. */
+    record Placed(Card card, int colspan, int rowspan) {
+
+        static List<Placed> parse(@Nullable String saved) {
+            var placed = new ArrayList<Placed>();
+            if (saved == null || saved.isBlank()) {
+                return placed;
+            }
+            for (String part : saved.split(";")) {
+                String[] fields = part.split(":");
+                try {
+                    Card card = Card.valueOf(fields[0]);
+                    if (placed.stream().noneMatch(known -> known.card() == card)) {
+                        placed.add(new Placed(card, Math.max(1, Integer.parseInt(fields[1])),
+                                Math.max(1, Integer.parseInt(fields[2]))));
+                    }
+                } catch (RuntimeException unreadable) {
+                    // A card this release no longer has, or a value somebody edited: left out.
+                }
+            }
+            return placed;
+        }
+
+        static String format(List<Placed> placed) {
+            return placed.stream().map(one -> one.card().name() + ":" + one.colspan() + ":" + one.rowspan())
+                    .collect(Collectors.joining(";"));
+        }
+    }
+
+    /** A widget that knows which card it is. */
+    static final class CardWidget extends DashboardWidget {
+        final Card card;
+
+        CardWidget(Card card, String title) {
+            super(title);
+            this.card = card;
+            addClassName("diagnostics-card-" + card.name().toLowerCase(Locale.ROOT));
+        }
+    }
+
+    private final Dashboard board = new Dashboard();
+    private final Map<Card, Function<CardWidget, Section>> builders = new EnumMap<>(Card.class);
+    private final ValueSignal<Boolean> editing = new ValueSignal<>(false);
+    private final ValueSignal<List<Card>> absent = new ValueSignal<>(List.of());
     private final ValueSignal<@Nullable ExtendedClientDetails> client = new ValueSignal<>(null);
     private final ValueSignal<int[]> viewport = new ValueSignal<>(new int[0]);
 
@@ -74,23 +153,130 @@ public final class DiagnosticsView extends Composite<Div> {
         var since = new Paragraph(getTranslation("diagnostics.since", AT.format(counters.since())));
         since.addClassName("diagnostics-since");
 
-        getContent().add(since, navigationsPanel(counters.navigations()),
-                requestsPanel(counters.requests()), sessionsPanel(counters.sessions(), refresh.generatedAt()),
-                clientPanel(), tailsPanel(violations, tail));
+        builders.put(Card.NAVIGATIONS, widget -> navigationsPanel(counters.navigations()));
+        builders.put(Card.REQUESTS, widget -> requestsPanel(counters.requests()));
+        builders.put(Card.SESSIONS, widget -> sessionsPanel(counters.sessions(), refresh.generatedAt()));
+        builders.put(Card.CLIENT, widget -> clientPanel());
+        builders.put(Card.POLICY, widget -> policyPanel(violations, widget));
+        builders.put(Card.ASSISTANT, widget -> assistantPanel(tail));
+
+        board.addClassName("diagnostics-board");
+        board.setMinimumColumnWidth("28rem");
+        board.setMaximumColumnCount(4);
+        board.setPadding("0");
+        board.setI18n(boardI18n());
+        board.addItemMovedListener(moved -> save());
+        board.addItemResizedListener(resized -> save());
+        board.addItemRemovedListener(removed -> save());
+        show(Card.DEFAULT);
+
+        getContent().add(since, toolbar(), board);
+        whenAttached(ui -> {
+            WebStorage.getItem(ui, WebStorage.Storage.LOCAL_STORAGE, LAYOUT_KEY).thenAccept(saved -> {
+                List<Placed> placed = Placed.parse(saved);
+                if (!placed.isEmpty()) {
+                    show(placed);
+                }
+            });
+            return () -> {
+            };
+        });
 
         UI.getCurrent().getPage().retrieveExtendedClientDetails(client::set);
         whenAttached(ui -> ui.getPage().addBrowserWindowResizeListener(
                 resized -> viewport.set(new int[] { resized.getWidth(), resized.getHeight() })));
     }
 
-    private Section panel(String name, String heading) {
-        var section = new Section(new H2(getTranslation(heading)));
+    // The board
+
+    private Component toolbar() {
+        var edit = new Button();
+        edit.addClassName("diagnostics-edit");
+        edit.addThemeVariants(ButtonVariant.TERTIARY);
+        edit.bindText(editing.map(on -> getTranslation(on ? "diagnostics.board.done" : "diagnostics.board.edit")));
+        edit.addClickListener(click -> {
+            editing.set(!editing.peek());
+            board.setEditable(editing.peek());
+        });
+
+        var add = new MenuBar();
+        add.addClassName("diagnostics-add");
+        add.addThemeVariants(MenuBarVariant.TERTIARY);
+        MenuItem cards = add.addItem(getTranslation("diagnostics.board.add"));
+        add.bindVisible(absent.map(missing -> !missing.isEmpty()));
+        Signal.effect(add, () -> {
+            cards.getSubMenu().removeAll();
+            for (Card card : absent.get()) {
+                cards.getSubMenu().addItem(getTranslation(card.title), click -> {
+                    board.add(widget(new Placed(card, card.colspan, 1)));
+                    save();
+                });
+            }
+        });
+
+        var restore = new Button(getTranslation("diagnostics.board.restore"), click -> {
+            show(Card.DEFAULT);
+            save();
+        });
+        restore.addClassName("diagnostics-restore");
+        restore.addThemeVariants(ButtonVariant.TERTIARY);
+        restore.bindVisible(editing);
+
+        var bar = new Div(edit, add, restore);
+        bar.addClassName("diagnostics-toolbar");
+        return bar;
+    }
+
+    private Dashboard.DashboardI18n boardI18n() {
+        return new Dashboard.DashboardI18n().setSelectWidget(getTranslation("diagnostics.board.select"))
+                .setSelectSection(getTranslation("diagnostics.board.select"))
+                .setRemove(getTranslation("diagnostics.board.remove"))
+                .setResize(getTranslation("diagnostics.board.resize"))
+                .setResizeApply(getTranslation("diagnostics.board.apply"))
+                .setResizeShrinkWidth(getTranslation("diagnostics.board.narrower"))
+                .setResizeGrowWidth(getTranslation("diagnostics.board.wider"))
+                .setResizeShrinkHeight(getTranslation("diagnostics.board.shorter"))
+                .setResizeGrowHeight(getTranslation("diagnostics.board.taller"))
+                .setMove(getTranslation("diagnostics.board.move"))
+                .setMoveApply(getTranslation("diagnostics.board.apply"))
+                .setMoveForward(getTranslation("diagnostics.board.forward"))
+                .setMoveBackward(getTranslation("diagnostics.board.backward"));
+    }
+
+    private void show(List<Placed> placed) {
+        board.removeAll();
+        placed.forEach(one -> board.add(widget(one)));
+        refreshAbsent();
+    }
+
+    private CardWidget widget(Placed placed) {
+        var widget = new CardWidget(placed.card(), getTranslation(placed.card().title));
+        widget.setContent(builders.get(placed.card()).apply(widget));
+        widget.setColspan(placed.colspan());
+        widget.setRowspan(placed.rowspan());
+        return widget;
+    }
+
+    private void save() {
+        List<Placed> placed = board.getWidgets().stream().map(CardWidget.class::cast)
+                .map(widget -> new Placed(widget.card, widget.getColspan(), widget.getRowspan())).toList();
+        WebStorage.setItem(WebStorage.Storage.LOCAL_STORAGE, LAYOUT_KEY, Placed.format(placed));
+        refreshAbsent();
+    }
+
+    private void refreshAbsent() {
+        List<Card> shown = board.getWidgets().stream().map(widget -> ((CardWidget) widget).card).toList();
+        absent.set(Arrays.stream(Card.values()).filter(card -> !shown.contains(card)).toList());
+    }
+
+    private Section panel(String name) {
+        var section = new Section();
         section.addClassNames("diagnostics-panel", "diagnostics-" + name);
         return section;
     }
 
     private Section navigationsPanel(Signal<Navigations> navigations) {
-        Section section = panel("navigations", "diagnostics.navigations.title");
+        Section section = panel("navigations");
         var body = new Div();
         section.add(body);
         Signal.effect(section, () -> {
@@ -103,7 +289,8 @@ public final class DiagnosticsView extends Composite<Div> {
             var table = new Table();
             table.addClassName("diagnostics-navigations-table");
             table.addHeaderRow(getTranslation("diagnostics.navigations.route"),
-                    getTranslation("diagnostics.outcome.completed"), getTranslation("diagnostics.outcome.failed"),
+                    getTranslation("diagnostics.outcome.completed"), getTranslation("diagnostics.outcome.refused"),
+                    getTranslation("diagnostics.outcome.broke"),
                     getTranslation("diagnostics.outcome.notShown"), getTranslation("diagnostics.outcome.postponed"),
                     getTranslation("diagnostics.navigations.mean"), getTranslation("diagnostics.navigations.longest"));
             for (RouteCount route : counted.routes()) {
@@ -113,7 +300,8 @@ public final class DiagnosticsView extends Composite<Div> {
                         ? getTranslation("diagnostics.navigations.other")
                         : route.route());
                 row.addDataCell(String.valueOf(route.completed()));
-                row.addDataCell(String.valueOf(route.failed()));
+                row.addDataCell(String.valueOf(route.refused()));
+                row.addDataCell(String.valueOf(route.broke()));
                 row.addDataCell(String.valueOf(route.notShown()));
                 row.addDataCell(String.valueOf(route.postponed()));
                 row.addDataCell(millis(route.totalMillis() / (double) route.total()));
@@ -131,7 +319,7 @@ public final class DiagnosticsView extends Composite<Div> {
     }
 
     private Section requestsPanel(Signal<Requests> requests) {
-        Section section = panel("requests", "diagnostics.requests.title");
+        Section section = panel("requests");
         var body = new Div();
         section.add(body, note("diagnostics.requests.kept"));
         Signal.effect(section, () -> {
@@ -179,7 +367,7 @@ public final class DiagnosticsView extends Composite<Div> {
     }
 
     private Section sessionsPanel(Signal<Long> sessions, Signal<@Nullable Instant> generatedAt) {
-        Section section = panel("sessions", "diagnostics.sessions.title");
+        Section section = panel("sessions");
         var now = new Paragraph();
         now.addClassName("diagnostics-sessions-now");
         now.bindText(sessions.map(count -> getTranslation(
@@ -188,23 +376,20 @@ public final class DiagnosticsView extends Composite<Div> {
         data.addClassName("diagnostics-data");
         data.bindText(generatedAt.map(at -> at == null ? getTranslation("diagnostics.data.unread")
                 : getTranslation("diagnostics.data.measured", AT.format(at))));
-        section.add(now, data);
+        section.add(now, note("diagnostics.sessions.signIn"), data);
         return section;
     }
 
-    private Section tailsPanel(CspViolations violations, AssistantTail tail) {
-        Section section = panel("tails", "diagnostics.tails.title");
-
-        var csp = new Div();
-        csp.addClassName("diagnostics-csp");
+    private Section policyPanel(CspViolations violations, CardWidget widget) {
+        Section section = panel("csp");
         var cspReceived = violations.received();
-        Signal.effect(csp, () -> {
+        Signal.effect(section, () -> {
             long received = cspReceived.get();
-            csp.removeAll();
-            csp.add(new H3(getTranslation("diagnostics.csp.title", received)));
+            section.removeAll();
+            widget.setTitle(getTranslation("diagnostics.csp.title", received));
             List<CspViolations.Violation> kept = violations.newestFirst();
             if (kept.isEmpty()) {
-                csp.add(note("diagnostics.csp.none"));
+                section.add(note("diagnostics.csp.none"));
                 return;
             }
             var table = new Table();
@@ -214,19 +399,20 @@ public final class DiagnosticsView extends Composite<Div> {
                 row.addDataCell(AT.format(violation.receivedAt()));
                 row.addDataCell(violation.report()).addClassName("diagnostics-text");
             }
-            csp.add(table);
+            section.add(table);
         });
+        return section;
+    }
 
-        var assistant = new Div();
-        assistant.addClassName("diagnostics-assistant");
+    private Section assistantPanel(AssistantTail tail) {
+        Section section = panel("assistant");
         var newest = tail.newestSignal();
-        Signal.effect(assistant, () -> {
+        Signal.effect(section, () -> {
             newest.get();
-            assistant.removeAll();
-            assistant.add(new H3(getTranslation("diagnostics.assistant.title")));
+            section.removeAll();
             List<AssistantTail.Entry> entries = tail.entries().reversed();
             if (entries.isEmpty()) {
-                assistant.add(note("diagnostics.assistant.none"));
+                section.add(note("diagnostics.assistant.none"));
                 return;
             }
             var table = new Table();
@@ -244,15 +430,13 @@ public final class DiagnosticsView extends Composite<Div> {
                         + entry.kind().name().toLowerCase(Locale.ROOT)));
                 row.addDataCell(entry.text()).addClassName("diagnostics-text");
             }
-            assistant.add(table);
+            section.add(table);
         });
-
-        section.add(csp, assistant);
         return section;
     }
 
     private Section clientPanel() {
-        Section section = panel("client", "diagnostics.client.title");
+        Section section = panel("client");
         var body = new Div();
         section.add(body);
         Signal.effect(section, () -> {

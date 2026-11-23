@@ -22,12 +22,17 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.router.NavigationEndedEvent;
+import com.vaadin.flow.router.AccessDeniedException;
+import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.securitystatus.Application;
 import com.vaadin.securitystatus.base.observe.AssistantTail;
 import com.vaadin.securitystatus.base.security.CspViolations;
@@ -76,14 +81,15 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         RouteCount missing = count("/no-such-route");
         assertThat(diagnostics.completed() - diagnosticsBefore.completed()).isOne();
         assertThat(spring.completed() - springBefore.completed()).isOne();
-        assertThat(missing.failed() - missingBefore.failed()).isOne();
+        assertThat(missing.refused() - missingBefore.refused()).isOne();
+        assertThat(missing.broke()).isEqualTo(missingBefore.broke());
         assertThat(missing.completed()).isEqualTo(missingBefore.completed());
-        assertThat(diagnostics.failed()).isEqualTo(diagnosticsBefore.failed());
+        assertThat(diagnostics.refused()).isEqualTo(diagnosticsBefore.refused());
 
         // The view shows the same counts in the row of each route.
         navigate(DiagnosticsView.class);
         assertThat(cells("/no-such-route")).startsWith("/no-such-route", "0",
-                String.valueOf(missing.failed()), "0", "0");
+                String.valueOf(missing.refused()), "0", "0", "0");
         assertThat(cells("/diagnostics").get(1)).isEqualTo(String.valueOf(diagnostics.completed() + 1));
     }
 
@@ -104,13 +110,17 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         // The switch in Outcome.of names every record of the sealed interface; this
         // is the runtime half of that check, which the compiler does for new ones.
         assertThat(NavigationEndedEvent.Outcome.class.isSealed()).isTrue();
-        assertThat(NavigationEndedEvent.Outcome.class.getPermittedSubclasses()).hasSize(Outcome.values().length);
+        // Failed is counted in two columns, Refused and Broke, P-19.
+        assertThat(NavigationEndedEvent.Outcome.class.getPermittedSubclasses()).hasSize(Outcome.values().length - 1);
+        assertThat(Outcome.of(new NavigationEndedEvent.Failed(new NotFoundException()))).isEqualTo(Outcome.REFUSED);
+        assertThat(Outcome.of(new NavigationEndedEvent.Failed(new AccessDeniedException()))).isEqualTo(Outcome.REFUSED);
+        assertThat(Outcome.of(new NavigationEndedEvent.Failed(new IllegalStateException()))).isEqualTo(Outcome.BROKE);
         assertThat(Outcome.of(new NavigationEndedEvent.Postponed())).isEqualTo(Outcome.POSTPONED);
         assertThat(Outcome.of(new NavigationEndedEvent.NotShown())).isEqualTo(Outcome.NOT_SHOWN);
 
         navigate(DiagnosticsView.class);
         TableRow header = $(TableRow.class, panel("navigations")).first();
-        assertThat(header.getElement().getTextRecursively()).contains("Completed", "Failed", "Not shown",
+        assertThat(header.getElement().getTextRecursively()).contains("Completed", "Refused", "Broke", "Not shown",
                 "Postponed");
     }
 
@@ -125,9 +135,10 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(Paragraph.class).withClassName("diagnostics-since").single().getText())
                 .startsWith("Counting since ").contains(" UTC, when the application started.")
                 .endsWith("a restart sets every number back to zero.");
-        assertThat($(Section.class).withClassName("diagnostics-panel").all())
-                .extracting(section -> section.getElement().getChild(0).getTextRecursively())
-                .containsExactly("Navigations", "Requests", "Sessions", "Your browser", "Event tails");
+        assertThat($(DashboardWidget.class).all()).extracting(DashboardWidget::getTitle).containsExactly("Navigations",
+                "Requests", "Sessions", "Your browser", "Policy violations, "
+                        + violations.received().peek() + " reported since the start",
+                "Assistant exchanges");
     }
 
     @Test
@@ -159,8 +170,9 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         violations.record("{\"csp-report\":{\"blocked-uri\":\"https://diagnostics.example\"}}");
         runPendingSignalsTasks();
 
-        Div csp = $(Div.class).withClassName("diagnostics-csp").single();
-        assertThat($(H3.class, csp).single().getText()).startsWith("Policy violations, ");
+        Section csp = panel("csp");
+        // The card's title carries the count, P-19.
+        assertThat(((DashboardWidget) csp.getParent().orElseThrow()).getTitle()).startsWith("Policy violations, ");
         assertThat($(TableRow.class, csp).all().get(1).getElement().getTextRecursively())
                 .contains("https://diagnostics.example");
     }
@@ -193,7 +205,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
 
         test($(MessageInput.class).withClassName("assistant-input").single()).send("Is 24.9.21 safe?");
 
-        Div assistant = $(Div.class).withClassName("diagnostics-assistant").single();
+        Section assistant = panel("assistant");
         List<String> rows = $(TableRow.class, assistant).all().stream().skip(1)
                 .filter(row -> Long.parseLong(firstCell(row)) > started)
                 .map(row -> row.getElement().getAttribute("data-kind") + " "
@@ -211,18 +223,48 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
 
     @Test
     @WithMockUser(username = "guest", roles = {})
-    void a_guest_is_refused_and_the_refusal_is_counted_as_failed() {
-        long before = count("/diagnostics").failed();
+    void a_guest_is_refused_and_the_refusal_is_counted_as_refused() {
+        long before = count("/diagnostics").refused();
 
         navigate("diagnostics", NotFoundView.class);
 
         assertThat($(Section.class).withClassName("diagnostics-panel").exists()).isFalse();
-        assertThat(count("/diagnostics").failed() - before).isOne();
+        assertThat(count("/diagnostics").refused() - before).isOne();
+    }
+
+    // P-19: every panel is a card on a board, in the default order until the reader arranges it
+
+    @Test
+    void every_panel_is_a_card_on_the_board_in_the_default_order() {
+        navigate(DiagnosticsView.class);
+
+        Dashboard board = $(Dashboard.class).withClassName("diagnostics-board").single();
+        assertThat(board.getWidgets()).extracting(widget -> ((DiagnosticsView.CardWidget) widget).card)
+                .containsExactly(DiagnosticsView.Card.values());
+        assertThat(board.getWidgets()).extracting(DashboardWidget::getTitle).startsWith("Navigations", "Requests",
+                "Sessions", "Your browser");
+        assertThat(board.isEditable()).isFalse();
+
+        test($(Button.class).withClassName("diagnostics-edit").single()).click();
+        assertThat(board.isEditable()).isTrue();
+        assertThat($(Button.class).withClassName("diagnostics-edit").single().getText()).isEqualTo("Done");
+        // Every card is on the board, so there is nothing to add.
+        assertThat($(MenuBar.class).withClassName("diagnostics-add").exists()).isFalse();
+    }
+
+    @Test
+    void a_remembered_layout_is_read_back_and_anything_unreadable_is_left_out() {
+        var placed = DiagnosticsView.Placed.parse("SESSIONS:1:2;GONE:1:1;NAVIGATIONS:x:1;CLIENT:3:1;SESSIONS:2:2");
+
+        assertThat(placed).containsExactly(new DiagnosticsView.Placed(DiagnosticsView.Card.SESSIONS, 1, 2),
+                new DiagnosticsView.Placed(DiagnosticsView.Card.CLIENT, 3, 1));
+        assertThat(DiagnosticsView.Placed.format(placed)).isEqualTo("SESSIONS:1:2;CLIENT:3:1");
+        assertThat(DiagnosticsView.Placed.parse(null)).isEmpty();
     }
 
     private RouteCount count(String route) {
         return counters.navigations().peek().routes().stream().filter(count -> count.route().equals(route))
-                .findFirst().orElse(new RouteCount(route, 0, 0, 0, 0, 0, 0));
+                .findFirst().orElse(new RouteCount(route, 0, 0, 0, 0, 0, 0, 0));
     }
 
     private Section panel(String name) {

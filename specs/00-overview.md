@@ -188,7 +188,7 @@ These are the acceptance tests, written in the language of the actor. Each one i
 
 The nightly measurement pipeline, verdict publication, and everything else that writes to vaadin/cve-status: this application reads the published JSON and the one thing it composes, a verdict, leaves through GitHub's own editor as it does today. The self contained email file, the RSS feeds and the redirect stubs: they are publishing artifacts of the static site, not screens. The client side gates, replaced by real authentication. The hash address compatibility, because the JS pages stay published and keep their addresses. A second interface language, cut to one, with the bundle discipline kept so adding one back is mechanical.
 
-Also out of scope: GridPro, Crud, Dashboard and Spreadsheet, because nothing here edits tabular data in place and the one dashboard like screen is the home page the design already shapes; Collaboration Kit, because shared signals cover the one live surface; Hilla and React, because this is a Flow application; native image builds.
+Also out of scope: GridPro, Crud and Spreadsheet, because nothing here edits tabular data in place. Dashboard was out of scope too, until Manolo asked on 2026-11-23 for the diagnostics view as a board of cards the reader arranges, P-19, D-232; Collaboration Kit, because shared signals cover the one live surface; Hilla and React, because this is a Flow application; native image builds.
 
 ## 25.4 feature coverage
 

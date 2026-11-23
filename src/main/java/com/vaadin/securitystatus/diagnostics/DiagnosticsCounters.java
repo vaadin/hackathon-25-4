@@ -37,17 +37,18 @@ public class DiagnosticsCounters {
     static final int MINUTES_KEPT = 60;
 
     /** One route's navigations, counted per outcome, with their durations. */
-    public record RouteCount(String route, long completed, long failed, long notShown, long postponed,
+    public record RouteCount(String route, long completed, long refused, long broke, long notShown, long postponed,
             long totalMillis, long longestMillis) {
 
         public long total() {
-            return completed + failed + notShown + postponed;
+            return completed + refused + broke + notShown + postponed;
         }
 
         public long count(Outcome outcome) {
             return switch (outcome) {
             case COMPLETED -> completed;
-            case FAILED -> failed;
+            case REFUSED -> refused;
+            case BROKE -> broke;
             case NOT_SHOWN -> notShown;
             case POSTPONED -> postponed;
             };
@@ -55,7 +56,8 @@ public class DiagnosticsCounters {
 
         RouteCount plus(Outcome outcome, long millis) {
             return new RouteCount(route, completed + (outcome == Outcome.COMPLETED ? 1 : 0),
-                    failed + (outcome == Outcome.FAILED ? 1 : 0), notShown + (outcome == Outcome.NOT_SHOWN ? 1 : 0),
+                    refused + (outcome == Outcome.REFUSED ? 1 : 0), broke + (outcome == Outcome.BROKE ? 1 : 0),
+                    notShown + (outcome == Outcome.NOT_SHOWN ? 1 : 0),
                     postponed + (outcome == Outcome.POSTPONED ? 1 : 0), totalMillis + millis,
                     Math.max(longestMillis, millis));
         }
@@ -133,7 +135,7 @@ public class DiagnosticsCounters {
             String counted = key;
             int at = indexOf(routes, counted);
             if (at < 0) {
-                routes.add(new RouteCount(counted, 0, 0, 0, 0, 0, 0).plus(outcome, millis));
+                routes.add(new RouteCount(counted, 0, 0, 0, 0, 0, 0, 0).plus(outcome, millis));
             } else {
                 routes.set(at, routes.get(at).plus(outcome, millis));
             }
