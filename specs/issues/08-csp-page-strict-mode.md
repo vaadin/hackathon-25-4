@@ -1,3 +1,5 @@
+Withdrawn, replaced by a comment. The two open pull requests vaadin/docs#6495 and vaadin/docs#6687 document all three points: no header in development mode, `IndexHtmlResponse.getContentSecurityPolicy()` in an `IndexHtmlRequestListener`, and the other responses keeping the Spring Security policy. The measurement went to #6495 as `08b-comment-on-docs-6495.md`, posted.
+
 REPO: vaadin/docs
 TITLE: The Content Security Policy page does not say how the strict csp mode behaves
 ---

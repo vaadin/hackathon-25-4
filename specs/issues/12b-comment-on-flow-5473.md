@@ -23,11 +23,11 @@ It loses what the shortcut API gives for free: the key and modifier matching, th
 
 ### Reproduce
 
-Two routes in one project, the same page with the two registrations. Click Note and type `a/b`, then click the text above the fields and press `/`. On 25.4.0-beta2, Chrome:
+Two routes, the same page with the two registrations. Click Note and type `a/b`, then click the text above the fields and press `/`. On 25.4.0-beta2, Chrome:
 
 | Route | Note after typing `a/b` | Focus after typing | Slash from outside a field |
 | --- | --- | --- | --- |
 | `/`, `addShortcutListener` | `ab` | Search | focuses Search |
 | `/filtered`, listener with a declared filter | `a/b` | Note | focuses Search |
 
-[`12-shortcut-while-typing.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/12-shortcut-while-typing.zip), 3 KB, sources only, `mvn spring-boot:run`, port 8112.
+Each route is a page with a Search field and a Note field, and the registration shown for it. The second one is the snippet above.

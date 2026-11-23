@@ -141,6 +141,8 @@ Died when somebody tried to reproduce it. The draft file is kept with a one line
 
 | Finding | What happened |
 | --- | --- |
+| `19` the Grid context menu example uses the deprecated handler | Fixed before posting: vaadin/docs#6587, merged on 2026-11-22, moved the example, the page text and the upgrade guide to the provider |
+| `08` the Content Security Policy page does not say how the strict csp mode behaves | Covered by two open pull requests found at review time, vaadin/docs#6495 and #6687. The beta2 measurement was posted on #6495 instead, `08b`. Lesson: search open pull requests of the docs repository, not only its issues |
 | `02` the not found view renders outside the automatic layout | Documented, with the fix we had called a workaround: error views are not routes, add `@ParentLayout`. The documentation was read after the row was written |
 | `04` a signed in user without the role sees the not found view | Documented as a deliberate precaution, with a custom access denied view offered for applications that want to say so |
 | `06` `VaadinExpiredSessionStrategy` only acts under concurrency control | Stated twice on the page that introduces it |

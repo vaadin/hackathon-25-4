@@ -25,13 +25,15 @@ In order of usefulness:
 1. `ComponentTester.download(OutputStream)`, or a `DownloadTester` wrapping any component, that fetches what a `Download.onClick` registration on it serves, as `AnchorTester.download` does for a link.
 2. A documented, stable way to read the address of a `Download.onClick` registration, for a TestBench test to fetch.
 
+The draft vaadin/flow#25045, a test seam for simulating triggers and actions, looks like the base the first option could build on; it covers the clipboard today and not downloads.
+
 ### Workaround
 
 The export is tested in a browser only: the test reads the attribute whose name starts with `data-flow-download-` and fetches its value from the page, so nothing is saved to disk.
 
 ### Reproduce
 
-`mvn test` runs one test against a view that offers the same handler twice, through an `Anchor` and through `Download.onClick` on a `Button`. It downloads through the link, then lists what the button offers a test. On 25.4.0-beta2 it printed:
+One browserless test against a view that offers the same handler twice, through an `Anchor` and through `Download.onClick` on a `Button`. It downloads through the link, then lists what the button offers a test. On 25.4.0-beta2 it printed:
 
 ```
 AnchorTester.download: 45 bytes
@@ -40,13 +42,5 @@ Button attributes: [id=button, data-flow-download-dfc235e2-2cbc-4618-a540-15b362
 ```
 
 and failed with `the file Download.onClick serves cannot be fetched from a test`.
-
-### Getting the project
-
-[`16-download-onclick-testing.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/16-download-onclick-testing.zip), 4 KB, sources only. Unzip it and:
-
-```
-mvn test
-```
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1.

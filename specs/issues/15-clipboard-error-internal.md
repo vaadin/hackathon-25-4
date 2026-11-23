@@ -14,11 +14,16 @@ A lambda hides it. Anything that names the type does not: a shared error handler
 
 ### Why it matters
 
-The observed form is the one the documentation recommends for telling the user whether the copy worked, and the first application that writes one error handler for all its copy buttons imports an internal class, which the project says may change in any release. flow#26576 proposed moving `PromiseAction` out of the internal package and was closed without merging, so nothing tracks it now.
+The observed form is the one the documentation recommends for telling the user whether the copy worked, and the first application that writes one error handler for all its copy buttons imports an internal class, which the project says may change in any release.
+
+#26576 proposed making the trigger and action API public and was closed, with the part that passes data between them kept internal because it is not settled yet. This asks for less: only the type that a public signature already exposes.
 
 ### Expected
 
-The error record the callbacks receive is public API: a public `Clipboard.Error`, or `PromiseAction` moved to a public package as flow#26576 proposed. Options in that order, because the first keeps the trigger API's own decision separate.
+The error record the callbacks receive is public API. Options in this order:
+
+1. A public type of its own, such as `Clipboard.Error`, which leaves the trigger API's own decision untouched.
+2. `PromiseAction` moved to a public package, as #26576 proposed.
 
 ### Workaround
 
@@ -26,20 +31,20 @@ A lambda at every call site, so the type is never named. Our copy answer control
 
 ### Reproduce
 
-`mvn test` runs one test. It declares the shared handler a real application would, which only compiles with the internal import, then reads the parameter type of `writeText(String, onCopied, onError)` by reflection, prints it and fails. On 25.4.0-beta2 it printed:
+A shared handler, as a real application declares it, compiles only with the internal import:
+
+```java
+import com.vaadin.flow.component.trigger.internal.PromiseAction;
+
+static void copyFailed(PromiseAction.Error error) {
+    Notification.show(error.message());
+}
+```
+
+Reading the parameter type of `writeText(String, onCopied, onError)` by reflection prints, on 25.4.0-beta2 and on 25.3.5:
 
 ```
 ClipboardBinding.writeText(String, onCopied, onError): onError accepts com.vaadin.flow.component.trigger.internal.PromiseAction$Error
-```
-
-`mvn test -Dvaadin.version=25.3.5` prints the same line.
-
-### Getting the project
-
-[`15-clipboard-error-internal.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/15-clipboard-error-internal.zip), 3 KB, sources only. Unzip it and:
-
-```
-mvn test
 ```
 
 Found on 25.4.0-beta2, and the same on 25.3.5.

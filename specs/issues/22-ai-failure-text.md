@@ -22,21 +22,13 @@ The response listener replaces the text of the last item of the `MessageList` wi
 
 ### Reproduce
 
-`mvn test -Dtest=FailureTextTest` in the project below. A chat with a Finnish UI locale and Finnish names, whose provider fails with `ToolCallLimitExceededException`, prints:
+An `AIOrchestrator` built with `withUserName("Sinä")` and `withAssistantName("Avustaja")`, a Finnish UI locale, and a stub `LLMProvider` that fails every turn with `new ToolCallLimitExceededException("Tool call limit exceeded: lookup was called 41 times")`. One prompt, then the message list and the error the orchestrator reported:
 
 ```
 Sinä: Montako?
 Avustaja: An error occurred. Please try again.
 reported: com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException: Tool call limit exceeded: lookup was called 41 times
 public methods of the exception beyond Throwable: []
-```
-
-### Getting the project
-
-[`21-ai-surfaces.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/21-ai-surfaces.zip), 5 KB, sources only. The test of this draft needs no licence and no key. Unzip it and:
-
-```
-mvn test -Dtest=FailureTextTest
 ```
 
 Found on 25.4.0-beta2. The sentence is the same on 25.3.5; the exception is new in 25.4.

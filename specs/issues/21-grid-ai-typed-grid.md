@@ -23,7 +23,7 @@ The most common ask of a list screen is not "build me a table" but "show me only
 In order of usefulness:
 
 1. A filter mode: the controller drives an existing `Grid<T>` by handing the application the ids, or a predicate, that the model's query selected, and leaves columns and data provider alone. The query validation and the schema tools stay as they are.
-2. A state change event that carries the rows of the settled query, so an application can narrow its own grid without running the query a second time.
+2. A state change event that carries the rows of the settled query, so an application can narrow its own grid without running the query a second time. This touches #9205, which reconsiders `addStateChangeListener` on these controllers.
 
 ### Workaround
 
@@ -31,7 +31,7 @@ The controller drives a `Grid<AIDataRow>` that is never shown, over an in memory
 
 ### Reproduce
 
-`mvn test` in the project below, with a Vaadin licence on the machine, since the controller is commercial. `GridControllerTest` prints:
+The two snippets above, as a test that also prints the columns of a typed grid for comparison:
 
 | Line | Printed |
 | --- | --- |
@@ -40,13 +40,5 @@ The controller drives a `Grid<AIDataRow>` that is never shown, over an in memory
 | after | `[Name/Name, Team/Team]` |
 
 The typed grid cannot be passed at all; the `Grid<AIDataRow>` loses the column the application gave it.
-
-### Getting the project
-
-[`21-ai-surfaces.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/21-ai-surfaces.zip), 5 KB, sources only. It needs a Vaadin licence for the commercial AI extensions. Unzip it and:
-
-```
-mvn test -Dtest=GridControllerTest
-```
 
 Found on 25.4.0-beta2. The same constructor is on 25.3.5.

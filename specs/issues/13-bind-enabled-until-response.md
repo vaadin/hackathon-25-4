@@ -34,20 +34,12 @@ Signal.effect(check, () -> check.setEnabled(asked.get()));
 
 ### Reproduce
 
-`mvn test` runs three cases and prints one line each. On 25.4.0-beta2:
+Three calls on a new `Button`, each in its own test. On 25.4.0-beta2 they print:
 
 ```
 RESULT setDisableOnClick(UNTIL_RESPONSE), then bindEnabled: IllegalStateException: Binding the enabled state to a signal is not supported when disable on click is active.
 RESULT bindEnabled, then setDisableOnClick(UNTIL_RESPONSE): IllegalStateException: Disable on click is not supported when the enabled state is bound to a signal.
 RESULT setDisableOnClick(UNTIL_RESPONSE), then setEnabled(false): accepted
-```
-
-### Getting the project
-
-[`13-bind-enabled-until-response.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/13-bind-enabled-until-response.zip), 3 KB, sources only. Unzip it and:
-
-```
-mvn test
 ```
 
 Found on 25.4.0-beta2.

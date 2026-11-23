@@ -5,18 +5,7 @@ TITLE: A shared signal changed by another thread before a component is attached 
 
 A component binds a text to a `SharedValueSignal` in its constructor. Before the component is attached, another thread sets the signal. After the attach the bound text still shows the old value, and it stays there: a later round trip finds `peek()` returning the new value and the component still holding the old one.
 
-```java
-bound.bindText(signal);                       // in the constructor, value "initial"
-// before the view is attached, in beforeEnter:
-Thread other = Thread.ofPlatform().start(() -> signal.set("changed"));
-other.join();
-signal.peek();                                // "initial", on the request thread, after the join
-// attached, rendered, and one round trip later:
-signal.peek();                                // "changed"
-bound.getText();                              // "initial"
-```
-
-The same `set` made on the request thread, at the same point, arrives: the text is "changed" when the view renders.
+The same `set` made on the request thread, at the same point, arrives: the text is the new value when the view renders.
 
 ### Why it matters
 
@@ -36,27 +25,56 @@ Hand the change to `VaadinSession.access` when a session is current, so it runs 
 
 ### Reproduce
 
-1. `mvn spring-boot:run`, then open <http://localhost:8111/?by=other>.
-2. The first line is the bound text, the second what the server saw before the attach. Press Ask again for the third line, which is one round trip later.
-3. Open <http://localhost:8111/?by=same> and do the same. That is the control: the same change made on the request thread.
+One view, with `@Push` on the application shell:
 
-What we read on 25.4.0-beta2, with Chrome:
+```java
+@Route("")
+public class ChangedBeforeAttachView extends Div implements BeforeEnterObserver {
+
+    private final SharedValueSignal<String> signal = new SharedValueSignal<>("initial");
+    private final Span bound = new Span();
+    private final Paragraph log = new Paragraph();
+
+    public ChangedBeforeAttachView() {
+        bound.bindText(signal);
+        Signal.effect(this, () -> System.out.println("the effect ran with " + signal.get()));
+        var later = new Paragraph();
+        var ask = new NativeButton("Ask again", click -> later.setText(
+                "a round trip later: peek()=" + signal.peek() + ", the bound text is " + bound.getText()));
+        add(bound, log, ask, later);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        String by = event.getLocation().getQueryParameters().getSingleParameter("by").orElse("other");
+        if (by.equals("same")) {
+            signal.set("changed");
+        } else {
+            Thread other = Thread.ofPlatform().start(() -> signal.set("changed"));
+            try {
+                other.join();
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        log.setText("changed by the " + by + " thread before attach, attached=" + isAttached()
+                + ", peek()=" + signal.peek());
+    }
+}
+```
+
+1. Open `/?by=other`. The first line is the bound text, the second what the server saw before the attach. Press Ask again for the third line, one round trip later.
+2. Open `/?by=same` and do the same. That is the control: the same change made on the request thread.
+
+What we read, the same on 25.4.0-beta2 and on 25.3.5, with Chrome:
 
 | Route | Bound text when rendered | Before the attach | One round trip later |
 | --- | --- | --- | --- |
 | `/?by=other` | `initial` | `attached=false, peek()=initial` | `peek()=changed, the bound text is initial` |
 | `/?by=same` | `changed` | `attached=false, peek()=changed` | `peek()=changed, the bound text is changed` |
 
-Three seconds of waiting on `/?by=other` before pressing the button change nothing, with `@Push` on. The server log agrees: the effect beside the binding prints `the effect ran with initial` once for `/?by=other` and never again.
+Three seconds of waiting on `/?by=other` before pressing the button change nothing. The server log agrees: the effect beside the binding prints `the effect ran with initial` once for `/?by=other` and never again.
 
 Note the second column of the first row as well: on the request thread `peek()` still returns the old value after the thread that called `set` has finished.
 
-### Getting the project
-
-[`11-signal-changed-before-attach.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/11-signal-changed-before-attach.zip), 3 KB, sources only. Unzip it and:
-
-```
-mvn spring-boot:run
-```
-
-Found on 25.4.0-beta2, whose `flow-server` is 25.4.0-beta1.
+Found on 25.4.0-beta2 and 25.3.5.

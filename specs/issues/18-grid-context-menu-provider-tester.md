@@ -31,21 +31,13 @@ The test fires the before open event itself, through `ElementListenerMap`, with 
 
 ### Reproduce
 
-`mvn test` runs two tests on one view with two grids and the same menu, one built through `setDynamicContentProvider`, one through the deprecated `setDynamicContentHandler`. Each opens the menu on the first row with `test(grid).contextMenu(0).open()` and reads the item texts. On 25.4.0-beta2 with browserless-test 25.4.0-beta1 it printed:
+Two browserless tests on one view with two grids and the same menu, one built through `setDynamicContentProvider`, one through the deprecated `setDynamicContentHandler`. Each opens the menu on the first row with `test(grid).contextMenu(0).open()` and reads the item texts. On 25.4.0-beta2 with browserless-test 25.4.0-beta1 they printed:
 
 ```
 setDynamicContentHandler: [Email Ada]
 setDynamicContentProvider: java.lang.NullPointerException: Cannot invoke "tools.jackson.databind.JsonNode.asString()" because the return value of "tools.jackson.databind.node.ObjectNode.get(String)" is null
 ```
 
-and `provider_opens` failed with that exception. A reproduction is the second line; a fix prints `setDynamicContentProvider: [Email Ada]`.
-
-### Getting the project
-
-[`18-grid-context-menu-provider-tester.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/18-grid-context-menu-provider-tester.zip), 4 KB, sources only. Unzip it and:
-
-```
-mvn test
-```
+A reproduction is the second line; a fix prints `setDynamicContentProvider: [Email Ada]`.
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1. `requestMenu` on the main branch of browserless-test is unchanged.

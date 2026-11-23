@@ -1,9 +1,9 @@
 REPO: vaadin/flow-components
-TITLE: Breadcrumbs in ROUTER mode cannot take a leading item that is not a route
+TITLE: Breadcrumbs in ROUTER mode cannot show an item that is not a route of the application
 ---
 ### Description
 
-A trail usually starts with something that is not a view of the application: the company site, the product, a portal. In `ROUTER` mode there is nowhere to put it:
+A trail often holds something that is not a view of the application. In `ROUTER` mode there is nowhere to put it:
 
 ```java
 var breadcrumbs = new Breadcrumbs();
@@ -16,7 +16,9 @@ IllegalStateException: Cannot modify breadcrumb items manually in Mode.ROUTER. S
 
 ### Why it matters
 
-One fixed item forces `MANUAL` mode, and `MANUAL` mode means rewriting everything `ROUTER` mode does: listening to navigation, walking `RouteConfiguration.getRouteHierarchy`, resolving each title with `Router.resolvePageTitle`, linking the ancestors and leaving the leaf without a path. Ours is about thirty lines that exist only to add one link.
+It is common, not a corner case. An application that is one part of a larger site starts its trail with the site's pages. One app of a suite links back to the shared portal. A section label such as "Settings" in "Settings › Users" has no view of its own. A link the design wants in the trail is a route but not the logical parent of the page.
+
+One such item forces `MANUAL` mode, and `MANUAL` mode means rewriting everything `ROUTER` mode does: listening to navigation, walking `RouteConfiguration.getRouteHierarchy`, resolving each title with `Router.resolvePageTitle`, linking the ancestors and leaving the leaf without a path. Ours is about thirty lines that exist only to add one link.
 
 ### Expected
 

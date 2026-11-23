@@ -1,3 +1,5 @@
+Withdrawn: already fixed. vaadin/docs#6587, merged on 2026-11-22, moved the Grid page example, its text and the 25.4 upgrade guide to `setDynamicContentProvider`.
+
 REPO: vaadin/docs
 TITLE: The Grid context menu example uses setDynamicContentHandler, deprecated for removal in 25.4, and no page shows setDynamicContentProvider
 ---

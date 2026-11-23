@@ -7,7 +7,7 @@ A grid with an item details renderer and the default `setDetailsVisibleOnClick(t
 
 ### Reproduce
 
-`mvn test` runs two tests on one grid of two names whose details renderer is `new Span("Details of " + name)`. On 25.4.0-beta2 it printed:
+Two tests on one grid of two names whose details renderer is `new Span("Details of " + name)`. On 25.4.0-beta2 they printed:
 
 ```
 details visible after clickRow(0): false
@@ -15,18 +15,10 @@ details visible after setDetailsVisible: true
 Span "Details of Ada" found by a query: 1
 ```
 
-and `clicking_a_row_opens_its_details` failed. `mvn test -Dvaadin.version=25.3.5` prints the same. A fix prints `true` on the first line.
+25.3.5 prints the same. A fix prints `true` on the first line.
 
 ### Expected
 
 `clickRow` does what the browser does with the grid's own click behaviour: toggles the row's details when `isDetailsVisibleOnClick()` is true, as `select` already follows the selection mode.
-
-### Getting the project
-
-[`20-grid-item-details-tester.zip`](https://github.com/vaadin/hackathon-25-4/raw/COMMIT_SHA/specs/issues/projects/20-grid-item-details-tester.zip), 3 KB, sources only. Unzip it and:
-
-```
-mvn test
-```
 
 Found on 25.4.0-beta2, browserless-test 25.4.0-beta1, and the same on 25.3.5.
