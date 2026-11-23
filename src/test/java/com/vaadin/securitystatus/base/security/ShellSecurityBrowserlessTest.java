@@ -97,10 +97,9 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         // D-203: the shell draws the H1 in its bar, the explorer's title the prototype's, and the four
         // destinations are links in the bar beside it, so the left panel holds only the filter.
         assertThat($(H1.class).single().getText()).isEqualTo("Vaadin security status");
-        // D-237: the destinations are the left panel's side navigation, the advisories list among them.
+        // D-237, D-245: the left panel's side navigation, in the order the team works.
         assertThat($(SideNavItem.class).withClassName("internal-nav-link").all()).extracting(SideNavItem::getLabel)
-                .containsExactly("Findings", "What Spring Boot brings", "Verdict workbench", "Diagnostics",
-                        "All advisories");
+                .containsExactly("Customer view", "Findings", "Spring Boot", "Verdicts", "Advisories", "Diagnostics");
         assertThat($(Button.class).withText("Sign out").exists()).isTrue();
     }
 

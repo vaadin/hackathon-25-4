@@ -17,7 +17,6 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadFileList;
-import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.base.ai.AiSurfaces;
@@ -29,9 +28,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import jakarta.annotation.security.RolesAllowed;
 
 /**
- * The shell of the internal routes: a left panel with the destinations of
- * {@code @Menu} and the advisories list, and under them what the route gives
- * it, the explorer's filter and products, D-237; a bar over the content with
+ * The shell of the internal routes: a left panel with the destinations, the
+ * customer's page first, and under them what the route gives it, the
+ * explorer's filter and products, D-237 and D-245; a bar over the content with
  * the drawer toggle, the page's H1, the trail, the measured chip, the scheme
  * choice and Sign out; and the assistant as a panel on the right that the
  * Assistant button opens.
@@ -68,15 +67,14 @@ public final class InternalLayout extends AppLayout {
         var nav = new SideNav();
         nav.addClassName("internal-nav");
         nav.getElement().setAttribute("aria-label", getTranslation("shell.nav.label"));
-        MenuConfiguration.getMenuEntries().forEach(entry -> {
-            var item = new SideNavItem(getTranslation(entry.title()), entry.path());
-            item.addClassName("internal-nav-link");
-            nav.addItem(item);
-        });
-        // The customer side's catalogue, which the team reads as often as the explorer.
-        var advisories = new SideNavItem(getTranslation("shell.nav.advisories"), "findings/advisories");
-        advisories.addClassName("internal-nav-link");
-        nav.addItem(advisories);
+        // In the order the team works, D-245: what the customer sees first, then the measurements,
+        // the verdicts written from them, the catalogue, and the application's own health.
+        var findings = navItem("shell.nav.findings", "findings");
+        findings.addItem(navItem("shell.nav.spring", "findings/spring"));
+        findings.setExpanded(true);
+        nav.addItem(navItem("shell.nav.customer", ""), findings, navItem("shell.nav.verdicts", "findings/workbench"),
+                navItem("shell.nav.advisories", "findings/advisories"),
+                navItem("shell.nav.diagnostics", "diagnostics"));
 
         var appBar = new AppBar(dataRefresh, authentication);
         addToNavbar(toggle, heading, appBar);
@@ -133,6 +131,12 @@ public final class InternalLayout extends AppLayout {
         if (oldContent != null) {
             oldContent.getElement().removeFromParent();
         }
+    }
+
+    private SideNavItem navItem(String key, String path) {
+        var item = new SideNavItem(getTranslation(key), path);
+        item.addClassName("internal-nav-link");
+        return item;
     }
 
     /**
