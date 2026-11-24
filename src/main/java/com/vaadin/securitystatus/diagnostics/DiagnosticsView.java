@@ -346,6 +346,8 @@ public final class DiagnosticsView extends Composite<Div> {
             for (Outcome outcome : Outcome.values()) {
                 total.addDataCell(String.valueOf(counted.total(outcome)));
             }
+            total.addDataCell(millis(counted.totalMillis() / (double) counted.total()));
+            total.addDataCell(millis(counted.longestMillis()));
             body.add(table);
         });
         return section;

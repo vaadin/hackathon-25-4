@@ -39,7 +39,7 @@ The view is internal and for the team, so the support engineer meets it only as 
 
 ### Minor
 
-- The total row of the navigations has no mean and no longest, so its bottom border stops two columns short.
+- The total row of the navigations has no mean and no longest, so its bottom border stops two columns short. Fixed on 2026-11-24: the mean is weighted by navigations and the longest is the largest of every route.
 - The navigations panel leaves an empty block below it when the requests column is taller.
 - Handler kinds and route templates are developer names, not words.
 - The assistant tail rows can be very tall with a full tool result.

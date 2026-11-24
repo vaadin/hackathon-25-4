@@ -38,6 +38,7 @@ import com.vaadin.securitystatus.base.observe.AssistantTail;
 import com.vaadin.securitystatus.base.security.CspViolations;
 import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
+import com.vaadin.securitystatus.diagnostics.DiagnosticsCounters.Navigations;
 import com.vaadin.securitystatus.diagnostics.DiagnosticsCounters.RouteCount;
 import com.vaadin.securitystatus.explorer.SpringView;
 
@@ -91,6 +92,15 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         assertThat(cells("/no-such-route")).startsWith("/no-such-route", "0",
                 String.valueOf(missing.refused()), "0", "0", "0");
         assertThat(cells("/diagnostics").get(1)).isEqualTo(String.valueOf(diagnostics.completed() + 1));
+
+        // The total row has its mean, weighted by navigations, and its longest, like every route.
+        Navigations all = counters.navigations().peek();
+        List<String> total = $(TableRow.class).withClassName("diagnostics-total").single().getElement().getChildren()
+                .map(cell -> cell.getTextRecursively()).toList();
+        assertThat(total).hasSize(8);
+        assertThat(total.get(7)).isEqualTo(all.longestMillis() + ".0 ms");
+        assertThat(all.longestMillis()).isEqualTo(all.routes().stream().mapToLong(RouteCount::longestMillis).max()
+                .orElseThrow());
     }
 
     @Test

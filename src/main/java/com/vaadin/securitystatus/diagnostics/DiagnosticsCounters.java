@@ -73,6 +73,15 @@ public class DiagnosticsCounters {
         public long total() {
             return routes.stream().mapToLong(RouteCount::total).sum();
         }
+
+        /** The time of every navigation, for a mean weighted by how often each route was taken. */
+        public long totalMillis() {
+            return routes.stream().mapToLong(RouteCount::totalMillis).sum();
+        }
+
+        public long longestMillis() {
+            return routes.stream().mapToLong(RouteCount::longestMillis).max().orElse(0);
+        }
     }
 
     /** The requests that ended in one minute. */
