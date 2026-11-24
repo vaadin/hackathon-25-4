@@ -119,7 +119,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(H1.class).single().getText()).isEqualTo("Vaadin security status");
         // D-237, D-245: the left panel's side navigation, in the order the team works.
         assertThat($(SideNavItem.class).withClassName("internal-nav-link").all()).extracting(SideNavItem::getLabel)
-                .containsExactly("Customer view", "Findings", "Spring Boot", "Verdicts", "Advisories", "Diagnostics");
+                .containsExactly("Findings", "Spring Boot", "Customer view", "Verdicts", "Advisories", "Diagnostics");
         assertThat($(Button.class).withClassName("sign-out").exists()).isTrue();
     }
 

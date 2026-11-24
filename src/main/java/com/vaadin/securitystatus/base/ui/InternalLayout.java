@@ -68,12 +68,12 @@ public final class InternalLayout extends AppLayout {
         var nav = new SideNav();
         nav.addClassName("internal-nav");
         nav.getElement().setAttribute("aria-label", getTranslation("shell.nav.label"));
-        // In the order the team works, D-245: what the customer sees first, then the measurements,
-        // the verdicts written from them, the catalogue, and the application's own health.
+        // In the order the team works, D-245 and D-252: the measurements, what the customer sees of
+        // them, the verdicts written from them, the catalogue, and the application's own health.
         var findings = navItem("shell.nav.findings", "findings");
         findings.addItem(navItem("shell.nav.spring", "findings/spring"));
         findings.setExpanded(true);
-        nav.addItem(navItem("shell.nav.customer", ""), findings, navItem("shell.nav.verdicts", "findings/workbench"),
+        nav.addItem(findings, navItem("shell.nav.customer", ""), navItem("shell.nav.verdicts", "findings/workbench"),
                 navItem("shell.nav.advisories", "findings/advisories"),
                 navItem("shell.nav.diagnostics", "diagnostics"));
 
