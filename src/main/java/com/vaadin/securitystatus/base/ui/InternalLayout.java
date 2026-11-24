@@ -14,8 +14,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -65,17 +63,7 @@ public final class InternalLayout extends AppLayout {
         toggle.setAriaLabel(getTranslation("shell.drawer.toggle"));
         var heading = new ViewHeading();
 
-        var nav = new SideNav();
-        nav.addClassName("internal-nav");
-        nav.getElement().setAttribute("aria-label", getTranslation("shell.nav.label"));
-        // In the order the team works, D-245 and D-252: the measurements, what the customer sees of
-        // them, the verdicts written from them, the catalogue, and the application's own health.
-        var findings = navItem("shell.nav.findings", "findings");
-        findings.addItem(navItem("shell.nav.spring", "findings/spring"));
-        findings.setExpanded(true);
-        nav.addItem(findings, navItem("shell.nav.customer", ""), navItem("shell.nav.verdicts", "findings/workbench"),
-                navItem("shell.nav.advisories", "findings/advisories"),
-                navItem("shell.nav.diagnostics", "diagnostics"));
+        var nav = new TeamNavigation();
 
         var appBar = new AppBar(dataRefresh, authentication);
         addToNavbar(toggle, heading, appBar);
@@ -133,12 +121,6 @@ public final class InternalLayout extends AppLayout {
         if (oldContent != null) {
             oldContent.getElement().removeFromParent();
         }
-    }
-
-    private SideNavItem navItem(String key, String path) {
-        var item = new SideNavItem(getTranslation(key), path);
-        item.addClassName("internal-nav-link");
-        return item;
     }
 
     /**

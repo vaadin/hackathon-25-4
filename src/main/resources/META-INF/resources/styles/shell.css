@@ -163,3 +163,36 @@
 .advisory-id {
   white-space: nowrap;
 }
+
+/* A team member on the customer pages: the team's navigation beside the customer column, D-253.
+   Below a narrow window it gives the room back to the answer; the shield in the bar still leads home. */
+.customer-team-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.customer-team-nav {
+    flex: 0 0 15rem;
+    padding: 0.5rem;
+    border-inline-end: 1px solid var(--vaadin-border-color-secondary);
+    box-sizing: border-box;
+}
+
+.customer-team-body > .customer-column {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Beside the navigation the shield in the bar says nothing new; on a narrow window it is the way home. */
+@media (min-width: 801px) {
+    .customer-shell:has(.customer-team-nav) .team-pages {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+    .customer-team-nav {
+        display: none;
+    }
+}

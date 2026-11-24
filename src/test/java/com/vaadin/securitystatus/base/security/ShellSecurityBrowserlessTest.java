@@ -28,6 +28,7 @@ import com.vaadin.flow.server.WrappedHttpSession;
 import com.vaadin.securitystatus.base.ui.NotFoundView;
 import com.vaadin.securitystatus.explorer.ExplorerView;
 import com.vaadin.securitystatus.status.HomeView;
+import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -66,6 +67,18 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         navigate(HomeView.class);
 
         assertThat($(Anchor.class).withClassName("team-pages").exists()).isFalse();
+        assertThat($(SideNav.class).exists()).isFalse();
+    }
+
+    // D-253: a team member reads the customer pages with the team's navigation beside them
+    @Test
+    @WithMockUser(username = "team", roles = Roles.SECURITY)
+    void the_team_reads_the_customer_pages_beside_its_navigation() {
+        navigate(HomeView.class);
+
+        assertThat($(SideNavItem.class).withClassName("internal-nav-link").all()).extracting(SideNavItem::getLabel)
+                .containsExactly("Findings", "Spring Boot", "Customer view", "Verdicts", "Advisories", "Diagnostics");
+        assertThat($(H1.class).single().getText()).isEqualTo("Security status");
     }
 
     // FND-01

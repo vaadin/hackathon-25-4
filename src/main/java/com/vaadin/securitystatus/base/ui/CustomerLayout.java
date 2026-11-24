@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 
 /**
@@ -46,7 +48,16 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
 
         var column = new Main(heading, purpose, lookupMount, content);
         column.addClassName("customer-column");
-        getContent().add(AppBar.customer(dataRefresh, authentication), column);
+        if (authentication.hasRole(Roles.SECURITY)) {
+            // A team member reads the customer pages with the team's navigation beside them, D-253.
+            var side = new Aside(new TeamNavigation());
+            side.addClassName("customer-team-nav");
+            var body = new Div(side, column);
+            body.addClassName("customer-team-body");
+            getContent().add(AppBar.customer(dataRefresh, authentication), body);
+        } else {
+            getContent().add(AppBar.customer(dataRefresh, authentication), column);
+        }
     }
 
     /** Where the lookup is mounted, once per window. */
