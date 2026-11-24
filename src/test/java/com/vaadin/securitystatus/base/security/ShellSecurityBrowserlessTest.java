@@ -57,7 +57,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
 
         Anchor back = $(Anchor.class).withClassName("team-pages").single();
         assertThat(back.getHref()).isEqualTo("findings");
-        assertThat(back.getText()).isEqualTo("Team pages");
+        assertThat(back.getElement().getAttribute("aria-label")).isEqualTo("Team pages");
     }
 
     @Test
@@ -74,7 +74,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     void anonymous_navigation_to_findings_lands_on_login() {
         navigate("findings", LoginView.class);
 
-        assertThat($(Button.class).withText("Sign out").exists()).isFalse();
+        assertThat($(Button.class).withClassName("sign-out").exists()).isFalse();
     }
 
     // FND-01
@@ -120,7 +120,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         // D-237, D-245: the left panel's side navigation, in the order the team works.
         assertThat($(SideNavItem.class).withClassName("internal-nav-link").all()).extracting(SideNavItem::getLabel)
                 .containsExactly("Customer view", "Findings", "Spring Boot", "Verdicts", "Advisories", "Diagnostics");
-        assertThat($(Button.class).withText("Sign out").exists()).isTrue();
+        assertThat($(Button.class).withClassName("sign-out").exists()).isTrue();
     }
 
     // FND-02
@@ -130,6 +130,6 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         navigate("findings", NotFoundView.class);
 
         assertThat($(SideNavItem.class).withClassName("internal-nav-link").exists()).isFalse();
-        assertThat($(Button.class).withText("Sign out").exists()).isTrue();
+        assertThat($(Button.class).withClassName("sign-out").exists()).isTrue();
     }
 }

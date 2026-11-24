@@ -92,25 +92,26 @@ class ThemeFirstPaintIT {
         assertThat(isLightText(currentColor())).isTrue();
     }
 
+    /** Clicks the scheme button until it is on the scheme the label names, at most once round. */
     private void choose(String label) {
-        driver.findElement(By.cssSelector("vaadin-menu-bar.theme-switch vaadin-menu-bar-button")).click();
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> d.findElements(By.cssSelector("vaadin-menu-bar-item"))
-                .stream().filter(item -> label.equals(item.getText().trim())).findFirst().map(item -> {
-                    item.click();
-                    return true;
-                }).orElse(false));
+        String wanted = label.toLowerCase(java.util.Locale.ROOT);
+        for (int i = 0; i < 3 && !wanted.equals(chosen()); i++) {
+            String before = chosen();
+            driver.findElement(By.cssSelector("vaadin-button.theme-switch")).click();
+            new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> !before.equals(chosen()));
+        }
     }
 
     private void awaitSwitch() {
         new WebDriverWait(driver, Duration.ofSeconds(30))
-                .until(d -> !d.findElements(By.cssSelector("vaadin-menu-bar.theme-switch")).isEmpty());
+                .until(d -> !d.findElements(By.cssSelector("vaadin-button.theme-switch")).isEmpty());
         // The menu learns the remembered choice from the browser one round trip after it is attached.
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> !chosen().isEmpty());
     }
 
     private String chosen() {
         Object scheme = driver.executeScript(
-                "return document.querySelector('vaadin-menu-bar.theme-switch')?.getAttribute('data-scheme') ?? ''");
+                "return document.querySelector('vaadin-button.theme-switch')?.getAttribute('data-scheme') ?? ''");
         return String.valueOf(scheme);
     }
 

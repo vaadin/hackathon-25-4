@@ -6,7 +6,7 @@ Aura, as the walking skeleton ships it, with design tokens over component CSS. T
 
 ## Light and dark
 
-- A half light, half dark button in the app bar, both halves of the application, whose menu offers three choices, the current one checked: System, Light, Dark, D-239. Before that, a select. System is the default and the way back: choosing it forgets the remembered choice. Decided by Manolo on 2026-11-23, P-02, replacing the Switch, which was 22 pixels tall and had no way back to the system.
+- One icon button in the app bar, both halves of the application, that steps through System, Light and Dark at each click, its icon saying which is on: a half circle, a sun, a moon, D-247. Before that a menu, D-239, and a select. System is the default and the way back: choosing it forgets the remembered choice. Decided by Manolo on 2026-11-23, P-02, replacing the Switch, which was 22 pixels tall and had no way back to the system.
 - The default follows the system. A reader who disagrees with their system can say so, and the choice is remembered through the typed `WebStorage` accessors, because a preference query cannot be argued with: that is rule 6.8.6 of the source spec.
 - The choice applies before the first paint, or the page paints light and repaints dark, which is worse than no choice at all: rule 6.9.1.
 

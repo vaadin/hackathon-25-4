@@ -11,6 +11,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.sidenav.SideNav;
@@ -101,9 +102,10 @@ public final class InternalLayout extends AppLayout {
             assistantPanel.bindVisible(assistantOpen);
             frame.add(assistantPanel);
 
-            var open = new Button(getTranslation("shell.assistant.open"),
-                    click -> assistantOpen.set(!assistantOpen.peek()));
+            var open = new Button(VaadinIcon.CHAT.create(), click -> assistantOpen.set(!assistantOpen.peek()));
             open.addThemeVariants(ButtonVariant.TERTIARY);
+            open.setAriaLabel(getTranslation("shell.assistant.open"));
+            open.setTooltipText(getTranslation("shell.assistant.open"));
             open.addClassName("assistant-toggle");
             open.getElement().setAttribute("aria-expanded", "false");
             com.vaadin.flow.signals.Signal.effect(open, () -> open.getElement().setAttribute("aria-expanded",

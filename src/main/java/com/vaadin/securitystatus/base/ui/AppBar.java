@@ -26,6 +26,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.base.security.Roles;
 
@@ -72,14 +73,18 @@ public final class AppBar extends Composite<Header> {
         getContent().add(breadcrumbs, measured, new ThemeSwitch());
         if (customer && authentication.hasRole(Roles.SECURITY)) {
             // The way back to the team's pages from the customer side, D-246.
-            var team = new Anchor("findings", getTranslation("shell.teamPages"));
+            var team = new Anchor("findings", VaadinIcon.SHIELD.create());
             team.getElement().setAttribute("router-link", true);
+            team.getElement().setAttribute("aria-label", getTranslation("shell.teamPages"));
+            Tooltip.forComponent(team).setText(getTranslation("shell.teamPages"));
             team.addClassName("team-pages");
             getContent().add(team);
         }
         if (authentication.isAuthenticated()) {
-            var signOut = new Button(getTranslation("shell.signOut"), click -> authentication.logout());
+            var signOut = new Button(VaadinIcon.SIGN_OUT.create(), click -> authentication.logout());
             signOut.addThemeVariants(ButtonVariant.TERTIARY);
+            signOut.setAriaLabel(getTranslation("shell.signOut"));
+            signOut.setTooltipText(getTranslation("shell.signOut"));
             signOut.addClassName("sign-out");
             getContent().add(signOut);
         }

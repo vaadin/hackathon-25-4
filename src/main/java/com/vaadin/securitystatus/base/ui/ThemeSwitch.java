@@ -1,47 +1,44 @@
 package com.vaadin.securitystatus.base.ui;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.page.ColorScheme;
 import com.vaadin.flow.component.page.WebStorage;
 
 /**
- * The color scheme choice: a half light, half dark button whose menu offers
- * following the system, light or dark, the current one checked. It starts on
- * the remembered choice or, failing that, on the system, and a change by the
- * reader is remembered. Choosing the system again forgets the choice, D-239.
+ * The color scheme choice: one icon button that steps through following the
+ * system, light and dark, its icon saying which one is on, a half circle, a
+ * sun or a moon. It starts on the remembered choice or, failing that, on the
+ * system, and a change by the reader is remembered. Coming round to the
+ * system again forgets the choice, D-247.
  */
-public final class ThemeSwitch extends Composite<MenuBar> {
+public final class ThemeSwitch extends Composite<Button> {
 
-    /** The three positions, in the order the menu lists them. */
+    /** The three positions, in the order a click steps through them. */
     public enum Scheme {
-        SYSTEM, LIGHT, DARK
+        SYSTEM(VaadinIcon.ADJUST), LIGHT(VaadinIcon.SUN_O), DARK(VaadinIcon.MOON);
+
+        final VaadinIcon icon;
+
+        Scheme(VaadinIcon icon) {
+            this.icon = icon;
+        }
+
+        Scheme next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
     }
 
-    private final Map<Scheme, MenuItem> items = new EnumMap<>(Scheme.class);
+    private Scheme current = Scheme.SYSTEM;
 
     ThemeSwitch() {
         addClassName("theme-switch");
-        MenuBar bar = getContent();
-        bar.addThemeVariants(MenuBarVariant.TERTIARY);
-        String label = getTranslation("shell.theme.label");
-        MenuItem button = bar.addItem(VaadinIcon.ADJUST.create());
-        button.setAriaLabel(label);
-        bar.setTooltipText(button, label);
-        for (Scheme scheme : Scheme.values()) {
-            MenuItem item = button.getSubMenu()
-                    .addItem(getTranslation("shell.theme." + scheme.name().toLowerCase()), click -> choose(scheme));
-            item.setCheckable(true);
-            item.addClassName("theme-" + scheme.name().toLowerCase());
-            items.put(scheme, item);
-        }
+        getContent().addThemeVariants(ButtonVariant.TERTIARY);
+        getContent().addClickListener(click -> choose(current.next()));
+        mark(Scheme.SYSTEM);
         addAttachListener(attach -> restore(attach.getUI()));
     }
 
@@ -67,9 +64,18 @@ public final class ThemeSwitch extends Composite<MenuBar> {
         });
     }
 
-    private void mark(Scheme chosen) {
-        items.forEach((scheme, item) -> item.setChecked(scheme == chosen));
-        getElement().setAttribute("data-scheme", chosen.name().toLowerCase());
+    private void mark(Scheme scheme) {
+        current = scheme;
+        Button button = getContent();
+        button.setIcon(scheme.icon.create());
+        String says = getTranslation("shell.theme.now", name(scheme), name(scheme.next()));
+        button.setAriaLabel(says);
+        button.setTooltipText(says);
+        getElement().setAttribute("data-scheme", scheme.name().toLowerCase());
+    }
+
+    private String name(Scheme scheme) {
+        return getTranslation("shell.theme." + scheme.name().toLowerCase());
     }
 
     private static void apply(UI ui, Scheme scheme) {
