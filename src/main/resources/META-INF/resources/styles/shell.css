@@ -109,8 +109,14 @@
     padding: 0.5rem;
 }
 
+/* The route's own panel, the explorer's filter, is a card of its own under the plain navigation,
+   so the two read as different things: where to go, and what to show here, D-251. */
 .internal-route-panel {
-    border-top: 1px solid var(--vaadin-border-color-secondary);
+    margin: 0.25rem 0.5rem 0.75rem;
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-l, 12px);
+    background: var(--vaadin-background-container);
+    overflow: hidden;
 }
 
 .internal-frame {
