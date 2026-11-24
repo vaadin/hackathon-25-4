@@ -415,6 +415,13 @@
     width: 100%;
     padding: 0.625rem 0.75rem;
     box-sizing: border-box;
+    /* The chevron at the height of the series' first line, not centred on a row that wraps. */
+    align-items: flex-start;
+}
+
+.explorer-row > vaadin-details-summary::part(toggle) {
+    align-self: flex-start;
+    margin-block-start: 0.125rem;
 }
 
 .explorer-row-summary {
@@ -429,7 +436,8 @@
 .explorer-row-line {
     min-width: 3rem;
     font-weight: var(--aura-font-weight-semibold, 600);
-    color: var(--vaadin-accent-color, inherit);
+    /* The series in the accent text color, as the prototype draws it. */
+    color: var(--aura-accent-text-color, inherit);
 }
 
 .explorer-row-version {
