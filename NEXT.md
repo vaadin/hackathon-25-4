@@ -18,7 +18,7 @@ Session six aligned the release page, the Spring Boot page and the verdict workb
 
 1. **`NEEDS-A-PERSON.md`, 20 rows, 4 open.** P-01, the interactive polish pass, carried on with the person through D-237 to D-253 and closed when the person says so. P-13, only the progress of a large upload. P-18, the camera on a phone, signed in as the team, through the assistant in the drawer. P-20, the rehearsal of `DEMO.md` with the model key and in production mode with a licence, as well as on the fixtures.
 2. **`DECISIONS.md`, 254 rows, D-01 to D-254.** Reviewed by the person up to D-236; D-237 to D-254 were taken with the person during the demo pass and the refactor.
-3. **The issue drafts, `specs/issues/`.** Every ready draft is posted, 19 entries in `posted.txt`; the Not ready table is empty. Two questions stay with the person: whether the comparison of `REPORT.md` with the prototype is fair as written, and whether `vaadin/docs#6625`, the open pull request documenting `NativeForm`, gets a comment.
+3. **The issue drafts, `specs/issues/`.** Every ready draft is posted, 19 entries in `posted.txt`; the Not ready table is empty. Two questions stay with the person: whether the comparison of `REPORT.md` with the prototype is fair as written. `vaadin/docs#6625`, documenting `NativeForm`, was merged on 2026-11-22; whether to ask vaadin/docs for a sentence on `form-action` there is the person's call.
 
 The accounts for the prototype's two gates are the person's and were never written into this repository, any commit, review, draft or report; a session that needs them gets them from the person. Before committing, `grep -rn -i` over the repository and the history for the account names and their domain comes back empty.
 
@@ -134,7 +134,7 @@ The paths below were written before D-254. Since then `base/security` is `securi
 - The workbench drives its YAML through a `ValueSignal` that the binder's value change listener writes, rather than reading fields inside an effect.
 - In auto responsive mode a `FormLayout` keeps its fields at the column width, about 12em, whatever `setWidthFull` says, until `setExpandColumns(true)` and `setExpandFields(true)` are set. Labels stay aside only while the layout is wider than the label width plus the column width: with 11em and 20em they fell above the fields at a 1200 pixel window, so the form uses 10em and 16em.
 - A form GET sends every line break as CR LF. What GitHub's editor does with that is P-17.
-- `vaadin/docs#6625` documents `NativeForm`; until it lands the javadoc is the only reference.
+- `vaadin/docs#6625`, merged on 2026-11-22, documents `NativeForm` under HTML elements; it says nothing about the CSP `form-action` directive a form into another site needs.
 - A view that renders hundreds of rows at once, the Spring Boot page with its risk folds open, paints slowly: a Playwright viewport screenshot taken right after navigation came back blank while the DOM was complete. Wait, or fold, before screenshotting.
 - A component that a test reaches through `Details.getContent()` must be the direct child, not wrapped in a `Composite`: `FindingGrid` extends `Grid` for that reason, the explorer tests filter the folds' children by `Grid.class`.
 - Spring Boot advice has two "nothing newer" cases: no newer patch of the line, while a later minor may exist, and nothing newer in the major. Saying "within this major" while naming a later minor contradicts itself, which the review caught.
