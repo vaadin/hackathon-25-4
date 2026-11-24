@@ -421,7 +421,8 @@
 
 .explorer-row > vaadin-details-summary::part(toggle) {
     align-self: flex-start;
-    margin-block-start: 0.125rem;
+    margin-block-start: -0.125rem;
+    scale: 0.8;
 }
 
 .explorer-row-summary {
