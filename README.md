@@ -1,6 +1,9 @@
 # Security Status 25.4
 
-A rebuild of Vaadin's two security status pages on Vaadin 25.4, built specification first, for the 25.4 hackathon.
+A rebuild of Vaadin's two security status pages on Vaadin 25.4, built specification first, for the 25.4 hackathon. Two goals:
+
+1. **Turn the prototype into a production ready Vaadin application** that can be served from vaadin.com.
+2. **Cover the new features of Vaadin 25.4** and report the bugs and issues found on the way.
 
 The originals live in vaadin/cve-status: two static JavaScript pages on GitHub Pages that compute everything in the reader's browser from the published JSON. One answers customers ("is my Vaadin version safe, and what do I do?"), the other is the security team's findings explorer behind a client side gate. This application answers the same questions from the same JSON as one Vaadin Flow application, with a real sign in, real addresses, server side parsing of scanner reports, and two things the originals do not have: an AI assistant for the team and a diagnostics board.
 
