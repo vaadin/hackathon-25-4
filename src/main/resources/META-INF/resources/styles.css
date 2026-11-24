@@ -1,15 +1,17 @@
-@import url("styles/shell.css");
-@import url("styles/data.css");
-@import url("styles/lookup.css");
-@import url("styles/home.css");
-@import url("styles/version.css");
-@import url("styles/cve.css");
-@import url("styles/scan.css");
-@import url("styles/advisories.css");
-@import url("styles/explorer.css");
-@import url("styles/workbench.css");
-@import url("styles/assistant.css");
-@import url("styles/diagnostics.css");
+@import url("styles/common/shell.css");
+@import url("styles/common/data.css");
+@import url("styles/customer/lookup.css");
+@import url("styles/customer/home.css");
+@import url("styles/customer/version.css");
+@import url("styles/customer/cve.css");
+@import url("styles/customer/scan.css");
+@import url("styles/customer/advisories.css");
+/* The team's part: delete this folder and these lines with the team's packages, D-254. */
+@import url("styles/team/shell.css");
+@import url("styles/team/explorer.css");
+@import url("styles/team/workbench.css");
+@import url("styles/team/assistant.css");
+@import url("styles/team/diagnostics.css");
 
 html {
     --aura-base-font-size: 16;

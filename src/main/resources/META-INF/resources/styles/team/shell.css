@@ -1,0 +1,111 @@
+/* The team's shell: the internal layout, its left panel and assistant, and the team's navigation beside the customer pages. */
+.internal-shell .app-bar {
+    flex: 1 1 24rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    padding-inline-start: 0.5rem;
+}
+
+/* The bar wraps onto a second row rather than push Sign out off a laptop's screen. */
+.internal-shell::part(navbar) {
+    flex-wrap: wrap;
+}
+
+.internal-shell .app-bar > vaadin-breadcrumbs {
+    flex: 1 1 12rem;
+}
+
+.lookup-mount:empty,
+.assistant-mount:empty {
+    display: none;
+}
+
+/* The internal shell, D-237: the H1 in the bar after the toggle, the route and the assistant
+   side by side under it. */
+.internal-shell > [slot="navbar"].view-heading,
+.internal-shell .view-heading {
+    font-size: 1.125rem;
+    white-space: nowrap;
+}
+
+.internal-shell vaadin-drawer-toggle[hidden] {
+    display: none;
+}
+
+/* The destinations at the top of the left panel, D-237; the route's own panel under them. */
+.internal-drawer {
+    display: flex;
+    flex-direction: column;
+}
+
+.internal-nav {
+    padding: 0.5rem;
+}
+
+/* The route's own panel, the explorer's filter, is a card of its own under the plain navigation,
+   so the two read as different things: where to go, and what to show here, D-251. */
+.internal-route-panel {
+    margin: 0.25rem 0.5rem 0.75rem;
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-l, 12px);
+    background: var(--vaadin-background-container);
+    overflow: hidden;
+}
+
+.internal-frame {
+    display: flex;
+    align-items: stretch;
+    min-height: 100%;
+}
+
+.internal-route {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.assistant-aside {
+    flex: 0 0 22rem;
+    box-sizing: border-box;
+    border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    display: flex;
+    flex-direction: column;
+}
+
+.assistant-close {
+    align-self: flex-end;
+    margin: 0.25rem 0.5rem 0;
+}
+
+/* A team member on the customer pages: the team's navigation beside the customer column, D-253.
+   Below a narrow window it gives the room back to the answer; the shield in the bar still leads home. */
+.customer-team-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.customer-team-nav {
+    flex: 0 0 15rem;
+    padding: 0.5rem;
+    border-inline-end: 1px solid var(--vaadin-border-color-secondary);
+    box-sizing: border-box;
+}
+
+.customer-team-body > .customer-column {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Beside the navigation the shield in the bar says nothing new; on a narrow window it is the way home. */
+@media (min-width: 801px) {
+    .customer-shell:has(.customer-team-nav) .team-pages {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+    .customer-team-nav {
+        display: none;
+    }
+}

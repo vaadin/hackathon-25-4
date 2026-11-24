@@ -7,7 +7,7 @@ import com.vaadin.flow.component.page.Inline;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.aura.Aura;
-import com.vaadin.securitystatus.base.ui.ThemeMemory;
+import com.vaadin.securitystatus.ui.common.ThemeMemory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

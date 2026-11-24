@@ -18,7 +18,7 @@ import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.Application;
-import com.vaadin.securitystatus.status.HomeView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
 
 /**
  * DAT-05. The nightly publish reaches every open session: the measured chip

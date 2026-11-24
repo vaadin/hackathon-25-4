@@ -15,7 +15,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.vaadin.securitystatus.base.ui.ThemeMemory;
+import com.vaadin.securitystatus.ui.common.ThemeMemory;
 
 /**
  * FND-04. A probe installed before the document exists samples the text color

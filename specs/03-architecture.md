@@ -5,16 +5,21 @@
 ```
 com.vaadin.securitystatus/
   Application.java
-  base/          the shell, breadcrumbs, theme, signals helpers, error handling, i18n
   data/          PagesClient, SecurityDataService, DataRefreshSignal, read models, VersionNumber
-  status/        the customer screens: home, lookup, version, cve, scan, advisories, cases
-  explorer/      the internal front door, release and spring pages
-  workbench/     the verdict queue, the draft form, the YAML export
-  assistant/     the AI surfaces and their tools
-  diagnostics/   the event bus listeners and the diagnostics view
+  security/      Spring Security, roles, the CSP and its report endpoint
+  customer/      the customer's rules: lookup, scan triage, report parsing, version and CVE rules
+  team/
+    explorer/    the explorer, release and Spring Boot rules
+    workbench/   the verdict queue rules, drafts and their repository, the YAML export
+    assistant/   the AI providers, prompts and tools
+    diagnostics/ the event bus listeners and counters
+  ui/
+    common/      the app bar, login, not found, theme, headings, downloads, nav helpers
+    customer/    CustomerLayout, home, lookup, version, cve, scan, advisories, cases
+    team/        InternalLayout, TeamNavigation, and explorer/ workbench/ assistant/ diagnostics/
 ```
 
-A feature package owns its views, its view models and its tests. `base` and `data` are the only packages a feature may depend on, and features never depend on each other: the assistant asks `data`, not `status`. Every package has a `package-info.java` with `@NonNullApi`.
+Two UIs, D-254. The customer UI is `customer` plus `ui/customer`; the team UI is `team` plus `ui/team`, and it reads the customer views as one more page of its own. Every component, view and layout lives under `ui`; the packages outside it hold no components. Nothing outside `team` and `ui/team` imports them: the customer shell finds the team through the `TeamEntrance` interface in `ui/common`, which `ui/team` implements as a Spring bean, the team registers its own aliases of customer views (`findings/advisories`, `findings/cve`) in `TeamRoutes`, and the AI surfaces are reached through `AiSurfaces`. The team's CSS sits in `styles/team/`. To ship the customer UI alone, delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, and the team's tests; `TeamIsRemovableTest` fails the build when a file outside the team reaches into it. Every package has a `package-info.java` with `@NonNullApi`.
 
 ## Views and routing
 

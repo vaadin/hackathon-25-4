@@ -29,19 +29,20 @@ import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.securitystatus.base.security.Roles;
 import com.vaadin.securitystatus.data.FixturePages;
-import com.vaadin.securitystatus.diagnostics.DiagnosticsView;
-import com.vaadin.securitystatus.explorer.ExplorerView;
-import com.vaadin.securitystatus.explorer.ReleaseView;
-import com.vaadin.securitystatus.explorer.SpringView;
-import com.vaadin.securitystatus.status.AdvisoriesView;
-import com.vaadin.securitystatus.status.CasesView;
-import com.vaadin.securitystatus.status.CveView;
-import com.vaadin.securitystatus.status.HomeView;
-import com.vaadin.securitystatus.status.ScanView;
-import com.vaadin.securitystatus.status.VersionView;
-import com.vaadin.securitystatus.workbench.WorkbenchView;
+import com.vaadin.securitystatus.security.Roles;
+import com.vaadin.securitystatus.ui.customer.AdvisoriesView;
+import com.vaadin.securitystatus.ui.customer.CasesView;
+import com.vaadin.securitystatus.ui.customer.CveView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
+import com.vaadin.securitystatus.ui.customer.ScanView;
+import com.vaadin.securitystatus.ui.customer.VersionView;
+import com.vaadin.securitystatus.ui.team.diagnostics.DiagnosticsView;
+import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
+import com.vaadin.securitystatus.ui.team.explorer.ReleaseView;
+import com.vaadin.securitystatus.ui.team.explorer.SpringView;
+import com.vaadin.securitystatus.ui.team.workbench.WorkbenchView;
+import com.vaadin.securitystatus.team.workbench.VerdictDraftRepository;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -78,6 +79,9 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
     FixturePages fixtures;
+
+    @Autowired
+    VerdictDraftRepository drafts;
 
     @AfterEach
     void restore() {
@@ -255,6 +259,8 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
     // Workbench: a package not owned by Spring Boot says nothing about Spring Boot, and leaves no blank behind
     @Test
     void workbench_a_package_not_owned_by_spring_boot_says_nothing_about_it() {
+        // Drafts other tests saved, half filled on purpose, are not this page's absences.
+        drafts.deleteAll();
         navigate(WorkbenchView.class);
 
         assertThat(sweep()).isEmpty();

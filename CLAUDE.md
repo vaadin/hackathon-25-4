@@ -21,11 +21,17 @@ specs/                 the source of truth, start at 00-overview.md
   features/NN-*.md     behaviour, acceptance criteria and the natural language test cases
   user-stories/        epics with US-N.M stories and tasks
 src/main/java/com/vaadin/securitystatus/
-  base/                shell, signals helpers, security, error handling
   data/                the Pages client, caching, read models
-  status/ explorer/ workbench/ assistant/ diagnostics/
-src/main/resources/META-INF/resources/   all CSS and images
+  security/            Spring Security, roles, the CSP
+  customer/            the customer's rules, no components
+  team/                the team's rules: explorer/ workbench/ assistant/ diagnostics/
+  ui/common/           what both UIs share: app bar, login, not found, theme, nav helpers
+  ui/customer/         the customer UI: CustomerLayout and its views
+  ui/team/             the team UI: InternalLayout, TeamNavigation and the views per area
+src/main/resources/META-INF/resources/   all CSS and images, styles/{common,customer,team}
 ```
+
+The team is removable, D-254: delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, and the team's tests. `TeamIsRemovableTest` keeps it that way.
 
 ## Hard rules
 

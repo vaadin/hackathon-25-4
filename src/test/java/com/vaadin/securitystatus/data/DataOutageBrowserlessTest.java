@@ -13,10 +13,10 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.securitystatus.base.security.Roles;
-import com.vaadin.securitystatus.base.ui.DataOutageNotice;
-import com.vaadin.securitystatus.explorer.ExplorerView;
-import com.vaadin.securitystatus.status.HomeView;
+import com.vaadin.securitystatus.security.Roles;
+import com.vaadin.securitystatus.ui.common.DataOutageNotice;
+import com.vaadin.securitystatus.ui.customer.HomeView;
+import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
 
 /** DAT-04. A cold cache and a dead upstream is one sentence in the shell, never an exception page. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
