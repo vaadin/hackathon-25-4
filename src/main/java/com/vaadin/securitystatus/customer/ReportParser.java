@@ -35,8 +35,21 @@ public final class ReportParser {
         /** Not JSON at all. */
         NOT_JSON,
         /** JSON, and none of the four shapes. */
-        UNKNOWN_FORMAT
+        UNKNOWN_FORMAT,
+        /** Larger than the bytes a report may have. */
+        TOO_LARGE,
+        /** More findings than one triage reads. */
+        TOO_MANY_FINDINGS
     }
+
+    /** The most findings one report is read for; a whole application's report has a few hundred. */
+    public static final int MAX_FINDINGS = 10_000;
+
+    /**
+     * The longest coordinate or severity kept. A real purl is well under this;
+     * a longer one is not a coordinate, and is listed as skipped instead.
+     */
+    static final int MAX_TEXT = 300;
 
     /** A file this parser cannot read, with the reason a reader can act on. */
     public static final class RefusedException extends Exception {
@@ -76,10 +89,19 @@ public final class ReportParser {
     }
 
     public static ScannerReport parse(InputStream body) throws RefusedException {
+        return parse(body, Long.MAX_VALUE);
+    }
+
+    /** Reads at most {@code maxBytes}; a longer stream is refused as too large, whatever the browser said. */
+    public static ScannerReport parse(InputStream body, long maxBytes) throws RefusedException {
         JsonNode root;
+        var limited = new Limited(body, maxBytes);
         try {
-            root = JSON.readTree(body);
+            root = JSON.readTree(limited);
         } catch (JacksonException notJson) {
+            if (limited.exceeded) {
+                throw new RefusedException(Refusal.TOO_LARGE, notJson);
+            }
             throw new RefusedException(Refusal.NOT_JSON, notJson);
         }
         if (root == null || !root.isObject()) {
@@ -88,11 +110,15 @@ public final class ReportParser {
         ReportFormat format = detect(root)
                 .orElseThrow(() -> new RefusedException(Refusal.UNKNOWN_FORMAT, null));
         var read = new Read();
-        switch (format) {
-            case OSV_SCANNER -> readOsv(root, read);
-            case DEPENDENCY_CHECK -> readDependencyCheck(root, read);
-            case BOMBER -> readBomber(root, read);
-            case CYCLONEDX -> readCycloneDx(root, read);
+        try {
+            switch (format) {
+                case OSV_SCANNER -> readOsv(root, read);
+                case DEPENDENCY_CHECK -> readDependencyCheck(root, read);
+                case BOMBER -> readBomber(root, read);
+                case CYCLONEDX -> readCycloneDx(root, read);
+            }
+        } catch (TooMany stop) {
+            throw new RefusedException(Refusal.TOO_MANY_FINDINGS, null);
         }
         return new ScannerReport(format, platformVersion(read.named), read.findings, List.copyOf(read.components),
                 read.skipped);
@@ -128,8 +154,70 @@ public final class ReportParser {
             if (ids.isEmpty()) {
                 return;
             }
+            if (coordinate.length() > MAX_TEXT) {
+                skip(coordinate);
+                return;
+            }
+            if (findings.size() >= MAX_FINDINGS) {
+                throw new TooMany();
+            }
             findings.add(new ScannerReport.Finding(ids, coordinate,
-                    Optional.of(severity.toLowerCase(Locale.ROOT)).filter(word -> !word.isBlank())));
+                    Optional.of(severity.toLowerCase(Locale.ROOT)).filter(word -> !word.isBlank())
+                            .filter(word -> word.length() <= MAX_TEXT)));
+        }
+
+        /** A name the reader is told was left out, cut to a length a screen can show. */
+        void skip(String name) {
+            if (skipped.size() >= MAX_FINDINGS) {
+                throw new TooMany();
+            }
+            skipped.add(name.length() > MAX_TEXT ? name.substring(0, MAX_TEXT) + "\u2026" : name);
+        }
+    }
+
+    /** Stops the reading of a report with more findings than {@link #MAX_FINDINGS}. */
+    private static final class TooMany extends RuntimeException {
+
+        TooMany() {
+            super(null, null, false, false);
+        }
+    }
+
+    /** The upload's stream, refusing to give more than the bytes a report may have. */
+    private static final class Limited extends java.io.FilterInputStream {
+
+        private long left;
+        boolean exceeded;
+
+        Limited(InputStream in, long max) {
+            super(in);
+            this.left = max;
+        }
+
+        @Override
+        public int read() throws java.io.IOException {
+            int b = super.read();
+            if (b >= 0) {
+                count(1);
+            }
+            return b;
+        }
+
+        @Override
+        public int read(byte[] buffer, int offset, int length) throws java.io.IOException {
+            int n = super.read(buffer, offset, length);
+            if (n > 0) {
+                count(n);
+            }
+            return n;
+        }
+
+        private void count(long n) throws java.io.IOException {
+            left -= n;
+            if (left < 0) {
+                exceeded = true;
+                throw new java.io.IOException("larger than allowed");
+            }
         }
     }
 
@@ -142,7 +230,7 @@ public final class ReportParser {
                 JsonNode vulnerabilities = entry.path("vulnerabilities");
                 if (name.isBlank()) {
                     if (!vulnerabilities.isEmpty()) {
-                        read.skipped.add(firstNonBlank(result.path("source").path("path").asString(""),
+                        read.skip(firstNonBlank(result.path("source").path("path").asString(""),
                                 pkg.path("purl").asString("")));
                     }
                     continue;
@@ -176,7 +264,7 @@ public final class ReportParser {
             if (coordinates.isEmpty()) {
                 // Findings with nothing to match them on. Named, because left out
                 // they would read as a clean dependency.
-                read.skipped.add(firstNonBlank(dependency.path("fileName").asString(""),
+                read.skip(firstNonBlank(dependency.path("fileName").asString(""),
                         dependency.path("filePath").asString("")));
                 continue;
             }
@@ -195,7 +283,7 @@ public final class ReportParser {
             JsonNode vulnerabilities = entry.path("vulnerabilities");
             if (!coordinate.startsWith("pkg:")) {
                 if (!vulnerabilities.isEmpty()) {
-                    read.skipped.add(firstNonBlank(entry.path("name").asString(""), coordinate));
+                    read.skip(firstNonBlank(entry.path("name").asString(""), coordinate));
                 }
                 continue;
             }
@@ -243,7 +331,7 @@ public final class ReportParser {
             }
             if (affected.isEmpty()) {
                 if (!ids.isEmpty()) {
-                    read.skipped.add(ids.getFirst());
+                    read.skip(ids.getFirst());
                 }
                 continue;
             }

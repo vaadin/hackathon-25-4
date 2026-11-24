@@ -1,8 +1,13 @@
 package com.vaadin.securitystatus.security;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class CspReportController {
 
+    /** The most of a report read. A browser's report is about a kilobyte; the rest is never read. */
+    static final int MAX_BYTES = 8 * 1024;
+
     private final CspViolations violations;
 
     CspReportController(CspViolations violations) {
@@ -21,8 +29,12 @@ class CspReportController {
 
     @PostMapping(CspPolicy.REPORT_PATH)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void report(@RequestBody(required = false) String report) {
-        if (report != null && !report.isBlank()) {
+    void report(HttpServletRequest request) throws IOException {
+        String report;
+        try (InputStream body = request.getInputStream()) {
+            report = new String(body.readNBytes(MAX_BYTES), StandardCharsets.UTF_8);
+        }
+        if (!report.isBlank()) {
             violations.record(report);
         }
     }

@@ -63,7 +63,7 @@ public final class TriageFiles {
     /** Comment lines naming the file, the version and the measurements, the column names, then one line per finding. */
     public static byte[] csv(Sheet sheet) {
         var out = new StringBuilder();
-        sheet.notes().forEach(note -> out.append("# ").append(note.replace('\n', ' ')).append("\r\n"));
+        sheet.notes().forEach(note -> out.append("# ").append(note.replace('\n', ' ').replace('\r', ' ')).append("\r\n"));
         out.append(line(sheet.columns()));
         sheet.rows().forEach(row -> out.append(line(row)));
         return out.toString().getBytes(StandardCharsets.UTF_8);
@@ -71,8 +71,16 @@ public final class TriageFiles {
 
     private static String line(List<String> cells) {
         var quoted = new ArrayList<String>();
-        cells.forEach(cell -> quoted.add('"' + cell.replace("\"", "\"\"") + '"'));
+        cells.forEach(cell -> quoted.add('"' + inert(cell).replace("\"", "\"\"") + '"'));
         return String.join(",", quoted) + "\r\n";
+    }
+
+    /**
+     * A cell a spreadsheet shows as the text it is: one that starts the way a
+     * formula starts is opened with an apostrophe, which the spreadsheet hides.
+     */
+    static String inert(String cell) {
+        return !cell.isEmpty() && "=+-@\t\r".indexOf(cell.charAt(0)) >= 0 ? "'" + cell : cell;
     }
 
     /** The same facts as a landscape A4 document: title, the version line, the headline, the counts, the table. */
@@ -191,10 +199,7 @@ public final class TriageFiles {
                 }
                 String rest = word;
                 while (measure(rest, font, fontSize) > width && rest.length() > 1) {
-                    int cut = rest.length() - 1;
-                    while (cut > 1 && measure(rest.substring(0, cut), font, fontSize) > width) {
-                        cut--;
-                    }
+                    int cut = longestFitting(rest, font, fontSize, width);
                     lines.add(rest.substring(0, cut));
                     rest = rest.substring(cut);
                 }
@@ -204,6 +209,22 @@ public final class TriageFiles {
                 lines.add(current.toString());
             }
             return lines;
+        }
+
+        /** The most leading characters that fit the width, at least one, found by halving rather than one by one. */
+        private static int longestFitting(String text, PDType1Font font, float fontSize, float width)
+                throws IOException {
+            int fits = 1;
+            int tooLong = text.length();
+            while (tooLong - fits > 1) {
+                int middle = (fits + tooLong) >>> 1;
+                if (measure(text.substring(0, middle), font, fontSize) <= width) {
+                    fits = middle;
+                } else {
+                    tooLong = middle;
+                }
+            }
+            return fits;
         }
 
         private static float measure(String text, PDType1Font font, float fontSize) throws IOException {

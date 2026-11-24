@@ -172,6 +172,51 @@ class ReportParserTest {
                 .isInstanceOf(ReportParser.RefusedException.class);
     }
 
+    @Test
+    void a_stream_longer_than_allowed_is_refused_as_too_large_whatever_it_holds() {
+        byte[] body = ("{\"results\":[" + " ".repeat(4096) + "]}").getBytes(StandardCharsets.UTF_8);
+
+        assertThatThrownBy(() -> ReportParser.parse(new ByteArrayInputStream(body), 1024))
+                .isInstanceOf(ReportParser.RefusedException.class)
+                .extracting(refused -> ((ReportParser.RefusedException) refused).refusal())
+                .isEqualTo(ReportParser.Refusal.TOO_LARGE);
+    }
+
+    @Test
+    void a_report_that_multiplies_into_more_findings_than_one_triage_reads_is_refused() {
+        var packages = new StringBuilder();
+        var vulnerabilities = new StringBuilder();
+        for (int i = 0; i < 200; i++) {
+            packages.append(i == 0 ? "" : ",").append("{\"id\":\"pkg:maven/g/a").append(i).append("@1\"}");
+            vulnerabilities.append(i == 0 ? "" : ",").append("{\"name\":\"CVE-2026-").append(i)
+                    .append("\",\"severity\":\"HIGH\"}");
+        }
+        String report = "{\"scanInfo\":{},\"dependencies\":[{\"packages\":[" + packages
+                + "],\"vulnerabilities\":[" + vulnerabilities + "]}]}";
+
+        assertThatThrownBy(() -> ReportParser.parse(new ByteArrayInputStream(report.getBytes(StandardCharsets.UTF_8))))
+                .isInstanceOf(ReportParser.RefusedException.class)
+                .extracting(refused -> ((ReportParser.RefusedException) refused).refusal())
+                .isEqualTo(ReportParser.Refusal.TOO_MANY_FINDINGS);
+    }
+
+    @Test
+    void a_coordinate_too_long_to_be_one_is_listed_as_skipped_and_a_long_severity_is_dropped() throws Exception {
+        String long_ = "pkg:maven/g/" + "a".repeat(ReportParser.MAX_TEXT) + "@1";
+        String report = "{\"scanInfo\":{},\"dependencies\":["
+                + "{\"packages\":[{\"id\":\"" + long_ + "\"}],\"vulnerabilities\":[{\"name\":\"CVE-2026-1\"}]},"
+                + "{\"packages\":[{\"id\":\"pkg:maven/g/b@1\"}],\"vulnerabilities\":[{\"name\":\"CVE-2026-2\","
+                + "\"severity\":\"" + "=".repeat(ReportParser.MAX_TEXT + 1) + "\"}]}]}";
+
+        ScannerReport read = ReportParser.parse(new ByteArrayInputStream(report.getBytes(StandardCharsets.UTF_8)));
+
+        assertThat(read.findings()).singleElement().satisfies(finding -> {
+            assertThat(finding.coordinate()).isEqualTo("pkg:maven/g/b@1");
+            assertThat(finding.severity()).isEmpty();
+        });
+        assertThat(read.skipped()).singleElement().satisfies(name -> assertThat(name).hasSize(ReportParser.MAX_TEXT + 1));
+    }
+
     private static ScannerReport parse(String resource) throws Exception {
         try (InputStream in = ReportParserTest.class.getResourceAsStream(resource)) {
             return ReportParser.parse(in);

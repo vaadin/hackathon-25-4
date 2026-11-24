@@ -33,6 +33,19 @@ class CspReportTest {
     }
 
     @Test
+    void only_the_first_kilobytes_of_a_long_report_are_read() throws Exception {
+        MockMvc mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        String marker = "far-past-the-limit";
+
+        var answer = mvc.perform(post(CspPolicy.REPORT_PATH).contentType("application/csp-report")
+                .content("{\"csp-report\":\"" + "y".repeat(1024 * 1024) + marker + "\"}")).andReturn().getResponse();
+
+        assertThat(answer.getStatus()).isEqualTo(204);
+        assertThat(violations.newestFirst().getFirst().report()).doesNotContain(marker)
+                .hasSizeLessThanOrEqualTo(CspViolations.MAX_REPORT_LENGTH);
+    }
+
+    @Test
     void the_kept_reports_are_bounded_in_count_and_in_length() {
         var kept = new CspViolations();
 

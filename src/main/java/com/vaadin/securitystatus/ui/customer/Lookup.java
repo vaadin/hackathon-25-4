@@ -359,13 +359,17 @@ public final class Lookup extends Composite<Div> {
     private void receive(UploadEvent event) throws IOException {
         ScannerReport report;
         try (InputStream body = event.getInputStream()) {
-            report = ReportParser.parse(body);
+            report = ReportParser.parse(body, MAX_REPORT_BYTES);
         } catch (ReportParser.RefusedException refused) {
             event.reject(refused.refusal().name());
             event.getUI().access(() -> {
-                scan.refusal().set(refused.refusal() == ReportParser.Refusal.NOT_JSON
-                        ? getTranslation("lookup.report.refused.json", refusedFormat())
-                        : refusedFormat());
+                scan.refusal().set(switch (refused.refusal()) {
+                    case NOT_JSON -> getTranslation("lookup.report.refused.json", refusedFormat());
+                    case UNKNOWN_FORMAT -> refusedFormat();
+                    case TOO_LARGE -> getTranslation("lookup.report.refused.large", MAX_REPORT_BYTES / (1024 * 1024));
+                    case TOO_MANY_FINDINGS -> getTranslation("lookup.report.refused.findings",
+                            ReportParser.MAX_FINDINGS);
+                });
                 reports.clearFileList();
             });
             return;
