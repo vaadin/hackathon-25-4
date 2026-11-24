@@ -119,7 +119,7 @@ Five more findings died on the way: three were already documented, two were alre
 .vaadin/vaadin-dev stop
 ```
 
-Use one or the other: both take port 8080. To pass environment variables or Maven profiles to the dev loop, set them before `start`, for example `VAADIN_DEV_DAEMON_OPTS="-Dvaadin.dev.mavenArgs=-Pai"`.
+Use one or the other: both take port 8080. To pass environment variables or Maven profiles to the dev loop, set them before `start`, for example `VAADIN_DEV_DAEMON_OPTS="-Dvaadin.dev.mavenArgs=-Pai"`. The daemon keeps the environment it was first started with, so to change a variable run `.vaadin/vaadin-dev shutdown` before `start`; `stop` alone is not enough.
 
 ### Real data or mock data
 
