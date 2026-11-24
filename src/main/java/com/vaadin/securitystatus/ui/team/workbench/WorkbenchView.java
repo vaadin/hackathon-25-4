@@ -15,6 +15,7 @@ import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -832,6 +833,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
 
         var save = new Button(getTranslation("workbench.save"), click -> save());
         save.addClassName("workbench-save");
+        form.lines().forEach(line -> save.addClickShortcut(Key.ENTER).listenOn(line));
         var export = new Button(getTranslation("workbench.export"), click -> export());
         export.addClassName("workbench-export");
         export.addThemeVariants(ButtonVariant.PRIMARY);

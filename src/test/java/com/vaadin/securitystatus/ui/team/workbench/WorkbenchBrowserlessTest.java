@@ -21,6 +21,9 @@ import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
 import org.springframework.util.FileSystemUtils;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.browserless.internal.ShortcutsKt;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.HasValue;
@@ -269,6 +272,16 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(github().isEnabled()).isFalse();
         assertThat(input("filename").getValue()).isEmpty();
         assertThat(input("value").getValue()).isEmpty();
+    }
+
+    @Test
+    void enter_in_a_one_line_field_saves_as_the_button_does() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+        type(view, "purl", "pkg:npm/wrk-enter");
+
+        ShortcutsKt._fireShortcut((Component) view.form().fields().get("purl"), Key.ENTER);
+
+        assertThat(drafts.list()).anyMatch(draft -> draft.getPurl().equals("pkg:npm/wrk-enter"));
     }
 
     @Test

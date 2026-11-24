@@ -83,7 +83,9 @@ public final class InternalLayout extends AppLayout {
         ai.stream().filter(AiSurfaces::offered).findFirst().ifPresent(surfaces -> {
             assistantMount.addClassName("assistant-mount");
             assistantMount.add(surfaces.chatPanel());
-            var close = new Button(getTranslation("shell.assistant.close"), click -> assistantOpen.set(false));
+            var close = new Button(VaadinIcon.CLOSE.create(), click -> assistantOpen.set(false));
+            close.setAriaLabel(getTranslation("shell.assistant.close"));
+            close.setTooltipText(getTranslation("shell.assistant.close"));
             close.addThemeVariants(ButtonVariant.TERTIARY);
             close.addClassName("assistant-close");
             assistantPanel.addClassName("assistant-aside");

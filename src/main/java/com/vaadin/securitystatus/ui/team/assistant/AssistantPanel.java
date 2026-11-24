@@ -9,12 +9,15 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.RequestInterceptor;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
+import com.vaadin.flow.component.messages.MessageInputVariant;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.upload.UploadButton;
@@ -77,13 +80,18 @@ final class AssistantPanel extends Composite<Section> {
         messages.setMarkdown(true);
 
         input.addClassName("assistant-input");
+        input.addThemeVariants(MessageInputVariant.AURA_ICON_BUTTON);
         input.setI18n(new MessageInputI18n().setMessage(getTranslation("assistant.input.message"))
                 .setSend(getTranslation("assistant.input.send")));
 
         uploads.setAcceptedMimeTypes("image/*");
         uploads.setMaxFileSize(MOST_BYTES);
         uploads.setMaxFiles(1);
-        var attach = new UploadButton(getTranslation("assistant.attach"), uploads);
+        // A camera icon at the start of the composer, as phone chat apps draw it.
+        var attach = new UploadButton(uploads);
+        attach.setIcon(VaadinIcon.CAMERA.create());
+        attach.setAriaLabel(getTranslation("assistant.attach"));
+        attach.addThemeVariants(ButtonVariant.TERTIARY);
         attach.addClassName("assistant-attach");
         attach.setCapture(UploadCapture.ENVIRONMENT);
         attach.setTooltipText(getTranslation("assistant.attach.tooltip"));

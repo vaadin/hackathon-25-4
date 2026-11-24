@@ -61,6 +61,11 @@ public final class VerdictForm extends Composite<FormLayout> {
     private final TextField supersedes = text("supersedes");
     private final TextField assessedBy = text("assessedBy");
 
+    /** The one line fields, where Enter saves as the Save button does; in a text area Enter is a new line. */
+    public List<TextField> lines() {
+        return List.of(verdictId, purl, affects, fixExpectedVersion, supersedes, assessedBy);
+    }
+
     public VerdictForm() {
         FormLayout layout = getContent();
         layout.addClassName("verdict-form");

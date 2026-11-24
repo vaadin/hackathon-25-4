@@ -1,10 +1,6 @@
 /* The assistant: the chat panel in the internal drawer, the ask over the
    advisories list and the paste box of the workbench. Epic 11. */
 
-.assistant-mount {
-    flex: 1 1 auto;
-}
-
 .assistant-panel {
     display: flex;
     flex-direction: column;
@@ -23,28 +19,78 @@
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
+/* The conversation takes the panel's height and the composer sits at its foot, at every width. */
+.assistant-mount,
+.assistant-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 .assistant-messages {
-    max-height: 55vh;
+    flex: 1 1 auto;
     min-height: 6rem;
     overflow-y: auto;
     overflow-wrap: anywhere;
 }
 
+/* The composer as phone chat apps draw it: one rounded bar, the camera at the start,
+   a text area that grows with the question, and the send icon at the end. */
 .assistant-compose {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: 1.5rem;
+    background: var(--vaadin-input-field-background, transparent);
 }
 
 .assistant-compose > .assistant-files {
     flex: 1 1 100%;
 }
 
-.assistant-compose > .assistant-input {
-    flex: 1 1 12rem;
-    min-width: 0;
+.assistant-compose > .assistant-attach {
+    flex: none;
+    border-radius: 50%;
 }
+
+.assistant-compose > .assistant-input {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+    --vaadin-input-field-background: transparent;
+    --vaadin-input-field-border-width: 0;
+    /* Aura's icon button variant draws the input as a box of its own; the bar is that box here. */
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.assistant-compose:focus-within {
+    outline: var(--vaadin-focus-ring-width, 2px) solid var(--vaadin-focus-ring-color, currentColor);
+    outline-offset: -1px;
+}
+
+.assistant-input > vaadin-text-area {
+    min-height: 4.5rem;
+    max-height: 12rem;
+}
+
+/* The bar is the field: the text area inside it draws no box and no ring of its own. */
+.assistant-input > vaadin-text-area::part(input-field) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.assistant-input > vaadin-message-input-button {
+    border-radius: 50%;
+}
+
 
 .advisories-ask {
     display: flex;

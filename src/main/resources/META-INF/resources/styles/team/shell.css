@@ -71,6 +71,15 @@
     display: flex;
     flex-direction: column;
     background: var(--vaadin-background-color);
+    /* As tall as the window under the bar, so the composer stays at the foot while the page scrolls. */
+    position: sticky;
+    top: 0;
+    height: 100cqh;
+}
+
+/* The layout's content area is what scrolls; as a container it lends the assistant its height. */
+vaadin-app-layout.internal-shell::part(content) {
+    container-type: size;
 }
 
 /* On a phone there is no room beside the page: the assistant covers it whole until closed. */
@@ -78,6 +87,7 @@
     .assistant-aside {
         position: fixed;
         inset: 0;
+        height: auto;
         z-index: 10;
         border: none;
         overflow-y: auto;
