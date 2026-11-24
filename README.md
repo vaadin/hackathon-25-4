@@ -26,7 +26,7 @@ Nothing is copied from the JavaScript code. It was read for behaviour only.
 OPENAI_API_KEY=... ./mvnw    # the assistant with a live model, the ai profile turns on by itself
 ```
 
-Sign in with `team` / `team` for the team's pages or `guest` / `guest` for a user without the role. They are demo accounts and they are in the source on purpose. Without a key the assistant replays recorded answers in development and is not offered in production. `DEMO.md` is the walk through.
+Sign in with `team` / `team` for the team's pages or `guest` / `guest` for a user without the role. They are demo accounts and they are in the source on purpose. Without a key the assistant replays recorded answers in development and is not offered in production. `DEMO.md` is the walk through, and [Running it in detail](#running-it-in-detail) at the end covers the dev loop, mock data, keys and production.
 
 ## What to look at
 
@@ -106,6 +106,57 @@ Five more findings died on the way: three were already documented, two were alre
 | `REPORT.md` | How the build went, the timeline, the comparison with the originals, what is not done |
 | `DEMO.md` | The demo, step by step |
 | `DEVELOPMENT.md` | Development notes, the licence, removing the team |
+
+## Running it in detail
+
+### Development mode or the dev loop
+
+```bash
+./mvnw                          # development mode on http://localhost:8080
+./mvnw vaadin:install-dev-cli   # once: installs the dev loop
+.vaadin/vaadin-dev start        # the dev loop owns the application
+.vaadin/vaadin-dev apply        # after an edit: compiles and hot swaps, the exit code says whether it is live
+.vaadin/vaadin-dev stop
+```
+
+Use one or the other: both take port 8080. To pass environment variables or Maven profiles to the dev loop, set them before `start`, for example `VAADIN_DEV_DAEMON_OPTS="-Dvaadin.dev.mavenArgs=-Pai"`.
+
+### Real data or mock data
+
+By default the application reads the real data, the JSON vaadin/cve-status publishes at `https://vaadin.github.io/cve-status/`, and revalidates it every 15 minutes.
+
+For mock data, serve the test fixtures and point the application at them. The numbers are then fixed, measured on 2026-11-21, which is what `DEMO.md` describes:
+
+```bash
+mkdir -p /tmp/pages && ln -sfn "$PWD/src/test/resources/pages" /tmp/pages/cve-status
+(cd /tmp/pages && python3 -m http.server 8082 --bind 127.0.0.1) &
+SECURITYSTATUS_PAGES_BASE_URL=http://localhost:8082/cve-status/ ./mvnw
+```
+
+### Keys, tokens and settings
+
+| Setting | What it does | Without it |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | Turns the `ai` Maven profile on by itself and the assistant answers with a live model | Development replays recorded answers; production does not offer the assistant |
+| Vaadin licence, `~/.vaadin/proKey` or `offlineKey` | The PDF Viewer and the Dashboard are commercial; the production build requires it | Development shows the trial dialog over those two; the tests pass anyway |
+| `SECURITYSTATUS_PAGES_BASE_URL` | Where the data is read from | The published JSON |
+| `SECURITYSTATUS_DRAFTS_DIR` | Where the workbench keeps its drafts, an H2 file | `~/.security-status` |
+| `PORT` | The HTTP port | 8080 |
+
+The accounts are `team` / `team` and `guest` / `guest`.
+
+### Production
+
+```bash
+OPENAI_API_KEY=... ./mvnw clean package -Pproduction
+OPENAI_API_KEY=... java -jar target/security-status-*.jar
+```
+
+The key is needed at build time too, because it is what brings the model's library into the jar. Not production ready yet:
+
+- **The accounts are written in the source.** Serving this from vaadin.com needs a real sign in, such as the company's single sign on, in place of the two demo users in `SecurityConfig`.
+- **Drafts live in an H2 file on the local disk.** More than one instance, or a container without a mounted volume, loses them; production needs a shared database.
+- **The `Dockerfile` does not build for production.** It runs `./mvnw clean package` without `-Pproduction`, and without the key at build time the image has no assistant.
 
 ## Hackathon
 
