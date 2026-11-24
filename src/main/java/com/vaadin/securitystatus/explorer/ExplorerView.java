@@ -266,7 +266,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         lookupHeading.addClassName("explorer-panel-heading");
         search.addClassName("explorer-search");
         search.setAriaLabel(getTranslation("explorer.lookup.heading"));
-        search.setHelperText(getTranslation("explorer.search.helper"));
         search.setClearButtonVisible(true);
         search.addValueChangeListener(change -> {
             if (change.isFromClient()) {

@@ -163,7 +163,6 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         heading.addClassName("explorer-panel-heading");
         lookup.addClassNames("explorer-search", "release-lookup");
         lookup.setAriaLabel(getTranslation("explorer.lookup.heading"));
-        lookup.setHelperText(getTranslation("release.lookup.helper"));
         lookup.addValueChangeListener(change -> {
             if (change.isFromClient()) {
                 jump(change.getValue());
