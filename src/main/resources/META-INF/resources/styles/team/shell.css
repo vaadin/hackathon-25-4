@@ -70,6 +70,18 @@
     border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
     display: flex;
     flex-direction: column;
+    background: var(--vaadin-background-color);
+}
+
+/* On a phone there is no room beside the page: the assistant covers it whole until closed. */
+@media (max-width: 800px) {
+    .assistant-aside {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        border: none;
+        overflow-y: auto;
+    }
 }
 
 .assistant-close {
