@@ -34,7 +34,8 @@ RUN --mount=type=cache,target=/root/.m2 \
     sh -c 'PRO_KEY=$(sed -n "s/.*\"proKey\" *: *\"\([^\"]*\)\".*/\1/p" /run/secrets/proKey 2>/dev/null || echo "${proKey}") && \
     OFFLINE_KEY=$(cat /run/secrets/offlineKey 2>/dev/null || echo "${offlinekey}") && \
     BANNER=$([ -z "${PRO_KEY}${OFFLINE_KEY}" ] && echo true || echo false) && \
-    ./mvnw clean package -P${mavenprofiles} -DskipTests -Dvaadin.proKey=${PRO_KEY} -Dvaadin.offlineKey=${OFFLINE_KEY} -Dproduction.commercialWithBanner=${BANNER}'
+    ./mvnw clean package -P${mavenprofiles} -DskipTests -Dproduction.commercialWithBanner=${BANNER} \
+        ${PRO_KEY:+-Dvaadin.proKey=${PRO_KEY}} ${OFFLINE_KEY:+-Dvaadin.offlineKey=${OFFLINE_KEY}}'
 
 # Split the JAR into layers, so that the dependencies get their own image layer
 RUN cp target/*.jar application.jar && \
