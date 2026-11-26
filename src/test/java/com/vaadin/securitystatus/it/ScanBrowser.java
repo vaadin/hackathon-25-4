@@ -43,6 +43,7 @@ final class ScanBrowser implements AutoCloseable {
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         driver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", Map.of("source", PROBE));
         base = "http://localhost:" + System.getProperty("it.port", "8080");
+        SignIn.as(driver, base, "guest");
     }
 
     /** Home, the report tab, and the fixture through the upload button's file input. */

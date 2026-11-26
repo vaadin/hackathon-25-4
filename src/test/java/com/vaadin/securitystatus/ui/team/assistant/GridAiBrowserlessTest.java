@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -95,7 +94,7 @@ class GridAiBrowserlessTest extends SpringBrowserlessTest {
     class Anonymous {
 
         @Test
-        @WithAnonymousUser
+        @WithMockUser(username = "guest")
         void an_anonymous_reader_has_no_ask_and_so_no_model_call() {
             navigate(AdvisoriesView.class);
 

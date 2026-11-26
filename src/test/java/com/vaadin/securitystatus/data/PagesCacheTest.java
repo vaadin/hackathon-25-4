@@ -188,13 +188,19 @@ class PagesCacheTest {
     }
 
     @Test
-    void a_404_is_an_empty_answer_and_is_not_cached() {
+    void a_404_is_an_empty_answer_remembered_for_five_minutes() {
+        // D-261: a path the host has no document for is remembered as missing, because every
+        // unmeasured version a reader types used to cost the host one request per render. The
+        // memory is short, and the next ask after it goes to the host again.
         var nobodyMeasured = VersionNumber.of("0.0.0");
 
         assertThat(service.version(nobodyMeasured)).isEmpty();
         assertThat(service.version(nobodyMeasured)).isEmpty();
         assertThat(service.cve("CVE-1999-0001")).isEmpty();
+        assertThat(host.requestsFor("cases/v/0.0.0.json")).extracting(Request::status).containsExactly(404);
 
+        clock.advance(PagesCache.MISSING_FOR.plusSeconds(1));
+        assertThat(service.version(nobodyMeasured)).isEmpty();
         assertThat(host.requestsFor("cases/v/0.0.0.json")).extracting(Request::status).containsExactly(404, 404);
     }
 

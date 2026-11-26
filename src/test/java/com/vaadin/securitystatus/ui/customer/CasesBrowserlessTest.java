@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -26,6 +27,7 @@ import com.vaadin.securitystatus.ui.common.NotFoundView;
  * whose example no longer shows it moved to none today.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class CasesBrowserlessTest extends SpringBrowserlessTest {
 
     private static final String CASES = "cases/cases.json";

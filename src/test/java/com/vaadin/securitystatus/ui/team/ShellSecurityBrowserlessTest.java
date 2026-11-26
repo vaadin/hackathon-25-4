@@ -1,6 +1,7 @@
 package com.vaadin.securitystatus.ui.team;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -41,7 +42,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
 
     // The sign in page is no answer: no heading, purpose or lookup above the form
     @Test
-    @WithAnonymousUser
+    @WithMockUser(username = "guest")
     void the_sign_in_page_stands_alone_and_the_answers_keep_the_lookup() {
         navigate(LoginView.class);
         assertThat($(H1.class).withClassName("view-heading").exists()).isFalse();
@@ -50,6 +51,13 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
         navigate(HomeView.class);
         assertThat($(H1.class).withClassName("view-heading").single().getText()).isEqualTo("Security status");
         assertThat($(Div.class).withClassName("lookup-mount").exists()).isTrue();
+    }
+
+    // D-258: no page answers a visitor who has not signed in
+    @Test
+    @WithAnonymousUser
+    void a_visitor_who_has_not_signed_in_is_sent_to_sign_in() {
+        assertThatThrownBy(() -> navigate(HomeView.class)).hasMessageContaining(LoginView.class.getName());
     }
 
     // D-246: on the customer side the team has a way back to its own pages, a reader does not
@@ -64,7 +72,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     }
 
     @Test
-    @WithAnonymousUser
+    @WithMockUser(username = "guest")
     void a_reader_has_no_link_to_the_team_pages() {
         navigate(HomeView.class);
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -43,6 +44,7 @@ import com.vaadin.flow.shared.JsonConstants;
  * {@code specs/reviews/03-home-and-lookup/REVIEW.md}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class LookupBrowserlessTest extends SpringBrowserlessTest {
 
     // HOM-03

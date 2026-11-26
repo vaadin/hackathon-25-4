@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -49,6 +50,7 @@ import com.vaadin.securitystatus.data.FixturePages;
  * Vaadin's.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class ScanViewBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
@@ -303,20 +305,42 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(getCurrentView()).isInstanceOf(ScanView.class);
 
         // Whatever appeared in the temporary directory during the upload, none of it holds the report.
-        try (var walk = Files.walk(temporary, 3)) {
-            List<Path> leftBehind = walk.filter(Files::isRegularFile).filter(path -> !path.startsWith(source))
-                    .filter(path -> !before.contains(path) || modifiedSince(path, started))
-                    .filter(path -> contains(path, marker)).toList();
-            assertThat(leftBehind).isEmpty();
-        }
+        List<Path> leftBehind = listing(temporary).stream().filter(path -> !path.startsWith(source))
+                .filter(path -> !before.contains(path) || modifiedSince(path, started))
+                .filter(path -> contains(path, marker)).toList();
+        assertThat(leftBehind).isEmpty();
     }
 
+    /**
+     * The system temporary directory is shared and alive: entries vanish and others are not ours
+     * to read, and {@code Files.walk} throws on the first of either, which took the whole test
+     * down on CI over a systemd private directory. A visitor that skips what it cannot visit
+     * reads the same universe without inheriting its races.
+     */
     private static java.util.Set<Path> listing(Path directory) throws IOException {
-        try (var walk = Files.walk(directory, 3)) {
-            return walk.filter(Files::isRegularFile).collect(java.util.stream.Collectors.toSet());
-        } catch (java.io.UncheckedIOException unreadable) {
-            return java.util.Set.of();
-        }
+        var found = new java.util.HashSet<Path>();
+        Files.walkFileTree(directory, java.util.EnumSet.noneOf(java.nio.file.FileVisitOption.class), 3,
+                new java.nio.file.SimpleFileVisitor<>() {
+                    @Override
+                    public java.nio.file.FileVisitResult visitFile(Path file,
+                            java.nio.file.attribute.BasicFileAttributes attributes) {
+                        if (attributes.isRegularFile()) {
+                            found.add(file);
+                        }
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public java.nio.file.FileVisitResult visitFileFailed(Path file, IOException unreadable) {
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public java.nio.file.FileVisitResult postVisitDirectory(Path dir, IOException failure) {
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+                });
+        return found;
     }
 
     private static boolean modifiedSince(Path path, long started) {

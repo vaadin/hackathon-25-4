@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,7 @@ import com.vaadin.securitystatus.ui.common.DataOutageNotice;
  * reviewed lists eight advisories in the customer's words.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class HomeBrowserlessTest extends SpringBrowserlessTest {
 
     private static final String INDEX = "cases/index.json";

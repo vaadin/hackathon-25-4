@@ -3,6 +3,7 @@ package com.vaadin.securitystatus.it;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +37,15 @@ class ScrollActionsIT {
             options.addArguments("--headless=new");
         }
         options.addArguments("--window-size=1280,900");
+        // After a sign in Chrome offers to save the password, and the first click on the
+        // page closes that bubble instead of reaching the page.
+        options.setExperimentalOption("prefs",
+                Map.of("credentials_enable_service", false, "profile.password_manager_enabled", false,
+                        "profile.password_manager_leak_detection", false));
         driver = new ChromeDriver(options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         base = "http://localhost:" + System.getProperty("it.port", "8080") + "/";
+        SignIn.as(driver, base, "guest");
     }
 
     @AfterEach

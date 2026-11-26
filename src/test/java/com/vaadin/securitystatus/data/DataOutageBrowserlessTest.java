@@ -20,6 +20,7 @@ import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
 
 /** DAT-04. A cold cache and a dead upstream is one sentence in the shell, never an exception page. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class DataOutageBrowserlessTest extends SpringBrowserlessTest {
 
     private static final String UNREACHABLE = "The security data cannot be reached right now, so there is nothing to show here yet.";

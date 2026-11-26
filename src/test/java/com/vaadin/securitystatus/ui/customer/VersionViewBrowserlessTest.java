@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -45,6 +46,7 @@ import com.vaadin.securitystatus.ui.common.DataOutageNotice;
  * from versions nobody measured.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class VersionViewBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired

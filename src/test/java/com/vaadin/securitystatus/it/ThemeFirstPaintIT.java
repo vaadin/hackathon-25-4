@@ -47,11 +47,19 @@ class ThemeFirstPaintIT {
             options.addArguments("--headless=new");
         }
         options.addArguments("--window-size=1280,900");
+        // After a sign in Chrome offers to save the password, and the first click on the
+        // page closes that bubble instead of reaching the page.
+        options.setExperimentalOption("prefs",
+                Map.of("credentials_enable_service", false, "profile.password_manager_enabled", false,
+                        "profile.password_manager_leak_detection", false));
         driver = new ChromeDriver(options);
         driver.executeCdpCommand("Emulation.setEmulatedMedia",
                 Map.of("features", List.of(Map.of("name", "prefers-color-scheme", "value", "dark"))));
         driver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", Map.of("source", PROBE));
         home = "http://localhost:" + System.getProperty("it.port", "8080") + "/";
+        // Signing in navigates twice, and the probe starts a fresh window.__frames on every new
+        // document, so the frames each test asserts on belong to the page it opened itself.
+        SignIn.as(driver, home, "guest");
     }
 
     @AfterEach

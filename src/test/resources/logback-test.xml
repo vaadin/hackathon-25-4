@@ -1,0 +1,14 @@
+<!-- The test runs' console. One Spring context per configuration used to print a banner and
+     twenty INFO lines, times however many configurations the suite has, which buried the one
+     line that mattered. Warnings and errors still print; everything a test asserts on is in
+     the test's own failure message, never in the log. -->
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{24} %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="warn">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

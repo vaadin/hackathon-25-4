@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.SecuredBrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.flow.component.badge.Badge;
@@ -34,7 +34,7 @@ class RefreshBroadcastBrowserlessTest {
     @Autowired
     FixturePages fixtures;
 
-    private BrowserlessApplicationContext app;
+    private SecuredBrowserlessApplicationContext<?> app;
 
     @BeforeEach
     void open() {
@@ -50,8 +50,8 @@ class RefreshBroadcastBrowserlessTest {
     // DAT-05
     @Test
     void a_moved_generated_at_updates_the_measured_chip_of_two_sessions() {
-        BrowserlessUIContext first = app.newUser().newWindow();
-        BrowserlessUIContext second = app.newUser().newWindow();
+        BrowserlessUIContext first = app.newUser("guest").newWindow();
+        BrowserlessUIContext second = app.newUser("guest").newWindow();
         first.navigate(HomeView.class);
         second.navigate(HomeView.class);
         assertThat(first.getUI().getSession()).isNotSameAs(second.getUI().getSession());
@@ -70,8 +70,8 @@ class RefreshBroadcastBrowserlessTest {
     // DAT-05
     @Test
     void the_home_cards_of_two_sessions_show_the_new_measurement() {
-        BrowserlessUIContext first = app.newUser().newWindow();
-        BrowserlessUIContext second = app.newUser().newWindow();
+        BrowserlessUIContext first = app.newUser("guest").newWindow();
+        BrowserlessUIContext second = app.newUser("guest").newWindow();
         first.navigate(HomeView.class);
         second.navigate(HomeView.class);
         assertThat(newestReleases(first)).contains("24.9.26").doesNotContain("24.9.27");
@@ -93,7 +93,7 @@ class RefreshBroadcastBrowserlessTest {
 
     @Test
     void an_unmoved_index_changes_nothing() {
-        BrowserlessUIContext window = app.newUser().newWindow();
+        BrowserlessUIContext window = app.newUser("guest").newWindow();
         window.navigate(HomeView.class);
 
         fixtures.revalidate();

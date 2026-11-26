@@ -59,7 +59,7 @@ class CspIT {
 
     @Test
     void every_response_carries_the_enforcing_header() {
-        driver.get(base + "/");
+        SignIn.as(driver, base, "guest");
         await("vaadin-button.theme-switch");
 
         for (String path : List.of("/", "/login", "/styles.css", "/nothing-here")) {
@@ -75,7 +75,9 @@ class CspIT {
      */
     @Test
     void the_bootstrap_page_itself_carries_the_enforcing_header() throws Exception {
-        try (var client = HttpClient.newHttpClient()) {
+        try (var client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()) {
+            // Anonymous on purpose. Since D-258 the first two answer with a redirect to the sign
+            // in, and the redirect is a response of ours too, so it carries the policy like any.
             for (String path : List.of("/", "/login", "/nothing-here")) {
                 var response = client.send(HttpRequest.newBuilder(URI.create(base + path)).build(),
                         HttpResponse.BodyHandlers.discarding());
@@ -88,10 +90,7 @@ class CspIT {
 
     @Test
     void the_application_boots_signs_in_and_navigates_without_a_violation() {
-        driver.get(base + "/");
-        await("vaadin-button.theme-switch");
-        assertThat(violations()).isEmpty();
-
+        // Since D-258 the first page anybody meets is the sign in.
         driver.get(base + "/findings");
         await("vaadin-login-form input[name=password]");
         assertThat(violations()).isEmpty();
@@ -106,15 +105,19 @@ class CspIT {
         assertThat(driver.getCurrentUrl()).contains("/findings");
         assertThat(violations()).isEmpty();
 
+        driver.get(base + "/");
+        await("vaadin-button.theme-switch");
+        assertThat(violations()).isEmpty();
+
         driver.findElement(By.cssSelector(".sign-out")).click();
         new WebDriverWait(driver, Duration.ofSeconds(20)).until(d -> !d.getCurrentUrl().contains("/findings"));
-        await("vaadin-button.theme-switch");
+        await("vaadin-login-form input[name=password]");
         assertThat(violations()).isEmpty();
     }
 
     @Test
     void a_script_from_another_origin_is_blocked() {
-        driver.get(base + "/");
+        SignIn.as(driver, base, "guest");
         await("vaadin-button.theme-switch");
         assertThat(violations()).isEmpty();
 
@@ -136,7 +139,7 @@ class CspIT {
      */
     @Test
     void forms_go_to_the_application_and_github_only() {
-        driver.get(base + "/");
+        SignIn.as(driver, base, "guest");
         await("vaadin-button.theme-switch");
 
         assertThat(header("/", "content-security-policy")).contains("form-action 'self' https://github.com;");

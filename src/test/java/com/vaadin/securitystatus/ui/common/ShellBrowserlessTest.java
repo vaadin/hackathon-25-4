@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -31,6 +32,7 @@ import com.vaadin.securitystatus.ui.customer.CustomerLayout;
 import com.vaadin.securitystatus.ui.customer.HomeView;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class ShellBrowserlessTest extends SpringBrowserlessTest {
 
     @Route(value = "shell-test-leaf", layout = CustomerLayout.class)

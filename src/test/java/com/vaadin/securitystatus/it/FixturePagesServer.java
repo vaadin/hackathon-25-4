@@ -24,6 +24,13 @@ public final class FixturePagesServer implements BeforeAllCallback {
     private static final String SITE = "/cve-status/";
     private static final String ROOT = "pages/";
 
+    static {
+        // One line per driver about where DevTools listens, and a page of CDP chatter per test,
+        // none of it read by anything. Chromedriver's own stderr is silenced the same way.
+        System.setProperty("webdriver.chrome.silentOutput", "true");
+        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(java.util.logging.Level.WARNING);
+    }
+
     @Override
     public void beforeAll(ExtensionContext context) {
         context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent(FixturePagesServer.class,

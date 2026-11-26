@@ -38,6 +38,7 @@ import com.vaadin.securitystatus.security.Roles;
  * their flag, and the context menu built for the row it opens on.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired

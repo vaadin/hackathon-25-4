@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -40,6 +41,7 @@ import com.vaadin.securitystatus.ui.common.DataOutageNotice;
  * CVE-2021-33604 ruled out, and CVE-2019-25028 not reported at all.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@WithMockUser(username = "guest")
 class CveViewBrowserlessTest extends SpringBrowserlessTest {
 
     @Autowired
