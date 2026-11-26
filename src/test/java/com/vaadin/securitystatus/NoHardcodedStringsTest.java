@@ -37,7 +37,8 @@ class NoHardcodedStringsTest {
 
     private static final Map<String, String> NOT_WORDING = Map.of("ThemeMemory.java",
             "the first paint script, JavaScript in a text block", "AdvisoryCatalogue.java",
-            "SQL statements, read by the database");
+            "SQL statements, read by the database", "TeamNavigation.java",
+            "the script that keeps Findings closed, JavaScript in a text block");
 
     private static final Pattern BLOCK_COMMENT = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
     private static final Pattern TEXT_BLOCK = Pattern.compile("\"\"\"(.*?)\"\"\"", Pattern.DOTALL);
