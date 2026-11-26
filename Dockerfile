@@ -42,10 +42,6 @@ RUN cp target/*.jar application.jar && \
     java -Djarmode=tools -jar application.jar extract --layers --destination extracted
 
 FROM eclipse-temurin:21-jre-alpine
-# How people sign in, baked in where the host passes no environment, as on v-herd:
-# --build-arg profile=demo. Empty by default, so the container still has to say it.
-ARG profile=""
-ENV SPRING_PROFILES_ACTIVE=${profile}
 RUN addgroup -S app && adduser -S app -G app
 USER app
 WORKDIR /application
