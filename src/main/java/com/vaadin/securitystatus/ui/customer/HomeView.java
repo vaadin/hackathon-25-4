@@ -28,7 +28,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.LookupState;
@@ -53,7 +53,7 @@ import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
 // its components. Named here, on the one route whose components load eagerly.
 @Uses(Lookup.class)
 @PageTitle("home.title")
-@AnonymousAllowed
+@PermitAll
 public final class HomeView extends Composite<Div> implements BeforeEnterObserver {
 
 

@@ -39,7 +39,7 @@ import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.AdvisoryRules;
@@ -71,7 +71,7 @@ import com.vaadin.securitystatus.ui.common.ViewHeading;
 @Route("cve/:ids/:version?")
 @RouteParent(HomeView.class)
 @PageTitle("cve.title")
-@AnonymousAllowed
+@PermitAll
 public final class CveView extends Composite<Div> implements BeforeEnterObserver {
 
     public static final String IDS = "ids";

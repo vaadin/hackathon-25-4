@@ -65,6 +65,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- Signing in through vaadin.com's single sign on, the cas profile, D-258. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-cas</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -222,10 +227,16 @@
                                 <goals><goal>start</goal></goals>
                                 <configuration>
                                     <arguments>
+                                        <argument>--spring.profiles.active=demo</argument>
                                         <argument>--server.port=${it.port}</argument>
                                         <argument>--securitystatus.pages.base-url=http://localhost:${it.pages.port}/cve-status/</argument>
                                         <argument>--securitystatus.drafts.dir=${project.build.directory}/it-drafts</argument>
                                         <argument>--securitystatus.assistant.recorded=true</argument>
+                                        <!-- The whole startup of the forked application printed into
+                                             the test log. Maven waits on the port, not on a line, so
+                                             nothing reads it; warnings still print. -->
+                                        <argument>--spring.main.banner-mode=off</argument>
+                                        <argument>--logging.level.root=warn</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

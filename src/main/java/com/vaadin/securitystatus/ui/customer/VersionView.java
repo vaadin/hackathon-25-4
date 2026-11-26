@@ -46,7 +46,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.VersionRules;
@@ -75,7 +75,7 @@ import com.vaadin.securitystatus.ui.common.ViewHeading;
 @Route("version/:version")
 @RouteParent(HomeView.class)
 @PageTitle("version.title")
-@AnonymousAllowed
+@PermitAll
 public final class VersionView extends Composite<Div> implements BeforeEnterObserver {
 
     public static final String VERSION = "version";

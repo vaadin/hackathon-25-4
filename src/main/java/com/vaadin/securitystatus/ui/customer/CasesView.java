@@ -20,7 +20,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
@@ -39,7 +39,7 @@ import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 @Route("cases/:id?")
 @RouteParent(HomeView.class)
 @PageTitle("cases.title")
-@AnonymousAllowed
+@PermitAll
 public final class CasesView extends Composite<Div> implements BeforeEnterObserver {
 
     public static final String ID = "id";

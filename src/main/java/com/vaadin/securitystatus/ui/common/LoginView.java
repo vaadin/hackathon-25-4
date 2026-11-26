@@ -1,5 +1,9 @@
 package com.vaadin.securitystatus.ui.common;
 
+import java.util.Arrays;
+
+import org.springframework.core.env.Environment;
+
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.login.LoginForm;
@@ -16,8 +20,11 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 public final class LoginView extends Composite<Div> implements BeforeEnterObserver, StandsAlone {
 
     private final LoginForm form = new LoginForm();
+    private final boolean singleSignOn;
 
-    public LoginView() {
+    public LoginView(Environment environment) {
+        // Under vaadin.com's single sign on nobody signs in here; the home page sends them there, D-258.
+        singleSignOn = Arrays.asList(environment.getActiveProfiles()).contains("cas");
         addClassName("login-view");
         form.setAction("login");
         form.setForgotPasswordButtonVisible(false);
@@ -27,6 +34,10 @@ public final class LoginView extends Composite<Div> implements BeforeEnterObserv
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        if (singleSignOn) {
+            event.getUI().getPage().setLocation(".");
+            return;
+        }
         form.setError(event.getLocation().getQueryParameters().getParameters().containsKey("error"));
     }
 

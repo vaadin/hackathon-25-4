@@ -13,7 +13,7 @@ import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.router.RouterLayout;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -29,7 +29,7 @@ import com.vaadin.securitystatus.ui.common.TeamEntrance;
  * navigation menu.
  */
 @Layout
-@AnonymousAllowed
+@PermitAll
 public final class CustomerLayout extends Composite<Div> implements RouterLayout {
 
     private final Div lookupMount = new Div();

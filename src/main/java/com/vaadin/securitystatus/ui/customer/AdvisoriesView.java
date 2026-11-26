@@ -38,7 +38,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -67,7 +67,7 @@ import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
 @Route("advisories")
 @RouteParent(HomeView.class)
 @PageTitle("advisories.title")
-@AnonymousAllowed
+@PermitAll
 // The ask arrives through a bean, which the production bundle's scanner does not follow, D-149.
 @Uses(MessageInput.class)
 public final class AdvisoriesView extends Composite<Div> implements BeforeEnterObserver {
