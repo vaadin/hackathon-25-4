@@ -324,6 +324,19 @@
     border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
 }
 
+/* The first column does not touch the table's edge, as in the scanner report's table. The
+   table is pulled out by the same amount, so the text still lines up with the column it sits
+   in; without that the row a reader is on, which is tinted, printed its first word against
+   the edge of its own tint. */
+.answer-table {
+    margin-inline-start: -0.75rem;
+    width: calc(100% + 0.75rem);
+}
+
+.answer-table :is(th, td):first-child {
+    padding-inline-start: 0.75rem;
+}
+
 .lines-table tr.yours {
     background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
 }
