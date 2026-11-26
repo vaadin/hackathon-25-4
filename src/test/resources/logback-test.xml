@@ -8,6 +8,21 @@
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{24} %msg%n</pattern>
         </encoder>
     </appender>
+
+    <!-- Two tests make a turn fail on purpose, one with a refused connection and one past the
+         tool call limit, and assert on the sentence the panel shows and on the diagnostics tail.
+         The orchestrator is Vaadin's and logs each of those at ERROR with its whole stack, two
+         hundred lines of a failure the suite asked for. Nothing reads the log, so it is off here
+         and only here: a turn that fails where no test provoked it still fails the test that
+         meets it, on its own assertion. -->
+    <logger name="com.vaadin.flow.component.ai.orchestrator.AIOrchestrator" level="off"/>
+    <logger name="com.vaadin.flow.component.ai.grid.GridAITools" level="off"/>
+
+    <!-- The same again, ours this time: one test records a hundred and five reports to prove the
+         cap holds, and each is a warning the application is right to write and nobody is here to
+         read. The tests that care read the tail, never the log. -->
+    <logger name="com.vaadin.securitystatus.security.CspViolations" level="error"/>
+
     <root level="warn">
         <appender-ref ref="console"/>
     </root>

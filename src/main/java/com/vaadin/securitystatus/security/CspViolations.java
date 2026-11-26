@@ -24,6 +24,8 @@ public class CspViolations {
 
     static final int KEPT = 100;
     static final int MAX_REPORT_LENGTH = 4000;
+    /** How much of a report the log line carries; the whole of it is kept for the view. */
+    static final int LOGGED_LENGTH = 200;
 
     private static final Logger LOG = LoggerFactory.getLogger(CspViolations.class);
 
@@ -38,7 +40,12 @@ public class CspViolations {
     public synchronized void record(String report) {
         String bounded = report.length() > MAX_REPORT_LENGTH ? report.substring(0, MAX_REPORT_LENGTH) : report;
         String oneLine = bounded.replaceAll("\\s+", " ");
-        LOG.warn("Content Security Policy violation reported: {}", oneLine);
+        // The log says one arrived and enough of it to recognise, not the whole body: anybody's
+        // browser can post here, the text is theirs rather than ours, and four kilobytes of it
+        // per report is a way to drown the log in somebody else's words. What the log leaves out
+        // is not lost, the diagnostics view reads the whole bounded report from the tail below.
+        LOG.warn("Content Security Policy violation reported, {} characters: {}", oneLine.length(),
+                oneLine.length() > LOGGED_LENGTH ? oneLine.substring(0, LOGGED_LENGTH) + "..." : oneLine);
         newestFirst.addFirst(new Violation(Instant.now(), oneLine));
         while (newestFirst.size() > KEPT) {
             newestFirst.removeLast();
