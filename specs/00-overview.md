@@ -68,11 +68,13 @@ No code here checks a licence, degrades, hides a feature or offers a substitute 
 
 | Actor | Authenticated | What they do |
 | --- | --- | --- |
-| Customer with a version | no | Types a version, reads the verdict, follows the upgrade advice, downloads nothing |
-| Customer with advisory ids | no | Pastes one or more CVE or GHSA ids, with or without a version, and reads what each means for them |
-| Auditor with a scanner report | no | Uploads an osv-scanner, OWASP Dependency-Check, bomber or CycloneDX JSON file and takes away a triaged answer, as CSV and as a PDF preview |
-| Support engineer | no | Answers a ticket from the same screens, and copies the answer with one control |
-| Security team member | role `SECURITY` | Reads the explorer, the release and Spring Boot pages, works the verdict workbench, asks the assistant |
+| Customer with a version | signed in | Types a version, reads the verdict, follows the upgrade advice, downloads nothing |
+| Customer with advisory ids | signed in | Pastes one or more CVE or GHSA ids, with or without a version, and reads what each means for them |
+| Auditor with a scanner report | signed in | Uploads an osv-scanner, OWASP Dependency-Check, bomber or CycloneDX JSON file and takes away a triaged answer, as CSV and as a PDF preview |
+| Support engineer | signed in | Answers a ticket from the same screens, and copies the answer with one control |
+| Security team member | signed in, role `SECURITY` | Reads the explorer, the release and Spring Boot pages, works the verdict workbench, asks the assistant |
+
+Every actor signs in since D-258, where the first four were specified anonymous. The page is going to live inside My account on vaadin.com, where the reader arrives signed in already, and `04-security.md` carries the reasoning.
 
 ## Phases and epics
 
@@ -235,7 +237,7 @@ The brief asks for all of 25.4, so what is not claimed is named, with a decision
 | --- | --- |
 | `Audio`, `Video`, `Media`, `Source` | Out. Nothing on these screens plays media, and a demo jingle would be the forced use the first section forbids |
 | `Slider` | Out. Severity here is four words with fixed meanings, and the design filters them with labelled pills a reader can name in a ticket. A range slider would be vaguer and prettier, which is the wrong trade for a security page |
-| OAuth2 and Keycloak additions: `KeycloakOidcUserMapper`, role mapping | Out. The demo authenticates two in memory users, because standing up an identity provider for a hackathon demo proves the provider rather than the application. The security spec names where it would plug in |
+| OAuth2 and Keycloak additions: `KeycloakOidcUserMapper`, role mapping | Not taken, and no longer for the reason first written here. The application does sign in against a real identity provider since D-258, vaadin.com's own, which speaks CAS rather than OAuth2, so these two land nowhere. `04-security.md` holds the configuration |
 | `NativeButton.Type` | Not claimed on its own. If the workbench's `NativeForm` uses a submit button it arrives there for free |
 | `CompiledLitTemplate` | Out by hard rule 1 of the source project and this one: no templates |
 | Quarkus startup recorder | Out. This is a Spring application |

@@ -26,7 +26,7 @@ Nothing is copied from the JavaScript code. It was read for behaviour only.
 OPENAI_API_KEY=... ./mvnw    # the assistant with a live model, the ai profile turns on by itself
 ```
 
-Sign in with `team` / `team` for the team's pages or `guest` / `guest` for a user without the role. They are demo accounts and they are in the source on purpose. Without a key the assistant replays recorded answers in development and is not offered in production. `DEMO.md` is the walk through, and [Running it in detail](#running-it-in-detail) at the end covers the dev loop, mock data, keys and production.
+Every page asks for a sign in. Use `team` / `team` for the team's pages or `guest` / `guest` for a reader without the role; they are demo accounts of the default `demo` profile and they are in the source on purpose. Against vaadin.com's own single sign on, run the `cas` profile instead, where a verified vaadin.com email is what grants the team role. Without a key the assistant replays recorded answers in development and is not offered in production. `DEMO.md` is the walk through, and [Running it in detail](#running-it-in-detail) at the end covers the dev loop, mock data, keys and production.
 
 ## What to look at
 
@@ -143,7 +143,7 @@ SECURITYSTATUS_PAGES_BASE_URL=http://localhost:8082/cve-status/ ./mvnw
 | `SECURITYSTATUS_DRAFTS_DIR` | Where the workbench keeps its drafts, an H2 file | `~/.security-status` |
 | `PORT` | The HTTP port | 8080 |
 
-The accounts are `team` / `team` and `guest` / `guest`.
+The accounts are `team` / `team` and `guest` / `guest`, from the `demo` profile that is the default. `-Dspring.profiles.active=cas` signs in through sso.vaadin.com instead, and `cas-local` against staging; a production start with neither named refuses to run.
 
 ### Production
 
@@ -154,9 +154,9 @@ OPENAI_API_KEY=... java -jar target/security-status-*.jar
 
 The key is needed at build time too, because it is what brings the model's library into the jar. Not production ready yet:
 
-- **The accounts are written in the source.** Serving this from vaadin.com needs a real sign in, such as the company's single sign on, in place of the two demo users in `SecurityConfig`.
+- **The single sign on has never met the real server.** The `cas` profile is built and tested against a stubbed ticket validator only. What it still needs from the vaadin.com web team is P-21 in `NEEDS-A-PERSON.md`: the service path, whether CAS releases `emailAddressVerified`, single log out, and the customer rule.
 - **Drafts live in an H2 file on the local disk.** More than one instance, or a container without a mounted volume, loses them; production needs a shared database.
-- **The `Dockerfile` does not build for production.** It runs `./mvnw clean package` without `-Pproduction`, and without the key at build time the image has no assistant.
+- **The versions are prereleases.** Vaadin 25.4.0-beta2 and Spring Boot 4.2.0-RC2, from the prerelease repository, and the Docker base images are not pinned by digest. P-22.
 
 ## Hackathon
 

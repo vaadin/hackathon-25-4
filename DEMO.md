@@ -19,7 +19,7 @@ For the live assistant, keep `OPENAI_API_KEY` in the environment, that is drop `
 
 To run a second instance beside one already on 8080, which holds the drafts file, add `PORT=8090 SECURITYSTATUS_DRAFTS_DIR=<an empty directory>` in front of `./mvnw`.
 
-The fixtures were published at `generated_at` 2026-11-21T10:13:39Z, so the chip in the bar reads Measured 2026-11-21 and every number below is the same on every run; only the relative scan date, "7 days ago", follows the clock. Without the base URL the application reads the live pages, and the numbers move with them. Sign in as `team` with the password `team` for the internal screens; the customer screens need no sign in.
+The fixtures were published at `generated_at` 2026-11-21T10:13:39Z, so the chip in the bar reads Measured 2026-11-21 and every number below is the same on every run; only the relative scan date, "7 days ago", follows the clock. Without the base URL the application reads the live pages, and the numbers move with them. Every page asks for a sign in. Use `guest` / `guest` to walk the customer screens as a customer, and `team` / `team` for the internal ones; signed in as `team` the team's navigation shows beside the customer pages too, which is right for the team and wrong for a customer walkthrough.
 
 `/cases` is the map: every state the customer screens can show, each with a release or an advisory that shows it today, and a See one link that opens it. When a step below needs another example, take it from there.
 
