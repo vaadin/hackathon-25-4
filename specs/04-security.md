@@ -47,6 +47,10 @@ Violation reports are logged and surfaced on the diagnostics view. `CspViolation
 
 Whatever `VaadinSecurityConfigurer` and Spring Security default to stands, explicitly unconfigured, except the CSP above. `VaadinExpiredSessionStrategy`, new in 25.4, handles the expired session: the user lands back on the view they were on, with the lookup state gone and one notice, rather than a stack trace or a silent new session.
 
+## A refused route
+
+A signed in reader without the role who opens an internal address lands on the home page, decided by Manolo on 2026-11-27. Access control refuses the route as not found, and `NotFoundView` forwards to the home page when the address names a registered route, so the reader learns no more about the route than the not found page told them. An address that names no route still shows the not found page, and an anonymous reader is still sent to sign in.
+
 ## What a test has to prove
 
-Every rule here has a refusing test: `guest` is refused on each internal route, anonymous is redirected to login, the draft service throws for a caller without the role, and the CSP header is present on a rendered page. Security tests assert the refusal, not the absence of a link.
+Every rule here has a refusing test: `guest` is refused on each internal route and lands on the home page, anonymous is redirected to login, the draft service throws for a caller without the role, and the CSP header is present on a rendered page. Security tests assert the refusal, not the absence of a link.

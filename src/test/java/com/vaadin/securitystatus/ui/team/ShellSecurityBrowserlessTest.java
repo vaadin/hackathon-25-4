@@ -30,7 +30,6 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.ui.common.LoginView;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
 import com.vaadin.securitystatus.ui.customer.HomeView;
 import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
 
@@ -150,7 +149,7 @@ class ShellSecurityBrowserlessTest extends SpringBrowserlessTest {
     @Test
     @WithMockUser(username = "guest", roles = {})
     void guest_is_refused_on_findings() {
-        navigate("findings", NotFoundView.class);
+        navigate("findings", HomeView.class);
 
         assertThat($(SideNavItem.class).withClassName("internal-nav-link").exists()).isFalse();
         assertThat($(Button.class).withClassName("sign-out").exists()).isTrue();

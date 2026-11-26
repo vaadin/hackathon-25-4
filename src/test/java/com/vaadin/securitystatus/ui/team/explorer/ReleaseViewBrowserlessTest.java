@@ -23,7 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.security.Roles;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
 
 /**
  * REL-01 and REL-02: a measured release read in full, card, advice,
@@ -197,7 +197,7 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
     @Test
     @WithMockUser(username = "guest", roles = {})
     void a_reader_without_the_role_is_refused() {
-        navigate("findings/release/24.9/24.9.21", NotFoundView.class);
+        navigate("findings/release/24.9/24.9.21", HomeView.class);
 
         assertThat($(Details.class).withClassName("release-card").exists()).isFalse();
     }

@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.security.Roles;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
 
 /**
  * SPR-01: what Spring Boot brings, one group per Spring Boot release the
@@ -118,7 +118,7 @@ class SpringViewBrowserlessTest extends SpringBrowserlessTest {
     @Test
     @WithMockUser(username = "guest", roles = {})
     void a_reader_without_the_role_is_refused() {
-        navigate("findings/spring", NotFoundView.class);
+        navigate("findings/spring", HomeView.class);
 
         assertThat($(Details.class).withClassName("spring-boot").exists()).isFalse();
     }

@@ -43,6 +43,7 @@ import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsListeners;
 import com.vaadin.securitystatus.team.diagnostics.Outcome;
 import com.vaadin.securitystatus.ui.common.NotFoundView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
 import com.vaadin.securitystatus.ui.team.explorer.SpringView;
 
 /**
@@ -239,7 +240,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
     void a_guest_is_refused_and_the_refusal_is_counted_as_refused() {
         long before = count("/diagnostics").refused();
 
-        navigate("diagnostics", NotFoundView.class);
+        navigate("diagnostics", HomeView.class);
 
         assertThat($(Section.class).withClassName("diagnostics-panel").exists()).isFalse();
         assertThat(count("/diagnostics").refused() - before).isOne();

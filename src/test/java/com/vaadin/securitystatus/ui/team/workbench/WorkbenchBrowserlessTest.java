@@ -47,7 +47,7 @@ import com.vaadin.securitystatus.team.workbench.QueueRules.Row;
 import com.vaadin.securitystatus.team.workbench.VerdictDraft;
 import com.vaadin.securitystatus.team.workbench.VerdictDrafts;
 import com.vaadin.securitystatus.team.workbench.VerdictYamlTest;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
+import com.vaadin.securitystatus.ui.customer.HomeView;
 
 /**
  * WRK-01, WRK-02, WRK-03 and WRK-06: the queue in the fixture's order with its
@@ -438,7 +438,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     @Test
     @WithMockUser(username = "guest", roles = {})
     void a_reader_without_the_role_is_refused() {
-        navigate("findings/workbench", NotFoundView.class);
+        navigate("findings/workbench", HomeView.class);
 
         assertThat($(com.vaadin.flow.component.html.Div.class).withClassName("workbench-queue").exists()).isFalse();
     }
