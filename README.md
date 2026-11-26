@@ -68,14 +68,17 @@ Sign in as `team`. Four more pages appear, and the assistant with them.
 
 ### Watch it instead
 
-Two recordings of exactly these walks, made by `demo/record.mjs` against the committed fixtures:
+A scanner report dropped in, read on the server, and answered:
 
-| Video | What it walks |
-| --- | --- |
-| [demo/video/customer.mp4](demo/video/customer.mp4) | The customer half, 1:08 |
-| [demo/video/team.mp4](demo/video/team.mp4) | The team half, 2:40 |
+![A scanner report uploaded and triaged](demo/video/scan-triage.gif)
 
-The stills above are in `demo/screenshots/`, made by `demo/shots.mjs`. Both scripts drive the application the way a presenter would, against the fixtures rather than live data so every number is the same on every run, and neither presses anything that writes.
+A security report pasted into the workbench, filling the verdict the team is about to write:
+
+![The verdict form filled from a pasted report](demo/video/verdict-fill.gif)
+
+Those two are the moments worth seeing. The whole of each walk is a video, which GitHub will not play inside this page and offers as a download: [the customer half](demo/video/customer.mp4), 1:08, and [the team half](demo/video/team.mp4), 2:40.
+
+All of it is made by the two scripts in `demo/`, against the committed fixtures rather than live data, so every number is the same on every run, and neither of them presses anything that writes.
 
 ## What to look at
 

@@ -28,6 +28,16 @@ ffmpeg -i video/customer.webm -vf scale=1280:-2 -c:v libx264 -crf 30 -pix_fmt yu
   -movflags +faststart -an video/customer.mp4
 ```
 
+GitHub plays no video inside a README: a committed `.mp4` renders as a link and a `<video>` tag is stripped by its sanitizer, both measured against its own renderer. What does play inline is a GIF, so the two moments worth seeing are cut from the recordings and kept as one:
+
+```bash
+ffmpeg -ss 38 -t 12 -i video/customer.mp4 -vf "fps=10,scale=900:-1:flags=lanczos,palettegen=stats_mode=diff" /tmp/pal.png
+ffmpeg -ss 38 -t 12 -i video/customer.mp4 -i /tmp/pal.png \
+  -lavfi "fps=10,scale=900:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=3" video/scan-triage.gif
+```
+
+Ten frames a second at 900 pixels keeps twelve seconds around a megabyte and a half, inside GitHub's ten megabyte limit for an image. The whole walks stay as the two videos, which a reader downloads.
+
 The stills are shrunk to 1200 pixels and encoded as WebP, which is what keeps sixteen screens under a megabyte in the repository:
 
 ```bash
