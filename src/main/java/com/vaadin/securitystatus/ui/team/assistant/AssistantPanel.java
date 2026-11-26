@@ -121,8 +121,12 @@ final class AssistantPanel extends Composite<Section> {
         return orchestrator;
     }
 
-    /** Nothing is changed or refused here: the prompt is written to the tail as it goes out. */
+    /** The prompt is written to the tail as it goes out, or refused when the session has asked enough for now. */
     private void intercept(RequestInterceptor.RequestInterceptEvent event) {
+        if (!history.admit()) {
+            event.reject(getTranslation("assistant.enough"));
+            return;
+        }
         tools.forUser(user);
         var line = new StringBuilder(event.getUserMessage());
         for (AIAttachment file : event.getAttachments()) {

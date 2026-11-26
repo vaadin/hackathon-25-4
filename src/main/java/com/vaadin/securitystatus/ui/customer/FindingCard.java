@@ -141,10 +141,19 @@ final class FindingCard extends Composite<Div> {
         return column;
     }
 
-    /** A pull request named the way people say it, repository and number. */
-    static Anchor pullRequest(String url) {
+    /**
+     * A pull request named the way people say it, repository and number. Only
+     * an https address becomes a link; anything else the data carries is shown
+     * as the text it is, D-262.
+     */
+    static Component pullRequest(String url) {
         String[] parts = url.split("/");
         String name = parts.length >= 4 ? parts[parts.length - 3] + "#" + parts[parts.length - 1] : url;
+        if (!url.regionMatches(true, 0, "https://", 0, 8)) {
+            var text = new Span(url);
+            text.addClassName("pull-request");
+            return text;
+        }
         var link = new Anchor(url, name);
         link.addClassName("pull-request");
         return link;

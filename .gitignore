@@ -12,6 +12,11 @@
 node_modules/
 src/main/frontend/generated/
 vite.generated.ts
+package.json
+package-lock.json
+tsconfig.json
+types.d.ts
+vite.config.ts
 
 # The development bundle Vaadin generates when the application starts
 src/main/bundles/

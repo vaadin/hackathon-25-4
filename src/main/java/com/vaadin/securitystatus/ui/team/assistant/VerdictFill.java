@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.securitystatus.team.assistant.AssistantHistory;
 import com.vaadin.securitystatus.team.assistant.AssistantProviders;
 import com.vaadin.securitystatus.team.assistant.AssistantTail;
 import com.vaadin.securitystatus.team.assistant.Prompts;
@@ -35,8 +36,8 @@ final class VerdictFill extends Composite<Div> {
     private final AssistantTail tail;
     private final String user;
 
-    VerdictFill(AssistantProviders providers, AssistantTail tail, String user, FormLayout form, Binder<?> binder,
-            Collection<HasValue<?, ?>> personOnly) {
+    VerdictFill(AssistantProviders providers, AssistantTail tail, AssistantHistory history, String user,
+            FormLayout form, Binder<?> binder, Collection<HasValue<?, ?>> personOnly) {
         this.tail = tail;
         this.user = user;
         Div box = getContent();
@@ -69,8 +70,15 @@ final class VerdictFill extends Composite<Div> {
         orchestrator = AIOrchestrator.builder(providers.create(getTranslation("workbench.fill.unrecorded")),
                 Prompts.text(Prompts.FORM))
                 .withController(controller)
-                .withRequestInterceptor(event -> tail.record("form", user, AssistantTail.Kind.PROMPT,
-                        event.getUserMessage()))
+                .withRequestInterceptor(event -> {
+                    if (!history.admit()) {
+                        event.reject();
+                        answer.setText(getTranslation("assistant.enough"));
+                        answer.setVisible(true);
+                        return;
+                    }
+                    tail.record("form", user, AssistantTail.Kind.PROMPT, event.getUserMessage());
+                })
                 .withResponseListener(this::ended)
                 .build();
     }

@@ -62,7 +62,7 @@ class AssistantSurfaces implements AiSurfaces {
         if (!team()) {
             return nothing();
         }
-        return new AdvisoryAsk(providers, catalogue, tail, user(), narrow);
+        return new AdvisoryAsk(providers, catalogue, tail, history.getObject(), user(), narrow);
     }
 
     @Override
@@ -71,7 +71,7 @@ class AssistantSurfaces implements AiSurfaces {
         if (!team()) {
             return nothing();
         }
-        return new VerdictFill(providers, tail, user(), form, binder, personOnly);
+        return new VerdictFill(providers, tail, history.getObject(), user(), form, binder, personOnly);
     }
 
     @Override

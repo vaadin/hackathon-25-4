@@ -22,6 +22,7 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.securitystatus.team.assistant.AdvisoryCatalogue;
+import com.vaadin.securitystatus.team.assistant.AssistantHistory;
 import com.vaadin.securitystatus.team.assistant.AssistantProviders;
 import com.vaadin.securitystatus.team.assistant.AssistantTail;
 import com.vaadin.securitystatus.team.assistant.Prompts;
@@ -50,8 +51,8 @@ final class AdvisoryAsk extends Composite<Div> {
     private final String user;
     private final SerializableConsumer<Optional<Set<String>>> narrow;
 
-    AdvisoryAsk(AssistantProviders providers, AdvisoryCatalogue catalogue, AssistantTail tail, String user,
-            SerializableConsumer<Optional<Set<String>>> narrow) {
+    AdvisoryAsk(AssistantProviders providers, AdvisoryCatalogue catalogue, AssistantTail tail,
+            AssistantHistory history, String user, SerializableConsumer<Optional<Set<String>>> narrow) {
         this.catalogue = catalogue;
         this.tail = tail;
         this.user = user;
@@ -78,8 +79,15 @@ final class AdvisoryAsk extends Composite<Div> {
                 Prompts.text(Prompts.GRID))
                 .withInput(ask)
                 .withController(controller)
-                .withRequestInterceptor(event -> tail.record("grid", user, AssistantTail.Kind.PROMPT,
-                        event.getUserMessage()))
+                .withRequestInterceptor(event -> {
+                    if (!history.admit()) {
+                        event.reject();
+                        answer.setText(getTranslation("assistant.enough"));
+                        answer.setVisible(true);
+                        return;
+                    }
+                    tail.record("grid", user, AssistantTail.Kind.PROMPT, event.getUserMessage());
+                })
                 .withResponseListener(this::ended)
                 .build();
     }

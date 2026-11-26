@@ -38,6 +38,10 @@ final class PagesCache {
 
     /** How long a stale entry answers before the dead host is tried again. */
     static final Duration RETRY_AFTER_FAILURE = Duration.ofMinutes(1);
+    /** How long a path the host has no document for is answered as missing without asking again, D-261. */
+    static final Duration MISSING_FOR = Duration.ofMinutes(5);
+    /** The most missing paths remembered; past it the memory starts again, so it never grows without bound. */
+    static final int MISSING_KEPT = 10_000;
 
     private record Entry(Object value, @Nullable String etag, Instant freshUntil) {
     }
@@ -49,6 +53,7 @@ final class PagesCache {
             .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES).build();
     private final ConcurrentHashMap<String, Entry> entries = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, CompletableFuture<Optional<Entry>>> inFlight = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Instant> missing = new ConcurrentHashMap<>();
     private final AtomicBoolean failing = new AtomicBoolean();
 
     PagesCache(PagesClient client, Clock clock) {
@@ -61,6 +66,10 @@ final class PagesCache {
         Entry cached = entries.get(path);
         if (cached != null && clock.instant().isBefore(cached.freshUntil())) {
             return Optional.of(type.cast(cached.value()));
+        }
+        Instant missingUntil = missing.get(path);
+        if (cached == null && missingUntil != null && clock.instant().isBefore(missingUntil)) {
+            return Optional.empty();
         }
         return load(path, type, timeToLive, false);
     }
@@ -77,10 +86,12 @@ final class PagesCache {
     void expireAllExcept(String path) {
         entries.replaceAll((key, entry) -> key.equals(path) ? entry
                 : new Entry(entry.value(), entry.etag(), Instant.MIN));
+        missing.clear();
     }
 
     void clear() {
         entries.clear();
+        missing.clear();
         failing.set(false);
     }
 
@@ -128,8 +139,17 @@ final class PagesCache {
                 }
                 yield Optional.of(new Entry(cached.value(), cached.etag(), freshFor(timeToLive)));
             }
-            case PagesClient.Answer.NotFound missing -> Optional.empty();
+            case PagesClient.Answer.NotFound notFound -> {
+                if (missing.size() >= MISSING_KEPT) {
+                    missing.clear();
+                }
+                missing.put(path, clock.instant().plus(MISSING_FOR));
+                yield Optional.empty();
+            }
             };
+            if (loaded.isPresent()) {
+                missing.remove(path);
+            }
             loaded.ifPresentOrElse(entry -> entries.put(path, entry), () -> entries.remove(path));
             if (failing.compareAndSet(true, false)) {
                 LOG.info("The data source answers again");
