@@ -124,12 +124,16 @@
             </plugin>
             <!-- Tests tagged live-ai call a real model and never run by default.
                  Surefire's own property is excludedGroups, so the one above is
-                 handed to it here; -Dsurefire.excludedGroups= lifts it. -->
+                 handed to it here; -Dsurefire.excludedGroups= lifts it.
+                 Two forks cut the suite by a fifth; each fork boots its own Spring
+                 context, so more forks than that make it slower, not faster. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <excludedGroups>${surefire.excludedGroups}</excludedGroups>
+                    <forkCount>2</forkCount>
+                    <reuseForks>true</reuseForks>
                 </configuration>
             </plugin>
             <plugin>
