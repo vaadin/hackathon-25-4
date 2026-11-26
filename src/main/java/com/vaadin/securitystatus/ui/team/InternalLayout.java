@@ -72,7 +72,9 @@ public final class InternalLayout extends AppLayout {
 
         routePanel.addClassName("internal-route-panel");
         drawer.addClassName("internal-drawer");
-        drawer.add(nav, routePanel);
+        var brand = new Div(getTranslation("shell.brand"));
+        brand.addClassName("internal-brand");
+        drawer.add(brand, nav, routePanel);
         addToDrawer(drawer);
 
         routeHolder.addClassName("internal-route");
