@@ -14,6 +14,9 @@
         <vaadin.version>25.4.0-beta2</vaadin.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <surefire.excludedGroups>live-ai</surefire.excludedGroups>
+        <!-- A production build without a licence fails, unless a host with no key,
+             such as v-herd, asks for Vaadin's banner instead. -->
+        <production.commercialWithBanner>false</production.commercialWithBanner>
     </properties>
     
     <parent>
@@ -294,7 +297,7 @@
                         </executions>
                         <configuration>
                             <productionMode>true</productionMode>
-                            <commercialWithBanner>false</commercialWithBanner>
+                            <commercialWithBanner>${production.commercialWithBanner}</commercialWithBanner>
                             <!-- Never the stale local bundle, D-156. -->
                             <forceProductionBuild>true</forceProductionBuild>
                         </configuration>

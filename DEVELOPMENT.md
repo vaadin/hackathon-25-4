@@ -42,3 +42,9 @@ If you use commercial components, pass the license key as a build secret:
 ```bash
 docker build --secret id=proKey,src=$HOME/.vaadin/proKey .
 ```
+
+A host that passes neither secrets nor environment to the container, such as v-herd, takes build arguments instead: `profile` bakes `SPRING_PROFILES_ACTIVE` into the image, `mavenprofiles=production` leaves the model out, which a container with no `OPENAI_API_KEY` needs to start, and `offlinekey` carries a server licence key. Without a key the build shows Vaadin's commercial banner instead of failing. The image runs in 512 MB.
+
+```bash
+docker build --build-arg profile=demo --build-arg mavenprofiles=production .
+```
