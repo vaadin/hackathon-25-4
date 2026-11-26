@@ -28,6 +28,55 @@ OPENAI_API_KEY=... ./mvnw    # the assistant with a live model, the ai profile t
 
 Every page asks for a sign in. Use `team` / `team` for the team's pages or `guest` / `guest` for a reader without the role; they are demo accounts of the default `demo` profile and they are in the source on purpose. Against vaadin.com's own single sign on, run the `cas` profile instead, where a verified vaadin.com email is what grants the team role. Without a key the assistant replays recorded answers in development and is not offered in production. `DEMO.md` is the walk through, and [Running it in detail](#running-it-in-detail) at the end covers the dev loop, mock data, keys and production.
 
+## How to use it
+
+Two halves behind one sign in. A customer asks one question and gets an answer; the security team reads the measurements behind every answer and writes the verdicts that produce them. The walk below is the two minute version of `DEMO.md`.
+
+### As a customer
+
+![The customer page: every supported version at a glance](demo/screenshots/C1-home.webp)
+
+Sign in as `guest`. The front page answers before you ask anything: one card per maintained minor, tinted by state, with its newest release and when it was scanned. There are three ways to ask about your own application, and they are the three tabs of the box at the top.
+
+**Type your version.** This is the common one, and the answer is a single card: secure, a fix available, or unresolved. Fix available names the release to move to and lists, advisory by advisory, what that move clears. Nothing on the page is wording the measurements do not carry.
+
+![The answer for one version](demo/screenshots/C2-version-fix-available.webp)
+
+**Paste advisory ids.** One or several, with or without your version. Each gets its own answer in the words the question deserves: fixed in a named release, affects you through Spring Boot, not assessed yet, does not affect you. "Copy answer for your ticket" puts the card's own words on the clipboard, which is what a support reply needs.
+
+![Five advisories answered at once](demo/screenshots/C4-cve-five-states.webp)
+
+**Upload the report your scanner produced.** CycloneDX, OWASP Dependency-Check, osv-scanner or bomber. The server reads it, never stores it, and answers with what one upgrade would clear and who has to move on the rest: Vaadin, Spring Boot, the library, or you. The triage leaves as a CSV or as a PDF you can preview first.
+
+![A scanner report, triaged](demo/screenshots/C5-scan-triage.webp)
+
+### As the security team
+
+Sign in as `team`. Four more pages appear, and the assistant with them.
+
+![The findings explorer](demo/screenshots/T1-explorer.webp)
+
+**`/findings`** is the map: every maintained line, with the Vaadin and the Spring Boot half of each kept apart, and a filter that narrows everything to the products an application actually declares. What you turn off is written into the address, so a narrowed view can be sent to somebody.
+
+**`/findings/workbench`** is where the work is decided. The queue is one row per package, ranked by how much a single verdict would close. Paste a security report into the form and the AI fills the fields it can support, marking each one; the YAML follows the typing, and nothing is saved, and nothing reaches GitHub, until a person presses the button.
+
+![The verdict workbench, filled from a pasted report](demo/screenshots/T6-workbench-ai-fill.webp)
+
+**The assistant** answers from the same measurements and says which file it read. It refuses rather than guesses: ask it something the data cannot settle and it says the measurements do not say.
+
+**`/diagnostics`** is the board, fed by the navigation and request events of the service event bus, so it counts the walk you just did.
+
+### Watch it instead
+
+Two recordings of exactly these walks, made by `demo/record.mjs` against the committed fixtures:
+
+| Video | What it walks |
+| --- | --- |
+| [demo/video/customer.mp4](demo/video/customer.mp4) | The customer half, 1:08 |
+| [demo/video/team.mp4](demo/video/team.mp4) | The team half, 2:40 |
+
+The stills above are in `demo/screenshots/`, made by `demo/shots.mjs`. Both scripts drive the application the way a presenter would, against the fixtures rather than live data so every number is the same on every run, and neither presses anything that writes.
+
 ## What to look at
 
 | Route | What it shows |
