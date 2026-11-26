@@ -15,10 +15,13 @@ COPY . $HOME
 #
 #   $ docker build --secret id=offlineKey,src=$HOME/.vaadin/offlineKey .
 #
-# Where secrets cannot be mounted, as on v-herd, a server licence key can come as a build
-# argument instead. With no key at all the build still succeeds, showing Vaadin's banner.
+# Where secrets cannot be mounted, as on v-herd, a key can come as a build argument instead:
+# the "proKey" value of ~/.vaadin/proKey, or a server licence key. A server key does not cover
+# vaadin-pdf-viewer 25.4.0-beta1, a pro key does. With no key the build shows Vaadin's banner.
 #
+#   $ docker build --build-arg prokey=<proKey value> .
 #   $ docker build --build-arg offlinekey=<server licence key> .
+ARG prokey=""
 ARG offlinekey=""
 
 # The production bundle needs the licence; -Pai brings the model's library into the jar, and the
@@ -28,7 +31,7 @@ ARG mavenprofiles=production,ai
 RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=secret,id=proKey \
     --mount=type=secret,id=offlineKey \
-    sh -c 'PRO_KEY=$(sed -n "s/.*\"proKey\" *: *\"\([^\"]*\)\".*/\1/p" /run/secrets/proKey 2>/dev/null || echo "") && \
+    sh -c 'PRO_KEY=$(sed -n "s/.*\"proKey\" *: *\"\([^\"]*\)\".*/\1/p" /run/secrets/proKey 2>/dev/null || echo "${prokey}") && \
     OFFLINE_KEY=$(cat /run/secrets/offlineKey 2>/dev/null || echo "${offlinekey}") && \
     BANNER=$([ -z "${PRO_KEY}${OFFLINE_KEY}" ] && echo true || echo false) && \
     ./mvnw clean package -P${mavenprofiles} -DskipTests -Dvaadin.proKey=${PRO_KEY} -Dvaadin.offlineKey=${OFFLINE_KEY} -Dproduction.commercialWithBanner=${BANNER}'

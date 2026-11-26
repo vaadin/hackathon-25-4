@@ -210,7 +210,7 @@ The key is needed at build time too, because it is what brings the model's libra
 - **Drafts live in an H2 file on the local disk.** More than one instance, or a container without a mounted volume, loses them; production needs a shared database.
 - **The versions are prereleases.** Vaadin 25.4.0-beta2 and Spring Boot 4.2.0-RC2, from the prerelease repository, and the Docker base images are not pinned by digest. P-22.
 
-A demonstration copy runs at https://v-herd.eu/security-status, rebuilt from the `manolo` branch on every push, with the `demo` accounts, no assistant, and Vaadin's commercial banner: a server licence key does not yet cover `vaadin-pdf-viewer` 25.4.0-beta1, so a licensed build fails. `DEVELOPMENT.md` has the build arguments it uses.
+A demonstration copy runs at https://v-herd.eu/security-status, rebuilt from the `manolo` branch on every push, with the `demo` accounts and no assistant. Its licence comes as the `prokey` build argument; a server licence key does not cover `vaadin-pdf-viewer` 25.4.0-beta1, and without a key it shows Vaadin's commercial banner. `DEVELOPMENT.md` has the build arguments it uses.
 
 ## Hackathon
 
