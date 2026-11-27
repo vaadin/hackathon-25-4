@@ -124,7 +124,6 @@ Real here, not yet reduced. Each says what it needs.
 | --- | --- |
 | The production build fails in `eclipse-temurin:21-jdk` because the Node.js that Vaadin downloads needs `libatomic.so.1`, `FEEDBACK-25.4.md` | A Dockerfile over a starter project, run once with and once without `libatomic1`, and the Node.js version where it began |
 | A `SideNavItem` with children opens itself whenever it is the current page, `FEEDBACK-PLATFORM.md` | One view with a parent item and a child, the server closing the parent after navigation, and the same on 24.9 to date it |
-| Signing out under a path lands on the host's root, `FEEDBACK-PLATFORM.md` | A starter with a sign out button and `server.forward-headers-strategy=framework`, asked through a proxy that strips `/app` and sends `X-Forwarded-Prefix: /app`, and the same on 24.9 to date it |
 
 ### Needs no draft
 
