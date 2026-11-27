@@ -17,3 +17,4 @@
 24-sdd-starter-architecture.md -> https://github.com/vaadin/spec-driven-development-demo/issues/39
 25-effect-unlocked-request-end.md -> https://github.com/vaadin/flow/issues/27187
 26-combo-box-bind-value-before-items.md -> https://github.com/vaadin/flow-components/issues/10779
+27-logout-forwarded-prefix.md -> https://github.com/vaadin/flow/issues/27490
