@@ -3,6 +3,8 @@ TITLE: AuthenticationContext.logout() sends the browser to the host's root when 
 ---
 ### Description
 
+Not new in 25.4: 25.3.5 does the same.
+
 An application secured with `VaadinSecurityConfigurer` and served by a reverse proxy under a path, here `http://localhost:8128/app/`, signs in fine but signs out to the host's root: `authentication.logout()` from a button opens `http://localhost:8128/`, which is not the application.
 
 The logout success URL is fixed at startup from the servlet context path, `/` here, and during a Vaadin request `UidlRedirectStrategy` hands it to `Page.setLocation` as it is. The login redirect is an HTTP `Location` header, which the proxy moves under its path; the logout location travels inside the UIDL response, where no proxy can reach it. `X-Forwarded-Prefix`, sent by the proxy and enabled with `server.forward-headers-strategy=framework`, is not applied to it either.
@@ -43,7 +45,7 @@ A starter with the documented setup, `vaadin.loginView(LoginView.class)`, an in 
 4. Sign in as `user` / `user`. The view opens at `http://localhost:8128/app/`.
 5. Press Sign out.
 
-The browser opened `http://localhost:8128/`, nginx's 404. The same project on 25.3.5, Flow 25.3.7, with Spring Boot 4.1.2, does the same. A reproduction lands anywhere outside `/app/`; with the workaround above it lands on `http://localhost:8128/app/login`.
+The browser opened `http://localhost:8128/`, nginx's 404. The same project on 25.3.5, Flow 25.3.7, with Spring Boot 4.1.2, behind a proxy that does what `nginx.conf` does, does the same. A reproduction lands anywhere outside `/app/`; with the workaround above it lands on `http://localhost:8128/app/login`.
 
 ### Getting the project
 

@@ -24,7 +24,8 @@ cd "$(dirname "$0")/../.."
 CONFIRM=no
 [ "${1:-}" = "--confirm" ] && CONFIRM=yes
 
-PREFIX="Hackathon 25.4: "
+# A finding that is not new in this release can go out as "PiT 25.4: " instead.
+PREFIX="${PREFIX:-Hackathon 25.4: }"
 TRACKER=9642
 TRACKER_REPO=vaadin/platform
 TRACKER_HEADING="## Hackathon"
