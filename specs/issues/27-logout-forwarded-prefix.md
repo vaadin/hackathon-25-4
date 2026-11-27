@@ -43,7 +43,7 @@ A starter with the documented setup, `vaadin.loginView(LoginView.class)`, an in 
 4. Sign in as `user` / `user`. The view opens at `http://localhost:8128/app/`.
 5. Press Sign out.
 
-The browser opened `http://localhost:8128/`, nginx's 404. A reproduction lands anywhere outside `/app/`; with the workaround above it lands on `http://localhost:8128/app/login`.
+The browser opened `http://localhost:8128/`, nginx's 404. The same project on 25.3.5, Flow 25.3.7, with Spring Boot 4.1.2, does the same. A reproduction lands anywhere outside `/app/`; with the workaround above it lands on `http://localhost:8128/app/login`.
 
 ### Getting the project
 
