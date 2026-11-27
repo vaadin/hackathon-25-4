@@ -16,7 +16,7 @@ Two profiles, and a production start refuses to run without one of them named, w
 
 | Profile | Who signs in | For |
 | --- | --- | --- |
-| `demo`, the default | `team` / `team` with the role, `guest` / `guest` without it | Development, the demo and every test. In memory, committed on purpose |
+| `demo`, the default | `team` / `team` with the role, `guest` / `guest` without it | Development, the demo and every test. In memory, committed on purpose. A deployment can replace both through `securitystatus.demo.{team,guest}.{name,password}`, so another site's accounts stay out of the repository |
 | `cas` | vaadin.com's single sign on at sso.vaadin.com, through `spring-security-cas` and the CAS 3 ticket validator | Production |
 | `cas-local` | The same against the staging server | Trying the real flow from a developer machine |
 

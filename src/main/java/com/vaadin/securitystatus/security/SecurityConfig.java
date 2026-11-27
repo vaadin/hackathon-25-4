@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -93,15 +94,21 @@ class SecurityConfig {
     /**
      * The demonstration accounts, only under the profile {@code demo}, which
      * development mode turns on by itself, D-258. Their emails go through the
-     * same rule as a person signed in through CAS.
+     * same rule as a person signed in through CAS. A deployment can rename them
+     * and change their passwords through {@code securitystatus.demo.*}, so the
+     * accounts of another site never enter this repository.
      */
     @Bean
     @Profile("demo")
-    UserDetailsService demoUsers(TeamRule team, SignInFailures failures) {
+    UserDetailsService demoUsers(TeamRule team, SignInFailures failures,
+            @Value("${securitystatus.demo.team.name:team}") String teamName,
+            @Value("${securitystatus.demo.team.password:team}") String teamPassword,
+            @Value("${securitystatus.demo.guest.name:guest}") String guestName,
+            @Value("${securitystatus.demo.guest.password:guest}") String guestPassword) {
         return failures.guard(new InMemoryUserDetailsManager(
-                User.withUsername("team").password("{noop}team")
+                User.withUsername(teamName).password("{noop}" + teamPassword)
                         .authorities(team.authorities(Optional.of("team@vaadin.com"), true)).build(),
-                User.withUsername("guest").password("{noop}guest")
+                User.withUsername(guestName).password("{noop}" + guestPassword)
                         .authorities(team.authorities(Optional.of("guest@example.com"), true)).build()));
     }
 }

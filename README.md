@@ -195,7 +195,7 @@ SECURITYSTATUS_PAGES_BASE_URL=http://localhost:8082/cve-status/ ./mvnw
 | `SECURITYSTATUS_DRAFTS_DIR` | Where the workbench keeps its drafts, an H2 file | `~/.security-status` |
 | `PORT` | The HTTP port | 8080 |
 
-The accounts are `team` / `team` and `guest` / `guest`, from the `demo` profile that is the default. `-Dspring.profiles.active=cas` signs in through sso.vaadin.com instead, and `cas-local` against staging; a production start with neither named refuses to run.
+The accounts are `team` / `team` and `guest` / `guest`, from the `demo` profile that is the default; `SECURITYSTATUS_DEMO_TEAM_NAME`, `_TEAM_PASSWORD`, `_GUEST_NAME` and `_GUEST_PASSWORD` in the environment replace them. `-Dspring.profiles.active=cas` signs in through sso.vaadin.com instead, and `cas-local` against staging; a production start with neither named refuses to run.
 
 ### Production
 
@@ -210,7 +210,7 @@ The key is needed at build time too, because it is what brings the model's libra
 - **Drafts live in an H2 file on the local disk.** More than one instance, or a container without a mounted volume, loses them; production needs a shared database.
 - **The versions are prereleases.** Vaadin 25.4.0-beta2 and Spring Boot 4.2.0-RC2, from the prerelease repository, and the Docker base images are not pinned by digest. P-22.
 
-A demonstration copy runs at https://v-herd.eu/security-status, rebuilt from the `manolo` branch on every push, with the `demo` accounts and the assistant on a live model. Its licence comes as the `proKey` build argument; a server licence key does not cover `vaadin-pdf-viewer` 25.4.0-beta1, and without a key it shows Vaadin's commercial banner. `DEVELOPMENT.md` has the build arguments it uses.
+A demonstration copy runs at https://v-herd.eu/security-status, rebuilt from the `manolo` branch on every push, with the `demo` profile, its accounts set through the environment, and the assistant on a live model. Its licence comes as the `proKey` build argument; a server licence key does not cover `vaadin-pdf-viewer` 25.4.0-beta1, and without a key it shows Vaadin's commercial banner. `DEVELOPMENT.md` has the build arguments it uses.
 
 ## Hackathon
 

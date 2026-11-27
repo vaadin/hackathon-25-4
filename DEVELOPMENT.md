@@ -43,9 +43,10 @@ If you use commercial components, pass the license key as a build secret:
 docker build --secret id=proKey,src=$HOME/.vaadin/proKey .
 ```
 
-A host that cannot mount build secrets, such as v-herd, takes build arguments instead: `proKey` carries the `proKey` value of `~/.vaadin/proKey`, and `mavenprofiles=production` leaves the model out, which a container with no `OPENAI_API_KEY` needs to start. A server licence key, `offlinekey`, does not cover `vaadin-pdf-viewer` 25.4.0-beta1 and fails the build. Without a key the build shows Vaadin's commercial banner instead of failing. The container is told how people sign in with `SPRING_PROFILES_ACTIVE`, `demo` or `cas`, and gets `OPENAI_API_KEY` when the image was built with the model. The image runs in 512 MB.
+A host that cannot mount build secrets, such as v-herd, takes build arguments instead: `proKey` carries the `proKey` value of `~/.vaadin/proKey`, and `mavenprofiles=production` leaves the model out, which a container with no `OPENAI_API_KEY` needs to start. A server licence key, `offlinekey`, does not cover `vaadin-pdf-viewer` 25.4.0-beta1 and fails the build. Without a key the build shows Vaadin's commercial banner instead of failing. The container is told how people sign in with `SPRING_PROFILES_ACTIVE`, `demo` or `cas`, and gets `OPENAI_API_KEY` when the image was built with the model. Under `demo` the accounts are `team` / `team` and `guest` / `guest` unless `SECURITYSTATUS_DEMO_TEAM_NAME`, `SECURITYSTATUS_DEMO_TEAM_PASSWORD`, `SECURITYSTATUS_DEMO_GUEST_NAME` and `SECURITYSTATUS_DEMO_GUEST_PASSWORD` name others. The image runs in 512 MB.
 
 ```bash
 docker build --build-arg mavenprofiles=production -t security-status .
-docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=demo security-status
+docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=demo \
+    -e SECURITYSTATUS_DEMO_TEAM_NAME=alice -e SECURITYSTATUS_DEMO_TEAM_PASSWORD=secret security-status
 ```
