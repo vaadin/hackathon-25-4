@@ -1,8 +1,10 @@
 package com.vaadin.securitystatus.security;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +17,7 @@ import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -23,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.spring.security.RequestUtil;
 import com.vaadin.flow.spring.security.VaadinExpiredSessionStrategy;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
@@ -67,7 +71,8 @@ class SecurityConfig {
             if (sso.isPresent()) {
                 configurer.logoutSuccessHandler(sso.get().logoutSuccess());
             } else {
-                configurer.loginView(LoginView.class).failureHandler(failures);
+                configurer.loginView(LoginView.class).failureHandler(failures)
+                        .logoutSuccessHandler(SecurityConfig::backHome);
             }
         }).build();
     }
@@ -88,6 +93,22 @@ class SecurityConfig {
             return controllers.getHandler(request) == null;
         } catch (Exception unmatched) {
             return false;
+        }
+    }
+
+    /**
+     * After signing out, the application's own home. Flow sends the default
+     * {@code "/"} to the browser as it is, which behind a proxy that serves the
+     * application under a path is the host's root, so the page is told the
+     * application's root relative to its base instead.
+     */
+    private static void backHome(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException {
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.getPage().setLocation(".");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/");
         }
     }
 
