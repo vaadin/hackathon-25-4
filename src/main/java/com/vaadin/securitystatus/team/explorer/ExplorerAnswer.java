@@ -51,19 +51,19 @@ public final class ExplorerAnswer {
         for (String name : named) {
             Product product = byName.get(name);
             if (product != null && product.fixed()) {
-                ordered.add(product);
+                ordered.add(product.at(ordered.size()));
             }
         }
         for (String name : named) {
             Product product = byName.get(name);
             if (product != null && !product.fixed() && !product.discontinued()) {
-                ordered.add(product);
+                ordered.add(product.at(ordered.size()));
             }
         }
         for (String name : named) {
             Product product = byName.get(name);
             if (product != null && !product.fixed() && product.discontinued()) {
-                ordered.add(product);
+                ordered.add(product.at(ordered.size()));
             }
         }
         return ordered;

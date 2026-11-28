@@ -24,8 +24,8 @@ import com.vaadin.securitystatus.data.model.ExplorerFront;
  */
 public final class ExplorerRules {
 
-    /** The colours a ring can take, assigned by registry order. The palette itself is in the stylesheet. */
-    static final int PALETTE = 12;
+    /** The colours a ring can take, assigned by catalogue order. The palette itself is in the stylesheet. */
+    static final int PALETTE = 6;
 
     /** A group shows at most this many findings and counts the rest, rule 6.6.10. */
     static final int GROUP_CAP = 150;
@@ -39,14 +39,24 @@ public final class ExplorerRules {
      * One product of the registry. {@code index} is its position in
      * {@code module_names}, which the findings use; {@code optional}, {@code
      * discontinued}, {@code fixed} and {@code switchesShape} come from
-     * {@code profile}.
+     * {@code profile}; {@code place} is its position in the catalogue, once
+     * one has placed it.
      */
     public record Product(int index, String name, boolean optional, boolean discontinued, boolean fixed,
-            boolean switchesShape) {
+            boolean switchesShape, int place) {
 
-        /** The ring colour, from one fixed palette by registry order. */
+        /**
+         * The ring colour, from one fixed palette by catalogue order, as the
+         * prototype picks it, so the first product is blue whatever the
+         * registry order.
+         */
         public int ring() {
-            return index % PALETTE;
+            return place % PALETTE;
+        }
+
+        /** The same product at this position in the catalogue. */
+        Product at(int position) {
+            return new Product(index, name, optional, discontinued, fixed, switchesShape, position);
         }
 
         /** A product every application has cannot be turned off, so it has no chip. */
@@ -82,7 +92,7 @@ public final class ExplorerRules {
         for (int index = 0; index < names.size(); index++) {
             String name = names.get(index);
             products.add(new Product(index, name, optional.contains(name), discontinued.contains(name),
-                    fixed.contains(name), shape.filter(name::equals).isPresent()));
+                    fixed.contains(name), shape.filter(name::equals).isPresent(), index));
         }
         return products;
     }

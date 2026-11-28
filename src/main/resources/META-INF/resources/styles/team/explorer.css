@@ -15,6 +15,12 @@
     gap: 0.25rem;
     align-self: flex-start;
     min-height: 1.5rem;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.release-back:hover {
+    text-decoration: underline;
 }
 
 .release-lookup {
@@ -331,13 +337,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.5rem;
-    height: 1.25rem;
-    padding: 0 0.25rem;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
     border: 2px solid var(--ring, var(--vaadin-border-color, rgb(0 0 0 / 0.15)));
     border-radius: 999px;
     box-sizing: border-box;
-    font-size: 0.75rem;
+    font-size: 11.5px;
+    font-weight: 650;
     font-variant-numeric: tabular-nums;
     background: transparent;
 }
@@ -348,21 +355,16 @@
     color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.35));
 }
 
-/* The palette the rings and dots take, by registry position. */
-.product-ring.ring-0 { --ring: #0969da; }
-.product-ring.ring-1 { --ring: #1a7f37; }
-.product-ring.ring-2 { --ring: #8250df; }
-.product-ring.ring-3 { --ring: #bc4c00; }
-.product-ring.ring-4 { --ring: #bf3989; }
-.product-ring.ring-5 { --ring: #0a7c8a; }
-.product-ring.ring-6 { --ring: #9a6700; }
-.product-ring.ring-7 { --ring: #cf222e; }
-.product-ring.ring-8 { --ring: #4b6584; }
-.product-ring.ring-9 { --ring: #2da44e; }
-.product-ring.ring-10 { --ring: #a475f9; }
-.product-ring.ring-11 { --ring: #e16f24; }
+/* The palette the rings and dots take, by catalogue position, the prototype's six. */
+.product-ring.ring-0 { --ring: #1676f3; }
+.product-ring.ring-1 { --ring: #7c4dff; }
+.product-ring.ring-2 { --ring: #0f8f8f; }
+.product-ring.ring-3 { --ring: #c2338a; }
+.product-ring.ring-4 { --ring: #5a6b8c; }
+.product-ring.ring-5 { --ring: #8a5a00; }
 
-.product-ring {
+/* The bare mark. A ring that carries a number keeps the pill drawn above, the prototype's shape. */
+.product-ring:not(.chip-count, .explorer-ring) {
     display: inline-block;
     width: 0.75rem;
     height: 0.75rem;
@@ -383,7 +385,6 @@
 .explorer-hint,
 .explorer-group-note,
 .explorer-group-more,
-.explorer-spring-only,
 .explorer-finding-missing {
     margin: 0;
     color: var(--vaadin-text-color-secondary, inherit);
@@ -400,7 +401,7 @@
 .explorer-row {
     border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
     border-inline-start: 4px solid var(--status-secure);
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border-radius: 10px;
     background: var(--vaadin-background-color, transparent);
 }
 
@@ -414,42 +415,60 @@
 
 .explorer-row > vaadin-details-summary {
     width: 100%;
-    padding: 0.625rem 0.75rem;
+    padding: 14px 16px;
     box-sizing: border-box;
     /* The chevron at the height of the series' first line, not centred on a row that wraps. */
     align-items: flex-start;
 }
 
+/* A chevron the prototype does not draw, kept because it says the row opens. */
 .explorer-row > vaadin-details-summary::part(toggle) {
     align-self: flex-start;
-    margin-block-start: -0.125rem;
     scale: 0.8;
+}
+
+.explorer-row > vaadin-details-summary::part(content) {
+    flex: 1;
 }
 
 .explorer-row-summary {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.375rem 0.75rem;
+    gap: 10px;
     width: 100%;
-    font-size: 0.875rem;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .explorer-row-line {
-    min-width: 3rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    min-width: 52px;
+    font-size: 13px;
+    font-weight: 650;
     /* The series in the accent text color, as the prototype draws it. */
     color: var(--aura-accent-text-color, inherit);
 }
 
 .explorer-row-version {
-    font-size: 1.0625rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-size: 16px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
 }
 
 .explorer-row-scanned {
     color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.8125rem;
+    font-size: 12px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+/* What the row says beside the badge: quieter than the badge, the prototype's size. */
+.explorer-row-says {
+    flex: 1 1 160px;
+    min-width: 0;
+    margin: 0;
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 13.5px;
 }
 
 .explorer-row-badges {
@@ -458,32 +477,60 @@
     gap: 0.375rem;
 }
 
+/* The state badge as the prototype draws it: a small filled pill, the word in the state's colour on its tint. */
+.explorer-badge {
+    --vaadin-badge-font-size: 11.5px;
+    --vaadin-badge-font-weight: 600;
+    --vaadin-badge-padding: 2px 9px;
+    --vaadin-badge-border-width: 0;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
 .explorer-badge.badge-vulnerable {
-    color: var(--status-unresolved);
+    --vaadin-badge-text-color: var(--status-unresolved);
+    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
 }
 
 .explorer-badge.badge-unjudged {
-    color: var(--status-fix);
+    --vaadin-badge-text-color: var(--status-fix);
+    --vaadin-badge-background: light-dark(#fff6e0, #2a2314);
 }
 
 .explorer-badge.badge-not_affected {
-    color: var(--status-secure);
+    --vaadin-badge-text-color: var(--status-secure);
+    --vaadin-badge-background: light-dark(#e7f5ee, #12271d);
+}
+
+/* The Spring Boot badge, for the half no Vaadin release moves: the same colours and a dashed edge. */
+.explorer-badge.spring {
+    --vaadin-badge-border-width: 1px;
+    --vaadin-badge-border-color: currentColor;
+    border-style: dashed;
 }
 
 
 .explorer-rings {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    gap: 0.25rem;
-    flex: 1 0 100%;
+    gap: 5px;
+    flex: 0 0 100%;
+}
+
+/* One width for every ring on a row, so a product lands in the same column on every series. */
+.explorer-rings .explorer-ring {
+    width: 30px;
+    min-width: 30px;
+    padding: 0 2px;
 }
 
 .explorer-dots {
-    display: flex;
-    flex-wrap: wrap;
+    display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
-    gap: 0.25rem;
+    gap: 4px;
+    margin-inline-start: auto;
 }
 
 .explorer-detail {
@@ -508,24 +555,61 @@
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
+/*
+ * A group is a tinted panel, as the prototype draws it: red for a risk, amber
+ * for what nobody has judged, green for what is answered, the border in the
+ * same hue so the edge does not read as grey against the field.
+ */
 .explorer-group {
-    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    --group-hue: var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1)));
+    border-radius: 9px;
+    overflow: hidden;
 }
 
 .explorer-group.group-risk,
 .explorer-group.group-spring_risk {
-    background: color-mix(in srgb, var(--status-unresolved) 7%, transparent);
+    --group-hue: var(--severity-critical);
+    background: light-dark(#fdeceb, #2a1615);
 }
 
 .explorer-group.group-unjudged,
 .explorer-group.group-spring_unjudged {
-    background: color-mix(in srgb, var(--status-fix) 7%, transparent);
+    --group-hue: var(--severity-moderate);
+    background: light-dark(#fff6e0, #2a2314);
+}
+
+.explorer-group.group-answered,
+.explorer-group.group-spring_answered {
+    --group-hue: var(--status-secure);
+    background: light-dark(#e7f5ee, #12271d);
 }
 
 .explorer-group > vaadin-details-summary {
-    padding-inline: 0.5rem;
+    padding: 10px 13px;
+    font-size: 13.5px;
+    color: var(--vaadin-text-color-secondary, inherit);
 }
+
+.explorer-group[opened] > vaadin-details-summary {
+    border-bottom: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1)));
+}
+
+.explorer-group > vaadin-details-summary:hover {
+    color: var(--vaadin-text-color, inherit);
+    background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.explorer-group-label {
+    font-variant-numeric: tabular-nums;
+}
+
+.explorer-group-count {
+    font-weight: 650;
+    color: var(--vaadin-text-color, inherit);
+}
+
+
 
 .explorer-releases a,
 .explorer-spring-link,
@@ -576,73 +660,217 @@
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
-.explorer-detail-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-
-.explorer-detail-title {
-    margin: 0;
-    font-size: 1rem;
-}
-
+/* The five counts read like the other sentences of the opened series. */
 .explorer-detail-summary {
     margin: 0;
-}
-
-.explorer-group > vaadin-details-summary {
-    font-weight: var(--aura-font-weight-semibold, 600);
-}
-
-.explorer-findings {
-    --vaadin-grid-cell-padding: 0.375rem 0.5rem;
-}
-
-.explorer-severity {
+    color: var(--vaadin-text-color-secondary, inherit);
     font-size: 0.875rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
 }
 
-.explorer-finding {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem 0.75rem;
+/* The findings of a group, one disclosure each, a hairline between them. */
+.explorer-findings {
+    padding: 0 8px 4px;
+}
+
+.explorer-finding-row {
+    border-top: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.explorer-finding-row:first-child {
+    border-top: 0;
+}
+
+.explorer-finding-row > vaadin-details-summary {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 4px;
+    border-radius: 6px;
+}
+
+.explorer-finding-row > vaadin-details-summary:hover {
+    background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+.explorer-finding-row > vaadin-details-summary::part(toggle) {
+    scale: 0.7;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-finding-row > vaadin-details-summary::part(content) {
+    flex: 1;
     min-width: 0;
+}
+
+.explorer-finding-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    font-size: 13.5px;
+}
+
+.explorer-finding-summary .advisory-id {
+    font-weight: 600;
+}
+
+/* The severity as a small pill, lowercase as the prototype writes it, filled with the tint of its group. */
+.explorer-severity {
+    --vaadin-badge-font-size: 12px;
+    --vaadin-badge-font-weight: 600;
+    --vaadin-badge-padding: 1px 7px;
+    --vaadin-badge-border-width: 0;
+    text-transform: lowercase;
+}
+
+.explorer-severity.severity-critical {
+    --vaadin-badge-text-color: var(--severity-critical);
+    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
+}
+
+.explorer-severity.severity-high {
+    --vaadin-badge-text-color: var(--severity-high);
+    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
+}
+
+.explorer-severity.severity-moderate {
+    --vaadin-badge-text-color: var(--severity-moderate);
+    --vaadin-badge-background: light-dark(#fff6e0, #2a2314);
+}
+
+.explorer-severity.severity-low {
+    --vaadin-badge-text-color: var(--vaadin-text-color-secondary, inherit);
+    --vaadin-badge-background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+}
+
+.explorer-through {
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 12.5px;
+}
+
+.explorer-through.only {
+    color: var(--vaadin-text-color, inherit);
+}
+
+.explorer-through.dim {
+    font-style: italic;
+}
+
+/* One finding, opened: the coordinate and the title, the verdict as a panel, the routes, the record. */
+.explorer-finding {
+    padding: 2px 0 12px 20px;
+    min-width: 0;
+    font-size: 13.5px;
     overflow-wrap: anywhere;
 }
 
-.explorer-field h3 {
-    margin: 0;
-    font-size: 0.875rem;
+.explorer-finding-top {
+    margin: 0 0 10px;
+}
+
+.explorer-finding-pkg {
+    display: inline-block;
+    margin: 2px 8px 2px 0;
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    font-size: 12.5px;
+}
+
+.explorer-finding-title {
+    margin: 6px 0 0;
+    line-height: 1.55;
+    font-weight: 600;
+}
+
+/* What Vaadin decided, a flat field with a rule down its left edge, so the reader sees where our words start. */
+.explorer-verdict {
+    margin: 4px 0 0;
+    padding: 8px 11px;
+    border-left: 3px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-radius: 0 8px 8px 0;
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+}
+
+.explorer-field + .explorer-field {
+    margin-top: 9px;
+    padding-top: 8px;
+    border-top: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+}
+
+.explorer-field-label {
+    display: block;
+    margin: 0 0 2px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .explorer-field p {
-    margin: 0;
+    margin: 3px 0 0;
+    line-height: 1.55;
 }
 
-.explorer-coordinate {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    margin-block-end: 0.375rem;
+.field-impact p {
+    font-size: 14px;
+}
+
+.field-fix p {
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+/* "… more" at the end of the line the text stops on, the paragraph's own size. */
+/* Aura has no inline tertiary variant, so the tertiary button is set flat into the line here. */
+.explorer-more {
+    --vaadin-button-height: auto;
+    --vaadin-button-line-height: inherit;
+    --vaadin-button-border-width: 0;
+    padding: 0;
+    height: auto;
+    min-height: 0;
+    font-size: 1em;
+    --vaadin-button-min-width: 0;
+    --vaadin-button-font-size: 1em;
+    --vaadin-button-font-weight: 400;
+    --vaadin-button-text-color: var(--aura-accent-text-color, var(--vaadin-text-color));
+    vertical-align: baseline;
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
+.explorer-routes {
+    margin: 8px 0 0;
 }
 
 .explorer-coordinate-name {
+    margin: 6px 0 0;
     font-family: var(--vaadin-font-family-monospace, monospace);
-    font-size: 0.875rem;
+    font-size: 12.5px;
 }
 
+/* A path per line, monospaced, wrapping with a hanging indent so the steps still read down the line. */
 .explorer-route {
+    display: block;
+    margin-top: 3px;
+    padding-left: 14px;
+    text-indent: -14px;
+    font-size: 12px;
     color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.8125rem;
+    background: none;
+    white-space: normal;
 }
 
 .explorer-route-none {
-    margin: 0;
-    font-size: 0.8125rem;
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: var(--vaadin-text-color-secondary, inherit);
+}
+
+.explorer-finding-record {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 12.5px;
 }
 
 .explorer-detail .release-files-row {

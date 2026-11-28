@@ -37,22 +37,34 @@
     gap: 0.5rem;
 }
 
+/* The series chips, the prototype's: white pills, the count set back, the chosen one tinted. */
 .workbench-series-link {
     display: inline-flex;
     align-items: center;
-    min-height: 2rem;
-    padding: 0 0.875rem;
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    padding: 5px 12px;
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
     border-radius: 999px;
-    color: inherit;
-    font-size: 0.875rem;
+    background: light-dark(#ffffff, var(--vaadin-background-color));
+    color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 13px;
     text-decoration: none;
 }
 
+.workbench-series-link:hover {
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+}
+
 .workbench-series-link.active {
-    border-color: var(--vaadin-text-color, currentColor);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.06));
-    font-weight: var(--aura-font-weight-semibold, 600);
+    border-color: light-dark(#3266e4, var(--aura-accent-color, #3266e4));
+    background: color-mix(in srgb, var(--aura-accent-color, #3266e4) 10%, transparent);
+    color: var(--vaadin-text-color, inherit);
+    font-weight: 600;
+}
+
+.workbench-series-count {
+    margin-inline-start: 3px;
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
 }
 
 .workbench-summary {
@@ -84,13 +96,16 @@
 .workbench-queue {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 10px;
 }
 
+/* A package is a card, as a series is on the explorer: white, a soft shadow, its state on the edge. */
 .workbench-row {
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
     border-inline-start: 4px solid var(--status-secure);
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border-radius: 10px;
+    background: light-dark(#ffffff, var(--vaadin-background-color));
+    box-shadow: 0 1px 2px rgb(16 24 40 / 0.06);
 }
 
 .workbench-row.state-todo {
@@ -99,45 +114,59 @@
 
 .workbench-row > vaadin-details-summary {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: 14px 16px;
     box-sizing: border-box;
+}
+
+.workbench-row > vaadin-details-summary::part(content) {
+    flex: 1;
+    min-width: 0;
 }
 
 .workbench-row-summary {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-    font-size: 0.875rem;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
 }
 
+/* What a verdict would close: the row's number, where the explorer puts the series. */
 .workbench-row-closes {
-    min-width: 2rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    min-width: 52px;
+    font-size: 16px;
+    font-weight: 650;
     font-variant-numeric: tabular-nums;
 }
 
 .workbench-row-package {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-size: 13px;
+    color: var(--vaadin-text-color-secondary, inherit);
     overflow-wrap: anywhere;
 }
 
 .workbench-row-state {
-    padding: 0 0.5rem;
+    padding: 2px 9px;
     border-radius: 999px;
-    font-size: 0.75rem;
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.06));
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
 .workbench-row-state.todo {
-    color: var(--status-fix);
+    color: light-dark(#8a6100, var(--status-fix));
+    background: light-dark(#fff6e0, #2a2314);
 }
 
 .workbench-row-state.done {
-    color: var(--status-secure);
+    color: light-dark(#1c6b45, var(--status-secure));
+    background: light-dark(#e7f5ee, #12271d);
 }
 
 .workbench-row-says {
+    flex: 1 1 160px;
+    min-width: 0;
+    font-size: 13.5px;
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
@@ -145,7 +174,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 0 0.75rem 0.75rem;
+    padding: 0 16px 14px;
+    font-size: 13.5px;
 }
 
 .workbench-evidence,
@@ -158,8 +188,8 @@
 }
 
 .workbench-field-label {
-    margin-block-start: 0.375rem;
-    font-size: 0.75rem;
+    margin-block-start: 10px;
+    font-size: 12px;
     font-weight: var(--aura-font-weight-semibold, 600);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -175,13 +205,19 @@
     font-size: 0.875rem;
 }
 
+/* A version or a route, set as code on a flat field, the prototype's evidence. */
 .workbench-pkg code {
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    font-size: 12.5px;
     overflow-wrap: anywhere;
 }
 
 .workbench-through,
 .workbench-said {
     color: var(--vaadin-text-color-secondary, inherit);
+    font-size: 12.5px;
 }
 
 .workbench-said {
@@ -201,9 +237,11 @@
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
+/* The form, boxed, tinted and shut: a tool beside the record, the prototype's compose fold. */
 .workbench-compose-fold {
+    margin: 12px 0 2px;
     border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border-radius: 10px;
     background: var(--vaadin-background-container, rgb(0 0 0 / 0.03));
 }
 
@@ -226,12 +264,16 @@
 }
 
 .workbench-fold-label {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .workbench-fold-says {
     color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.875rem;
+    font-size: 12.5px;
 }
 
 .workbench-compose {

@@ -21,13 +21,16 @@ public class LookupState {
     private final ValueSignal<Tab> tab = new ValueSignal<>(Tab.VERSION);
     private final ValueSignal<String> version = new ValueSignal<>("");
     private final ValueSignal<String> ids = new ValueSignal<>("");
-    private final ValueSignal<String> idsVersion = new ValueSignal<>("");
 
     public ValueSignal<Tab> tab() {
         return tab;
     }
 
-    /** The version field of the version tab, and of the report tab when it asks. */
+    /**
+     * The reader's version, one for every tab as in the prototype, D-274: the
+     * version tab's field, the one beside the ids, and the report tab's when
+     * it asks.
+     */
     public ValueSignal<String> version() {
         return version;
     }
@@ -37,8 +40,8 @@ public class LookupState {
         return ids;
     }
 
-    /** The optional version beside the ids. */
+    /** The optional version beside the ids: the same version as every other tab, D-274. */
     public ValueSignal<String> idsVersion() {
-        return idsVersion;
+        return version;
     }
 }

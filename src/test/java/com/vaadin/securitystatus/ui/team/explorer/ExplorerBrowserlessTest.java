@@ -16,7 +16,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -264,13 +263,11 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
         Finding swing = findings("ANSWERED").stream().filter(finding -> finding.cve().equals("CVE-2021-33604"))
                 .findFirst().orElseThrow();
 
-        // The grid opens a row's details on click in the browser; the tester's clickRow does not,
-        // browserless-test#29, so the test opens them as the click would.
-        grid("ANSWERED").setDetailsVisible(swing, true);
+        list("ANSWERED").rowOf(swing.cve()).orElseThrow().setOpened(true);
 
         String text = $(Div.class).withClassName("explorer-finding").single().getElement().getTextRecursively();
         assertThat(text).contains("What it means for your application", "None. The advisory is about flow-server",
-                "com.vaadin:vaadin-swing-kit-flow@3.0.1", "Read the advisory");
+                "com.vaadin:vaadin-swing-kit-flow 3.0.1", "Read the advisory");
         // The record carries no workaround and no fix for it, so neither is shown.
         assertThat(text).doesNotContain("What you can do today", "Fixed in");
     }
@@ -282,7 +279,7 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
         open("24.9");
         Finding risk = findings("SPRING_RISK").getFirst();
 
-        grid("SPRING_RISK").setDetailsVisible(risk, true);
+        list("SPRING_RISK").rowOf(risk.cve()).orElseThrow().setOpened(true);
 
         assertThat($(Div.class).withClassName("explorer-finding").single().getElement().getTextRecursively())
                 .startsWith("The record of 24.9.26 is not published");
@@ -355,13 +352,12 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
                 .map(child -> child.getElement().getTextRecursively()).reduce((a, b) -> a + " " + b).orElse("");
     }
 
-    @SuppressWarnings("unchecked")
-    private Grid<Finding> grid(String key) {
-        return (Grid<Finding>) group(key).getContent().filter(Grid.class::isInstance).findFirst().orElseThrow();
+    private FindingList list(String key) {
+        return (FindingList) group(key).getContent().filter(FindingList.class::isInstance).findFirst().orElseThrow();
     }
 
     private List<Finding> findings(String key) {
-        return grid(key).getGenericDataView().getItems().toList();
+        return list(key).findings();
     }
 
     private TextField search() {

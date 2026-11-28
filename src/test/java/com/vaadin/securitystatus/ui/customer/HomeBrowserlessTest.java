@@ -69,8 +69,8 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
                 "state-secure", "state-unresolved", "state-unresolved", "state-unresolved", "state-unresolved",
                 "state-secure", "state-secure");
         assertThat(cards()).allSatisfy(card -> assertThat(icons(card)).hasSize(1));
-        assertThat(icons(cards().get(0)).get(0).getElement().getAttribute("icon")).isEqualTo("vaadin:check-circle");
-        assertThat(icons(cards().get(3)).get(0).getElement().getAttribute("icon")).isEqualTo("vaadin:warning");
+        assertThat(icons(cards().get(0)).get(0).getElement().getAttribute("icon")).isEqualTo("vaadin:check");
+        assertThat(icons(cards().get(3)).get(0).getElement().getAttribute("icon")).isEqualTo("vaadin:exclamation-circle");
     }
 
     // HOM-01: the action line and the scanned date
@@ -165,7 +165,6 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void recently_reviewed_lists_eight_advisories_in_the_customers_words() {
         navigate(HomeView.class);
-        showTab(LookupState.Tab.IDS);
 
         List<RouterLink> rows = find(RouterLink.class).withClassName("recent-row").all();
         assertThat(rows).hasSize(8);
@@ -194,7 +193,6 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
         replaceIndex(twice);
 
         reopenHome();
-        showTab(LookupState.Tab.IDS);
 
         assertThat(texts("recent-id")).hasSize(8).doesNotHaveDuplicates().first().isEqualTo("CVE-2026-45292");
         assertThat(texts("recent-says").get(0)).isEqualTo("Said twice.");
@@ -203,12 +201,10 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void the_advisories_link_carries_the_count_and_the_pointer_is_the_designers() {
         navigate(HomeView.class);
-        showTab(LookupState.Tab.IDS);
 
         RouterLink all = find(RouterLink.class).withClassName("recent-all").single();
         assertThat(all.getText()).isEqualTo("All 535 advisories");
         assertThat(all.getHref()).isEqualTo("advisories");
-        showTab(LookupState.Tab.REPORT);
         assertThat(find(Component.class).withClassName("home-pointer").single().getElement().getTextRecursively())
                 .contains("Scanner flagged Tomcat, Spring or logback?").contains("managed by Spring Boot");
     }
@@ -236,20 +232,19 @@ class HomeBrowserlessTest extends SpringBrowserlessTest {
     }
 
     /** The window opens on home, so the view is built again only after leaving it. */
-    // D-241: each section of the home page shows under the tab it helps
+    // D-273: the three sections show under By version, and nothing shows under the other tabs, as in the prototype
     @Test
-    void each_tab_shows_its_own_section_of_the_home_page() {
+    void the_sections_show_under_by_version_only() {
         navigate(HomeView.class);
-        assertThat(find(Component.class).withClassName("home-lines").exists()).isTrue();
-        assertThat(find(Component.class).withClassName("home-recent").exists()).isFalse();
-
-        showTab(LookupState.Tab.IDS);
-        assertThat(find(Component.class).withClassName("home-lines").exists()).isFalse();
-        assertThat(find(Component.class).withClassName("home-recent").exists()).isTrue();
-
-        showTab(LookupState.Tab.REPORT);
-        assertThat(find(Component.class).withClassName("home-pointer").exists()).isTrue();
-        assertThat(find(Component.class).withClassName("home-recent").exists()).isFalse();
+        for (String part : List.of("home-lines", "home-recent", "home-pointer")) {
+            assertThat(find(Component.class).withClassName(part).exists()).isTrue();
+        }
+        for (LookupState.Tab tab : List.of(LookupState.Tab.IDS, LookupState.Tab.REPORT)) {
+            showTab(tab);
+            for (String part : List.of("home-lines", "home-recent", "home-pointer")) {
+                assertThat(find(Component.class).withClassName(part).exists()).isFalse();
+            }
+        }
         showTab(LookupState.Tab.VERSION);
     }
 

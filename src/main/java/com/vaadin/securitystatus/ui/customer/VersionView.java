@@ -158,7 +158,11 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         addClassName("version-view");
         var body = new Div(card, noFix, triage, fixes, spring, discontinued, details, ruledOut, lines);
         body.addClassName("version-body");
-        getContent().add(ViewHeading.ofAnswer(), body);
+        // No visible "Vaadin X" above the card: its headline names the release, as in the prototype,
+        // D-270. The heading stays for screen readers, so the page still reads H1, H2, H3.
+        var heading = ViewHeading.ofAnswer();
+        heading.addClassName("visually-hidden");
+        getContent().add(heading, body);
 
         var generatedAt = refresh.generatedAt();
         answer = Signal.computed(() -> {
@@ -1033,9 +1037,10 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     private static VaadinIcon stateIcon(String state) {
         return switch (state) {
-            case "secure" -> VaadinIcon.CHECK_CIRCLE;
-            case "fix_available" -> VaadinIcon.ARROW_CIRCLE_UP;
-            default -> VaadinIcon.WARNING;
+            // The glyph alone: the stylesheet draws the prototype's filled circle round it.
+            case "secure" -> VaadinIcon.CHECK;
+            case "fix_available" -> VaadinIcon.ARROW_UP;
+            default -> VaadinIcon.EXCLAMATION;
         };
     }
 }

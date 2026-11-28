@@ -1,9 +1,29 @@
 /* The scanner report: the drop zone in the lookup, then the triage screen. */
+/* The prototype's file card: white, a thin edge, the arrow, the name and one line, the controls at the end. */
 .lookup-report {
     display: block;
-    padding: 0.75rem 1rem;
-    border: 1px dashed var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.2));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    box-sizing: border-box;
+    min-height: 65px;
+    padding: 12px 16px;
+    border: 1px solid light-dark(#d7dce3, var(--vaadin-border-color));
+    border-radius: 12px;
+    background: light-dark(#ffffff, var(--vaadin-background-color));
+}
+
+.lookup-report-mark {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+}
+
+.lookup-report-choose {
+    font-size: 14px;
+    --vaadin-button-font-size: 14px;
+    --vaadin-button-font-weight: 500;
+    --vaadin-button-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    --vaadin-button-background: transparent;
+    --vaadin-button-border-width: 0;
 }
 
 .lookup-report[dragover] {
@@ -16,7 +36,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 1rem;
+    gap: 0.5rem 14px;
 }
 
 .lookup-report-card > .lookup-report {
@@ -32,12 +52,17 @@
 }
 
 .lookup-report-title {
+    font-size: 15px;
     font-weight: 600;
+    line-height: 20px;
     overflow-wrap: anywhere;
 }
 
 .lookup-report .lookup-report-formats {
-    font-size: var(--aura-font-size-s, 0.875rem);
+    margin: 0;
+    font-size: 13px;
+    line-height: 17px;
+    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .lookup-report-refused {
@@ -77,65 +102,59 @@
 }
 
 .scan-headline {
-    font-size: 1.5rem;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
 }
 
+/* Three across, the prototype's buckets: tinted by state, the count large in the state's ink. */
 .scan-buckets {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    gap: 1rem;
+    gap: 12px;
 }
 
-/* Each bucket tinted by its state with a border all round and the count in the
-   state's color, as the prototype draws them and as the version card is, D-175. */
 .scan-bucket {
+    --bucket-face: light-dark(#f1f9f3, #12271d);
+    --bucket-edge: light-dark(#c3e5cd, color-mix(in srgb, var(--status-secure) 30%, transparent));
+    --bucket-ink: light-dark(#0b5e28, var(--status-secure));
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    padding: 1rem 1.25rem;
-    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
-}
-
-.scan-bucket.state-secure {
-    border-color: color-mix(in srgb, var(--status-secure) 35%, transparent);
-    background: color-mix(in srgb, var(--status-secure) 7%, transparent);
+    gap: 6px;
+    padding: 19px;
+    border: 1px solid var(--bucket-edge);
+    border-radius: 15px;
+    background: var(--bucket-face);
 }
 
 .scan-bucket.state-fix_available {
-    border-color: color-mix(in srgb, var(--status-fix) 35%, transparent);
-    background: color-mix(in srgb, var(--status-fix) 7%, transparent);
+    --bucket-face: light-dark(#f4f7ff, #151e33);
+    --bucket-edge: light-dark(#c9d7fb, color-mix(in srgb, var(--aura-accent-color, #3266e4) 30%, transparent));
+    --bucket-ink: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
 }
 
 .scan-bucket.state-unresolved {
-    border-color: color-mix(in srgb, var(--status-unresolved) 35%, transparent);
-    background: color-mix(in srgb, var(--status-unresolved) 6%, transparent);
-}
-
-.scan-bucket.state-secure .scan-bucket-count {
-    color: var(--status-secure);
-}
-
-.scan-bucket.state-fix_available .scan-bucket-count {
-    color: var(--status-fix);
-}
-
-.scan-bucket.state-unresolved .scan-bucket-count {
-    color: var(--status-unresolved);
+    --bucket-face: light-dark(#fff5f5, #2a1615);
+    --bucket-edge: light-dark(#f0c4c5, color-mix(in srgb, var(--status-unresolved) 30%, transparent));
+    --bucket-ink: light-dark(#a20519, var(--status-unresolved));
 }
 
 .scan-bucket-count {
-    font-size: 2rem;
-    font-weight: 600;
-    line-height: 1.1;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--bucket-ink);
 }
 
 .scan-bucket-word {
+    font-size: 15px;
     font-weight: 600;
 }
 
-.scan-bucket-detail {
-    color: var(--vaadin-text-color-secondary, inherit);
+.scan-body .scan-bucket-detail {
+    margin: 0;
+    font-size: 13px;
+    color: light-dark(rgb(11 11 11 / 0.7), var(--vaadin-text-color-secondary));
 }
 
 .scan-actions {
@@ -149,6 +168,33 @@
     padding: 1rem 1.25rem;
     border: 1px dashed var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.2));
     border-radius: var(--vaadin-radius-m, 0.5rem);
+}
+
+/* The actions at the prototype's button size. */
+.scan-actions vaadin-button {
+    --vaadin-button-font-size: 14px;
+    --vaadin-button-font-weight: 500;
+    --vaadin-button-border-radius: 9px;
+    font-size: 14px;
+}
+
+.scan-release-notes {
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.scan-release-notes:hover {
+    text-decoration: underline;
+}
+
+.scan-findings-head h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.scan-findings-head vaadin-switch {
+    font-size: 13px;
 }
 
 .scan-findings-head {
@@ -178,10 +224,6 @@
     color: var(--vaadin-text-color-secondary, inherit);
 }
 
-.status-chip.state-in_triage {
-    border-style: dashed;
-}
-
 /* A phone: the table scrolls inside its section, never the page. */
 .scan-findings {
     min-width: 0;
@@ -204,7 +246,4 @@
     overflow-wrap: normal;
 }
 
-/* The first column does not touch the table's edge or its header band. */
-.scan-table :is(th, td):first-child {
-    padding-inline-start: 0.75rem;
-}
+

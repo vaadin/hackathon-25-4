@@ -18,6 +18,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
@@ -282,7 +283,12 @@ public final class Lookup extends Composite<Div> {
         line.bindText(scan.held().map(held -> held.map(this::fileLine).orElseGet(this::formatsLine)));
         var said = new Div(title, line);
         said.addClassName("lookup-report-said");
-        var drop = new UploadDropZone(new Div(said, reportHelp(), choose), reports);
+        choose.getElement().getThemeList().add("tertiary");
+        // The prototype's mark at the start of the card: an arrow up, the file going in.
+        var mark = VaadinIcon.ARROW_UP.create();
+        mark.addClassName("lookup-report-mark");
+        mark.getElement().setAttribute("aria-hidden", "true");
+        var drop = new UploadDropZone(new Div(mark, said, reportHelp(), choose), reports);
         drop.addClassName("lookup-report");
 
         var refused = new Span();

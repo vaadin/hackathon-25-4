@@ -96,7 +96,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
                 .filter(candidate -> "24.9".equals(candidate.getElement().getAttribute("data-series"))).findFirst()
                 .orElseThrow();
         assertThat(link.getHref()).isEqualTo("findings/workbench?series=24.9");
-        assertThat(link.getText()).isEqualTo("24.9 0");
+        assertThat(link.getElement().getTextRecursively()).isEqualTo("24.9 0");
         assertThat(Tooltip.forComponent(link).getText()).isEqualTo("0 advisories to judge on 24.9");
 
         view = navigate("findings/workbench?series=24.9", WorkbenchView.class);
@@ -110,7 +110,8 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows.getFirst().elsewhere()).isEqualTo(3);
         assertThat(text("workbench-lead")).startsWith("Nothing on the head of 24.9 is waiting for a verdict.");
         assertThat(summary("workbench-summary-line")).containsExactly("24.9 214 0");
-        assertThat($(RouterLink.class).withClassName("active").single().getText()).isEqualTo("24.9 0");
+        assertThat($(RouterLink.class).withClassName("active").single().getElement().getTextRecursively())
+                .isEqualTo("24.9 0");
 
         // A series the queue does not know narrows nothing.
         view = navigate("findings/workbench?series=99.9", WorkbenchView.class);

@@ -26,7 +26,7 @@
 - [x] Off only addressing by registry name until the code export lands, unknown names dropped
 - [x] Chip counts, hide only when every route is off, no product never hides. The counts are no longer marginal: distinct advisories through a chip as if it were on, D-207
 - [x] Web storage memory, merged, address wins
-- [x] The without Spring switch per line
+- [x] The without Spring switch per line. Removed by D-266: the starter's chip does it
 
 **Verified by:** `ExplorerFilterBrowserlessTest`
 

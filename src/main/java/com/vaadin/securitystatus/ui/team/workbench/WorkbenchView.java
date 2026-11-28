@@ -14,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -277,11 +278,10 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         }
 
         filter.removeAll();
-        filter.add(seriesLink(getTranslation("workbench.series.all"), Optional.empty(), line.isEmpty(), null));
+        filter.add(seriesLink(getTranslation("workbench.series.all"), null, Optional.empty(), line.isEmpty(), null));
         for (String series : QueueRules.series(all)) {
             int open = QueueRules.rows(all, Optional.of(series)).stream().mapToInt(Row::closes).sum();
-            filter.add(seriesLink(getTranslation("workbench.series.one", series, String.valueOf(open)),
-                    Optional.of(series), line.filter(series::equals).isPresent(),
+            filter.add(seriesLink(series, String.valueOf(open), Optional.of(series), line.filter(series::equals).isPresent(),
                     getTranslation("workbench.series.title", open, series)));
         }
 
@@ -298,8 +298,16 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         context.set(entry(all, Optional.of(form.draft().getPurl().trim())));
     }
 
-    private Component seriesLink(String text, Optional<String> series, boolean active, @Nullable String title) {
-        var link = new RouterLink(text, WorkbenchView.class);
+    /** A series chip, as the prototype draws it: the series, then its count set back. */
+    private Component seriesLink(String text, @Nullable String count, Optional<String> series, boolean active,
+            @Nullable String title) {
+        var link = new RouterLink("", WorkbenchView.class);
+        link.add(new Span(text));
+        if (count != null) {
+            var number = new Span(count);
+            number.addClassName("workbench-series-count");
+            link.add(new Text(" "), number);
+        }
         link.setQueryParameters(Address.of(PATH).with(QueryFlag.SERIES, series).query());
         link.addClassName("workbench-series-link");
         series.ifPresent(word -> link.getElement().setAttribute("data-series", word));

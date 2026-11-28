@@ -26,4 +26,20 @@ html {
     --severity-high: light-dark(#bc4c00, #ffa657);
     --severity-moderate: light-dark(#9a6700, #e3b341);
     --severity-low: light-dark(#57606a, #9da7b3);
+
+    /* Tooltips as the prototype draws them: a shade apart from the page, prose width, no delay to read. */
+    --vaadin-tooltip-background: light-dark(#39414d, #2b323d);
+    --vaadin-tooltip-text-color: light-dark(#f4f6f9, #dfe4ec);
+    --vaadin-tooltip-border-width: 1px;
+    --vaadin-tooltip-border-color: light-dark(#39414d, #3d4653);
+    --vaadin-tooltip-border-radius: 8px;
+    --vaadin-tooltip-padding: 8px 11px;
+    --vaadin-tooltip-font-size: 12.5px;
+    --vaadin-tooltip-line-height: 1.5;
+    --vaadin-tooltip-max-width: min(44em, 90vw);
+}
+
+/* A tooltip that names a path puts each one on its own line. */
+vaadin-tooltip::part(content) {
+    white-space: pre-line;
 }

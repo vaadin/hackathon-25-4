@@ -1,9 +1,69 @@
 /* The lookup, in a tinted box under the purpose of every customer page. */
 .lookup-mount {
-    margin-block-start: 1.75rem;
-    padding: 1.5rem;
-    border-radius: var(--vaadin-radius-l, 0.75rem);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+    margin-block-start: 28px;
+    padding: 24px;
+    border-radius: 15px;
+    background: light-dark(#f3f5f7, var(--vaadin-background-container));
+}
+
+/* The three tabs as one control, the prototype's: a white pill as wide as its tabs, the chosen one tinted. */
+.lookup-tabs {
+    --vaadin-tabs-background: light-dark(#ffffff, var(--vaadin-background-color));
+    --vaadin-tabs-border-radius: 999px;
+    --vaadin-tabs-border-width: 0;
+    --vaadin-tabs-padding: 3px;
+    --vaadin-tabs-gap: 2px;
+    --vaadin-tab-border-radius: 999px;
+    --vaadin-tab-border-width: 0;
+    --vaadin-tab-padding: 5px 14px;
+    --vaadin-tab-font-size: 14px;
+    --vaadin-tab-font-weight: 500;
+    --vaadin-tab-line-height: 18px;
+    --vaadin-tab-text-color: var(--vaadin-text-color-secondary);
+    --vaadin-tab-background: transparent;
+    align-self: flex-start;
+    width: fit-content;
+    max-width: 100%;
+    margin-block-end: 8px;
+}
+
+.lookup-tabs vaadin-tab[selected] {
+    --vaadin-tab-background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
+    --vaadin-tab-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    --vaadin-tab-font-weight: 600;
+}
+
+/* No underline under the chosen tab: the tint says it. */
+.lookup-tabs vaadin-tab::before {
+    display: none;
+}
+
+/* The field and the button of the prototype: white, a thin grey edge, the brand blue button. */
+.lookup vaadin-combo-box,
+.lookup vaadin-text-field {
+    --vaadin-input-field-label-font-size: 13px;
+    --vaadin-input-field-label-font-weight: 400;
+    --vaadin-input-field-label-color: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color-secondary));
+    --vaadin-input-field-background: light-dark(#ffffff, var(--vaadin-background-color));
+    --vaadin-input-field-border-color: light-dark(#c9ced6, var(--vaadin-border-color));
+    --vaadin-input-field-border-width: 1px;
+    --vaadin-input-field-border-radius: 9px;
+    --vaadin-input-field-value-font-size: 15px;
+    --vaadin-input-field-placeholder-color: var(--vaadin-text-color-disabled, rgb(11 11 11 / 0.3));
+}
+
+.lookup-check {
+    --vaadin-button-font-size: 14px;
+    --vaadin-button-font-weight: 500;
+    --vaadin-button-padding: 8px 14px;
+    --vaadin-button-border-radius: 9px;
+    --vaadin-button-shadow: 0 2px 5px -1px rgb(20 20 20 / 0.2);
+}
+
+.lookup-check[disabled] {
+    --vaadin-button-background: light-dark(#eceff2, var(--vaadin-background-container));
+    --vaadin-button-text-color: var(--vaadin-text-color-disabled, rgb(11 11 11 / 0.45));
+    --vaadin-button-shadow: none;
 }
 
 @media (max-width: 40rem) {
@@ -35,7 +95,7 @@
 }
 
 .lookup-version {
-    width: 16rem;
+    width: 14rem;
     max-width: 100%;
 }
 
@@ -53,14 +113,42 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    font-size: 13px;
+    color: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color-secondary));
 }
 
-.help-mark {
-    min-width: 0;
-    height: auto;
-    padding: 0 0.35rem;
-    margin: 0;
-    font-weight: var(--aura-font-weight-semibold, 600);
+/* The prototype's question mark: a 22 pixel filled circle in the page's lightest blue. The
+   element selector and the theme attribute outweigh Aura's own tertiary rules, which otherwise
+   keep their padding and font size and squeeze the mark into an oval. */
+vaadin-button.help-mark[theme] {
+    --vaadin-button-padding: 0;
+    --vaadin-button-height: 22px;
+    --vaadin-button-min-width: 22px;
+    --vaadin-button-border-width: 0;
+    --vaadin-button-border-radius: 50%;
+    --vaadin-button-font-size: 13px;
+    --vaadin-button-font-weight: 600;
+    --vaadin-button-line-height: 22px;
+    --vaadin-button-background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
+    --vaadin-button-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    box-sizing: border-box;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0;
+    margin-block: -3px;
+    margin-inline-start: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 22px;
+    background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
+    color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+}
+
+vaadin-button.help-mark[theme]::part(label) {
+    padding: 0;
+    width: 100%;
+    text-align: center;
 }
 
 /* The example in an empty field is the faintest ink on the page, rule 6.11.16

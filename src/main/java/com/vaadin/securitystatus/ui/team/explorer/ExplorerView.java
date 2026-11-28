@@ -17,13 +17,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
@@ -629,12 +627,8 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         detail.addClassName("explorer-detail");
         detail.getElement().setAttribute("data-line", line.line());
 
-        // No close button of its own: the row's own chevron shuts it, D-238.
-        var title = new H3(getTranslation("explorer.detail.title", line.line(), line.version().toString()));
-        title.addClassName("explorer-detail-title");
-        var head = new Div(title);
-        head.addClassName("explorer-detail-head");
-        detail.add(head, springSwitch(line, catalogue, shape, off));
+        // No title, no close button and no Spring switch: the row above names the line and release, its
+        // chevron shuts it and the starter's chip in the side panel chooses the shape, D-238, D-265, D-266.
 
         Split split = ExplorerAnswer.split(line, shape, asked);
         if (!split.measured()) {
@@ -650,7 +644,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         }
 
         Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-        var routes = new FindingGrid.Routes(registry, shape, shape.hidden(line), optional);
+        var routes = new FindingList.Routes(catalogue, shape, shape.hidden(line), optional);
         parts.halves(detail, line, split, routes, false);
 
         detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));
@@ -685,39 +679,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     private static RouterLink releaseLink(String line, VersionNumber version, String text) {
         return new RouterLink(text, ReleaseView.class,
                 new RouteParameters(Map.of(ReleaseView.LINE, line, ReleaseView.VERSION, version.toString())));
-    }
-
-    /**
-     * The switch between the full measurement and the one without Spring. It
-     * is the Spring Boot starter's chip in another shape, so it writes the same
-     * address. A line measured without Spring only says so instead.
-     */
-    private Component springSwitch(Line line, List<Product> catalogue, Shape shape, Set<String> off) {
-        var holder = new Div();
-        holder.addClassName("explorer-spring");
-        var toggle = new Switch(getTranslation("explorer.spring.switch"));
-        toggle.addClassName("explorer-spring-switch");
-        holder.add(toggle);
-        boolean starter = catalogue.stream().anyMatch(Product::switchesShape);
-        if (Boolean.TRUE.equals(line.noSpring()) || !starter) {
-            toggle.setValue(true);
-            toggle.setEnabled(false);
-            holder.add(lead("explorer-spring-only", getTranslation("explorer.spring.only")));
-            return holder;
-        }
-        toggle.setValue(shape.plain());
-        toggle.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                var next = new LinkedHashSet<>(off);
-                if (change.getValue()) {
-                    next.add(shape.starter());
-                } else {
-                    next.remove(shape.starter());
-                }
-                go(next);
-            }
-        });
-        return holder;
     }
 
     // Small parts

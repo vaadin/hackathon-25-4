@@ -62,7 +62,6 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     private static final Pattern SENTENCE_END = Pattern.compile("(?<=\\.)\\s");
 
     private final SecurityDataService data;
-    private final LookupState lookup;
     private final ValueSignal<Boolean> prereleases = new ValueSignal<>(false);
     private final Div body = new Div();
     private final Div linesHolder = new Div();
@@ -71,25 +70,22 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
 
     public HomeView(SecurityDataService data, DataRefreshSignal refresh, LookupState lookup) {
         this.data = data;
-        this.lookup = lookup;
         addClassName("home-view");
         body.addClassName("home-body");
         // The customer shell draws the page's H1, the purpose and the lookup above this.
         getContent().add(body);
-        shownUnder(linesHolder, LookupState.Tab.VERSION);
-        shownUnder(recentHolder, LookupState.Tab.IDS);
-        shownUnder(pointerHolder, LookupState.Tab.REPORT);
+        // The three parts under By version only; the other tabs show nothing under the lookup until
+        // they have an answer, as the prototype does, D-273.
+        for (Div part : List.of(linesHolder, recentHolder, pointerHolder)) {
+            part.addClassName("home-part");
+            part.bindVisible(lookup.tab().map(LookupState.Tab.VERSION::equals));
+        }
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(this, () -> {
             generatedAt.get();
             show(prereleases.get());
         });
-    }
-
-    private void shownUnder(Div holder, LookupState.Tab tab) {
-        holder.addClassName("home-part");
-        holder.bindVisible(lookup.tab().map(tab::equals));
     }
 
     @Override
@@ -109,8 +105,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             body.add(new DataOutageNotice());
             return;
         }
-        // Each tab of the lookup gets what helps its own question, D-241: the lines to the version
-        // tab, the recently reviewed advisories to the ids tab, the Spring Boot pointer to the report tab.
+        // The lines, the recently reviewed advisories and the Spring Boot pointer, D-273.
         linesHolder.add(linesSection(index, withPrereleases));
         recentHolder.add(recentSection(index));
         pointerHolder.add(pointer());
@@ -255,9 +250,11 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
 
     private static Optional<Component> stateIcon(CasesIndex.Summary row) {
         return row.state().map(state -> {
-            VaadinIcon shape = "secure".equals(state) ? VaadinIcon.CHECK_CIRCLE
+            // The prototype's marks: a plain tick for secure, a filled circle with a bar for a finding open.
+            VaadinIcon shape = "secure".equals(state) ? VaadinIcon.CHECK
                     : notAssessedOnly(row) ? VaadinIcon.CLOCK
-                            : "fix_available".equals(state) ? VaadinIcon.ARROW_CIRCLE_UP : VaadinIcon.WARNING;
+                            : "fix_available".equals(state) ? VaadinIcon.ARROW_CIRCLE_UP
+                                    : VaadinIcon.EXCLAMATION_CIRCLE;
             Icon icon = shape.create();
             icon.addClassName("line-card-icon");
             icon.getElement().setAttribute("aria-hidden", "true");

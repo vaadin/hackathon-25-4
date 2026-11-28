@@ -60,8 +60,8 @@ The comparison was written before anything was changed. The Action column is one
 
 | Prototype | App before | Action |
 | --- | --- | --- |
-| No title: the panel opens under the row | "Line 14.14, release 14.14.9" and a close button | Keep as app extra, D-212 |
-| No Spring switch: the starter's chip does it | The switch "Without Spring Boot", and "This line was measured without Spring only." | Keep as app extra, D-212 |
+| No title: the panel opens under the row | "Line 14.14, release 14.14.9" and a close button | Removed: the close button by D-238, the title by D-265 |
+| No Spring switch: the starter's chip does it | The switch "Without Spring Boot", and "This line was measured without Spring only." | Removed, D-266 |
 | "From Vaadin", with a tooltip, when the other half is there | Absent | Add, transcribe wording, D-205 |
 | "13 a real risk", "1 not assessed yet", open; "61 answered, nothing to do", shut; each with its tooltip | "To act on (13)", "Not assessed yet (1)", "From your Spring Boot 2.7.18 (132)", "Only in the build (12)", "Answered (61)" | Transcribe wording; move: the groups are per half, D-205. The build only group has no place in the prototype, which leaves those findings out: keep as app extra, after both halves |
 | "Nothing on this release is waiting for you: ..." when neither the risk nor the unassessed group has anything | Absent | Add, transcribe wording |
@@ -71,8 +71,8 @@ The comparison was written before anything was changed. The Action column is one
 | "For your own tooling:" and JSON, CSV always, VEX, dependency-check, osv-scanner, bomber where the release has scanner files, each with a tooltip | "Files of 14.14.9" and six files only when the release has scanner files, D-109 | Transcribe wording; move: JSON and CSV always, D-212 |
 | "Other measured releases of 14.14: 14.14.8, ..." linking each release page | Absent | Add from `releases`, D-212 |
 | No link to the head release | "Release page of 14.14.9" | Keep as app extra |
-| A finding row: id, severity, "through 4 products", "through 0 of 1 product", "only with vaadin-swing-kit-client", "bundled inside X", "in the frontend bundle Vaadin publishes", "we could not establish which product brings this", each with a tooltip naming the products; dots for the products that are on | A grid row: id, severity, "only with X" for one product, "through N products", "through N of M products", "bundled inside X", "no product recorded"; a dot per product, off ones dimmed | Transcribe wording, D-208. The grid stays: keep as app extra |
-| An opened finding: the summary, "What it means for your application", "What Vaadin says", "What you can do today", "The fix", the routes, "Read the advisory"; long texts cut with "more" | Summary, "What it means", "What you can do today", "Fix", "Routes", "Advisory record of X", texts whole, no commentary | Transcribe wording; add "What Vaadin says" from `commentary`; the summary without its heading, D-213. Texts stay whole: keep as app extra |
+| A finding row: id, severity, "through 4 products", "through 0 of 1 product", "only with vaadin-swing-kit-client", "bundled inside X", "in the frontend bundle Vaadin publishes", "we could not establish which product brings this", each with a tooltip naming the products; dots for the products that are on | A grid row: id, severity, "only with X" for one product, "through N products", "through N of M products", "bundled inside X", "no product recorded"; a dot per product, off ones dimmed | Transcribe wording, D-208. Since D-264 one `Details` per finding, as the prototype draws it; the grid is gone |
+| An opened finding: the summary, "What it means for your application", "What Vaadin says", "What you can do today", "The fix", the routes, "Read the advisory"; long texts cut with "more" | Summary, "What it means", "What you can do today", "Fix", "Routes", "Advisory record of X", texts whole, no commentary | Transcribe wording; add "What Vaadin says" from `commentary`; the summary without its heading, D-213. Since D-264 the prototype's panel, texts cut with "… more" |
 
 ## Behaviour
 

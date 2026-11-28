@@ -11,6 +11,7 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.html.Div;
@@ -141,7 +142,7 @@ final class SeriesParts {
      * off sentence in the release's words, and no sentence under With Spring
      * Boot, whose advice the card has already given.
      */
-    void halves(Div into, Line line, Split split, FindingGrid.Routes routes, boolean release) {
+    void halves(Div into, Line line, Split split, FindingList.Routes routes, boolean release) {
         boolean halves = split.theirs().size() > 0 && !routes.shape().plain();
         if (halves) {
             into.add(halfTitle("explorer.half.ours"));
@@ -159,7 +160,7 @@ final class SeriesParts {
                                 && ExplorerAnswer.mine(finding, routes.shape(), line))
                         .toList()
                 : split.unattributed().stream().filter(finding -> finding.bundledIn().isEmpty()).toList();
-        int frontend = (int) blind.stream().filter(FindingGrid::frontend).count();
+        int frontend = (int) blind.stream().filter(FindingList::frontend).count();
         if (frontend > 0) {
             into.add(hint(t("explorer.detail.frontend", frontend)));
         }
@@ -195,7 +196,7 @@ final class SeriesParts {
         }
 
         if (!split.build().isEmpty()) {
-            into.add(group(line, "BUILD", t("explorer.group.BUILD", split.build().size()), null,
+            into.add(group(line, "BUILD", new Span(t("explorer.group.BUILD", split.build().size())), null,
                     "explorer.group.BUILD.note", split.build(), false, routes));
         }
     }
@@ -207,7 +208,7 @@ final class SeriesParts {
         return title;
     }
 
-    private void groups(Div into, Line line, String prefix, Groups groups, FindingGrid.Routes routes,
+    private void groups(Div into, Line line, String prefix, Groups groups, FindingList.Routes routes,
             boolean shut) {
         List<List<Finding>> members = List.of(groups.risk(), groups.pending(), groups.ruled());
         for (int i = 0; i < KINDS.size(); i++) {
@@ -216,20 +217,23 @@ final class SeriesParts {
                 continue;
             }
             String kind = KINDS.get(i);
-            String heading = t("explorer.half.group", findings.size(), t("explorer.half.group." + kind));
+            // The count in bold and the words after it, as the prototype sets a group's heading.
+            var count = new Span(String.valueOf(findings.size()));
+            count.addClassName("explorer-group-count");
+            var heading = new Span(count, new Span(" " + t("explorer.half.group." + kind)));
             into.add(group(line, prefix + kind, heading, t("explorer.half.group." + kind + ".title"), null, findings,
                     !shut && !"ANSWERED".equals(kind), routes));
         }
     }
 
-    private Component group(Line line, String key, String heading, String title, String noteKey,
-            List<Finding> findings, boolean startsOpen, FindingGrid.Routes routes) {
-        var label = new Span(heading);
+    private Component group(Line line, String key, Span label, String title, String noteKey,
+            List<Finding> findings, boolean startsOpen, FindingList.Routes routes) {
         label.addClassName("explorer-group-label");
         if (title != null) {
             Tooltip.forComponent(label).setText(title);
         }
         var details = new Details(label);
+        details.addThemeVariants(DetailsVariant.AURA_NO_PADDING);
         details.addClassNames("explorer-group", "group-" + key.toLowerCase(Locale.ROOT));
         details.getElement().setAttribute("data-group", key);
         details.setOpened(selection.isOpen(key, startsOpen));
@@ -243,12 +247,27 @@ final class SeriesParts {
             details.add(lead("explorer-group-note", t(noteKey)));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
-        details.add(new FindingGrid(capped.shown(), routes, finding -> findingDetails(line.version(), finding,
-                routes.shape().plain())));
+        details.add(new FindingList(capped.shown(), routes, finding -> findingDetails(line.version(), finding,
+                routes.shape().plain()), cve -> paths(line.version(), cve, routes.shape().plain())));
         if (capped.more() > 0) {
             details.add(lead("explorer-group-more", t("explorer.group.more", capped.more())));
         }
         return details;
+    }
+
+    /**
+     * The paths each product brings an advisory by, read from the release's
+     * own record, which the data layer caches; nothing when it is not
+     * published or cannot be reached, and the dot then names only its product.
+     */
+    private Map<String, List<String>> paths(VersionNumber version, String cve, boolean springOff) {
+        try {
+            return data.explorerVersion(version).flatMap(record -> record.findings().stream()
+                    .filter(candidate -> candidate.cve().equals(cve)).findFirst())
+                    .map(found -> FindingDetail.pathsByProduct(found, springOff)).orElse(Map.of());
+        } catch (DataUnreachableException unreachable) {
+            return Map.of();
+        }
     }
 
     /**

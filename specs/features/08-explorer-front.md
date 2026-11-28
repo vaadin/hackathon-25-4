@@ -41,7 +41,7 @@ The security team's reading: every maintained series, narrowed by the products a
 - With Spring Boot: "N findings on this series come with Spring Boot rather than with Vaadin, measured against X. ... See what Spring Boot brings", linking the Spring Boot page, then its own three groups.
 - "For your own tooling:" with JSON and CSV always, and VEX, dependency-check, osv-scanner and bomber where the release has scanner files, each streamed through the proxy of epic 02 with the `Download` API. Then "Other measured releases of X", each a link to its release page, D-212.
 - Each finding row: id, severity, "only with X", "through N products", "through M of N products", "bundled inside X", "in the frontend bundle Vaadin publishes" or "we could not establish which product brings this", and a dot per product that is on, D-208. Opening it loads the release's record lazily and shows the summary, What it means for your application, What Vaadin says, What you can do today, The fix, the routes and Read the advisory, D-213. Groups cap at 150 with the remainder counted. Grid texts localise through the Grid i18n API.
-- App extras kept, D-212: the title and close button at the top, the switch "Without Spring Boot", the sentence of five counts, the build only group after both halves, and the link to the head release's page.
+- App extras kept, D-212: the sentence of five counts, the build only group after both halves, and the link to the head release's page. The title, the close button and the switch "Without Spring Boot" are gone, D-238, D-265, D-266: the row names the line, its chevron shuts it, and the starter's chip chooses the shape.
 
 ## Edge cases
 
@@ -51,7 +51,7 @@ The security team's reading: every maintained series, narrowed by the products a
 | An `?off` name matching no product on this data | Dropped from the address, rule 6.2.7 |
 | An `?off` naming exactly the default | Written away |
 | Storage empty or unreadable | The default, silently |
-| A line measured without Spring only | The Spring switch explains itself on that line |
+| A line measured without Spring only | Reads the one measurement it has, whatever the starter's chip says, D-266 |
 | The shape without Spring not measured on a series | The series reads Not assessed yet and its panel says the second scan has not been made |
 
 ## Acceptance criteria

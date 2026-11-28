@@ -300,7 +300,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             advice(front, record, line, shape, split).ifPresent(detail::add);
             detail.add(new ReleaseFiles(data, record.version(), ReleaseRules.files(record.scannerFiles()), true));
             Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-            parts.halves(detail, line, split, new FindingGrid.Routes(registry, shape, shape.hidden(line), optional),
+            parts.halves(detail, line, split, new FindingList.Routes(catalogue, shape, shape.hidden(line), optional),
                     true);
         }
 

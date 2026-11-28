@@ -111,7 +111,10 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         this.data = data;
         addClassName("cve-view");
         body.addClassNames("version-body", "cve-body");
-        getContent().add(ViewHeading.ofAnswer(), body);
+        // No visible title above the answer, as in the prototype; kept for screen readers, D-270.
+        var heading = ViewHeading.ofAnswer();
+        heading.addClassName("visually-hidden");
+        getContent().add(heading, body);
 
         var generatedAt = refresh.generatedAt();
         Signal<Answer> answer = Signal.computed(() -> {
@@ -444,11 +447,11 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     private static VaadinIcon stateIcon(CveRules.State state) {
         return switch (state) {
-            case FIX -> VaadinIcon.ARROW_CIRCLE_UP;
-            case AFFECTS, BOOT, DISCONTINUED -> VaadinIcon.WARNING;
-            case TRIAGE, UNKNOWN -> VaadinIcon.QUESTION_CIRCLE_O;
-            case NOT_AFFECTED, FIXED, NOT_REPORTED -> VaadinIcon.CHECK_CIRCLE;
-            case MEASURED -> VaadinIcon.CHART;
+            // The glyph alone: the stylesheet draws the prototype's filled circle round it.
+            case FIX, MEASURED -> VaadinIcon.ARROW_UP;
+            case AFFECTS, BOOT, DISCONTINUED -> VaadinIcon.EXCLAMATION;
+            case TRIAGE, UNKNOWN -> VaadinIcon.QUESTION;
+            case NOT_AFFECTED, FIXED, NOT_REPORTED -> VaadinIcon.CHECK;
         };
     }
 

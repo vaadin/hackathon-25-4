@@ -13,7 +13,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -21,7 +20,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.ui.customer.HomeView;
 
@@ -114,12 +112,7 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void an_opened_finding_reads_the_release_record() {
         navigate("findings/release/24.9/24.9.21", ReleaseView.class);
-        Grid<Finding> grid = gridOf("CVE-2026-45292");
-        Finding risk = grid.getGenericDataView().getItems().filter(item -> item.cve().equals("CVE-2026-45292"))
-                .findFirst().orElseThrow();
-
-        // The tester's clickRow does not open item details, browserless-test#29.
-        grid.setDetailsVisible(risk, true);
+        listOf("CVE-2026-45292").rowOf("CVE-2026-45292").orElseThrow().setOpened(true);
 
         assertThat($(Div.class).withClassName("explorer-finding").single().getElement().getTextRecursively())
                 .contains("OpenTelemetry Java SDK has Unbounded Memory Allocation",
@@ -233,12 +226,9 @@ class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
         return $(TextField.class).withClassName("release-lookup").single();
     }
 
-    @SuppressWarnings("unchecked")
-    private Grid<Finding> gridOf(String cve) {
+    private FindingList listOf(String cve) {
         return $(Details.class).withClassName("explorer-group").all().stream()
-                .flatMap(details -> details.getContent().filter(Grid.class::isInstance))
-                .map(grid -> (Grid<Finding>) grid)
-                .filter(grid -> grid.getGenericDataView().getItems().anyMatch(item -> item.cve().equals(cve)))
-                .findFirst().orElseThrow();
+                .flatMap(details -> details.getContent().filter(FindingList.class::isInstance))
+                .map(FindingList.class::cast).filter(list -> list.rowOf(cve).isPresent()).findFirst().orElseThrow();
     }
 }

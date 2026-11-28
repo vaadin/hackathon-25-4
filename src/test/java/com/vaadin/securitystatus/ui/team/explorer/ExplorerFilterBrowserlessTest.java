@@ -16,12 +16,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.FixturePages;
-import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules;
@@ -123,7 +121,8 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
         navigate("findings?open=25.3", ExplorerView.class);
         assertThat(shown()).hasSize(15).contains(SPRING_BOOTS);
 
-        test($(Switch.class).withClassName("explorer-spring-switch").single()).switchOn();
+        // The starter's chip is the control, D-266: switched off, the address says so.
+        navigate("findings?open=25.3&off=vaadin-spring-boot-starter,control-center-starter", ExplorerView.class);
 
         assertThat(ExplorerBrowserlessTest.query().getParameters().get("off"))
                 .containsExactly("vaadin-spring-boot-starter,control-center-starter");
@@ -131,23 +130,12 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
         assertThat(shown()).hasSize(12).doesNotContain(SPRING_BOOTS);
         // The shape without Spring has no Spring Boot half, so no second badge.
         assertThat(badgeTexts("25.3")).containsExactly("Vaadin: Not affected");
-        assertThat($(Switch.class).withClassName("explorer-spring-switch").single().getValue()).isTrue();
+        assertThat($(Switch.class).withClassName("explorer-spring-switch").exists()).isFalse();
         // The products that need Spring cannot be had on that shape: drawn off, not clickable.
         Span hilla = $(Span.class).withClassName("explorer-chip").all().stream()
                 .filter(chip -> "hilla-spring-boot-starter".equals(chip.getElement().getAttribute("data-product")))
                 .findFirst().orElseThrow();
         assertThat(hilla.getElement().getClassList()).contains("impossible");
-    }
-
-    // Edge case: a line measured without Spring only explains itself
-    @Test
-    void a_line_measured_without_spring_only_says_so() {
-        navigate("findings?open=8.32", ExplorerView.class);
-
-        Switch toggle = $(Switch.class).withClassName("explorer-spring-switch").single();
-        assertThat(toggle.isEnabled()).isFalse();
-        assertThat($(Paragraph.class).withClassName("explorer-spring-only").single().getText())
-                .isEqualTo("This line was measured without Spring only.");
     }
 
     // The select all box reads the chips, and its two targets are the prototype's, D-206
@@ -171,26 +159,24 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
 
     // Helpers
 
-    @SuppressWarnings("unchecked")
     private List<String> shown() {
         var ids = new ArrayList<String>();
         for (Details group : $(Details.class).withClassName("explorer-group").all()) {
-            group.getContent().filter(Grid.class::isInstance).map(grid -> (Grid<Finding>) grid)
-                    .forEach(grid -> grid.getGenericDataView().getItems().forEach(finding -> ids.add(finding.cve())));
+            group.getContent().filter(FindingList.class::isInstance).map(FindingList.class::cast)
+                    .forEach(list -> list.findings().forEach(finding -> ids.add(finding.cve())));
         }
         return ids;
     }
 
-    @SuppressWarnings("unchecked")
     private String through(String cve) {
         for (Details group : $(Details.class).withClassName("explorer-group").all()) {
-            for (var component : group.getContent().filter(Grid.class::isInstance).toList()) {
-                var grid = (Grid<Finding>) component;
-                var found = grid.getGenericDataView().getItems().filter(finding -> finding.cve().equals(cve))
-                        .findFirst();
-                if (found.isPresent()) {
-                    int row = grid.getGenericDataView().getItems().toList().indexOf(found.get());
-                    return test(grid).getCellComponent(row, 2).getElement().getTextRecursively();
+            for (var list : group.getContent().filter(FindingList.class::isInstance).map(FindingList.class::cast)
+                    .toList()) {
+                var row = list.rowOf(cve);
+                if (row.isPresent()) {
+                    return row.get().getSummary().getChildren().filter(Span.class::isInstance).map(Span.class::cast)
+                            .filter(span -> span.hasClassName("explorer-through")).findFirst().orElseThrow()
+                            .getText();
                 }
             }
         }

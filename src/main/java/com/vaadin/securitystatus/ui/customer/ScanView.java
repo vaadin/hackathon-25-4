@@ -88,7 +88,10 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         this.scan = scan;
         addClassName("scan-view");
         body.addClassName("scan-body");
-        getContent().add(ViewHeading.ofAnswer(), body);
+        // No visible title above the answer, as in the prototype; kept for screen readers, D-270.
+        var heading = ViewHeading.ofAnswer();
+        heading.addClassName("visually-hidden");
+        getContent().add(heading, body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(body, () -> {

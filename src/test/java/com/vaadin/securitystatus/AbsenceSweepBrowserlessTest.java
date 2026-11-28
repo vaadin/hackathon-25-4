@@ -237,9 +237,8 @@ class AbsenceSweepBrowserlessTest extends SpringBrowserlessTest {
         edit("data/25.3.5.json", root -> root.remove(List.of("scanner_files", "scanned_at")));
         navigate("findings/release/25.3/25.3.5", ReleaseView.class);
 
-        // The only blanks are route cells of findings that arrive through no product of the registry,
-        // a cell with no ring in it rather than an empty element.
-        assertThat(sweep()).isNotEmpty().allSatisfy(blank -> assertThat(blank).matches("explorer-findings column3 \\d+"));
+        // A finding that arrives through no product draws no dots at all, rather than an empty element.
+        assertThat(sweep()).isEmpty();
         assertThat(find(Anchor.class).withClassName("release-file").all()).extracting(Anchor::getText)
                 .containsExactly("JSON", "CSV");
         assertThat(pageText()).doesNotContain("Scanned").doesNotContain("scanned");
