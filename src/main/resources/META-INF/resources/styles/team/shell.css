@@ -7,13 +7,14 @@
     padding-inline-start: 0.5rem;
 }
 
-/* The bar wraps onto a second row rather than push Sign out off a laptop's screen. */
-/* Aura pads the drawer by 6.445 pixels, which puts its content between pixels and blurs the app
-   icon on a 1x screen; a whole 6 keeps it sharp. FEEDBACK-25.4.md, bugs routed around. */
+/* Aura pads the drawer from an unrounded 1.5vmin, 6.445 pixels in a window 963 tall, which puts
+   its content between pixels and blurs the app icon on a 1x screen; a whole 6 keeps it sharp.
+   FEEDBACK-PLATFORM.md, draft specs/issues/28-aura-app-layout-inset.md. */
 vaadin-app-layout.internal-shell:not([overlay])::part(drawer) {
     padding-inline: 6px;
 }
 
+/* The bar wraps onto a second row rather than push Sign out off a laptop's screen. */
 .internal-shell::part(navbar) {
     flex-wrap: wrap;
 }
