@@ -81,4 +81,4 @@ Where a feature document says the settled wording, the words are transcribed int
 
 ## What we are not doing
 
-No Hilla endpoints and no React: one UI technology. The pom still carries `hilla-spring-boot-starter`, which no class uses; a rebuild can leave it out. No client side templates. No websocket push beyond what signals use. No service worker or PWA: the readers of this page arrive from a ticket, use it and leave. No database reads on the render path: H2 exists for the workbench draft alone.
+No Hilla and no React: one UI technology, and the pom carries no Hilla starter. No client side templates. No websocket push beyond what signals use. No service worker or PWA: the readers of this page arrive from a ticket, use it and leave. No database reads on the render path: H2 exists for the workbench draft alone.
