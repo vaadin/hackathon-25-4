@@ -18,3 +18,4 @@
 25-effect-unlocked-request-end.md -> https://github.com/vaadin/flow/issues/27187
 26-combo-box-bind-value-before-items.md -> https://github.com/vaadin/flow-components/issues/10779
 27-logout-forwarded-prefix.md -> https://github.com/vaadin/flow/issues/27490
+28-aura-app-layout-inset.md -> https://github.com/vaadin/web-components/issues/13535
