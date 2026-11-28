@@ -21,12 +21,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.UploadButton;
@@ -50,13 +51,13 @@ import com.vaadin.securitystatus.customer.ReportParser;
 import com.vaadin.securitystatus.customer.ScanState;
 import com.vaadin.securitystatus.customer.ScannerReport;
 import com.vaadin.securitystatus.customer.Triage;
+import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.ui.common.HelpDialog;
-import com.vaadin.securitystatus.customer.VersionRules;
 
 /**
  * The lookup: three tabs, by version, by advisory ids and by report, over the
@@ -121,7 +122,7 @@ public final class Lookup extends Composite<Div> {
     private final Signal<Boolean> reportAsks;
 
     private final Tabs tabs = new Tabs();
-    private final Map<LookupState.Tab, com.vaadin.flow.component.tabs.Tab> tabOf = new HashMap<>();
+    private final Map<LookupState.Tab, Tab> tabOf = new HashMap<>();
     private final ComboBox<String> version = new ComboBox<>();
     private final TextField ids = new TextField();
     private final TextField idsVersion = new TextField();
@@ -179,7 +180,7 @@ public final class Lookup extends Composite<Div> {
     }
 
     private void addTab(LookupState.Tab which, String key) {
-        var tab = new com.vaadin.flow.component.tabs.Tab(getTranslation(key));
+        var tab = new Tab(getTranslation(key));
         tabOf.put(which, tab);
         tabs.add(tab);
     }

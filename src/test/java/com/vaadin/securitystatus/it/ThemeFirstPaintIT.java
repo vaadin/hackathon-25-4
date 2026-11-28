@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
@@ -102,7 +103,7 @@ class ThemeFirstPaintIT {
 
     /** Clicks the scheme button until it is on the scheme the label names, at most once round. */
     private void choose(String label) {
-        String wanted = label.toLowerCase(java.util.Locale.ROOT);
+        String wanted = label.toLowerCase(Locale.ROOT);
         for (int i = 0; i < 3 && !wanted.equals(chosen()); i++) {
             String before = chosen();
             driver.findElement(By.cssSelector("vaadin-button.theme-switch")).click();

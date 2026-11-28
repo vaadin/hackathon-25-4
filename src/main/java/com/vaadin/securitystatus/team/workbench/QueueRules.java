@@ -10,10 +10,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.jspecify.annotations.Nullable;
 
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.model.VerdictQueue.QueueEntry;
 import com.vaadin.securitystatus.data.model.VerdictQueue.QueuedAdvisory;
 import com.vaadin.securitystatus.data.model.VerdictQueue;
@@ -32,8 +34,6 @@ import com.vaadin.securitystatus.data.model.VerdictQueue;
 public final class QueueRules {
 
     /** The severities in the order every list here uses, worst first. */
-    public static final List<String> SEVERITIES = List.of("critical", "high", "moderate", "low");
-
     private static final String IN_TRIAGE = "in_triage";
 
     private QueueRules() {
@@ -196,7 +196,7 @@ public final class QueueRules {
      */
     public static Summary summary(List<Row> rows, Optional<String> line) {
         var bySeverity = new LinkedHashMap<String, int[]>();
-        var byLine = new java.util.TreeMap<String, int[]>(NEWEST_FIRST);
+        var byLine = new TreeMap<String, int[]>(NEWEST_FIRST);
         int findings = 0, unjudged = 0;
         for (Row row : rows) {
             for (QueuedAdvisory advisory : row.here()) {
@@ -205,7 +205,7 @@ public final class QueueRules {
                 if (open) {
                     unjudged++;
                 }
-                advisory.severity().map(word -> word.toLowerCase(Locale.ROOT)).filter(SEVERITIES::contains)
+                advisory.severity().map(word -> word.toLowerCase(Locale.ROOT)).filter(Severity.WORST_FIRST::contains)
                         .ifPresent(word -> count(bySeverity.computeIfAbsent(word, key -> new int[2]), open));
                 for (String series : advisory.lines()) {
                     if (line.isEmpty() || line.get().equals(series)) {
@@ -216,7 +216,7 @@ public final class QueueRules {
             }
         }
         var ordered = new LinkedHashMap<String, int[]>();
-        SEVERITIES.stream().filter(bySeverity::containsKey).forEach(word -> ordered.put(word, bySeverity.get(word)));
+        Severity.WORST_FIRST.stream().filter(bySeverity::containsKey).forEach(word -> ordered.put(word, bySeverity.get(word)));
         return new Summary(rows.size(), findings, unjudged, ordered, new LinkedHashMap<>(byLine));
     }
 

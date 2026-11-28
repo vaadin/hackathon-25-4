@@ -12,6 +12,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.badge.BadgeVariant;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -20,18 +21,17 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
-import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.LookupState;
+import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -41,7 +41,8 @@ import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
-import com.vaadin.securitystatus.customer.VersionRules;
+
+import jakarta.annotation.security.PermitAll;
 
 /**
  * The front door: every followed line at a glance, the advisories reviewed
@@ -192,7 +193,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             if ("fix_available".equals(state)) {
                 return getTranslation("state.fixAvailable");
             }
-            int open = count(row.risk()) + count(row.triage());
+            int open = row.open().orElse(0);
             return getTranslation(open == 1 ? "state.open.one" : "state.open.many", open);
         });
     }

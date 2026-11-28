@@ -7,10 +7,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apereo.cas.client.authentication.AttributePrincipalImpl;
 import org.apereo.cas.client.validation.AssertionImpl;
+import org.apereo.cas.client.validation.TicketValidationException;
 import org.apereo.cas.client.validation.TicketValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +60,7 @@ class CasSignInTest {
     @Test
     void a_ticket_the_server_does_not_vouch_for_signs_nobody_in() throws Exception {
         when(validator.validate(anyString(), anyString()))
-                .thenThrow(new org.apereo.cas.client.validation.TicketValidationException("no"));
+                .thenThrow(new TicketValidationException("no"));
 
         var session = new MockHttpSession();
         mvc.perform(get(CasSecurity.CALLBACK).param("ticket", "ST-3").session(session));
@@ -76,7 +78,7 @@ class CasSignInTest {
         return session;
     }
 
-    private static java.util.List<String> roles(MockHttpSession session) {
+    private static List<String> roles(MockHttpSession session) {
         var security = (SecurityContext) session
                 .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
         assertThat(security).isNotNull();

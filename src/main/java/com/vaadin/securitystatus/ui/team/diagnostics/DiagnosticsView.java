@@ -2,11 +2,12 @@ package com.vaadin.securitystatus.ui.team.diagnostics;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -23,19 +24,19 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.menubar.MenuBarVariant;
-import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.page.WebStorage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.page.ExtendedClientDetails;
+import com.vaadin.flow.component.page.WebStorage;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -190,8 +191,7 @@ public final class DiagnosticsView extends Composite<Div> {
                     show(placed);
                 }
             });
-            return () -> {
-            };
+            return null;
         });
 
         UI.getCurrent().getPage().retrieveExtendedClientDetails(client::set);
@@ -246,7 +246,7 @@ public final class DiagnosticsView extends Composite<Div> {
 
     /** How long ago, in words: the largest whole unit, down to "less than a minute". */
     private String ago(Instant then, Instant now) {
-        long minutes = Math.max(0, java.time.Duration.between(then, now).toMinutes());
+        long minutes = Math.max(0, Duration.between(then, now).toMinutes());
         if (minutes < 1) {
             return getTranslation("diagnostics.ago.now");
         }

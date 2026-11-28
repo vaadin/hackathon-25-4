@@ -1,6 +1,7 @@
 package com.vaadin.securitystatus.customer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public final class CaseRules {
             Placed placed = place(item, index);
             groups.get(placed.group()).add(placed);
         }
-        groups.values().forEach(cases -> cases.sort(java.util.Comparator.comparingInt(
+        groups.values().forEach(cases -> cases.sort(Comparator.comparingInt(
                 (Placed placed) -> placed.item().count() == null ? 0 : placed.item().count()).reversed()));
         return groups;
     }
@@ -126,7 +127,7 @@ public final class CaseRules {
             return false;
         }
         String advisory = where.ids();
-        return Optional.ofNullable(index.advisories().get(advisory)).filter(advisoryFact(caseId, advisory))
+        return index.advisory(advisory).filter(advisoryFact(caseId, advisory))
                 .isPresent();
     }
 

@@ -13,10 +13,10 @@ import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
 import com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.messages.MessageInputVariant;
@@ -112,11 +112,6 @@ final class AssistantPanel extends Composite<Section> {
                 .withResponseListener(this::ended)
                 .withHistory(history.messages(), Map.of())
                 .build();
-    }
-
-    /** The orchestrator, for a programmatic prompt in the tests. */
-    AIOrchestrator orchestrator() {
-        return orchestrator;
     }
 
     /** The prompt is written to the tail as it goes out, or refused when the session has asked enough for now. */

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +26,12 @@ class AssistantHistoryTest {
             }
 
             @Override
-            public java.time.ZoneId getZone() {
+            public ZoneId getZone() {
                 return ZoneOffset.UTC;
             }
 
             @Override
-            public Clock withZone(java.time.ZoneId zone) {
+            public Clock withZone(ZoneId zone) {
                 return this;
             }
         });

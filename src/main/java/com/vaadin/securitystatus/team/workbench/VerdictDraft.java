@@ -190,10 +190,6 @@ public class VerdictDraft {
         return draftKey;
     }
 
-    String getPair() {
-        return pair;
-    }
-
     void setPair(String pair) {
         this.pair = pair;
     }

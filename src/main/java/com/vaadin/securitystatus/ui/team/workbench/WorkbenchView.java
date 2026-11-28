@@ -2,11 +2,13 @@ package com.vaadin.securitystatus.ui.team.workbench;
 
 import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
 import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.notice;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -15,14 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -43,7 +46,6 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.markdown.Markdown;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -98,7 +100,7 @@ import jakarta.annotation.security.RolesAllowed;
 public final class WorkbenchView extends Composite<Div> implements BeforeEnterObserver {
 
     static final String PATH = "findings/workbench";
-    private static final DateTimeFormatter SAVED_AT = new java.time.format.DateTimeFormatterBuilder()
+    private static final DateTimeFormatter SAVED_AT = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE).appendLiteral(' ').appendPattern("HH:mm").toFormatter()
             .withZone(ZoneOffset.UTC);
 
@@ -196,8 +198,8 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         changed();
     }
 
-    /** The verdict form, for whatever attaches to it later: the form AI controller of epic 11. */
-    public VerdictForm form() {
+    /** The verdict form, for the tests. */
+    VerdictForm form() {
         return form;
     }
 
@@ -559,7 +561,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         drawPicks(row, line);
         if (kept.isPresent()) {
             restore(kept.get());
-            syncTicks();
             return;
         }
         var fresh = new VerdictDraft();
@@ -570,7 +571,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         saved.set(Optional.empty());
         changed();
         newest(row, line).ifPresent(id -> fillFrom(row, id));
-        syncTicks();
     }
 
     /**
@@ -581,7 +581,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
      * counts as the oldest; a tie goes to the first met.
      */
     private Optional<String> newest(Row row, Optional<String> line) {
-        Map<String, Assessment> written = loaded.map(VerdictQueue::assessments).orElse(Map.of());
+        Map<String, Assessment> written = written();
         List<String> carried = carried(row);
         List<String> speaking = line.map(series -> carried.stream().filter(id -> row.entry().cves().stream()
                 .anyMatch(advisory -> id.equals(advisory.saidByLine().get(series)))).toList()).orElse(List.of());
@@ -593,7 +593,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
 
     /** The verdicts this package already carries, as the queue publishes them, in the order first met. */
     private List<String> carried(Row row) {
-        Map<String, Assessment> written = loaded.map(VerdictQueue::assessments).orElse(Map.of());
+        Map<String, Assessment> written = written();
         var ids = new LinkedHashSet<String>();
         row.entry().cves().forEach(advisory -> advisory.assessments().stream().filter(written::containsKey)
                 .forEach(ids::add));
@@ -607,7 +607,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         if (carried.isEmpty()) {
             return;
         }
-        Map<String, Assessment> written = loaded.map(VerdictQueue::assessments).orElse(Map.of());
+        Map<String, Assessment> written = written();
         reuse.add(label("workbench.reuse"));
         var chips = css(new Div(), "workbench-reuse-chips");
         for (String id : carried) {
@@ -631,7 +631,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
      * beside the ones already ticked. The old file is never written over.
      */
     void fillFrom(Row row, String id) {
-        Assessment old = loaded.map(VerdictQueue::assessments).map(all -> all.get(id)).orElse(null);
+        Assessment old = written().get(id);
         if (old == null) {
             return;
         }
@@ -656,7 +656,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         form.edit(draft);
         saved.set(Optional.empty());
         changed();
-        syncTicks();
 
         filled.setText(getTranslation("workbench.filled", id, old.cves().size()));
         filled.setVisible(true);
@@ -718,7 +717,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     /** What is said about one advisory beside its tick, in the prototype's words. */
     private List<String> said(QueuedAdvisory advisory, Optional<String> line) {
         var out = new ArrayList<String>();
-        var byVersion = new java.util.TreeMap<String, List<String>>();
+        var byVersion = new TreeMap<String, List<String>>();
         advisory.fixedUpstream().forEach((series, version) -> byVersion.computeIfAbsent(version,
                 key -> new ArrayList<>()).add(series));
         if (byVersion.size() == 1) {
@@ -779,6 +778,16 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     /** The ticks following the advisories field. */
+    /** The verdicts the queue publishes, by id. */
+    private Map<String, Assessment> written() {
+        return loaded.map(VerdictQueue::assessments).orElse(Map.of());
+    }
+
+    /** When a draft was last saved, in UTC, or nothing for one never saved. */
+    private static String savedAt(VerdictDraft draft) {
+        return draft.getUpdatedAt() == null ? "" : SAVED_AT.format(draft.getUpdatedAt());
+    }
+
     private void syncTicks() {
         Set<String> ids = Set.copyOf(form.draft().advisoryIds());
         ticks.forEach((id, tick) -> {
@@ -793,7 +802,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         form.edit(draft);
         saved.set(Optional.of(draft));
         changed();
-        syncTicks();
     }
 
     private static Optional<QueueEntry> entry(VerdictQueue queue, Optional<String> purl) {
@@ -826,13 +834,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         var export = css(new Button(getTranslation("workbench.export"), click -> export()), "workbench-export");
         export.addThemeVariants(ButtonVariant.PRIMARY);
         var copy = css(new Button(getTranslation("workbench.copy")), "workbench-copy");
-        Clipboard.onClick(copy).writeText(yamlSource, copied -> {
-            var done = Notification.show(getTranslation("workbench.copy.done"));
-            done.addThemeVariants(NotificationVariant.SUCCESS);
-        }, failure -> {
-            var failed = Notification.show(getTranslation("workbench.copy.failed"));
-            failed.addThemeVariants(NotificationVariant.ERROR);
-        });
+        Clipboard.onClick(copy).writeText(yamlSource,
+                copied -> notice(getTranslation("workbench.copy.done"), NotificationVariant.SUCCESS),
+                failure -> notice(getTranslation("workbench.copy.failed"), NotificationVariant.ERROR));
 
         open.setText(getTranslation("workbench.github"));
         open.setType(NativeButton.Type.SUBMIT);
@@ -912,15 +916,14 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
 
         lastSaved.setVisible(last.isPresent());
         last.ifPresent(kept -> lastSaved.setText(getTranslation("workbench.saved", kept.getSavedBy(),
-                kept.getUpdatedAt() == null ? "" : SAVED_AT.format(kept.getUpdatedAt()))));
+                savedAt(kept))));
     }
 
     private void save() {
         List<String> invalid = form.invalidForDraft();
         if (!invalid.isEmpty()) {
-            var refusal = Notification.show(getTranslation("workbench.save.refused", String.join(", ", invalid),
-                    invalid.size()));
-            refusal.addThemeVariants(NotificationVariant.ERROR);
+            notice(getTranslation("workbench.save.refused", String.join(", ", invalid), invalid.size()),
+                    NotificationVariant.ERROR);
             return;
         }
         VerdictDraft kept = drafts.save(form.draft());
@@ -931,8 +934,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         changed();
         // Saving is no edit: an export approved before it still says what is on screen.
         handover.set(approved);
-        var done = Notification.show(getTranslation("workbench.save.done"));
-        done.addThemeVariants(NotificationVariant.SUCCESS);
+        notice(getTranslation("workbench.save.done"), NotificationVariant.SUCCESS);
     }
 
     private void export() {
@@ -972,7 +974,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
                 .setFlexGrow(1);
         draftList.addColumn(VerdictDraft::getSavedBy).setHeader(getTranslation("workbench.drafts.by")).setKey("by")
                 .setAutoWidth(true).setFlexGrow(0);
-        draftList.addColumn(draft -> draft.getUpdatedAt() == null ? "" : SAVED_AT.format(draft.getUpdatedAt()))
+        draftList.addColumn(WorkbenchView::savedAt)
                 .setHeader(getTranslation("workbench.drafts.when")).setKey("when").setAutoWidth(true).setFlexGrow(0);
         draftList.addItemClickListener(click -> {
             // A draft restored belongs to no row; the form waits at the foot of the page.

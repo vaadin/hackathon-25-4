@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.securitystatus.data.VersionNumber;
 
 /** {@code cases/cve/<id>.json}: everything the by CVE screen needs for one advisory. */
@@ -60,7 +61,7 @@ public record CveAnswer(String cve, Optional<String> severity, Optional<String> 
             changes = Wire.list(changes);
         }
 
-        public record Change(@com.fasterxml.jackson.annotation.JsonProperty("package") Optional<String> packageName,
+        public record Change(@JsonProperty("package") Optional<String> packageName,
                 List<String> from, List<String> to) {
 
             public Change {
@@ -72,7 +73,7 @@ public record CveAnswer(String cve, Optional<String> severity, Optional<String> 
     }
 
     /** How the vulnerable package reaches a line. */
-    public record Arrival(@com.fasterxml.jackson.annotation.JsonProperty("package") Optional<String> packageName,
+    public record Arrival(@JsonProperty("package") Optional<String> packageName,
             Optional<String> version, Optional<String> bundledIn, Optional<String> fixedUpstream) {
 
         public Arrival {

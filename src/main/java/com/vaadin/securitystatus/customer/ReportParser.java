@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.customer;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import tools.jackson.core.JacksonException;
@@ -184,7 +187,7 @@ public final class ReportParser {
     }
 
     /** The upload's stream, refusing to give more than the bytes a report may have. */
-    private static final class Limited extends java.io.FilterInputStream {
+    private static final class Limited extends FilterInputStream {
 
         private long left;
         boolean exceeded;
@@ -195,7 +198,7 @@ public final class ReportParser {
         }
 
         @Override
-        public int read() throws java.io.IOException {
+        public int read() throws IOException {
             int b = super.read();
             if (b >= 0) {
                 count(1);
@@ -204,7 +207,7 @@ public final class ReportParser {
         }
 
         @Override
-        public int read(byte[] buffer, int offset, int length) throws java.io.IOException {
+        public int read(byte[] buffer, int offset, int length) throws IOException {
             int n = super.read(buffer, offset, length);
             if (n > 0) {
                 count(n);
@@ -212,11 +215,11 @@ public final class ReportParser {
             return n;
         }
 
-        private void count(long n) throws java.io.IOException {
+        private void count(long n) throws IOException {
             left -= n;
             if (left < 0) {
                 exceeded = true;
-                throw new java.io.IOException("larger than allowed");
+                throw new IOException("larger than allowed");
             }
         }
     }
@@ -436,7 +439,7 @@ public final class ReportParser {
         return all;
     }
 
-    private static boolean anyElement(JsonNode array, java.util.function.Predicate<JsonNode> test) {
+    private static boolean anyElement(JsonNode array, Predicate<JsonNode> test) {
         if (!array.isArray()) {
             return false;
         }

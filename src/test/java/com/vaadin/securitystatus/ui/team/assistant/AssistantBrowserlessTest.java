@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.provider.ToolException;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadCapture;
+import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.assistant.AssistantProviders;
 import com.vaadin.securitystatus.team.assistant.AssistantTail.Entry;
@@ -28,6 +32,9 @@ import com.vaadin.securitystatus.team.assistant.AssistantTail;
 import com.vaadin.securitystatus.team.assistant.AssistantTools;
 import com.vaadin.securitystatus.team.assistant.CassetteLLMProvider;
 import com.vaadin.securitystatus.team.assistant.Prompts;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * AST-01 to AST-04 and the rest of US-11.1 to US-11.3: the chat panel of the
@@ -57,7 +64,7 @@ class AssistantBrowserlessTest extends SpringBrowserlessTest {
 
     /** The panel is on the right of the internal shell, shut until the Assistant button opens it, D-203. */
     private void openPanel() {
-        test($(com.vaadin.flow.component.button.Button.class).withClassName("assistant-toggle").single()).click();
+        test($(Button.class).withClassName("assistant-toggle").single()).click();
     }
 
     // US-11.1: the mock is the default, and says so
@@ -189,9 +196,9 @@ class AssistantBrowserlessTest extends SpringBrowserlessTest {
         var capped = tools.openFindings(tools_json("{\"version\":\"24.9.21\",\"limit\":500}"));
         assertThat(capped.get("findings").size()).isEqualTo(12);
 
-        org.assertj.core.api.Assertions
+        Assertions
                 .assertThatThrownBy(() -> tools.queueHead(tools_json("{\"n\":500}")))
-                .isInstanceOf(com.vaadin.flow.component.ai.provider.ToolException.class)
+                .isInstanceOf(ToolException.class)
                 .hasMessage("n must be a whole number from 1 to 20, and 500 is not.");
     }
 
@@ -293,14 +300,14 @@ class AssistantBrowserlessTest extends SpringBrowserlessTest {
     }
 
     @Autowired
-    com.vaadin.securitystatus.data.SecurityDataService data;
+    SecurityDataService data;
 
-    private com.vaadin.securitystatus.data.SecurityDataService dataService() {
+    private SecurityDataService dataService() {
         return data;
     }
 
-    private static tools.jackson.databind.JsonNode tools_json(String json) {
-        return tools.jackson.databind.json.JsonMapper.builder().build().readTree(json);
+    private static JsonNode tools_json(String json) {
+        return JsonMapper.builder().build().readTree(json);
     }
 
     private static File fixture(String name) throws URISyntaxException {

@@ -3,6 +3,7 @@ package com.vaadin.securitystatus.customer;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -233,7 +234,7 @@ public final class Triage {
     }
 
     public static Scope scope(ScannerReport report, ScanIndex scan) {
-        var listed = new java.util.LinkedHashSet<String>();
+        var listed = new LinkedHashSet<String>();
         report.components().forEach(component -> listed.add(ReportParser.bare(component)));
         report.findings().forEach(finding -> listed.add(ReportParser.bare(finding.coordinate())));
         List<String> unknown = listed.stream().filter(bare -> !scan.coordinates().containsKey(bare)).toList();

@@ -2,6 +2,8 @@ package com.vaadin.securitystatus.ui.team;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 
+import org.springframework.beans.factory.ObjectProvider;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadFileList;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
@@ -26,8 +29,6 @@ import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.ui.common.AiSurfaces;
 import com.vaadin.securitystatus.ui.common.AppBar;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
-
-import org.springframework.beans.factory.ObjectProvider;
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -103,7 +104,7 @@ public final class InternalLayout extends AppLayout {
             open.setTooltipText(getTranslation("shell.assistant.open"));
             open.addClassName("assistant-toggle");
             open.getElement().setAttribute("aria-expanded", "false");
-            com.vaadin.flow.signals.Signal.effect(open, () -> open.getElement().setAttribute("aria-expanded",
+            Signal.effect(open, () -> open.getElement().setAttribute("aria-expanded",
                     String.valueOf(assistantOpen.get())));
             appBar.addBeforeEnd(open);
         });

@@ -9,10 +9,11 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.LabelTextAlign;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -210,7 +211,7 @@ public final class VerdictForm extends Composite<FormLayout> {
         return field;
     }
 
-    private void help(com.vaadin.flow.component.HasHelper field, String property) {
+    private void help(HasHelper field, String property) {
         String help = getTranslation("workbench.help." + property);
         if (!help.isBlank()) {
             field.setHelperText(help);

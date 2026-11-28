@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -24,8 +25,8 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -336,7 +337,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         for (History entry : past) {
             var line = css(new Paragraph(entry.cve() + ": "), "explorer-note-says");
             boolean first = true;
-            for (var span : new java.util.TreeMap<>(entry.lines()).entrySet()) {
+            for (var span : new TreeMap<>(entry.lines()).entrySet()) {
                 String until = span.getValue().until().map(VersionNumber::toString).orElse("");
                 line.add((first ? "" : " ") + getTranslation("explorer.past.until", span.getKey(), until) + " ");
                 first = false;

@@ -10,10 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.workbench.VerdictDrafts;
 
@@ -39,7 +41,7 @@ class WorkbenchAiBrowserlessTest extends SpringBrowserlessTest {
         WorkbenchView view = navigate(WorkbenchView.class);
         int savedBefore = drafts.list().size();
         Map<String, HasValue<?, ?>> fields = view.form().fields();
-        ((com.vaadin.flow.component.textfield.TextField) fields.get("assessedBy")).setValue("someone");
+        ((TextField) fields.get("assessedBy")).setValue("someone");
         String verdictIdBefore = (String) fields.get("verdictId").getValue();
 
         Button fill = $(Button.class).withClassName("verdict-fill-run").single();
@@ -92,7 +94,7 @@ class WorkbenchAiBrowserlessTest extends SpringBrowserlessTest {
 
     /** The marker the form AI controller puts on a field it changed, a {@code vaadin-ai-field-marker} child. */
     private static boolean marked(HasValue<?, ?> field) {
-        return ((com.vaadin.flow.component.Component) field).getElement().getChildren()
+        return ((Component) field).getElement().getChildren()
                 .anyMatch(child -> "vaadin-ai-field-marker".equals(child.getTag()));
     }
 }

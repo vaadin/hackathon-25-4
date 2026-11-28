@@ -3,14 +3,16 @@ package com.vaadin.securitystatus.ui.customer;
 import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.decorative;
-import static com.vaadin.securitystatus.ui.customer.AnswerParts.layer;
-import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
-import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
-import static com.vaadin.securitystatus.ui.customer.AnswerParts.note;
+import static com.vaadin.securitystatus.ui.common.Parts.notice;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.heading;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.layer;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.note;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.verdictState;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,12 +22,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
@@ -35,7 +37,6 @@ import com.vaadin.flow.component.html.TableDataCell;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.markdown.Markdown;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -46,17 +47,17 @@ import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
-import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.AdvisoryRules;
 import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.customer.LookupInput;
-import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.customer.VerdictFor;
+import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
@@ -65,6 +66,8 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
 import com.vaadin.securitystatus.ui.common.AdvisoryIds;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
+
+import jakarta.annotation.security.PermitAll;
 
 /**
  * The answer by advisory, screen 3 of the delivered design: one verdict card
@@ -173,7 +176,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * published data carries no alias map to look it up in otherwise.
      */
     private List<One> resolve(List<String> ids) {
-        Map<String, CveAnswer> found = new java.util.LinkedHashMap<>();
+        Map<String, CveAnswer> found = new LinkedHashMap<>();
         for (String id : ids) {
             data.cve(id).ifPresent(advisory -> found.put(id, advisory));
         }
@@ -414,15 +417,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         var button = css(new Button(getTranslation("cve.action.copy"), VaadinIcon.COPY_O.create()), "copy-answer");
         button.addThemeVariants(ButtonVariant.TERTIARY);
         button.getElement().setAttribute("data-answer", text);
-        Clipboard.onClick(button).writeText(text, copied -> {
-            var done = Notification.show(getTranslation("cve.copy.done", id));
-            done.addThemeVariants(NotificationVariant.SUCCESS);
-            done.addClassName("copy-notice");
-        }, failure -> {
-            var failed = Notification.show(getTranslation("cve.copy.failed"));
-            failed.addThemeVariants(NotificationVariant.ERROR);
-            failed.addClassName("copy-notice");
-        });
+        Clipboard.onClick(button).writeText(text,
+                copied -> css(notice(getTranslation("cve.copy.done", id), NotificationVariant.SUCCESS), "copy-notice"),
+                failure -> css(notice(getTranslation("cve.copy.failed"), NotificationVariant.ERROR), "copy-notice"));
         return button;
     }
 
@@ -449,7 +446,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     // Across supported versions
 
     private Component lineCards(CasesIndex index, CveAnswer advisory, Loaded answer, Optional<CveRules.Fix> fix) {
-        String readers = answer.measured() != null ? CveRules.lineOf(answer.measured())
+        String readers = answer.measured() != null ? answer.measured().lineName()
                 : answer.version().isBlank() ? "" : VersionNumber.of(answer.version()).line();
         var cards = css(new Div(), "cve-line-cards");
         for (CasesIndex.Line line : VersionRules.tableLines(index, readers, false)) {
@@ -604,7 +601,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         // 3. The advisory and the evidence
         var evidence = css(new Div(), "layer-full");
         // The severity word as the data writes it, as the prototype prints it, D-188.
-        advisory.severity().flatMap(VersionRules::severity).ifPresent(known -> evidence.add(note(
+        advisory.severity().flatMap(Severity::known).ifPresent(known -> evidence.add(note(
                 getTranslation("cve.evidence.severity", known))));
         advisory.summary().map(String::strip).ifPresent(text -> evidence.add(new Paragraph(text)));
         // The version document's copy of a verdict carries no commentary; the advisory document's copy of the
@@ -662,15 +659,15 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * the reader's line when a version was given, every line otherwise.
      */
     private Optional<Component> box(CveAnswer advisory, Loaded answer) {
-        String mine = answer.measured() != null ? CveRules.lineOf(answer.measured())
+        String mine = answer.measured() != null ? answer.measured().lineName()
                 : answer.version().isBlank() ? null : VersionNumber.of(answer.version()).line();
-        List<String> lines = mine == null ? new ArrayList<>(advisory.arrives().keySet())
-                : advisory.arrives().containsKey(mine) ? new ArrayList<>(List.of(mine)) : new ArrayList<>();
+        if (mine != null) {
+            return advisory.arrives().containsKey(mine) ? boxSentences(mine, advisory.arrives().get(mine))
+                    : Optional.empty();
+        }
+        List<String> lines = new ArrayList<>(advisory.arrives().keySet());
         if (lines.isEmpty()) {
             return Optional.empty();
-        }
-        if (mine != null) {
-            return boxSentences(mine, advisory.arrives().get(mine));
         }
         lines.sort((a, b) -> VersionNumber.of(b).compareTo(VersionNumber.of(a)));
         var table = answerTable(getTranslation("cve.box.col.line"), getTranslation("cve.box.col.package"),
@@ -772,7 +769,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         if (measured == null) {
             return Optional.empty();
         }
-        String line = CveRules.lineOf(measured);
+        String line = measured.lineName();
         Optional<CveAnswer.Coverage> coverage = Optional.ofNullable(advisory.coverage().get(line));
         if (coverage.isEmpty()) {
             return Optional.empty();

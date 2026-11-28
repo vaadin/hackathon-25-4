@@ -2,13 +2,16 @@ package com.vaadin.securitystatus.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+
+import com.vaadin.securitystatus.data.VersionNumber;
+import com.vaadin.securitystatus.data.model.CasesIndex;
 
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.json.JsonMapper;
-import com.vaadin.securitystatus.data.VersionNumber;
-import com.vaadin.securitystatus.data.model.CasesIndex;
 
 /**
  * The rules of the version screen that are easiest to get wrong in one
@@ -87,7 +90,7 @@ class VersionRulesTest {
 
     @Test
     void worst_first_orders_by_severity_then_id_with_the_unrated_last() {
-        assertThat(VersionRules.worstFirst(java.util.List.of("CVE-9", "CVE-1", "CVE-3", "CVE-2"), INDEX))
+        assertThat(VersionRules.worstFirst(List.of("CVE-9", "CVE-1", "CVE-3", "CVE-2"), INDEX))
                 .containsExactly("CVE-2", "CVE-3", "CVE-1", "CVE-9");
     }
 }

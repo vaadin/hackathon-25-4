@@ -1,9 +1,9 @@
 package com.vaadin.securitystatus.ui.customer;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
-import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.note;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.customer.VerdictFor;
+import com.vaadin.securitystatus.customer.VersionRules;
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
@@ -47,7 +48,7 @@ final class FindingCard extends Composite<Div> {
         card.getElement().setAttribute("data-advisory", advisory);
 
         List<VerdictFor> said = VersionRules.verdictsFor(answer, advisory);
-        Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
+        Optional<CasesIndex.AdvisoryCatalogEntry> entry = index.advisory(advisory);
 
         var head = css(new Div(AnswerParts.advisoryLink(advisory, answer.version().toString(), "finding-id")), "finding-head");
         AnswerParts.severity(this, entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity)).ifPresent(head::add);
@@ -170,7 +171,7 @@ final class FindingCard extends Composite<Div> {
 
             var full = css(new Div(), "layer-full");
             var facts = new ArrayList<String>();
-            entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(VersionRules::severity)
+            entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(Severity::known)
                     .ifPresent(known -> facts.add(getTranslation("version.layer.severity",
                             getTranslation("severity." + known))));
             entry.map(CasesIndex.AdvisoryCatalogEntry::packages).filter(list -> !list.isEmpty())

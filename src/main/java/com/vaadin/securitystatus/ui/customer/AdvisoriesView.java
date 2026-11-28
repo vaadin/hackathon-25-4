@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.ui.customer;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+import static com.vaadin.securitystatus.ui.common.Parts.notice;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
@@ -32,7 +32,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -40,7 +40,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -58,6 +57,8 @@ import com.vaadin.securitystatus.ui.common.AiSurfaces;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
+
+import jakarta.annotation.security.PermitAll;
 
 /**
  * Every advisory the index carries, worst first, narrowed by one verdict
@@ -126,10 +127,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         });
     }
 
-    /**
-     * The grid of the list, for whatever attaches to it later: the AI grid
-     * controller of epic 11 drives this instance.
-     */
+    /** The grid of the list, for the tests that read its rows; the assistant drives a grid of its own. */
     public Grid<AdvisoryCatalogEntry> grid() {
         return grid;
     }
@@ -309,13 +307,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         GridMenuItem<AdvisoryCatalogEntry> copy = menu.addItem(getTranslation("advisories.menu.copy", id));
         copy.addClassName("menu-copy");
         copy.getElement().setAttribute("data-answer", id);
-        Clipboard.onClick(copy).writeText(id, copied -> {
-            var done = Notification.show(getTranslation("advisories.copy.done", id));
-            done.addThemeVariants(NotificationVariant.SUCCESS);
-        }, failure -> {
-            var failed = Notification.show(getTranslation("advisories.copy.failed"));
-            failed.addThemeVariants(NotificationVariant.ERROR);
-        });
+        Clipboard.onClick(copy).writeText(id,
+                copied -> notice(getTranslation("advisories.copy.done", id), NotificationVariant.SUCCESS),
+                failure -> notice(getTranslation("advisories.copy.failed"), NotificationVariant.ERROR));
 
         var record = new Anchor(CveRules.recordUrl(id),
                 getTranslation("advisories.menu.record", AdvisoryRules.recordHost(id)));

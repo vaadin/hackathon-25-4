@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -28,7 +30,7 @@ public final class FixturePagesServer implements BeforeAllCallback {
         // One line per driver about where DevTools listens, and a page of CDP chatter per test,
         // none of it read by anything. Chromedriver's own stderr is silenced the same way.
         System.setProperty("webdriver.chrome.silentOutput", "true");
-        java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(java.util.logging.Level.WARNING);
+        Logger.getLogger("org.openqa.selenium").setLevel(Level.WARNING);
     }
 
     @Override

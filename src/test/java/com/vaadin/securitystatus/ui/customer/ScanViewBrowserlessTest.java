@@ -4,19 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.BrowserlessTestConfig;
 import com.vaadin.browserless.SpringBrowserlessTest;
@@ -26,6 +34,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Switch;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
@@ -34,10 +43,12 @@ import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadDropZone;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.customer.ReportFormat;
 import com.vaadin.securitystatus.data.FixturePages;
@@ -84,7 +95,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
                 "5 Unresolved 2 awaiting a vendor release, 1 waiting on a fix, 1 not assessed yet,"
                         + " 1 not ours to answer.");
         // The upgrade's release notes are offered beside the downloads.
-        assertThat(find(com.vaadin.flow.component.html.Anchor.class).withClassName("scan-release-notes").single()
+        assertThat(find(Anchor.class).withClassName("scan-release-notes").single()
                 .getHref()).isEqualTo("https://github.com/vaadin/platform/releases/tag/24.9.26");
     }
 
@@ -180,7 +191,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void a_file_over_the_size_limit_is_refused_before_it_is_read(@TempDir Path temporary) throws IOException {
         Path huge = temporary.resolve("huge.json");
-        try (var file = new java.io.RandomAccessFile(huge.toFile(), "rw")) {
+        try (var file = new RandomAccessFile(huge.toFile(), "rw")) {
             file.setLength(Lookup.MAX_REPORT_BYTES + 1);
         }
         navigate(HomeView.class);
@@ -295,7 +306,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
                 {"results": [{"packages": [{"package": {"name": "com.example:%s", "version": "1.0",
                  "ecosystem": "Maven"}, "vulnerabilities": [{"id": "CVE-2099-0001"}]}]}]}""".formatted(marker));
         Path temporary = Path.of(System.getProperty("java.io.tmpdir"));
-        java.util.Set<Path> before = listing(temporary);
+        Set<Path> before = listing(temporary);
         long started = System.currentTimeMillis();
 
         navigate(HomeView.class);
@@ -317,27 +328,27 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
      * down on CI over a systemd private directory. A visitor that skips what it cannot visit
      * reads the same universe without inheriting its races.
      */
-    private static java.util.Set<Path> listing(Path directory) throws IOException {
-        var found = new java.util.HashSet<Path>();
-        Files.walkFileTree(directory, java.util.EnumSet.noneOf(java.nio.file.FileVisitOption.class), 3,
-                new java.nio.file.SimpleFileVisitor<>() {
+    private static Set<Path> listing(Path directory) throws IOException {
+        var found = new HashSet<Path>();
+        Files.walkFileTree(directory, EnumSet.noneOf(FileVisitOption.class), 3,
+                new SimpleFileVisitor<>() {
                     @Override
-                    public java.nio.file.FileVisitResult visitFile(Path file,
-                            java.nio.file.attribute.BasicFileAttributes attributes) {
+                    public FileVisitResult visitFile(Path file,
+                            BasicFileAttributes attributes) {
                         if (attributes.isRegularFile()) {
                             found.add(file);
                         }
-                        return java.nio.file.FileVisitResult.CONTINUE;
+                        return FileVisitResult.CONTINUE;
                     }
 
                     @Override
-                    public java.nio.file.FileVisitResult visitFileFailed(Path file, IOException unreadable) {
-                        return java.nio.file.FileVisitResult.CONTINUE;
+                    public FileVisitResult visitFileFailed(Path file, IOException unreadable) {
+                        return FileVisitResult.CONTINUE;
                     }
 
                     @Override
-                    public java.nio.file.FileVisitResult postVisitDirectory(Path dir, IOException failure) {
-                        return java.nio.file.FileVisitResult.CONTINUE;
+                    public FileVisitResult postVisitDirectory(Path dir, IOException failure) {
+                        return FileVisitResult.CONTINUE;
                     }
                 });
         return found;
@@ -435,7 +446,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
 
         test(find(Button.class).withClassName("scan-preview-pdf").single()).click();
 
-        var viewer = find(com.vaadin.flow.component.pdfviewer.PdfViewer.class).single();
+        var viewer = find(PdfViewer.class).single();
         assertThat(viewer.getFileName()).isEqualTo("vaadin-security-audit-24.9.21.pdf");
         assertThat(find(Button.class).withClassName("scan-download-pdf").single().getText())
                 .isEqualTo("Download the audit report");
@@ -492,7 +503,7 @@ class ScanViewBrowserlessTest extends SpringBrowserlessTest {
         return words(component.getElement()).replaceAll("\\s+", " ").replace(" ,", ",").strip();
     }
 
-    private static String words(com.vaadin.flow.dom.Element element) {
+    private static String words(Element element) {
         if (element.isTextNode()) {
             return element.getText();
         }

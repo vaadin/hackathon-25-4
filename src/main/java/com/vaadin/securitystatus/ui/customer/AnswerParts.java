@@ -3,9 +3,12 @@ package com.vaadin.securitystatus.ui.customer;
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.decorative;
 
+import java.util.Optional;
+
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -13,10 +16,8 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.securitystatus.customer.VersionRules;
-import java.util.Optional;
+import com.vaadin.securitystatus.data.Severity;
 
 /** The parts the version, CVE and finding answers are built from, so each is drawn the same way. */
 final class AnswerParts {
@@ -32,7 +33,7 @@ final class AnswerParts {
 
     /** The severity a record names, in its colour, or nothing for one the data does not establish. */
     static Optional<Component> severity(Component on, Optional<String> word) {
-        return word.flatMap(VersionRules::severity)
+        return word.flatMap(Severity::known)
                 .map(known -> css(new Span(on.getTranslation("severity." + known)), "severity", "severity-" + known));
     }
 

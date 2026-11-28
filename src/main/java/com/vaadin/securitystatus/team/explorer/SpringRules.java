@@ -2,12 +2,14 @@ package com.vaadin.securitystatus.team.explorer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
@@ -61,7 +63,7 @@ public final class SpringRules {
         var boots = new ArrayList<Boot>();
         lines.forEach((release, on) -> {
             var seen = new LinkedHashMap<String, Finding>();
-            Set<Set<String>> sets = new java.util.HashSet<>();
+            Set<Set<String>> sets = new HashSet<>();
             for (Line line : on) {
                 Set<String> here = new TreeSet<>();
                 for (Finding finding : line.findings()) {
@@ -74,7 +76,7 @@ public final class SpringRules {
                 sets.add(here);
             }
             var findings = new ArrayList<>(seen.values());
-            findings.sort(Comparator.<Finding>comparingInt(finding -> ExplorerRules.severityRank(finding.severity()))
+            findings.sort(Comparator.<Finding>comparingInt(finding -> Severity.rank(finding.severity()))
                     .thenComparing(Finding::cve));
             boots.add(new Boot(release, on.stream().map(Line::line).toList(), findings, sets.size() > 1));
         });

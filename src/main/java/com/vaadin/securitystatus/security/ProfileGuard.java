@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.security;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ class ProfileGuard {
     static final String BUILD_INFO = "META-INF/VAADIN/config/flow-build-info.json";
 
     ProfileGuard(Environment environment) {
-        var active = java.util.Arrays.asList(environment.getActiveProfiles());
+        var active = Arrays.asList(environment.getActiveProfiles());
         if (!active.contains("cas") && !active.contains("demo") && productionBuild()) {
             // A production build has to name how people sign in: cas, or demo for the demonstration accounts.
             throw new IllegalStateException("spring.profiles.active=cas|demo");

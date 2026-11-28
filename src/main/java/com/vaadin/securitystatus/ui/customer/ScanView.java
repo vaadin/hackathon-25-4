@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -37,7 +38,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.ScanState;
@@ -57,6 +57,8 @@ import com.vaadin.securitystatus.ui.common.Downloads;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
+
+import jakarta.annotation.security.PermitAll;
 
 /**
  * The scanner report, triaged: the headline, the three buckets, the open
@@ -400,7 +402,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         // The fourth word is no fourth state: the row stays counted under unresolved, rule 6.11.19.
         var chip = css(new Badge(row.pending().isPresent() ? getTranslation("state.notAssessed")
                 : getTranslation(bucketKey(row.bucket()))), "status-chip", "state-" + (row.pending().isPresent() ? "in_triage"
-                : row.bucket().name().toLowerCase(java.util.Locale.ROOT)));
+                : row.bucket().name().toLowerCase(Locale.ROOT)));
         cell.add(chip);
         Triage.settledVerdict(row, index).ifPresent(label -> cell.add(css(new Span(label), "scan-verdict-label")));
         return cell;

@@ -93,11 +93,6 @@ final class AdvisoryAsk extends Composite<Div> {
                 .build();
     }
 
-    /** The grid the controller drives, which nobody sees. */
-    Grid<AIDataRow> unseen() {
-        return unseen;
-    }
-
     private void narrowTo(GridState state) {
         Set<String> ids = catalogue.ids(state.query());
         tail.record("grid", user, AssistantTail.Kind.TOOL, state.query() + " -> " + ids.size());

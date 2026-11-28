@@ -2,9 +2,12 @@ package com.vaadin.securitystatus.team.explorer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.securitystatus.data.ExportKind;
@@ -22,18 +25,18 @@ class ReleaseRulesTest {
     private final ExplorerFront front = data.explorerFront();
     private final ExplorerVersion record = data.explorerVersion(VersionNumber.of("24.9.21")).orElseThrow();
 
-    private ExplorerAnswer.Shape shape(java.util.Set<String> off) {
+    private ExplorerAnswer.Shape shape(Set<String> off) {
         return ExplorerAnswer.shape(front, ExplorerAnswer.catalogue(front), off);
     }
 
     @Test
     void an_update_removes_the_readers_own_findings_fixed_after_this_release_in_the_records_order() {
         var line = ReleaseRules.asLine(front, record);
-        var everything = shape(java.util.Set.of());
+        var everything = shape(Set.of());
         List<String> removed = ReleaseRules.removedBy(record, line, everything);
 
         assertThat(removed).isNotEmpty();
-        var byId = new java.util.HashMap<String, ExplorerVersion.Finding>();
+        var byId = new HashMap<String, ExplorerVersion.Finding>();
         record.findings().forEach(finding -> byId.putIfAbsent(finding.cve(), finding));
         assertThat(removed).allSatisfy(id -> {
             ExplorerVersion.Finding finding = byId.get(id);
@@ -46,7 +49,7 @@ class ReleaseRulesTest {
                 .filter(removed::contains).toList();
         assertThat(removed).containsExactlyElementsOf(order);
         // A product turned off takes its findings out of what an update is said to remove.
-        var narrowed = ReleaseRules.removedBy(record, line, shape(java.util.Set.copyOf(
+        var narrowed = ReleaseRules.removedBy(record, line, shape(Set.copyOf(
                 ExplorerAnswer.countedByDefault(ExplorerAnswer.catalogue(front)))));
         assertThat(narrowed.size()).isLessThanOrEqualTo(removed.size());
         var newest = data.explorerVersion(VersionNumber.of("25.3.5")).orElseThrow();
@@ -56,7 +59,7 @@ class ReleaseRulesTest {
     @Test
     void the_record_reads_into_the_explorers_halves_so_badge_and_groups_agree() {
         var line = ReleaseRules.asLine(front, record);
-        var split = ExplorerAnswer.split(line, shape(java.util.Set.of()), ExplorerAnswer.Asked.nothing());
+        var split = ExplorerAnswer.split(line, shape(Set.of()), ExplorerAnswer.Asked.nothing());
 
         // Everything on: every finding is in a half or in the build group, none elsewhere.
         assertThat(split.elsewhere()).isZero();
@@ -102,8 +105,8 @@ class ReleaseRulesTest {
         assertThat(boots.getFirst().lines()).containsExactly("1.0", "1.1");
         assertThat(boots.getFirst().differs()).isTrue();
         assertThat(boots.getFirst().findings()).extracting(Finding::cve, finding -> SpringRules.kind(finding))
-                .containsExactly(org.assertj.core.groups.Tuple.tuple("CVE-1", SpringRules.Kind.RISK),
-                        org.assertj.core.groups.Tuple.tuple("CVE-2", SpringRules.Kind.UNJUDGED));
+                .containsExactly(Tuple.tuple("CVE-1", SpringRules.Kind.RISK),
+                        Tuple.tuple("CVE-2", SpringRules.Kind.UNJUDGED));
     }
 
     @Test

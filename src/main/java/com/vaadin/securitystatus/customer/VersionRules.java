@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
@@ -32,8 +33,6 @@ public final class VersionRules {
 
     /** The Spring Boot table shows this many rows and counts the rest. */
     public static final int BOOT_ROWS = 12;
-
-    private static final List<String> SEVERITIES = List.of("critical", "high", "moderate", "low", "unknown");
 
     private static final int RECENT_ROWS = 8;
     private static final Pattern SENTENCE_END = Pattern.compile("(?<=\\.)\\s+");
@@ -164,19 +163,8 @@ public final class VersionRules {
 
     /** Advisory ids worst first by the catalogue's severity, then by id, so a cut list keeps what matters. */
     public static List<String> worstFirst(List<String> ids, CasesIndex index) {
-        return ids.stream().distinct().sorted(Comparator.comparingInt((String id) -> severityRank(index, id))
+        return ids.stream().distinct().sorted(Comparator.comparingInt((String id) -> Severity.rank(index.advisory(id).flatMap(CasesIndex.AdvisoryCatalogEntry::severity)))
                 .thenComparing(Comparator.naturalOrder())).toList();
-    }
-
-    /** One of the four severity words, lower case, or empty for anything else, unknown included. */
-    public static Optional<String> severity(String word) {
-        String known = word.toLowerCase(java.util.Locale.ROOT);
-        return SEVERITIES.indexOf(known) >= 0 && !"unknown".equals(known) ? Optional.of(known) : Optional.empty();
-    }
-
-    private static int severityRank(CasesIndex index, String id) {
-        return Optional.ofNullable(index.advisories().get(id)).flatMap(CasesIndex.AdvisoryCatalogEntry::severity)
-                .map(SEVERITIES::indexOf).filter(rank -> rank >= 0).orElse(SEVERITIES.size());
     }
 
     /** The release a measured line's fixed_in names for this advisory on the reader's line. */
@@ -301,7 +289,7 @@ public final class VersionRules {
 
     /** Whether no release of its line is newer than this one. */
     public static boolean isNewestOfItsLine(CasesIndex index, VersionAnswer measured) {
-        String line = measured.line().orElse(measured.version().line());
+        String line = measured.lineName();
         return index.byLine().getOrDefault(line, List.of()).stream().noneMatch(other -> other.compareTo(measured.version()) > 0);
     }
 }

@@ -238,7 +238,7 @@ public final class AssistantTools implements AIController {
         ObjectNode line = JSON.createObjectNode();
         line.put("id", id);
         line.put("list", list);
-        Optional.ofNullable(index.advisories().get(id)).flatMap(AdvisoryCatalogEntry::severity)
+        index.advisory(id).flatMap(AdvisoryCatalogEntry::severity)
                 .ifPresent(severity -> line.put("severity", severity));
         Optional.ofNullable(answer.verdicts().get(id)).flatMap(Verdict::state)
                 .ifPresent(state -> line.put("verdict", state));

@@ -36,8 +36,7 @@ public final class TeamNavigation extends Composite<SideNav> {
                 });
                 types.forEach(type => window.addEventListener(type, this.__closeOnNavigation));
                 this.__closeOnNavigation();""");
-            return () -> {
-            };
+            return null;
         });
         nav.addItem(findings, item("shell.nav.customer", "", VaadinIcon.EYE),
                 item("shell.nav.verdicts", "findings/workbench", VaadinIcon.GAVEL),

@@ -41,6 +41,11 @@ public record VersionAnswer(VersionNumber version, Optional<String> line, Option
         assessments = Wire.map(assessments);
     }
 
+    /** The line the version belongs to: the one the document names, or the one its number says. */
+    public String lineName() {
+        return line.orElse(version.line());
+    }
+
     /** The one upgrade sentence: where to, how much it clears, how much stays. */
     public record Upgrade(Optional<VersionNumber> to, @Nullable Integer clears, @Nullable Integer remains,
             @Nullable Boolean measured) {

@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
@@ -18,6 +18,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.data.FixturePages;
@@ -105,7 +107,7 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         assertThat(answers()).containsExactly("CVE-2021-33604", "CVE-2026-45292", "CVE-2016-1000027");
         assertThat(find(H3.class).all()).extracting(H3::getText).contains("3 advisories", "Details for CVE-2021-33604",
                 "Details for CVE-2026-45292", "Details for CVE-2016-1000027");
-        assertThat(text(find(com.vaadin.flow.component.html.Div.class).withClassName("cve-body").single()))
+        assertThat(text(find(Div.class).withClassName("cve-body").single()))
                 .contains("Answered for 24.9.21");
     }
 
@@ -291,8 +293,8 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         open("cve/CVE-2026-89407/24.9.21");
 
         Details evidence = layer(answer("CVE-2026-89407"), "evidence");
-        assertThat(find(com.vaadin.flow.component.markdown.Markdown.class, evidence).all())
-                .extracting(com.vaadin.flow.component.markdown.Markdown::getContent)
+        assertThat(find(Markdown.class, evidence).all())
+                .extracting(Markdown::getContent)
                 .anySatisfy(text -> assertThat(text).startsWith("The version is your Spring Boot's: 3.5.16"));
         // The measured range and the range the verdict is written for are one paragraph, D-188.
         assertThat(text(evidence)).contains("of the 24.9 line. The verdict is written for Vaadin");
@@ -323,8 +325,8 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
     void an_unmeasured_version_is_said_once_above_the_cards() {
         open("cve/CVE-2026-89407,CVE-2021-33604/24.9.99");
 
-        assertThat(find(com.vaadin.flow.component.html.Div.class).withClassName("cve-unmeasured").all()).hasSize(1);
-        assertThat(text(find(com.vaadin.flow.component.html.Div.class).withClassName("cve-unmeasured").single()))
+        assertThat(find(Div.class).withClassName("cve-unmeasured").all()).hasSize(1);
+        assertThat(text(find(Div.class).withClassName("cve-unmeasured").single()))
                 .startsWith("We have not measured Vaadin 24.9.99.");
         assertThat(word(card("CVE-2026-89407"))).isEqualTo("Measured");
         assertThat(word(card("CVE-2021-33604"))).isEqualTo("Measured");
@@ -410,7 +412,7 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private String word(Section card) {
-        return find(com.vaadin.flow.component.html.Div.class, card).withClassName("verdict-state").single()
+        return find(Div.class, card).withClassName("verdict-state").single()
                 .getElement().getTextRecursively();
     }
 
@@ -429,7 +431,7 @@ class CveViewBrowserlessTest extends SpringBrowserlessTest {
         return String.join(" ", parts);
     }
 
-    private static void words(com.vaadin.flow.dom.Element element, List<String> parts) {
+    private static void words(Element element, List<String> parts) {
         if (element.isTextNode()) {
             String text = element.getText().strip();
             if (!text.isEmpty()) {

@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.common;
 
+import java.util.Locale;
+
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -71,11 +73,11 @@ public final class ThemeSwitch extends Composite<Button> {
         String says = getTranslation("shell.theme.now", name(scheme), name(scheme.next()));
         button.setAriaLabel(says);
         button.setTooltipText(says);
-        getElement().setAttribute("data-scheme", scheme.name().toLowerCase());
+        getElement().setAttribute("data-scheme", scheme.name().toLowerCase(Locale.ROOT));
     }
 
     private String name(Scheme scheme) {
-        return getTranslation("shell.theme." + scheme.name().toLowerCase());
+        return getTranslation("shell.theme." + scheme.name().toLowerCase(Locale.ROOT));
     }
 
     private static void apply(UI ui, Scheme scheme) {

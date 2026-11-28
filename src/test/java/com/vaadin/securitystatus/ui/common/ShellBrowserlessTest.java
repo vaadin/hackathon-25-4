@@ -6,11 +6,12 @@ import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
@@ -19,13 +20,13 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.ui.customer.CustomerLayout;
@@ -93,7 +94,7 @@ class ShellBrowserlessTest extends SpringBrowserlessTest {
     void every_customer_route_opens_with_the_heading_the_purpose_and_the_lookup_above_its_content() {
         RouteConfiguration.forSessionScope().setAnnotatedRoute(LeafView.class);
 
-        for (Class<? extends com.vaadin.flow.component.Component> route : List.of(HomeView.class, LeafView.class)) {
+        for (Class<? extends Component> route : List.of(HomeView.class, LeafView.class)) {
             navigate(route);
             Main column = $(Main.class).withClassName("customer-column").single();
             assertThat(column.getChildren().map(child -> child.getElement().getAttribute("class")))

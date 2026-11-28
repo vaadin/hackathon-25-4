@@ -7,9 +7,9 @@ import java.util.Objects;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
@@ -19,8 +19,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Code;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -34,6 +34,7 @@ import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.FixturePages;
@@ -456,7 +457,7 @@ class VersionViewBrowserlessTest extends SpringBrowserlessTest {
     /** The address the window is on, the query compared as a set because its order is not ours to keep. */
     private static void assertAddress(String expected) {
         var location = UI.getCurrent().getInternals().getActiveViewLocation();
-        var wanted = new com.vaadin.flow.router.Location(expected);
+        var wanted = new Location(expected);
         assertThat(location.getPath()).isEqualTo(wanted.getPath());
         assertThat(location.getQueryParameters().getParameters())
                 .isEqualTo(wanted.getQueryParameters().getParameters());

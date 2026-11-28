@@ -2,21 +2,23 @@ package com.vaadin.securitystatus.ui.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.FixturePages;
 
@@ -71,7 +73,7 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
         // The most frequent first, as the prototype orders them, D-195.
         List<Integer> counts = rows.stream()
                 .map(row -> Integer.valueOf($(Span.class, row).withClassName("case-count").single().getText())).toList();
-        assertThat(counts).isSortedAccordingTo(java.util.Comparator.reverseOrder());
+        assertThat(counts).isSortedAccordingTo(Comparator.reverseOrder());
         // A case that cannot be drawn has no count and the cannot chip; none today counts 0.
         assertThat($(Span.class, row("fix_eta")).withClassName("case-count").exists()).isFalse();
         assertThat(row("fix_eta").getElement().getTextRecursively()).contains("cannot");
@@ -95,7 +97,7 @@ class CasesBrowserlessTest extends SpringBrowserlessTest {
 
         for (String href : hrefs) {
             Class<?> expected = href.startsWith("version/") ? VersionView.class : CveView.class;
-            var view = navigate(href, expected.asSubclass(com.vaadin.flow.component.Component.class));
+            var view = navigate(href, expected.asSubclass(Component.class));
             assertThat(view).as(href).isInstanceOf(expected).isNotInstanceOf(NotFoundView.class);
             assertThat(location()).as(href).isEqualTo(href);
         }

@@ -61,7 +61,7 @@ public final class CveRules {
             return Optional.empty();
         }
         return VersionRules.upgradeTo(version).map(to -> new Fix(to,
-                to.line().equals(version.line().orElse(version.version().line())),
+                to.line().equals(version.lineName()),
                 index.summaryOf(to).flatMap(CasesIndex.Summary::state).filter("secure"::equals).isPresent(),
                 version.upgrade().map(VersionAnswer.Upgrade::remains).orElse(null)));
     }
@@ -96,13 +96,9 @@ public final class CveRules {
                 || version.fromBuild().contains(id)) {
             return State.NOT_AFFECTED;
         }
-        boolean reportedOnTheLine = Optional.ofNullable(advisory.coverage().get(lineOf(version)))
+        boolean reportedOnTheLine = Optional.ofNullable(advisory.coverage().get(version.lineName()))
                 .map(CveAnswer.Coverage::affectedCount).filter(count -> count > 0).isPresent();
         return reportedOnTheLine ? State.FIXED : State.NOT_REPORTED;
-    }
-
-    public static String lineOf(VersionAnswer version) {
-        return version.line().orElse(version.version().line());
     }
 
     /**

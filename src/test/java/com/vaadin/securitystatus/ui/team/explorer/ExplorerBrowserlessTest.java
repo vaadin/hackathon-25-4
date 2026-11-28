@@ -15,8 +15,10 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -289,12 +291,12 @@ class ExplorerBrowserlessTest extends SpringBrowserlessTest {
     @Test
     void the_help_mark_opens_the_legend_in_the_prototypes_words() {
         navigate(ExplorerView.class);
-        assertThat($(com.vaadin.flow.component.html.Aside.class).withClassName("explorer-legend").exists()).isFalse();
+        assertThat($(Aside.class).withClassName("explorer-legend").exists()).isFalse();
 
-        test($(com.vaadin.flow.component.button.Button.class).withClassName("explorer-help").single()).click();
+        test($(Button.class).withClassName("explorer-help").single()).click();
 
-        var legend = $(com.vaadin.flow.component.html.Aside.class).withClassName("explorer-legend").single();
-        assertThat($(com.vaadin.flow.component.button.Button.class).withClassName("explorer-help").exists()).isFalse();
+        var legend = $(Aside.class).withClassName("explorer-legend").single();
+        assertThat($(Button.class).withClassName("explorer-help").exists()).isFalse();
         assertThat(text(legend)).contains("What the words on this page mean", "The badge on a series",
                 "The groups inside a series", "How far a verdict was taken", "What this page is measuring",
                 "Reproduced against a Vaadin application");

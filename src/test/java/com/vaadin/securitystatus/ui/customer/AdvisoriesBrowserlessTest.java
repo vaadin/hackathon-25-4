@@ -4,13 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.badge.Badge;
@@ -96,7 +97,7 @@ class AdvisoriesBrowserlessTest extends AdvisoriesTesting {
         var grid = test(view.grid());
         List<AdvisoryCatalogEntry> rows = rows(view.grid());
 
-        int several = java.util.stream.IntStream.range(0, rows.size()).filter(i -> rows.get(i).packages().size() > 1)
+        int several = IntStream.range(0, rows.size()).filter(i -> rows.get(i).packages().size() > 1)
                 .findFirst().orElseThrow();
         Component cell = grid.getCellComponent(several, "package");
         assertThat(cell.getChildren().map(child -> child.getElement().getText()).toList())

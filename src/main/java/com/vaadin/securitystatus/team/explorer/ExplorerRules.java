@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
@@ -30,7 +30,6 @@ public final class ExplorerRules {
     /** A group shows at most this many findings and counts the rest, rule 6.6.10. */
     static final int GROUP_CAP = 150;
 
-    private static final List<String> SEVERITY_ORDER = List.of("critical", "high", "moderate", "low");
 
     private static final Pattern FULL_VERSION = Pattern
             .compile("^(?:vaadin\\s+)?v?(\\d+\\.\\d+\\.\\d+(?:[.\\-]?[a-z]+\\d*)?)$", Pattern.CASE_INSENSITIVE);
@@ -114,12 +113,7 @@ public final class ExplorerRules {
 
     /** Worst first, then by id so the order is stable, rule 6.4.22 without its age step, D-81. */
     static final Comparator<Finding> WORST_FIRST = Comparator
-            .comparingInt((Finding finding) -> severityRank(finding.severity())).thenComparing(Finding::cve);
-
-    public static int severityRank(Optional<String> severity) {
-        int rank = severity.map(word -> SEVERITY_ORDER.indexOf(word.toLowerCase(Locale.ROOT))).orElse(-1);
-        return rank < 0 ? SEVERITY_ORDER.size() : rank;
-    }
+            .comparingInt((Finding finding) -> Severity.rank(finding.severity())).thenComparing(Finding::cve);
 
     /** A group cut at {@link #GROUP_CAP}, with the remainder counted. */
     public static Capped capped(List<Finding> findings) {

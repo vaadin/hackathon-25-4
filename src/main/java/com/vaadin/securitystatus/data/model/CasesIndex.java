@@ -40,6 +40,11 @@ public record CasesIndex(Instant generatedAt, Map<String, String> labels, Map<St
         return Optional.ofNullable(summary.get(version.toString()));
     }
 
+    /** The catalogue's entry for one advisory, when the index has one. */
+    public Optional<AdvisoryCatalogEntry> advisory(String id) {
+        return Optional.ofNullable(advisories.get(id));
+    }
+
     public record Counts(@Nullable Integer cves, Map<String, Integer> byApplicability,
             Map<String, Integer> bySeverity, Map<String, Integer> byEcosystem, @Nullable Integer current,
             @Nullable Integer historical, @Nullable Integer appearedLater, @Nullable Integer unknown,
@@ -128,6 +133,14 @@ public record CasesIndex(Instant generatedAt, Map<String, String> labels, Map<St
             state = Wire.text(state);
             scannedAt = Wire.value(scannedAt);
             upgradeTo = Wire.value(upgradeTo);
+        }
+
+        /** Risk and triage together, what is still open; empty when the data carries neither. */
+        public Optional<Integer> open() {
+            if (risk == null && triage == null) {
+                return Optional.empty();
+            }
+            return Optional.of((risk == null ? 0 : risk) + (triage == null ? 0 : triage));
         }
     }
 

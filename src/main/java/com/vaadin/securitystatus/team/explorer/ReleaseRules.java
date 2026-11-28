@@ -2,9 +2,12 @@ package com.vaadin.securitystatus.team.explorer;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.securitystatus.data.ExportKind;
 import com.vaadin.securitystatus.data.VersionNumber;
@@ -122,7 +125,7 @@ public final class ReleaseRules {
         if (newest.isEmpty()) {
             return List.of();
         }
-        var fixed = new java.util.HashMap<String, VersionNumber>();
+        var fixed = new HashMap<String, VersionNumber>();
         record.findings().forEach(finding -> finding.fixedIn().ifPresent(at -> fixed.putIfAbsent(finding.cve(), at)));
         var removed = new ArrayList<String>();
         for (ExplorerFront.Finding finding : ExplorerAnswer.findingsOf(line, shape, ExplorerAnswer.Asked.nothing())) {
@@ -140,7 +143,7 @@ public final class ReleaseRules {
      * VEX and the three scanner files only where the record says they were
      * produced, rule 6.3.14.
      */
-    public static Set<ExportKind> files(@org.jspecify.annotations.Nullable Boolean scannerFiles) {
+    public static Set<ExportKind> files(@Nullable Boolean scannerFiles) {
         return Boolean.TRUE.equals(scannerFiles) ? EnumSet.allOf(ExportKind.class)
                 : EnumSet.of(ExportKind.JSON, ExportKind.CSV);
     }

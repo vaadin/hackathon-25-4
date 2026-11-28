@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,7 +78,7 @@ class ReportParserTest {
     @Test
     void the_three_vulnerability_reports_triage_into_the_same_buckets_and_cyclonedx_adds_to_them() {
         var version = data.version(VersionNumber.of("24.9.21"));
-        Map<ReportFormat, Triage.Result> results = new java.util.EnumMap<>(ReportFormat.class);
+        Map<ReportFormat, Triage.Result> results = new EnumMap<>(ReportFormat.class);
         FIXTURES.forEach((format, fixture) -> results.put(format,
                 Triage.of(read(fixture), data.scanIndex(), version, Optional.of("24.9.21"))));
 

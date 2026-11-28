@@ -1,12 +1,15 @@
 package com.vaadin.securitystatus.customer;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
+import com.vaadin.securitystatus.data.Severity;
 import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 
@@ -23,8 +26,6 @@ public final class AdvisoryRules {
     public static final List<String> VERDICTS = List.of("risk", "in_triage", "configuration", "no_risk", "not_affected",
             "false_positive", "fixed", "not_current");
 
-    private static final List<String> SEVERITIES = List.of("critical", "high", "moderate", "low");
-
     private AdvisoryRules() {
     }
 
@@ -35,13 +36,8 @@ public final class AdvisoryRules {
      */
     public static List<AdvisoryCatalogEntry> ordered(CasesIndex index) {
         var rows = new ArrayList<>(index.advisories().values());
-        rows.sort(Comparator.comparingInt(AdvisoryRules::severityRank).thenComparing(AdvisoryCatalogEntry::cve));
+        rows.sort(Comparator.comparingInt((AdvisoryCatalogEntry entry) -> Severity.rank(entry.severity())).thenComparing(AdvisoryCatalogEntry::cve));
         return rows;
-    }
-
-    private static int severityRank(AdvisoryCatalogEntry entry) {
-        return entry.severity().map(word -> word.toLowerCase(java.util.Locale.ROOT)).map(SEVERITIES::indexOf)
-                .filter(rank -> rank >= 0).orElse(SEVERITIES.size());
     }
 
     /** A verdict the address may name: one of the closed vocabulary, else nothing, so everything is shown. */
@@ -85,7 +81,7 @@ public final class AdvisoryRules {
      * carries none for `not_current`, so that one is the prototype's own words
      * from the bundle, D-188, D-192.
      */
-    public static Optional<String> label(CasesIndex index, String word, java.util.function.Function<String, String> bundle) {
+    public static Optional<String> label(CasesIndex index, String word, Function<String, String> bundle) {
         return Optional.ofNullable(index.labels().get(word))
                 .or(() -> "not_current".equals(word) ? Optional.of(bundle.apply("verdict.label.not_current"))
                         : Optional.empty());
@@ -93,6 +89,6 @@ public final class AdvisoryRules {
 
     /** Where the advisory's own record lives, and the host a reader recognises it by. */
     public static String recordHost(String id) {
-        return java.net.URI.create(CveRules.recordUrl(id)).getHost();
+        return URI.create(CveRules.recordUrl(id)).getHost();
     }
 }

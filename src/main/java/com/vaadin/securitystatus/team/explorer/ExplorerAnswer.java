@@ -2,23 +2,23 @@ package com.vaadin.securitystatus.team.explorer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.Map;
-import java.util.LinkedHashMap;
 
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.History;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
+import com.vaadin.securitystatus.data.model.ExplorerVersion;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.LineState;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
-import com.vaadin.securitystatus.data.model.ExplorerVersion;
 
 /**
  * What the explorer's front door answers, in the prototype's terms and
@@ -50,7 +50,7 @@ public final class ExplorerAnswer {
         });
         var known = registry.stream().filter(product -> named.contains(product.name())).toList();
         var ordered = new ArrayList<Product>();
-        var byName = new java.util.LinkedHashMap<String, Product>();
+        var byName = new LinkedHashMap<String, Product>();
         known.forEach(product -> byName.put(product.name(), product));
         for (String name : named) {
             Product product = byName.get(name);
@@ -431,11 +431,6 @@ public final class ExplorerAnswer {
     /** Whether the text is a number, which a miss answers differently from a name. */
     public static boolean number(String raw) {
         return NUMBER.matcher(raw).matches();
-    }
-
-    /** The followed series a number falls under, when it names a release we hold no scan of. */
-    static Optional<Line> followedPrefix(String raw, ExplorerFront front) {
-        return front.lines().stream().filter(line -> raw.startsWith(line.line() + ".")).findFirst();
     }
 
     /**

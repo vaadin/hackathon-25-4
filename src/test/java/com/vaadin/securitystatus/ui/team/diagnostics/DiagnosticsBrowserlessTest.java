@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.ui.team.diagnostics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,22 +17,23 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.browserless.SecuredBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessApplicationContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardWidget;
-import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.messages.MessageInput;
-import com.vaadin.flow.router.NavigationEndedEvent;
 import com.vaadin.flow.router.AccessDeniedException;
+import com.vaadin.flow.router.NavigationEndedEvent;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.securitystatus.Application;
 import com.vaadin.securitystatus.security.CspViolations;
@@ -42,8 +44,8 @@ import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.RouteCount
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsListeners;
 import com.vaadin.securitystatus.team.diagnostics.Outcome;
-import com.vaadin.securitystatus.ui.customer.NotFoundView;
 import com.vaadin.securitystatus.ui.customer.HomeView;
+import com.vaadin.securitystatus.ui.customer.NotFoundView;
 import com.vaadin.securitystatus.ui.team.explorer.SpringView;
 
 /**
@@ -159,7 +161,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
     void a_request_is_counted_by_minute_and_handler_kind_only() {
         long before = counters.requests().peek().count();
         counters.requestEnded("UidlRequestHandler", false, java.time.Duration.ofMillis(3));
-        counters.requestEnded(DiagnosticsListeners.NO_HANDLER, true, java.time.Duration.ofMillis(9));
+        counters.requestEnded(DiagnosticsListeners.NO_HANDLER, true, Duration.ofMillis(9));
 
         var requests = counters.requests().peek();
         assertThat(requests.count() - before).isEqualTo(2);
@@ -215,7 +217,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
         navigate(DiagnosticsView.class);
         long started = tail.newest();
         // The panel is on the right of the internal shell, shut until the Assistant button opens it, D-203.
-        test($(com.vaadin.flow.component.button.Button.class).withClassName("assistant-toggle").single()).click();
+        test($(Button.class).withClassName("assistant-toggle").single()).click();
 
         test($(MessageInput.class).withClassName("assistant-input").single()).send("Is 24.9.21 safe?");
 
@@ -320,7 +322,7 @@ class DiagnosticsBrowserlessTest extends SpringBrowserlessTest {
 
         @Test
         void a_navigation_in_session_two_moves_the_numbers_in_session_one_without_a_reload() {
-            var secured = (com.vaadin.browserless.SecuredBrowserlessApplicationContext<?>) app;
+            var secured = (SecuredBrowserlessApplicationContext<?>) app;
             BrowserlessUIContext one = secured.newUser("team", Roles.SECURITY).newWindow();
             BrowserlessUIContext two = secured.newUser("team", Roles.SECURITY).newWindow();
             assertThat(one.getUI().getSession()).isNotSameAs(two.getUI().getSession());

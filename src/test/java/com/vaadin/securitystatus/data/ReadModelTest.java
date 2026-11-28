@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,7 +29,7 @@ class ReadModelTest {
 
     private SecurityDataService service() {
         var client = new PagesClient(FixtureTransport.BASE_URL, host);
-        return new SecurityDataService(new PagesCache(client, java.time.Clock.systemUTC()), client,
+        return new SecurityDataService(new PagesCache(client, Clock.systemUTC()), client,
                 new DataRefreshSignal(), Runnable::run);
     }
 

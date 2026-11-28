@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -17,31 +18,36 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
+import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.util.FileSystemUtils;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Key;
-import com.vaadin.browserless.internal.ShortcutsKt;
 import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.browserless.internal.ShortcutsKt;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout.LabelTextAlign;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.NativeForm;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.workbench.QueueRules.Row;
 import com.vaadin.securitystatus.team.workbench.VerdictDraft;
@@ -132,7 +138,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
                 .isEqualTo("CVE-2025-52999, CVE-2026-18401, CVE-2026-68494, CVE-2026-89407, CVE-2026-89425");
         assertThat(fields.get("verdictId").getValue())
                 .isEqualTo("maven-com-fasterxml-jackson-core-jackson-core-24-9-2026-11-21");
-        assertThat($(com.vaadin.flow.component.html.H2.class).withClassName("workbench-composing").single().getText())
+        assertThat($(H2.class).withClassName("workbench-composing").single().getText())
                 .isEqualTo("A verdict on com.fasterxml.jackson.core:jackson-core");
         assertThat(text("workbench-elsewhere")).startsWith("You are looking at 24.9, and 3 advisories of this package");
         assertThat(text("workbench-reach")).startsWith("This closes 5 advisories on 8 series, "
@@ -149,9 +155,9 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
 
         view.open("org.apache.tomcat.embed:tomcat-embed-core");
 
-        com.vaadin.flow.component.details.Details row = view.row("org.apache.tomcat.embed:tomcat-embed-core");
+        Details row = view.row("org.apache.tomcat.embed:tomcat-embed-core");
         assertThat(row.isOpened()).isTrue();
-        String evidence = $(com.vaadin.flow.component.html.Div.class, row).withClassName("workbench-evidence").single()
+        String evidence = $(Div.class, row).withClassName("workbench-evidence").single()
                 .getElement().getTextRecursively();
         assertThat(evidence).contains("Resolves to", "Arrives by", "declared by spring-boot-starter-tomcat",
                 "CPE matched", "netapp:ontap_tools:vmware_vsphere",
@@ -159,7 +165,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(text("workbench-acknowledged")).endsWith("We could not read the list of 8.32, 7.7, so nothing "
                 + "is claimed about them.");
         // The advisories as ticks, each with what is known of it, and the verdicts the package carries.
-        List<com.vaadin.flow.component.checkbox.Checkbox> ticks = $(com.vaadin.flow.component.checkbox.Checkbox.class,
+        List<Checkbox> ticks = $(Checkbox.class,
                 row).withClassName("workbench-pick-box").all();
         assertThat(ticks).hasSize(61);
         assertThat($(Button.class, row).withClassName("workbench-reuse-chip").all()).hasSize(17);
@@ -170,7 +176,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(row.isOpened()).isFalse();
         assertThat($(Button.class, view.row("highcharts")).withClassName("workbench-save").exists()).isTrue();
         assertThat(text("workbench-acknowledged")).startsWith("Already in the check list of 25.4 (5 of 7), 25.3 (5 of 7)");
-        assertThat($(com.vaadin.flow.component.html.Div.class, view.row("highcharts"))
+        assertThat($(Div.class, view.row("highcharts"))
                 .withClassName("workbench-evidence").single().getElement().getTextRecursively())
                 .contains("Frontend. Compare the upstream fix date");
     }
@@ -180,10 +186,10 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     void the_ticks_write_the_advisories_and_follow_them() {
         WorkbenchView view = navigate(WorkbenchView.class);
         view.open("highcharts");
-        List<com.vaadin.flow.component.checkbox.Checkbox> ticks = $(com.vaadin.flow.component.checkbox.Checkbox.class)
+        List<Checkbox> ticks = $(Checkbox.class)
                 .withClassName("workbench-pick-box").all();
         String first = ticks.getFirst().getLabel();
-        assertThat(ticks).allMatch(com.vaadin.flow.component.checkbox.Checkbox::getValue);
+        assertThat(ticks).allMatch(Checkbox::getValue);
 
         test(ticks.getFirst()).click();
 
@@ -461,7 +467,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     void a_reader_without_the_role_is_refused() {
         navigate("findings/workbench", HomeView.class);
 
-        assertThat($(com.vaadin.flow.component.html.Div.class).withClassName("workbench-queue").exists()).isFalse();
+        assertThat($(Div.class).withClassName("workbench-queue").exists()).isFalse();
     }
 
     /**
@@ -479,7 +485,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     class AfterARestart extends SpringBrowserlessTest {
 
         /** The application of the first method, to prove the second runs in another one. */
-        private static @org.jspecify.annotations.Nullable ApplicationContext before;
+        private static @Nullable ApplicationContext before;
 
         @Autowired
         ApplicationContext application;
@@ -572,7 +578,7 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
     }
 
     private List<String> summary(String className) {
-        return $(TableRow.class, $(com.vaadin.flow.component.html.Table.class).withClassName(className).single())
+        return $(TableRow.class, $(Table.class).withClassName(className).single())
                 .all().stream().filter(row -> row.getElement().hasAttribute("data-key"))
                 .map(row -> String.join(" ", row.getChildren().map(cell -> cell.getElement().getTextRecursively())
                         .toList()))

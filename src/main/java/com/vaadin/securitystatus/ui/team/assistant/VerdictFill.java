@@ -83,11 +83,6 @@ final class VerdictFill extends Composite<Div> {
                 .build();
     }
 
-    /** The controller, so a test can see what it marked. */
-    FormAIController controller() {
-        return controller;
-    }
-
     private void run() {
         String text = paste.getValue().strip();
         if (!text.isEmpty()) {

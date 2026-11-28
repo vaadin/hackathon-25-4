@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
@@ -51,7 +53,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
-import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.VersionRules;
@@ -66,6 +67,8 @@ import com.vaadin.securitystatus.data.model.VersionAnswer;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.HelpDialog;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
+
+import jakarta.annotation.security.PermitAll;
 
 /**
  * The answer by version, the screen a support reply links at: the verdict
@@ -181,8 +184,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
         whenAttached(ui -> {
             ui.getPage().retrieveExtendedClientDetails(details -> zone.set(Optional.of(details.getZoneId())));
-            return () -> {
-            };
+            return null;
         });
     }
 
@@ -270,7 +272,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         if (lone != null) {
             var said = VersionRules.verdictsFor(measured, lone);
             var layers = new FindingCard.Layers(measured, index, lone, said,
-                    Optional.ofNullable(index.advisories().get(lone)), true);
+                    index.advisory(lone), true);
             loneLayers = layers;
             loneAdvisory = lone;
             details.add(heading(getTranslation("version.details.title", lone), null), layers);
@@ -315,12 +317,12 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         }
         if ("unresolved".equals(state)) {
             actions.add(notifyMe());
-            VersionRules.secureMove(index, measured.version(), measured.line().orElse(measured.version().line()))
+            VersionRules.secureMove(index, measured.version(), measured.lineName())
                     .ifPresent(move -> {
                         String text = move.sameLine()
                                 ? getTranslation("version.action.move.same", move.to().toString())
                                 : getTranslation("version.action.move.other", move.to().toString(),
-                                        measured.line().orElse(measured.version().line()));
+                                        measured.lineName());
                         var link = css(new RouterLink(text, VersionView.class,
                                 new RouteParameters(VERSION, move.to().toString())), "verdict-action", "secure-move");
                         actions.add(link);
@@ -406,7 +408,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     private Div badges(CasesIndex index, VersionAnswer measured) {
         var badges = css(new Div(), "verdict-badges");
-        String line = measured.line().orElse(measured.version().line());
+        String line = measured.lineName();
         if (measured.version().isPrerelease()) {
             badges.add(badge(getTranslation("version.badge.prerelease")));
         }
@@ -566,7 +568,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             return;
         }
         String version = measured.version().toString();
-        String line = measured.line().orElse(measured.version().line());
+        String line = measured.lineName();
         int openCount = VersionRules.openCount(measured);
         fixes.add(heading(getTranslation("version.fixes.title", to.get().toString()),
                 getTranslation(plural("version.fixes.aside", openCount), measured.fixable().size(), openCount, version)));
@@ -585,7 +587,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     private Component fixRow(CasesIndex index, VersionAnswer measured, String advisory, String line, VersionNumber to) {
-        Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
+        Optional<CasesIndex.AdvisoryCatalogEntry> entry = index.advisory(advisory);
         var row = css(new RouterLink(CveView.class, CveView.parameters(advisory, measured.version().toString())), "fix-row");
         row.getElement().setAttribute("data-advisory", advisory);
         var id = css(new Span(advisory), "fix-id");
@@ -712,7 +714,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         discontinued.add(heading(getTranslation("version.disc.title"), count(ids.size())));
         String tip = measured.discontinuedThrough().isEmpty() ? getTranslation("version.disc.tip.unnamed", version)
                 : getTranslation("version.disc.tip", measured.discontinuedThrough().stream().map(VersionView::code)
-                        .collect(java.util.stream.Collectors.joining(getTranslation("version.list.separator"))), version);
+                        .collect(Collectors.joining(getTranslation("version.list.separator"))), version);
         var paragraph = css(new Paragraph(new Span(withCode(tip)), new Text(" "), sectionLink(
                 getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withDisc(!open))), "section-tip");
         discontinued.add(paragraph);
@@ -746,7 +748,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 var id = row.addDataCell(AnswerParts.advisoryLink(advisory, measured.version().toString(), "finding-id"));
                 Optional<String> why = measured.fromBuild().contains(advisory)
                         ? Optional.of(getTranslation("version.ruled.build"))
-                        : Optional.ofNullable(index.advisories().get(advisory))
+                        : index.advisory(advisory)
                                 .flatMap(CasesIndex.AdvisoryCatalogEntry::applicability)
                                 .map(index.labels()::get);
                 // A reason the data does not carry has no cell: the id spans the row instead of
@@ -796,21 +798,12 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 var chip = css(new Badge(word), "status-chip", "state-" + summary.get().state().orElse(""));
                 status.add(chip);
             });
-            row.addDataCell(summary.map(found -> {
-                if (found.risk() == null && found.triage() == null) {
-                    return "";
-                }
-                return String.valueOf(zeroIfAbsent(found.risk()) + zeroIfAbsent(found.triage()));
-            }).orElse(""));
+            row.addDataCell(summary.flatMap(CasesIndex.Summary::open).map(String::valueOf).orElse(""));
             row.addDataCell(line.support().flatMap(CasesIndex.Support::label).orElse(""));
             row.addDataCell(summary.flatMap(CasesIndex.Summary::scannedAt).or(line::scannedAt)
                     .map(scanned -> scanned.toLocalDate().toString()).orElse(""));
         }
         lines.add(grid);
-    }
-
-    private static int zeroIfAbsent(@Nullable Integer value) {
-        return value == null ? 0 : value;
     }
 
     // Revealing what an address names
@@ -837,12 +830,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         if (target == null) {
             return;
         }
-        if (target instanceof com.vaadin.flow.component.HasStyle styled) {
-            styled.removeClassName(REVEALED);
-            styled.addClassName(REVEALED);
-        } else {
-            target.getElement().getClassList().add(REVEALED);
-        }
+        target.getElement().getClassList().add(REVEALED);
         target.getElement().executeJs(Element.ScrollIntoViewJs.class).scrollIntoView();
     }
 
@@ -871,7 +859,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
      * A section control: a real link to the address it would write, so it can
      * be copied or opened in a new tab, and a plain click answered in place.
      */
-    private Anchor sectionLink(String text, java.util.function.UnaryOperator<VersionAddress> change) {
+    private Anchor sectionLink(String text, UnaryOperator<VersionAddress> change) {
         var link = css(new Anchor(change.apply(shown.peek()).href(), text), "section-link");
         link.getElement().setAttribute("router-ignore", true);
         Signal.effect(link, () -> link.setHref(change.apply(shown.get()).href()));
@@ -901,7 +889,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     private Component packages(CasesIndex index, String advisory) {
-        String text = Optional.ofNullable(index.advisories().get(advisory))
+        String text = index.advisory(advisory)
                 .map(entry -> String.join(", ", entry.packages().stream().limit(2).toList())).orElse("");
         return new Span(text);
     }

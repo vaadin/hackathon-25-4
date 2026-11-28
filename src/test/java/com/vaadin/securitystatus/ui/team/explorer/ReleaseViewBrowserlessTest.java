@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
@@ -33,8 +35,8 @@ import com.vaadin.securitystatus.ui.customer.HomeView;
 @WithMockUser(username = "team", roles = Roles.SECURITY)
 class ReleaseViewBrowserlessTest extends SpringBrowserlessTest {
 
-    @org.springframework.beans.factory.annotation.Autowired
-    org.springframework.beans.factory.ObjectProvider<ProductSelection> selections;
+    @Autowired
+    ObjectProvider<ProductSelection> selections;
 
     // REL-01
     @Test

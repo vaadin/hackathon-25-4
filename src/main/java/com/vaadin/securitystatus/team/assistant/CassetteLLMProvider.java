@@ -3,9 +3,12 @@ package com.vaadin.securitystatus.team.assistant;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +26,11 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException;
 import com.vaadin.flow.component.ai.provider.ToolException;
 
-import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
+
+import reactor.core.publisher.Flux;
 
 /**
  * The provider the default build runs with: no key, no network, no model. It
@@ -65,7 +69,6 @@ public final class CassetteLLMProvider implements LLMProvider {
     }
 
     private final String unrecorded;
-    private final List<String> callsOfLastTurn = new ArrayList<>();
 
     /**
      * @param unrecorded
@@ -81,13 +84,6 @@ public final class CassetteLLMProvider implements LLMProvider {
         return ALL;
     }
 
-    /** The tool calls the last turn made, as {@code name arguments}, for the tests. */
-    List<String> callsOfLastTurn() {
-        synchronized (callsOfLastTurn) {
-            return List.copyOf(callsOfLastTurn);
-        }
-    }
-
     @Override
     public Flux<String> stream(LLMRequest request) {
         return Flux.defer(() -> Flux.fromIterable(chunks(play(request))));
@@ -100,9 +96,6 @@ public final class CassetteLLMProvider implements LLMProvider {
     }
 
     private String play(LLMRequest request) {
-        synchronized (callsOfLastTurn) {
-            callsOfLastTurn.clear();
-        }
         String promptSha = Prompts.sha256(request.systemPrompt());
         for (Cassette cassette : ALL) {
             if (!cassette.promptSha256().equals(promptSha)) {
@@ -197,9 +190,6 @@ public final class CassetteLLMProvider implements LLMProvider {
         if (tool == null) {
             throw new IllegalStateException("The cassette calls " + name + ", which the request does not offer");
         }
-        synchronized (callsOfLastTurn) {
-            callsOfLastTurn.add(name + " " + arguments);
-        }
         values.keySet().removeIf(key -> key.startsWith(name + "."));
         try {
             String result = tool.execute(arguments);
@@ -290,8 +280,8 @@ public final class CassetteLLMProvider implements LLMProvider {
 
     static String sha256(byte[] data) {
         try {
-            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(data));
-        } catch (java.security.NoSuchAlgorithmException impossible) {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(data));
+        } catch (NoSuchAlgorithmException impossible) {
             throw new IllegalStateException(impossible);
         }
     }
