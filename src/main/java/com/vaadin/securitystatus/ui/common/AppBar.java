@@ -1,6 +1,7 @@
 package com.vaadin.securitystatus.ui.common;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.RouterState;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 
@@ -73,6 +75,9 @@ public final class AppBar extends Composite<Header> {
         Tooltip.forComponent(measured).setText(getTranslation("shell.measured.title"));
         measured.bindVisible(generatedAt.map(Objects::nonNull));
 
+        if (customer) {
+            getContent().add(icon());
+        }
         getContent().add(breadcrumbs, measured, new ThemeSwitch());
         if (authentication.isAuthenticated()) {
             var signOut = new Button(VaadinIcon.SIGN_OUT.create(), click -> authentication.logout());
@@ -82,6 +87,11 @@ public final class AppBar extends Composite<Header> {
             signOut.addClassName("sign-out");
             getContent().add(signOut);
         }
+    }
+
+    /** The app icon, the shield with the Vaadin mark, as a mark the words beside it already name. */
+    public static SvgIcon icon(String... classNames) {
+        return css(decorative(new SvgIcon("icons/favicon.svg"), "app-icon"), classNames);
     }
 
     /** Adds a control to the bar's end, before Sign out when there is one. */

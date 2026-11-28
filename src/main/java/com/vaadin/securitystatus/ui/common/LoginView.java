@@ -1,11 +1,16 @@
 package com.vaadin.securitystatus.ui.common;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
 import java.util.Arrays;
 
 import org.springframework.core.env.Environment;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -14,10 +19,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-@Route("login")
+// Drawn alone, without the customer shell and its app bar, D-276.
+@Route(value = "login", autoLayout = false)
 @PageTitle("login.title")
 @AnonymousAllowed
-public final class LoginView extends Composite<Div> implements BeforeEnterObserver, StandsAlone {
+public final class LoginView extends Composite<Div> implements BeforeEnterObserver {
 
     private final LoginForm form = new LoginForm();
     private final boolean singleSignOn;
@@ -29,7 +35,13 @@ public final class LoginView extends Composite<Div> implements BeforeEnterObserv
         form.setAction("login");
         form.setForgotPasswordButtonVisible(false);
         form.setI18n(i18n());
-        getContent().add(form);
+        // The prototype's card: the brand and the theme switch, its own heading and lead, the form, a footer.
+        var brand = css(new Div(AppBar.icon(),
+                css(new Span(getTranslation("shell.customer.title")), "login-brand-name"), new ThemeSwitch()),
+                "login-brand");
+        getContent().add(css(new Div(brand, new H1(getTranslation("login.title")),
+                paragraph("login-lead", getTranslation("login.lead")), form,
+                paragraph("login-foot", getTranslation("login.trouble"))), "login-card"));
     }
 
     @Override

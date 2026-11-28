@@ -13,6 +13,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Aside;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
@@ -74,7 +75,7 @@ public final class InternalLayout extends AppLayout {
 
         routePanel.addClassName("internal-route-panel");
         drawer.addClassName("internal-drawer");
-        var brand = css(new Div(getTranslation("shell.brand")), "internal-brand");
+        var brand = css(new Div(AppBar.icon(), new Span(getTranslation("shell.brand"))), "internal-brand");
         drawer.add(brand, nav, routePanel);
         addToDrawer(drawer);
 

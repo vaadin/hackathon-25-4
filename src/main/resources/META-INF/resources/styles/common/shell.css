@@ -69,9 +69,115 @@
     }
 }
 
+/* The sign in page stands alone, the prototype's card in the middle of the window, D-276. */
 .login-view {
+    --login-ground: light-dark(#f4f6f9, #0f141c);
+    --login-card: light-dark(#ffffff, #161d28);
+    --login-line: light-dark(#d9e0ea, #2a3443);
+    --login-muted: light-dark(#5b6676, #9aa7ba);
     display: flex;
+    align-items: flex-start;
     justify-content: center;
+    box-sizing: border-box;
+    min-height: 100dvh;
+    /* Centred by a top padding rounded to a whole pixel: centring in a window of odd height puts
+       the card, and the icon on it, on a half pixel, and that blurs them on a 1x screen. */
+    padding: max(24px, round(down, 50dvh - 240px, 1px)) 16px 24px;
+    background: var(--login-ground);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 32px 28px 28px;
+    border: 1px solid var(--login-line);
+    border-radius: 14px;
+    background: var(--login-card);
+    box-shadow: 0 12px 40px light-dark(rgb(20 35 70 / 0.12), rgb(0 0 0 / 0.45));
+    font-size: 15px;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+/* The app icon, the shield with the Vaadin mark, at the 32 pixels it is drawn on so every edge
+   falls on a pixel: scaled to 24 it blurred on a 1x screen. */
+.app-icon {
+    flex: 0 0 auto;
+    --vaadin-icon-size: 32px;
+    --vaadin-icon-visual-size: 100%;
+}
+
+.login-brand-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* The switch keeps its tertiary variant in the app bar; here it is the prototype's small ring. */
+.login-brand .theme-switch {
+    margin-inline-start: auto;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--login-line);
+    border-radius: 999px;
+    color: var(--login-muted);
+    --vaadin-icon-size: 14px;
+}
+
+.login-card h1 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.login-lead,
+.login-foot {
+    color: var(--login-muted);
+}
+
+.login-lead {
+    margin: 0 0 22px;
+    font-size: 13.5px;
+}
+
+.login-foot {
+    margin: 18px 0 0;
+    text-align: center;
+    font-size: 12.5px;
+}
+
+/* The form inside the card: its own title gives way to the card's heading, the fields and the button as the prototype draws them. */
+.login-card vaadin-login-form {
+    --vaadin-login-form-width: 100%;
+    --vaadin-login-form-padding: 0;
+    --vaadin-login-form-background: transparent;
+    --vaadin-input-field-height: 44px;
+    --vaadin-input-field-border-width: 1px;
+    --vaadin-input-field-border-color: var(--login-line);
+    --vaadin-input-field-border-radius: var(--r-control);
+    --vaadin-input-field-background: light-dark(#ffffff, #0f141c);
+    --vaadin-input-field-value-font-size: 15px;
+    --vaadin-input-field-label-color: inherit;
+    --vaadin-input-field-label-font-size: 13px;
+    --vaadin-input-field-label-font-weight: 600;
+    --vaadin-input-field-required-indicator: "";
+}
+
+.login-card vaadin-login-form::part(form-title) {
+    display: none;
+}
+
+.login-card vaadin-login-form [slot="submit"] {
+    --vaadin-button-height: 44px;
+    --vaadin-button-border-radius: var(--r-control);
+    --vaadin-button-font-weight: 700;
+    --vaadin-button-background: var(--accent);
+    margin-top: 8px;
 }
 
 .view-heading {

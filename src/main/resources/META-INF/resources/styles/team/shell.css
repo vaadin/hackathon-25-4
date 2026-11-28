@@ -8,6 +8,12 @@
 }
 
 /* The bar wraps onto a second row rather than push Sign out off a laptop's screen. */
+/* Aura pads the drawer by 6.445 pixels, which puts its content between pixels and blurs the app
+   icon on a 1x screen; a whole 6 keeps it sharp. FEEDBACK-25.4.md, bugs routed around. */
+vaadin-app-layout.internal-shell:not([overlay])::part(drawer) {
+    padding-inline: 6px;
+}
+
 .internal-shell::part(navbar) {
     flex-wrap: wrap;
 }
@@ -37,6 +43,9 @@
 
 /* The application's name, level with the bar beside it. */
 .internal-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 0.75rem 1rem 0.25rem;
     font-size: var(--vaadin-font-size-l, 1.125rem);
     font-weight: 700;

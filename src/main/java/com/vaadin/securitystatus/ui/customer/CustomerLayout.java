@@ -16,19 +16,17 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.router.RouterLayout;
 import jakarta.annotation.security.PermitAll;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.ui.common.AppBar;
 import com.vaadin.securitystatus.ui.common.ShellLookup;
-import com.vaadin.securitystatus.ui.common.StandsAlone;
 import com.vaadin.securitystatus.ui.common.TeamEntrance;
 
 /**
  * The shell of the public routes: the app bar, then one centered column that
  * opens every page the same way, the H1, the purpose and the lookup, above
- * the route's own content, except a route that {@link StandsAlone}. No
- * navigation menu.
+ * the route's own content. No navigation menu. The sign in page is not
+ * drawn in it, D-276.
  */
 @Layout
 @PermitAll
@@ -36,7 +34,6 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
 
     private final Div lookupMount = new Div();
     private final Div content = new Div();
-    private final ValueSignal<Boolean> asking = new ValueSignal<>(true);
 
     CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
             ObjectProvider<ShellLookup> lookup, ObjectProvider<TeamEntrance> team) {
@@ -47,9 +44,6 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
         lookupMount.addClassName("lookup-mount");
         lookup.ifAvailable(provider -> lookupMount.add(provider.create()));
         content.addClassName("customer-content");
-        heading.bindVisible(asking);
-        purpose.bindVisible(asking);
-        lookupMount.bindVisible(asking);
 
         var column = css(new Main(heading, purpose, lookupMount, content), "customer-column");
         // A team member reads the customer pages with the team's navigation beside them, D-253,
@@ -73,7 +67,6 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
     @Override
     public void showRouterLayoutContent(HasElement routeContent) {
         content.getElement().removeAllChildren();
-        asking.set(!(routeContent instanceof StandsAlone));
         if (routeContent != null) {
             content.getElement().appendChild(routeContent.getElement());
         }

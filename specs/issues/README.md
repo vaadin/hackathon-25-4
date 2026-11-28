@@ -125,6 +125,7 @@ Real here, not yet reduced. Each says what it needs.
 | Aura has no inline tertiary button, `FEEDBACK-PLATFORM.md` | One view with a paragraph ending in a `TERTIARY` button, screenshot on Aura and on Lumo with `LUMO_TERTIARY_INLINE`, and a search for an existing web components issue |
 | The production build fails in `eclipse-temurin:21-jdk` because the Node.js that Vaadin downloads needs `libatomic.so.1`, `FEEDBACK-25.4.md` | A Dockerfile over a starter project, run once with and once without `libatomic1`, and the Node.js version where it began |
 | A `SideNavItem` with children opens itself whenever it is the current page, `FEEDBACK-PLATFORM.md` | One view with a parent item and a child, the server closing the parent after navigation, and the same on 24.9 to date it |
+| Aura pads the drawer of `vaadin-app-layout` by a fraction of a pixel, 6.445, so a small `SvgIcon` inside blurs on a 1x screen, `FEEDBACK-25.4.md` | One app layout with a drawer holding a 32 pixel `SvgIcon`, its x read with `getBoundingClientRect`, and a zoomed screenshot on a 1x screen beside the same icon in a drawer padded 6 pixels |
 
 ### Needs no draft
 
