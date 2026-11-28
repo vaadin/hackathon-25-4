@@ -13,8 +13,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 /** D-258: under the cas profile no page answers a visitor without a session; the single sign on does. */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "securitystatus.cas.service=https://vaadin.example/security-status/login/cas")
+// The only test with a real server: without launch-browser off, Vaadin opens the reader's browser
+// at http://localhost:0/, the port Spring reports before it picks one.
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "securitystatus.cas.service=https://vaadin.example/security-status/login/cas", "vaadin.launch-browser=false" })
 @ActiveProfiles("cas")
 class CasEntryPointTest {
 
