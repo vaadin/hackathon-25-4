@@ -60,7 +60,7 @@ The epics map onto the passes like this: epics 01 to 11 are the implementation p
 
 ## Licensing
 
-There is a Vaadin licence, so a commercial component is the default choice wherever it is the right tool, and choosing a core component in its place needs a reason. What that comes to here: the AI controllers drive the assistant, the workbench form and the advisories grid, `PdfViewer` previews the audit export, and Charts draws the workbench queue summary if epic 10 keeps it. GridPro, Crud and Dashboard have no work here that plain Grid and layouts do not do better, because almost everything on these screens is read only, and that absence is itself a data point for the 25.4 report.
+There is a Vaadin licence, so a commercial component is the default choice wherever it is the right tool, and choosing a core component in its place needs a reason. What that comes to here: the AI controllers drive the assistant, the workbench form and the advisories grid, `PdfViewer` previews the audit export, and `Dashboard` holds the diagnostics board, D-232. Charts is not used: the workbench summary is figures in two tables, D-119. GridPro and Crud have no work here that plain Grid and layouts do not do better, because almost everything on these screens is read only, and that absence is itself a data point for the 25.4 report.
 
 No code here checks a licence, degrades, hides a feature or offers a substitute for one. Vaadin enforces its own terms: a production frontend build without a licence fails, and development marks what is unlicensed.
 
@@ -221,13 +221,13 @@ Every feature lands in exactly one epic unless two are named. If an epic is cut,
 
 Written at the end of epic 13, from the code, and brought up to date at the close of the prototype alignment.
 
-- Typed JavaScript from the server is covered in part. Declared `@JsDefinition` snippets with `@JsExpression` are used for the scroll actions of epic 04, the lookup's key filters and field clearing of epic 03, and the theme switch, whose system preference read returns the typed `JavaScriptResult<Boolean>`, D-157. `callJsFunction` and `addJsInitializer` are used nowhere: the copy answer control of epic 05 uses the platform's Clipboard API instead, D-63, and no existing code has a lifecycle an initializer would fit. The table's claim for epics 04 and 05 is true only for `JsExpression`, `JsSnippet` and return values.
+- Typed JavaScript from the server is covered in part. Declared `@JsDefinition` snippets with `@JsExpression` are used for the scroll actions of epic 04, the lookup's key filters and field clearing of epic 03, and the theme switch, whose system preference read returns a typed boolean, D-157. `callJsFunction` and `addJsInitializer` are used nowhere: the copy answer control of epic 05 uses the platform's Clipboard API instead, D-63, and no existing code has a lifecycle an initializer would fit. The table's claim for epics 04 and 05 is true only for `JsExpression`, `JsSnippet` and return values.
 - `ShortcutFilterJs` is internal, so the slash key is a filtered `keydown` listener and not a shortcut registration, draft 12b.
 - `CspMode` and the 25.4 strict mode are not used; the policy is our own with `vaadin.csp=warn`, D-02.
 - The JUnit 6 browserless extensions are used for the one test that needs no Spring context, `AssistantPanelBrowserlessTest`; every view test extends `SpringBrowserlessTest`, which the documentation says the extensions do not replace.
 - `QueryPage` is not used for tool results, D-143. `RequestStartedEvent` is not listened to, only `RequestEndedEvent`.
 - ComboBox partial match mode, claimed for epic 03 in the 25.3 table, is not used: 25.4.0-beta2 refuses it beside custom values, D-40, and the requirement left feature 03 with D-173.
-- Master Detail Layout, claimed for epic 08, left the explorer with D-204, and the drawer the internal shell used for its menu holds only a route's own filter and products since D-203: what the overview names for those two screens is now the App Layout's left panel and an opened `Details` per series.
+- Master Detail Layout, claimed for epic 08, left the explorer with D-204, and the internal shell's left panel holds the team's side navigation and under it the route's own filter and products, D-237, D-251: what the overview names for those two screens is now that panel and an opened `Details` per series.
 
 ### 25.4 arrivals no epic claims
 
@@ -252,15 +252,20 @@ The brief asks for all of 25.4, so what is not claimed is named, with a decision
 | AI orchestrator, message list, input, tool calling, `ToolException`, conversation history | 11 |
 | Form AI controller | 11, filling the workbench verdict form |
 | Grid AI controller | 11, the advisories grid |
-| Switch | 01, the theme toggle, and 08, the show secure toggles |
+| Switch | 06, the scan screen's show secure findings toggle. The theme toggle became an icon button, D-247, and the explorer's Spring switch left with D-266 |
 | Markdown | 05, impact and commentary prose, and 10, the YAML preview |
 | Table family | 04, the Spring Boot table, and 05, the coordinates |
-| Grid i18n API | 08 |
-| ComboBox partial match mode | 03, the version lookup |
+| Grid i18n API | Not used since D-264: the explorer's findings are disclosures, not a grid |
+| ComboBox partial match mode | Not used: refused beside custom values, D-40 |
 | Shared signals, `SharedNodeSignal` | 02, the refresh that reaches every session |
 | Service event bus | 12 |
 | Dev Loop CLI | Tooling, `specs/10-dev-loop.md` |
 | Breadcrumbs, a 25.2 arrival | 01, the app bar |
+| SideNav | 01, the team's navigation, D-237 |
+| Badge, a 25.1 arrival | Every state, severity and verdict pill |
+| Clipboard API, a 25.2 arrival | 05, the copy answer control, D-63 |
+| Dashboard | 12, the diagnostics board, D-232 |
+| Tooltip | Every hint, D-243 |
 | Master Detail Layout, a 25.2 arrival | 08 used it for the series list and its open row until the prototype alignment opened each series in place, D-204; no screen uses it now |
 | Date picker metadata, DateTimePicker defaults | Out. Nothing here picks a date. Recorded so nobody claims coverage |
 | Kotlin in Copilot | Out. One language in this codebase |

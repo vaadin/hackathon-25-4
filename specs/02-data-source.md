@@ -40,11 +40,15 @@ One class talks HTTP, `PagesClient` in `data`, built on Spring's `RestClient`. E
 - Conditional requests with `ETag` and `If-None-Match`, which GitHub Pages serves, so a revalidation costs a 304 and no body.
 - Single flight: concurrent first requests for one path share one fetch. Vaadin sessions arrive in bursts and twenty sessions must not mean twenty fetches.
 - Stale over error: when a refresh fails, the cache keeps answering with what it has and the staleness is surfaced once, in the measured chip, as the data's own `generated_at`. An error page where an answer exists is the wrong trade on a read only site.
+- A 503 is asked again once before it counts as a failure, D-190. After a failure the path is not asked again for one minute.
+- A path the host has no document for is remembered as missing for five minutes, at most 10 000 paths, and forgotten when the index moves, D-261.
+- Connect timeout 5 seconds, read timeout 20.
+- A path segment must be letters, digits, dot, underscore and hyphen, starting with a letter or digit, at most 100 characters, or nothing is fetched.
 - A cold cache that cannot reach Pages is the one real failure. The screen says the data source is unreachable, in one sentence, and nothing pretends.
 
 ### The refresh signal
 
-`DataRefreshSignal` holds the newest `generated_at` as a shared signal. A scheduled task revalidates the index every 15 minutes, and when `generated_at` moves, every session's measured chip and home cards update without a reload. This is the application's one live surface and the reason shared signals are claimed by epic 02: the data changes nightly underneath long lived tabs, and the current static pages simply go stale.
+`DataRefreshSignal` holds the newest `generated_at` as a `SharedValueSignal`. A scheduled task revalidates the index every 15 minutes, `securitystatus.pages.revalidate-every=PT15M`, and when `generated_at` moves, every session's measured chip and home cards update without a reload. This is the application's one live surface and the reason shared signals are claimed by epic 02: the data changes nightly underneath long lived tabs, and the current static pages simply go stale.
 
 ## What the machine files are
 

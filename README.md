@@ -30,13 +30,15 @@ Every page asks for a sign in. Use `team` / `team` for the team's pages or `gues
 
 ## How to use it
 
+The pictures on this page predate the restyle to the prototype's look of 28 November, D-264 to D-278, so the screens now look closer to the live prototype than they show.
+
 Two halves behind one sign in. A customer asks one question and gets an answer; the security team reads the measurements behind every answer and writes the verdicts that produce them. The walk below is the two minute version of `DEMO.md`.
 
 ### As a customer
 
 ![The customer page: every supported version at a glance](demo/screenshots/C1-home.webp)
 
-Sign in as `guest`. The front page answers before you ask anything: one card per maintained minor, tinted by state, with its newest release and when it was scanned. There are three ways to ask about your own application, and they are the three tabs of the box at the top.
+Sign in as `guest`, on a card that stands alone, outside the application's frame. The front page answers before you ask anything: one card per maintained minor, tinted by state, with its newest release and when it was scanned. There are three ways to ask about your own application, and they are the three tabs of the box at the top.
 
 **Type your version.** This is the common one, and the answer is a single card: secure, a fix available, or unresolved. Fix available names the release to move to and lists, advisory by advisory, what that move clears. Nothing on the page is wording the measurements do not carry.
 
@@ -58,7 +60,7 @@ Sign in as `team`. Four more pages appear, and the assistant with them.
 
 **`/findings`** is the map: every maintained line, with the Vaadin and the Spring Boot half of each kept apart, and a filter that narrows everything to the products an application actually declares. What you turn off is written into the address, so a narrowed view can be sent to somebody.
 
-**`/findings/workbench`** is where the work is decided. The queue is one row per package, ranked by how much a single verdict would close. Paste a security report into the form and the AI fills the fields it can support, marking each one; the YAML follows the typing, and nothing is saved, and nothing reaches GitHub, until a person presses the button.
+**`/findings/workbench`** is where the work is decided. The queue is one row per package, ranked by how much a single verdict would close. A package that already carries verdicts opens with the form filled from the newest of them, D-278. Paste a security report into the form and the AI fills the fields it can support, marking each one; the YAML follows the typing, and nothing is saved, and nothing reaches GitHub, until a person presses the button.
 
 ![The verdict workbench, filled from a pasted report](demo/screenshots/T6-workbench-ai-fill.webp)
 
@@ -102,18 +104,13 @@ Signals end to end (`SharedValueSignal`, effects bound to a component's life, `b
 
 The code is split so the team's half can be deleted if it is not wanted:
 
-```
-data/  security/            shared: the Pages client and cache, Spring Security, the CSP
-customer/  ui/customer/     the customer's rules and views
-team/      ui/team/         the team's rules and views: explorer, workbench, assistant, diagnostics
-ui/common/                  what both UIs share: app bar, login, theme, navigation helpers
-```
+The shared part is `data`, `security` and `ui/common`: the Pages client and cache, Spring Security and the CSP, and what both UIs draw. The customer's part is `customer` and `ui/customer`, its rules and its views. The team's part is `team` and `ui/team`: the explorer, the workbench, the assistant and diagnostics.
 
-Delete `team/`, `ui/team/` and `styles/team/` and the application still builds and serves the customer pages. `TeamIsRemovableTest` keeps it that way, and `DEVELOPMENT.md` has the steps.
+Delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, the team's tests and the team's specifications, and the application still builds and serves the customer pages. `TeamIsRemovableTest` keeps it that way, and `DEVELOPMENT.md` has the steps.
 
 ## The issues this build opened
 
-Fourteen issues and six comments on existing ones, each issue with a reproducer project zipped under `specs/issues/projects/`. They carry the `Hackathon 25.4:` prefix and are listed in the platform tracker, https://github.com/vaadin/platform/issues/9642.
+Sixteen issues and six comments on existing ones, each issue with a reproducer project zipped under `specs/issues/projects/`, and one fix. They carry the `Hackathon 25.4:` prefix, or `PiT 25.4:` for a finding older than this release, and are listed in the platform tracker, https://github.com/vaadin/platform/issues/9642.
 
 **vaadin/flow**
 
@@ -122,6 +119,7 @@ Fourteen issues and six comments on existing ones, each issue with a reproducer 
 - [#27172](https://github.com/vaadin/flow/issues/27172) QueryParameters could keep the order the parameters were given in
 - [#27173](https://github.com/vaadin/flow/issues/27173) The error callback of the Clipboard API takes a type from an internal package
 - [#27187](https://github.com/vaadin/flow/issues/27187) A signal effect runs without the session lock when a RequestEndedEvent listener changes a shared signal
+- [#27490](https://github.com/vaadin/flow/issues/27490) AuthenticationContext.logout() sends the browser to the host's root when a proxy serves the application under a path
 
 **vaadin/flow-components**
 
@@ -130,6 +128,10 @@ Fourteen issues and six comments on existing ones, each issue with a reproducer 
 - [#10754](https://github.com/vaadin/flow-components/issues/10754) A failed AI turn writes a fixed English sentence the application cannot replace
 - [#10755](https://github.com/vaadin/flow-components/issues/10755) Breadcrumbs in ROUTER mode cannot show an item that is not a route of the application
 - [#10779](https://github.com/vaadin/flow-components/issues/10779) ComboBox.bindValue before setItems drops the bound value, with only a log line
+
+**vaadin/web-components**
+
+- [#13535](https://github.com/vaadin/web-components/issues/13535) Aura's app layout inset is 1.5vmin unrounded, so the drawer's content sits on fractions of a pixel, posted as PiT 25.4 because it is the same since 25.0, with the fix in [#13534](https://github.com/vaadin/web-components/pull/13534)
 
 **vaadin/browserless-test**
 
@@ -154,7 +156,7 @@ Five more findings died on the way: three were already documented, two were alre
 | --- | --- |
 | `specs/` | The contract, written before the code. Start at `specs/00-overview.md` |
 | `specs/FEEDBACK-25.4.md`, `specs/FEEDBACK-PLATFORM.md` | Every missing API, bug and workaround, in 25.4 and older |
-| `DECISIONS.md` | 256 decisions, each with why and how to revert it |
+| `DECISIONS.md` | 278 decisions, each with why and how to revert it |
 | `REPORT.md` | How the build went, the timeline, the comparison with the originals, what is not done |
 | `DEMO.md` | The demo, step by step |
 | `DEVELOPMENT.md` | Development notes, the licence, removing the team |

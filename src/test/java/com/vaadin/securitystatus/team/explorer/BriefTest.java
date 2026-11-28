@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-/** D-255: a field shows its first sentences and the rest is one click away, cut as the prototype cuts it. */
+/** D-264: a field shows its first sentences and the rest is one click away, cut as the prototype cuts it. */
 class BriefTest {
 
     @Test

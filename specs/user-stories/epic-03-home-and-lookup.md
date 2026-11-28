@@ -15,10 +15,12 @@
 - [x] Version cleanup, the CVE jump, the ids splitter
 - Removed with D-173, not done: ~~ComboBox with `PartialMatchMode` over measured versions~~. The requirement left feature 03 because neither the prototype nor the application has it, and 25.4.0-beta2 refuses partial match beside custom values, D-40. What stands is a ComboBox over measured versions with free text allowed, D-228
 - [x] Check with `DisableOnClickMode`, clear and Escape withdraw to home
-- [x] Slash shortcut with a JS filter
+- [x] Slash focuses the lookup through a keydown listener with a declared filter
 - [x] The help dialogs per tab
+- [x] One version for every tab, D-274
+- [x] Enter asks as Check does, D-240; ids found inside a pasted address, D-244
 
-**25.x APIs:** `DisableOnClickMode`; `PartialMatchMode` removed with D-173,, `ShortcutFilterJs`, value change modes.
+**25.x APIs:** `DisableOnClickMode`, declared JavaScript filters (`@JsDefinition`, `@JsExpression`), value change modes; `PartialMatchMode` removed with D-173.
 **Verified by:** `LookupBrowserlessTest`
 
 ---
@@ -28,6 +30,7 @@
 **Tasks:**
 - [x] One card per line from the index, state words and icons, action line, scanned date
 - [x] Whole card a real link, `?pre` for prereleases
+- [x] The three home parts under By version only, D-273
 
 **Verified by:** `HomeBrowserlessTest`
 

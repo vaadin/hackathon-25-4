@@ -7,7 +7,7 @@ The closing epic: the suites completed to their tables, the sweeps that hold the
 ## Behaviour
 
 - Every feature document's test case table is reconciled: each named class exists, each checkbox reflects reality, each Still open section is written by reading the code.
-- The browserless additions of this release are exercised where the earlier epics left gaps: the upload testers against the scan flow, the JUnit 6 extensions in the shared test configuration, the AI view testing against the panel.
+- The browserless additions of this release are exercised where the earlier epics left gaps: the upload testers against the scan flow, the JUnit 6 `BrowserlessExtension` on the chat panel alone, and the AI view testing against the panel.
 - The literal sweep: `NoHardcodedStringsTest` green with no exemptions beyond its stated list.
 - Rule 4 sweep: for each screen, one fixture with absent fields walked and the omissions asserted.
 - The demo script, `DEMO.md`: the walk from a customer question to a filed verdict draft, with the data that exhibits each state, leaning on `/cases`.
@@ -32,7 +32,9 @@ The closing epic: the suites completed to their tables, the sweeps that hold the
 | --- | --- | --- | --- | --- | --- |
 | POL-01 | The whole suite | `./mvnw verify` | Green with no licence, key or network | unit | the gate itself |
 | POL-02 | Every feature table | `SpecConsistencyTest` | Every named class exists | unit | `SpecConsistencyTest` |
-| POL-03 | The absent field fixtures | Each screen | Omission, not emptiness | browserless | `AbsenceSweepBrowserlessTest` |
+| POL-03 | The absent field fixtures | Each customer screen | Omission, not emptiness | browserless | `AbsenceSweepBrowserlessTest` |
+| POL-04 | The absent field fixtures | Explorer, release, Spring Boot, workbench, diagnostics | Omission, not emptiness | browserless | `TeamAbsenceSweepBrowserlessTest` |
+| POL-05 | The sources and the tests | Deleting `team` and `ui/team` | Nothing outside the team names it | unit | `TeamIsRemovableTest` |
 
 ## Still open
 
@@ -40,5 +42,6 @@ Written from the code at the close of the prototype alignment. Each line names w
 
 - The JUnit 6 `BrowserlessExtension` is used where it applies, `AssistantPanelBrowserlessTest`, the chat panel on its own with no Spring context. The documentation says the extensions do not replace `SpringBrowserlessTest`, so every view test still extends it; there is no shared extension in a common test configuration.
 - `AbsenceSweepBrowserlessTest` walks one fixture or constructed record per screen with the omission asserted. It does not walk every absent field of every record: a field left out of the sweep is covered only by its feature's own tests.
-- The sweep's screens were kept green through the prototype alignment, so its explorer, release, Spring Boot and workbench cases now walk the prototype's layouts, the series opened in place, D-204, the release page as one opened series, D-216, the Spring Boot rows shut on arrival, D-219, and the verdict queue, D-220. A blank grid cell is still accounted for by row and column, D-159.
+- The sweep is split by D-254: the customer's screens in `AbsenceSweepBrowserlessTest`, the team's in `TeamAbsenceSweepBrowserlessTest`, both on the shared `AbsenceSweep`. The team's cases walk the prototype's layouts: the series opened in place, D-204; the release page as one opened series, D-216; the Spring Boot rows shut on arrival, D-219; the verdict queue, D-220; and the diagnostics board before the browser answers. A blank grid cell is still accounted for by row and column, D-159.
+- `DEMO.md` was walked before D-245 and D-278: its workbench step names the bar's old "Verdict workbench" destination, now "Verdicts" in the side navigation, and fills jackson-core by hand where the form now arrives filled from its newest verdict. It has to be walked again.
 - The demo walk of `DEMO.md` was made with real clicks on the committed fixtures served from a local port, in development mode, without the model key. The assistant's live answers and the hand over into GitHub's editor were not walked, P-17, P-18.

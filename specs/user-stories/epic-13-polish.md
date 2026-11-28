@@ -22,7 +22,7 @@
 - [x] The literal sweep, the absence sweep, the browserless additions exercised
 
 **25.x APIs:** browserless testers, JUnit 6 extensions, AI view testing.
-**Verified by:** `NoHardcodedStringsTest`, `AbsenceSweepBrowserlessTest`
+**Verified by:** `NoHardcodedStringsTest`, `AbsenceSweepBrowserlessTest`, `TeamAbsenceSweepBrowserlessTest`
 
 ---
 

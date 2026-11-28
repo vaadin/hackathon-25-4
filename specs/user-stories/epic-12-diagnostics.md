@@ -20,7 +20,7 @@
 ### US-12.2: The view
 
 **Tasks:**
-- [x] The four live panels plus the reader's extended client details
+- [x] The six cards on a Dashboard, the reader's extended client details among them, D-232
 
 **25.4 APIs:** extended client details typed accessors.
 **Verified by:** `DiagnosticsBrowserlessTest`

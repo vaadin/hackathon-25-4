@@ -8,8 +8,8 @@ All through the `VaadinService` event bus and the 25.4 lifecycle events, registe
 
 | Event | What is kept |
 | --- | --- |
-| `NavigationStartedEvent`, `NavigationEndedEvent` | Route, duration, and the outcome: completed, failed, not shown, postponed. The outcome enum is new in 25.4 and the whole reason this view exists |
-| `RequestStartedEvent`, `RequestEndedEvent` | Request counts and durations, bucketed per minute |
+| `NavigationStartedEvent`, `NavigationEndedEvent` | Route template, duration, and the outcome: completed, refused (not found or not allowed), broke (any other failure), not shown, postponed, D-233; at most 100 routes, the rest under one "Other routes". The outcome enum is new in 25.4 and the whole reason this view exists |
+| `RequestEndedEvent` | Request counts and durations per minute and per handler kind, the last 60 minutes. `RequestStartedEvent` is not listened to |
 | Session lifecycle | Live session count |
 | CSP violations | The last N reports, because `04-security.md` turns enforcement on and somebody has to see what it catches |
 | Assistant interception | The last N prompts and tool calls, from `06-ai.md` |
@@ -18,7 +18,7 @@ Counters live in a singleton holding signals, ring buffered, never persisted. Re
 
 ## The diagnostics view
 
-`/diagnostics`, role `SECURITY`. Four panels bound to the signals: navigation outcomes as counts per route, request timing summary, sessions now, and the two event tails. Everything updates live through the signals, no refresh button, because a diagnostics view with a refresh button is a screenshot.
+`/diagnostics`, role `SECURITY`. A board of six cards on the commercial `Dashboard`, D-232: navigations by route and outcome, request timings, sessions now with the data's age, the reader's browser, policy violations, and assistant exchanges. Edit cards moves, resizes and removes them, Add a card brings a removed one back, Restore the default cards puts the six back, and the arrangement is kept in the browser's local storage. Every card is bound to a shared signal. Everything updates live through the signals, no refresh button, because a diagnostics view with a refresh button is a screenshot.
 
 Extended client details, typed in 25.4, are shown for the reader's own session: timezone, pixel ratio, viewport. One session's facts, to prove the API, not a fleet view.
 

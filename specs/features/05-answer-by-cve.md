@@ -6,7 +6,9 @@ One or more advisory ids, with or without a version, answered the way screen 3 o
 
 ## Layout
 
-Under the customer shell's H1, purpose and lookup, the ids asked are the answer's H2. Each id then reads, in order: its verdict card, Across supported versions, and Details. The card's headline and every section heading are H3, D-186. The card is tinted by its state with a border all round and the state word in capitals; the line cards sit four to a row in the 912 pixel column, each tinted by its state, the reader's own outlined.
+Under the customer shell's H1, purpose and lookup, the answer's title, the ids asked, is an H2 kept for screen readers and visually hidden, D-270. When several ids are asked, an H3 "N advisories" opens the answer, with the aside "Answered for V" or "Enter your version above to answer for it", and each id's answer is a framed box of its own, D-242. Each id then reads, in order: its verdict card, Across supported versions, and Details. The card's headline and every section heading are H3, D-186. The card is tinted by its state with a border all round and the state word in capitals; the line cards sit four to a row in the 912 pixel column, each tinted by its state, the reader's own outlined.
+
+The answer takes the prototype's look, D-271. The measured card, asked with no version, is blue with a filled arrow mark. The other cards are tinted by state with a filled mark: a tick for does not affect you and fixed for you, an up arrow for fix available, an exclamation for every form of affects you, a question mark for not assessed yet and for not in our measurements. The line cards are drawn as the home page's. The label of the version field beside the ids is at the lookup's size. The three layers sit in one framed box like an accordion, though each is its own `Details` and several may be open.
 
 ## Behaviour
 
@@ -14,16 +16,16 @@ Under the customer shell's H1, purpose and lookup, the ids asked are the answer'
 
 One card per id, and the state decides the words, taken from the source page's settled set: fixed in X when the reader's version is affected and a release clears it, affects you, not assessed yet, affects you through Spring Boot when Spring Boot pins the version, affects you through a discontinued product, does not affect you, fixed for you, measured when no version was given, or not in our measurements. A risk verdict whose every route is the reader's own Spring Boot, `theirs_risk`, does not affect them through Vaadin: the card says so, and its why says where the verdict lives, D-187. The headline with a version answers the one question, is this fixed for me, with the exact release to move to, and that release is on the reader's line by construction, rule 6.11.11.
 
-- Actions: View release notes for the fix release, and Copy answer for your ticket, which here is built: it composes the card's facts into a short plain text answer and puts it on the clipboard through the platform's Clipboard API, whose observed form reads the browser's success back to the server, D-63, and confirms in one notice. The source page could not build this without a server and drew the not built dialog; this application has the server, and the difference is a line in the demo script.
+- Actions, on every card except Not in our measurements: first "View X release notes" for the fix release, when there is one; then Copy answer for your ticket, only when a version was given, D-229. It puts the card's own words on the clipboard through the platform's Clipboard API, whose observed form reads the browser's success back, D-63: "<state word>: <headline>", then the why sentences on one line, then "Scanned <date>" when the version was measured, then the page's absolute address, each on its own line. It confirms with "The answer for <id> is on your clipboard", or warns "Your browser did not let this page write to the clipboard". Last comes the scan date with a clock icon. The source page could not build this without a server and drew the not built dialog; this application has the server.
 - An id we never measured says so plainly and nothing else, rule C6. An entry of the address that is no CVE or GHSA id at all, which only a hand typed address carries, gets the same card in the same plain words, after the cards of the ids that parse, and is never looked up, D-226.
 
 ### Across supported versions
 
-One small card per maintained line, from `coverage`: affects you, fixed, never affected, reported, not measured yet, with the detail sentences, in X and later, a prerelease, enterprise only X, measured on X, nothing to do. The reader's line is marked yours and its card names the release the finding is gone in.
+One small card per line the version screen's All supported versions would list: newest first, prereleases only when the reader's own line is one. Each card is a link to `/version/<newest measured release of the line>`. Its word comes first from the verdict on that release, then from `coverage`: affects you, fixed, never affected, reported, not measured yet, with the detail sentences, in X and later, a prerelease, enterprise only X, measured on X, nothing to do. The reader's line reads "L · yours" and names the release the finding is gone in. The heading's aside reads "Your version is V" or "Enter your version above".
 
 ### Details
 
-The design's heading, Details, with the owning id named when several ids were asked. Three layers, only the first open:
+The design's heading, Details, with the owning id named when several ids were asked. Three layers. With one advisory on the page only the first is open on arrival; with several, all three start shut, D-242, so each answer reads as its card first:
 
 1. **What this means for you**: impact, Vaadin's assessment in the catalogue's own words, and Source, where it reaches a Vaadin application from and the dependency it rides in on, unestablished said as such.
 2. **Affected modules and the fix**: the modules, the dependency in the box, one sentence per package on the reader's line ("X 2.21.4, as we scanned the newest 24.9 release. The library fixes it in 2.21.7.") or a table of every line when no version was given, do this now, fix, who ships it, expected, PR links, handover, and other per package verdicts, each naming its coordinate with the differing part marked, rules 6.4.8 and 6.4.9.
@@ -42,8 +44,8 @@ Cards stack in the order asked. The details section exists once per id, each nam
 | An id with no version given | The measured card: what the catalogue knows, no claims about the reader |
 | An id fixed below the reader's version | Fixed for you, not reported on your version |
 | Ids separated by newlines and semicolons mixed | All parsed, order kept, duplicates collapsed |
-| An alias asked, GHSA for a CVE we track | Answered under the id we track, the asked alias shown beside it |
-| A version given that we never measured | Each card answers the catalogue half and says the version is not measured, once, above the cards |
+| A GHSA alias asked beside the CVE we track for it | Answered once, under the tracked CVE, with the asked alias named in the evidence layer. A GHSA asked alone that has no document of its own gets the "not tracked under that name" card, D-62 |
+| A version given that we never measured | Said once above the cards, only when at least one id resolved: "We have not measured Vaadin V. Each answer below says what we measured on the lines we follow, not what it means for V.", with the link "Answer these for X, the nearest release we measured, instead" |
 | An address whose ids do not parse, `/cve/GHSA-aaaa-bbbb-cccc` | The not in our measurements card for each entry that does not parse, "X is not in anything we scanned", as the prototype says, D-226 |
 
 ## Acceptance criteria
@@ -58,7 +60,7 @@ Cards stack in the order asked. The details section exists once per id, each nam
 - [x] The composed text names the id, the verdict, the reader's version and the move, and nothing the data does not carry
 
 ### AC3: The layers are the design's
-- [x] Only the first layer is open on arrival
+- [x] Only the first layer is open on arrival, with one advisory on the page
 - [x] Absent fields are omitted
 - [x] Per package verdicts each name their coordinate
 
@@ -83,12 +85,12 @@ Cards stack in the order asked. The details section exists once per id, each nam
 
 Written from the code at the close of the prototype alignment, D-186 to D-196 and D-226 included. Each line names where the code shows it and the decision or draft behind it.
 
-- Copy answer reads success back through the platform's `Clipboard.onClick(button).writeText(text, onCopied, onError)`, not through a typed JavaScript call with a `JsExpression` return value; `callJsFunction` and `addJsInitializer` are used nowhere in the application, `CveView.copyButton`, D-63, D-157.
-- The copy error callback stays a lambda so that `PromiseAction.Error`, in an internal package, is never named; remove that when the type becomes public, `CveView.copyButton`, draft 15.
-- An alias asked alone, a GHSA for a CVE we track, is not answered under the tracked id: it resolves only when another asked id lists it as an alias, otherwise its card says the id is not tracked under that name, `CveView.resolve`, D-62, the alias map data need in `FEEDBACK-25.4.md`.
-- An id fixed below the reader's version reads "Fixed for you" only when the reader's line ever reported it; on a line that never did, the word is "Does not affect you", `CveRules.state`, D-66.
-- The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView.lineCard`, D-64, confirmed against the prototype as an app extra, D-189.
+- Copy answer reads success back through the platform's observed clipboard write, not through a typed JavaScript call, D-63, D-157. Its error callback avoids naming a type that is still internal; remove that when the type becomes public, draft 15.
+- An alias asked alone, a GHSA for a CVE we track, is not answered under the tracked id: it resolves only when another asked id lists it as an alias, otherwise its card says the id is not tracked under that name, `CveView`, D-62, the alias map data need in `FEEDBACK-25.4.md`.
+- An id fixed below the reader's version reads "Fixed for you" only when the reader's line ever reported it; on a line that never did, the word is "Does not affect you", `CveRules`, D-66.
+- The reader's own line card follows the version document, not `coverage`, when the two disagree, `CveView`, D-64, confirmed against the prototype as an app extra, D-189.
 - Kept as app extras where the prototype says less or something false, D-189: the not measured note and its link, the `from_build` sentence, the per package table of every line with its marked difference, `cve.evidence.askedAs`, the copy answer itself, which the prototype does not build.
 - The copied answer ends with the address of the page it was copied from, so a ticket can come back to the answer, and the card without a version has no copy action, because it answers nothing yet. Decided by Manolo on 2026-11-23, P-10, D-229. The address is built from the request, so behind a proxy it is right only when the proxy's forwarded headers are honoured.
 - An address whose ids do not parse is answered since D-226; it used to show the H2 and nothing under it.
 - What the prototype shows and the data does not carry: the advisory's publication date after "First seen by our scans", a data need row in `FEEDBACK-25.4.md`, D-179.
+- No test asserts the several ids layout of D-242 yet: the H3 "N advisories", each answer framed, every layer shut.

@@ -12,6 +12,7 @@
 - [x] Customer layout with Breadcrumbs, the measured chip, the lookup mount: an automatic `@Layout`, with `@RouteParent` giving the trail's hierarchy; since D-164 the lookup sits in the centered column under the H1
 - [x] Document title follows the heading, one writer
 - [x] Delete the walking skeleton's example feature
+- [x] The sign in page outside the customer shell, in the prototype's card, D-276, D-277
 
 **25.x APIs:** Breadcrumbs, `@RouteParent`.
 **Verified by:** `ShellBrowserlessTest`
@@ -24,7 +25,7 @@
 
 **Tasks:**
 - [x] Internal parent with the drawer and assistant mount: since D-203 the left panel holds the route's own `DrawerContent`, the destinations are links in the bar, and the assistant mount is a panel on the right
-- [x] `VaadinSecurityConfigurer`, login view, the two users, route rules
+- [x] `VaadinSecurityConfigurer`, the `demo` profile's login view and two accounts, the `cas` profile's single sign on, route rules, D-258
 - [x] Return to the asked route after sign in
 - [x] `VaadinExpiredSessionStrategy` with the one notice
 
@@ -37,9 +38,9 @@
 
 **Tasks:**
 - [x] Aura tokens, the status and severity token pairs of `05-theming.md`
-- [x] Switch in the app bar, system default, remembered through typed web storage, decided before first paint
+- [x] The color scheme button in the app bar stepping System, Light, Dark, D-247, system default, remembered through typed web storage, decided before first paint
 
-**25.x APIs:** Switch, `WebStorage` typed accessors.
+**25.x APIs:** `WebStorage` typed accessors, `Page.setColorScheme`.
 **Verified by:** `ThemeFirstPaintIT`
 
 ---

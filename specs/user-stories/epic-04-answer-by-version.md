@@ -23,7 +23,7 @@
 
 **Tasks:**
 - [x] Cards with chips, do this now, fix, PRs
-- [x] The three layer accordion, Markdown prose, absence omitted
+- [x] The three layers as three Details, several open at once, Markdown prose, absence omitted
 
 **25.3 APIs:** Markdown.
 **Verified by:** `VersionViewBrowserlessTest`

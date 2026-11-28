@@ -10,7 +10,11 @@ The coding agent dev loop that 25.3 introduced: a daemon that holds the applicat
 .vaadin/vaadin-dev status
 .vaadin/vaadin-dev apply
 .vaadin/vaadin-dev restart
+.vaadin/vaadin-dev stop
+.vaadin/vaadin-dev shutdown
 ```
+
+`stop` stops the application, and `shutdown` stops the daemon too, which is the only way to change the environment it passes on.
 
 Verified on 25.4.0-beta2 in US-1.5: `./mvnw vaadin:install-dev-cli` works under the `vaadin` prefix, so the 25.3 workaround is not needed. The daemon inherits the environment of the shell that starts it: `VAADIN_LAUNCH_BROWSER=false` there keeps it from opening a browser.
 
@@ -34,7 +38,7 @@ The loop says why it restarted, every time. A restart costs ten to eleven second
 1. Open the browser before the first `apply`. A CSS push needs a page already connected.
 2. Never run the application through Maven and through the daemon at the same time.
 3. Do not batch a resource edit with a Java edit while iterating: one resource turns a hot swap into a restart.
-4. Run `./mvnw clean verify` after a dev loop session, because the daemon's compiler flags are not the build's and the gate is the gate.
+4. Run `./mvnw clean verify` after a dev loop session. The daemon writes its own classes into `target/classes`, and Maven trusts them when they are newer than the sources, so without `clean` a build can pass over code that does not compile; the gate is the gate.
 5. The daemon compiles Java only. Anything else needs a restart.
 
 ## Verification inside the loop

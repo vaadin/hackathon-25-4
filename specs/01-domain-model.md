@@ -76,7 +76,7 @@ The explorer's data, from `data/front.json`, `data/<version>.json` and `data/que
 
 ## The verdict vocabulary
 
-Closed, owned by cve-status, and never extended here: `risk`, `configuration`, `no_risk`, `not_affected`, `false_positive`, `fixed`, `not_current`. The absence of a verdict is `in_triage`, which is a fact about Vaadin's work and never presented as a property of the reader's release. Labels for customer words come from `labels` in the index, not from strings of ours, because the same wording written in two places drifts.
+Closed, owned by cve-status, and never extended here: `risk`, `configuration`, `no_risk`, `not_affected`, `false_positive`, `fixed`, `not_current`. The workbench writes only six of these, `not_current` being the pipeline's own, D-120. The absence of a verdict is `in_triage`, which is a fact about Vaadin's work and never presented as a property of the reader's release. Labels for customer words come from `labels` in the index, not from strings of ours, because the same wording written in two places drifts.
 
 ## The state rule
 
@@ -84,7 +84,7 @@ A version's state is read from the JSON, never recomputed: `secure` when nothing
 
 ## The triage model, scanner reports
 
-An uploaded report is parsed into `ReportedFinding` records: advisory id, coordinate, and whatever the format carries. Triage joins them against `ScanIndex` and the reader's `VersionAnswer` into three buckets with an owner and an action sentence each:
+An uploaded report is parsed into a `ScannerReport`: the detected format, the Vaadin version when the file names one, and one finding per entry with its advisory ids, coordinate and severity, within the bounds of D-257 (32 MB, 10 000 findings, a coordinate of at most 300 characters). Triage joins them against `ScanIndex` and the reader's `VersionAnswer` into three buckets with an owner and an action sentence each:
 
 | Bucket | Meaning |
 | --- | --- |
@@ -102,23 +102,27 @@ A JPA entity, H2, session independent so a draft survives a restart. Its fields 
 
 | Field | YAML key | Constraint |
 | --- | --- | --- |
-| `id` | `id` | Required for `Ready`: the verdict's own name, which also names the file. The workbench proposes `<ecosystem>-<package>-<line>-<date>` and the human edits |
-| `purl` | `purl` | Required, a purl without version |
-| `cves` | `cves` | Required, one or more ids matching `(CVE|GHSA)-` |
-| `applicability` | `applicability` | Required, one of the closed vocabulary |
-| `justification`, `depth`, `affects` | same | Optional: the CSAF justification word, the depth word, the affected range expression |
-| `impact`, `workaround`, `commentary` | same | Prose, impact required for `risk` and `no_risk` because a verdict without an impact sentence answers nothing |
-| `fixExpected`, `fixExpectedVersion`, `fixPrs` | `fix_expected`, `fix_expected_version`, `fix_prs` | The promise fields, version required when `fixExpected` names a release |
-| `evidence`, `supersedes` | same | Optional. Superseding is a new file pointing here, never an edit in place |
-| `updatedAt` | not exported | Maintained by the entity |
+| `verdictId` | `id` | Required for `Ready`. Starts with a letter or digit, then letters, digits, dot, underscore and hyphen. The verdict's own name, which also names the file. The workbench proposes one, `features/10-workbench.md`, and the person edits it, D-124 |
+| `purl` | `purl` | Required for `Ready`, `pkg:<type>/<name>` with no version |
+| `advisories` | `cves` | Required for `Ready`, one or more `CVE-` or `GHSA-` ids separated by commas or spaces |
+| `applicability` | `applicability` | Required for `Ready`, one of the six words the cve-status loader takes: `risk`, `not_affected`, `configuration`, `no_risk`, `false_positive`, `fixed`, D-120 |
+| (derived) | `justification` | Not a field: written from the applicability, `not_affected` as `code_not_present`, `configuration` as `requires_configuration`, `no_risk` as `code_not_reachable`, nothing for the others |
+| `depth` | `depth` | Optional, one of `cursory`, `reproduced`, `committee`, `automatic` |
+| `affects` | `affects` | Optional, `*` or comparison clauses such as `>=24.9.0, <24.9.26`, a version with an optional `-alpha`, `-beta` or `-rc` number |
+| `impact`, `workaround` | same | Prose. Impact is required to export a `risk` or `no_risk` verdict, because such a verdict without an impact sentence answers nothing |
+| `commentary` | `commentary` | Required for `Ready`, because the cve-status writer refuses a verdict without it, D-223 |
+| `fixExpected`, `fixExpectedVersion`, `fixPrs` | `fix_expected`, `fix_expected_version`, `fix_prs` | Optional. The version is a list of `<line>: <version>` promises, each version inside its line; the pull requests are GitHub pull request addresses |
+| `evidence`, `supersedes` | same | Optional. `supersedes` names another verdict id. Superseding is a new file pointing at the old one, never an edit in place |
+| `assessedBy` | `assessed_by` | Optional. `assessed_at` is the day of the export |
+| `pair`, `savedBy`, `updatedAt` | not exported | The identity, one draft per package and advisories pair with the last save winning, then who saved it last and when, D-131 |
 
-Validation groups: `Draft` checks only the formats, `Ready` checks the requireds above, and the YAML export is offered only on `Ready`. Two groups because the workbench must save half a thought without arguing about it, and must refuse to export one.
+Validation groups: `Draft` checks only the formats, `Ready` checks the requireds above, and the YAML export is offered only on `Ready`. A package that carries verdicts and has no kept draft arrives filled from the newest of them by `assessed_at`, among those that speak for the chosen series when a series is chosen and any does, D-278; filling sets the depth back to `cursory`. Two groups because the workbench must save half a thought without arguing about it, and must refuse to export one.
 
 ## Not entities on purpose
 
 | Thing | Why not |
 | --- | --- |
 | Measurement, SBOM, dependency route | They live in the cve-status data branch and arrive pre joined in the JSON. Modelling them here would be a second pipeline |
-| User and role beyond Spring Security's | Two in memory users, `04-security.md`. An account system is not this application |
+| User and role beyond Spring Security's | The demo profile's two in memory users, or vaadin.com's single sign on under `cas`, D-258, with the role derived from the email, `04-security.md`. An account system is not this application |
 | Advisory text from cve.org or GitHub | Linked, never fetched or stored. The pipeline already curates what is shown |
 | A computed affected range | The range arrives measured. Recomputing it is forbidden by the shape rule above |

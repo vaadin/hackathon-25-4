@@ -7,7 +7,12 @@
 | Vaadin | 25.4.0-beta2, pinned in one property | The hackathon target. The prereleases repository is in the pom |
 | Spring Boot | 4.2.0-RC2, from the skeleton | What the v25.4 walking skeleton ships against |
 | Java | 21 | The skeleton's floor |
-| Spring AI | 2.0.0, BOM imported | Behind the `ai` profile only |
+| Spring AI | 2.0.0, BOM imported | `spring-ai-client-chat` in the default build without a model; the `ai` profile adds `spring-ai-starter-model-openai` |
+| Spring Security CAS | from Spring Boot's management | The `cas` profile, D-258 |
+| PDFBox | 3.0.5 | The audit PDF |
+| SnakeYAML | from Spring Boot | The verdict YAML |
+| H2 | from Spring Boot | The workbench drafts |
+| `browserless-test-spring`, `vaadin-testbench-junit6` | from the Vaadin BOM | Tests |
 
 ## Where the scaffold came from, and what was done to it
 
@@ -23,10 +28,10 @@ What was then changed, each visible in its own commit:
 
 | Profile | Adds | Activated by |
 | --- | --- | --- |
-| none | The gate: unit and browserless tests, no licence, no key, no network | |
+| none | The gate: unit and browserless tests, no licence, no key, no network; `commercialWithBanner` keeps it green without a licence, D-80 | |
 | `ai` | Spring AI's OpenAI starter behind `SpringAILLMProvider` | `OPENAI_API_KEY` in the environment, or `-Pai` |
-| `it` | Starts the application and runs `*IT` with failsafe on 8081 | `-Pit` |
-| `production` | The production frontend build, where the licence is enforced | `-Pproduction` |
+| `it` | Starts the application with `forceProductionBuild`, D-156, and `securitystatus.assistant.recorded=true`, and runs `*IT` with failsafe on 8081 | `-Pit` |
+| `production` | The production frontend build with `forceProductionBuild`, D-156, where the licence is enforced | `-Pproduction` |
 
 The `ai` profile is key activated rather than activeByDefault because Maven turns every activeByDefault profile off the moment any other profile is named, so `-Pit` would silently take the assistant away. Learned in 25.3, kept.
 
@@ -36,7 +41,7 @@ Preview APIs and their flags are the register in `specs/CHANGELOG-RISK.md`. Flag
 
 ## MCP servers
 
-`.mcp.json` points at the Vaadin docs MCP, `https://mcp.vaadin.com/docs`, and Playwright. Every 25.4 API is queried before use with `ui_language: "java"` and `vaadin_version: "25.4"`, because beta knowledge is not in anyone's training data, and `get_new_apis` is consulted once per epic to catch arrivals the specification missed.
+`.mcp.json` points at the Vaadin docs MCP, `https://mcp.vaadin.com/docs`, and Playwright, pinned to `@playwright/mcp@0.0.86`, D-263. Every 25.4 API is queried before use with `ui_language: "java"` and `vaadin_version: "25.4"`, because beta knowledge is not in anyone's training data, and `get_new_apis` is consulted once per epic to catch arrivals the specification missed.
 
 ## The fixtures script
 
@@ -44,7 +49,7 @@ Preview APIs and their flags are the register in `specs/CHANGELOG-RISK.md`. Flag
 
 ## CI
 
-`.github/workflows/ci.yml`, two jobs. `verify` is the gate, no secrets required, green on a fork. `live` runs after it with `-Pai` and the lifted exclusion when `OPENAI_API_KEY` and `TB_LICENSE` exist, with one rerun, because a live model failure is evidence rather than proof. The pro key is written to `~/.vaadin/proKey` from the `TB_LICENSE` secret in the shape the licence checker reads.
+`.github/workflows/ci.yml`, two jobs. `verify` is the gate, no secrets required, green on a fork. `live` runs after it with `-Pai` and the lifted exclusion when `OPENAI_API_KEY` and `TB_LICENSE` exist, with one rerun, because a live model failure is evidence rather than proof. The pro key is written to `~/.vaadin/proKey` from the `TB_LICENSE` secret in the shape the licence checker reads. The workflow reads the repository only, its actions are pinned by commit, and the `live` job runs for pushes to `manolo` and manual runs, never for a pull request's code, D-263.
 
 ## Copilot and the dev loop
 

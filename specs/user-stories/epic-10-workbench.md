@@ -47,4 +47,4 @@
 ## Definition of Done
 
 - [x] Every acceptance criterion in `features/10-workbench.md` is checked
-- [x] The YAML round trips on every fixture draft
+- [x] The YAML round trips on a full and a minimal draft built in the test; there is no set of fixture drafts

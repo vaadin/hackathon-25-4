@@ -26,7 +26,7 @@
 - [x] Off only addressing by registry name until the code export lands, unknown names dropped
 - [x] Chip counts, hide only when every route is off, no product never hides. The counts are no longer marginal: distinct advisories through a chip as if it were on, D-207
 - [x] Web storage memory, merged, address wins
-- [x] The without Spring switch per line. Removed by D-266: the starter's chip does it
+- [x] ~~The without Spring switch per line~~: removed by D-266. The Spring Boot starter's chip is the one control for the shape
 
 **Verified by:** `ExplorerFilterBrowserlessTest`
 
@@ -37,9 +37,9 @@
 **Tasks:**
 - [x] The group discipline, open state persisted on stable keys: since D-205 two halves, From Vaadin and With Spring Boot, of three groups each, and the build only group after them, in place of the five groups of D-95
 - [x] Finding rows with routes, lazy per version load, the 150 cap
-- [x] Grid texts through the Grid i18n API
+- [x] ~~Grid texts through the Grid i18n API~~: removed with the grid by D-264. The findings are disclosures with no header, so there is no grid text to localise
 
-**25.3 APIs:** `GridI18n`.
+**25.3 APIs:** none since D-264, which removed the grid that used `GridI18n`.
 **Verified by:** `ExplorerBrowserlessTest`
 
 ---

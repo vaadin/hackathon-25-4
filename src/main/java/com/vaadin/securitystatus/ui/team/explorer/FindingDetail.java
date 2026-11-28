@@ -26,7 +26,7 @@ import com.vaadin.securitystatus.team.explorer.ExplorerRules;
 
 /**
  * An opened finding, read from its release's record, drawn as the prototype
- * draws it, D-255: the coordinate and the advisory's title, then what Vaadin
+ * draws it, D-264: the coordinate and the advisory's title, then what Vaadin
  * decided as one panel of four labelled fields, what it means, what Vaadin
  * says, what to do today and the fix, each cut to its first sentences with the
  * rest one click away, then the routes and the record link, D-213. A field

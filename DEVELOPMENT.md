@@ -4,8 +4,9 @@
 
 ```bash
 ./mvnw                            # Run in dev mode (default goal: spring-boot:run)
-./mvnw clean package              # Production build (JAR in target/)
-./mvnw test                       # Run all tests
+./mvnw clean package -Pproduction  # Production build, needs the Vaadin licence (JAR in target/)
+./mvnw verify                     # The gate: unit and browserless tests, no licence, key or network
+./mvnw verify -Pit                # Adds the browser tests on 8081
 ./mvnw test -Dtest=ClassName      # Run a single test class
 ```
 
@@ -21,9 +22,11 @@ rm -rf src/main/java/com/vaadin/securitystatus/team \
        src/main/resources/META-INF/resources/styles/team
 # remove the styles/team imports at the end of styles.css
 # remove the team's tests under src/test/java/.../team and .../ui/team
+# remove the team's specifications: features and epics 08 to 12, and the rows of
+# 01-foundation.md and US-1.2 that ShellSecurityBrowserlessTest verifies
 ```
 
-A few tests outside those folders also walk the team's pages and lose their team cases: `AbsenceSweepBrowserlessTest`, `DataOutageBrowserlessTest`, and the integration tests `AssistantPanelIT`, `CspIT`, `DenyByDefaultIT` and `ExportsProxyIT`.
+No test outside the team's folders names a team class, which `TeamIsRemovableTest` checks. The browser tests walk the team's pages by address and lose their team cases: `AssistantPanelIT` and `ExportsProxyIT` whole, `CspIT` and `DenyByDefaultIT` in part.
 
 ## Without a Vaadin licence
 

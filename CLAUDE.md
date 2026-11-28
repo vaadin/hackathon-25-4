@@ -9,10 +9,10 @@ Start at `NEXT.md` when it exists: where the work stopped, what to do next, and 
 | Thing | Version |
 | --- | --- |
 | Vaadin | 25.4.0-beta2, prereleases repository |
-| Spring Boot | 4.2.x |
+| Spring Boot | 4.2.0-RC2 |
 | Java | 21 |
 | Database | H2, only for what the workbench writes. Everything read comes from GitHub Pages JSON |
-| Tests | JUnit, `browserless-test-spring`, TestBench only where a browser is required |
+| Tests | JUnit 6, `browserless-test-spring`, `vaadin-testbench-junit6` only where a browser is required |
 
 ## Where things are
 
@@ -25,10 +25,10 @@ src/main/java/com/vaadin/securitystatus/
   security/            Spring Security, roles, the CSP
   customer/            the customer's rules, no components
   team/                the team's rules: explorer/ workbench/ assistant/ diagnostics/
-  ui/common/           what both UIs share: app bar, login, not found, theme, nav helpers
-  ui/customer/         the customer UI: CustomerLayout and its views
+  ui/common/           what both UIs share: app bar, login, theme, headings, downloads, Parts, nav helpers, the TeamEntrance and AiSurfaces extension points
+  ui/customer/         the customer UI: CustomerLayout, its views, the lookup, PdfPreview, NotFoundView
   ui/team/             the team UI: InternalLayout, TeamNavigation and the views per area
-src/main/resources/META-INF/resources/   all CSS and images, styles/{common,customer,team}
+src/main/resources/META-INF/resources/   all CSS and the app icon icons/favicon.svg: one palette in styles.css, state classes in styles/common/state.css, styles/{common,customer,team}
 ```
 
 The team is removable, D-254: delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, the team's tests, and its specifications: features and epics 08 to 12, and the rows of `01-foundation.md` and of US-1.2 in its epic that `ShellSecurityBrowserlessTest` verifies. `TeamIsRemovableTest` keeps it that way.
@@ -60,7 +60,7 @@ Always query the docs server before writing against a 25.4 API. It is a beta and
 | `./mvnw verify` | Unit plus browserless tests. This is the gate |
 | `./mvnw verify -Pit` | Adds the TestBench integration tests |
 | `./mvnw vaadin:install-dev-cli` | Installs the dev loop |
-| `.vaadin/vaadin-dev status` `start` `apply` `restart` | The dev loop |
+| `.vaadin/vaadin-dev status` `start` `apply` `restart` `stop` `shutdown` | The dev loop |
 
 Never run the application through Maven and through the dev loop daemon at the same time.
 

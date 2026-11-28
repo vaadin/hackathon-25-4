@@ -10,15 +10,15 @@ This replaces the JavaScript apps' client side gates, deliberately. Those gates 
 
 ## Configuration
 
-`VaadinSecurityConfigurer`, the 25.3 way, with the login view configuration it added. The login success handling added in 25.4 routes a signed in user back to the page they asked for, and failure stays on the login view with the component's own error state, nothing custom.
+`VaadinSecurityConfigurer`, the 25.3 way, with the login view under `demo`. A signed in user returns to the address they asked for through Spring Security's saved request, with no success handler of ours. A failed sign in goes through the 25.4 `failureHandler`, which counts it, D-259, and then to the login view with `?error`, where the form shows its own error state. Signing out goes to the application's own root, relative to the page's base so it holds behind a proxy that serves a path, issue 27. An expired session is handled by `VaadinExpiredSessionStrategy`, below.
 
-Two profiles, and a production start refuses to run without one of them named, which `ProfileGuard` enforces:
+Three profiles, `demo` by default through `spring.profiles.default`. A production build that names neither `cas` nor `demo` refuses to start, which `ProfileGuard` enforces by reading `productionMode` from the build info:
 
 | Profile | Who signs in | For |
 | --- | --- | --- |
 | `demo`, the default | `team` / `team` with the role, `guest` / `guest` without it | Development, the demo and every test. In memory, committed on purpose. A deployment can replace both through `securitystatus.demo.{team,guest}.{name,password}`, so another site's accounts stay out of the repository |
-| `cas` | vaadin.com's single sign on at sso.vaadin.com, through `spring-security-cas` and the CAS 3 ticket validator | Production |
-| `cas-local` | The same against the staging server | Trying the real flow from a developer machine |
+| `cas` | vaadin.com's single sign on through `spring-security-cas` and the CAS 3 ticket validator: `securitystatus.cas.server`, by default `https://sso.vaadin.com`, `securitystatus.cas.service`, the application's own `/login/cas` address, and the team domain `securitystatus.signin.team-domain=vaadin.com` | Production |
+| `cas-local` | The same against the staging server `https://cas-stg.vaadin.com`, with the service `http://localdev.vaadin.com:<port>/login/cas` | Trying the real flow from a developer machine |
 
 Under `cas`, `TeamRule` reads the released attributes and grants the role to a verified email on the team domain. Single log out is not wired: signing out here signs out of CAS. No real sign in through sso.vaadin.com has been made yet, only against a stubbed ticket validator, and what the production deployment still needs from the vaadin.com web team is P-21 in `NEEDS-A-PERSON.md`: the service path, whether CAS releases `emailAddressVerified`, single log out, and whether the customer pages should later read a subscription.
 
@@ -41,11 +41,13 @@ The assistant runs under the session's authentication: its tools read the same s
 
 25.4 ships `ContentSecurityPolicy` support and this application turns it on, in enforcing mode, as epic 01 work. A security page that answers security questions should not itself ship with an open policy, and doing it on a beta is exactly the kind of real world trial the hackathon wants: a Flow application with push, uploads, the AI components and a PDF viewer under one enforced policy. Every directive the components force us to loosen is a row in `specs/FEEDBACK-25.4.md`, because each one is a fact the Vaadin teams want.
 
-Violation reports are logged and surfaced on the diagnostics view. `CspViolationException` paths get a test of their own.
+The policy: `default-src 'self'`; `script-src 'self' 'unsafe-inline' 'unsafe-eval'`, because the bootstrap starts the engine inline and the engine builds functions from strings; `style-src 'self' 'unsafe-inline'`; `img-src` and `font-src 'self' data:`; `connect-src 'self'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self' https://github.com`, D-128; `frame-ancestors 'none'`; `report-uri /csp-report`. Spring Security sends it on every response, and `CspOnBootstrapPage` sends it on the bootstrap page, which leaves without Spring Security's headers. `vaadin.csp=warn`, D-02.
+
+Violation reports arrive at `/csp-report`: at most 8 KB is read, the newest 100 are kept, each cut to 4 000 characters, D-257, and they are surfaced on the diagnostics view. `CspReportTest` and `CspIT` prove it.
 
 ## Headers and sessions
 
-Whatever `VaadinSecurityConfigurer` and Spring Security default to stands, explicitly unconfigured, except the CSP above. `VaadinExpiredSessionStrategy`, new in 25.4, handles the expired session: the user lands back on the view they were on, with the lookup state gone and one notice, rather than a stack trace or a silent new session.
+Spring Security's defaults stand except three. The CSP above. `Referrer-Policy: strict-origin-when-cross-origin`, with `server.forward-headers-strategy=framework` so HSTS reaches a browser behind a proxy, D-263. Deny by default, D-235: besides Vaadin's own, only `/styles/**`, `/icons/**`, the CSP report, and a request no secured route, framework request or controller answers are open, the last reaching the not found view. `VaadinExpiredSessionStrategy`, new in 25.4, handles the expired session: the user lands back on the view they were on, with the lookup state gone and one notice, rather than a stack trace or a silent new session.
 
 ## A refused route
 

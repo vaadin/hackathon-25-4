@@ -26,7 +26,7 @@ import com.vaadin.securitystatus.team.explorer.ExplorerRules;
 
 /**
  * The findings of one group, each a disclosure of its own as the prototype
- * draws it, D-255: the advisory, the severity, how many of the products that
+ * draws it, D-264: the advisory, the severity, how many of the products that
  * bring it are the reader's, and a dot for each of those, with the opened
  * finding underneath. The explorer's opened line and the release page draw
  * the same one. The words of the third part are the prototype's, D-208.

@@ -2,7 +2,7 @@
 
 **Goal:** answers grounded in the measurements, refusals that teach, and a camera that asks questions rather than answering them.
 **Feature spec:** `specs/features/11-assistant.md`
-**Dependencies:** epics 02, 08 and 10, whose workbench form US-11.6 fills.
+**Dependencies:** epics 02, 08 and 10, whose workbench form US-11.5 fills.
 
 ---
 

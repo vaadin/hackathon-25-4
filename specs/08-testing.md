@@ -8,7 +8,7 @@
 | Browserless | `*BrowserlessTest` | `./mvnw test` | Every view behaviour that does not need pixels: rendering, navigation, signals, refusals |
 | End to end | `*IT` | `./mvnw verify -Pit` | The closed list below |
 
-Browserless wherever possible, a browser only where it must: a download's bytes, a file upload through the real widget, the theme switch before first paint, CSP in a real browser. The browserless additions this release ships are used deliberately: the JUnit 6 extensions configure the context, the component testers drive uploads and constraints, and the AI view testing support drives the assistant against the mock provider.
+Browserless wherever possible, a browser only where it must: a download's bytes, a file upload through the real widget, the theme switch before first paint, CSP in a real browser. The browserless additions this release ships are used deliberately: the JUnit 6 `BrowserlessExtension` drives the one test that needs no Spring context while every other view test extends `SpringBrowserlessTest`, the component testers drive uploads and constraints, and the AI view testing support drives the assistant against the mock provider.
 
 ## The closed IT list
 
@@ -24,6 +24,7 @@ The browser tier stays small because it is slow and flaky in proportion to its s
 | `ThemeFirstPaintIT` | A dark preference paints dark before first paint, no flash |
 | `CspIT` | The policy header is enforced and the application still works |
 | `AssistantPanelIT` | One exchange against the mock provider in a real browser |
+| `DenyByDefaultIT` | With no session, only the sign in and the static assets answer, and every other page and method goes to sign in, D-235, D-258 |
 
 ## Determinism
 
@@ -47,7 +48,7 @@ An assertion proves the rule, not the happy path through it. The named traps fro
 
 ## Consistency
 
-`SpecConsistencyTest` reads every feature document's test case table and fails the build when a named class is missing. The table is the contract; this test is what makes it one.
+`SpecConsistencyTest` reads every feature document's test case table and fails the build when a named class is missing. The table is the contract; this test is what makes it one. It reads only rows whose tier cell is one word and the "Verified by" lines of fully ticked stories, so class and method names in prose are not checked. `NoHardcodedStringsTest`, `NetworkBoundaryTest` and `TeamIsRemovableTest` are the other three guard rails. The gate ran 387 test methods on 2026-11-28.
 
 ## Natural language test cases
 
