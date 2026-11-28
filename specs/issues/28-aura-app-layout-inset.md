@@ -35,6 +35,8 @@ The inset rounded to a whole pixel, as the padding tokens are:
 --aura-app-layout-inset: round(1.5vmin, 1px);
 ```
 
+Proposed in #13534.
+
 ### Workaround
 
 The drawer's inline padding set to a whole number, with a selector as specific as Aura's: `vaadin-app-layout.my-layout:not([overlay])::part(drawer) { padding-inline: 6px; }`.
