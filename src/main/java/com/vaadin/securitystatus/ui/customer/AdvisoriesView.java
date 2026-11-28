@@ -234,11 +234,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
                 .setKey("package").setFlexGrow(1);
         grid.addComponentColumn(this::verdictCell).setHeader(getTranslation("advisories.col.verdict"))
                 .setKey("verdict").setAutoWidth(true).setFlexGrow(0);
-        grid.addItemClickListener(click -> open(click.getItem()));
-    }
-
-    private void open(AdvisoryCatalogEntry row) {
-        answer(row.cve(), "");
+        grid.addItemClickListener(click -> openCve(click.getItem().cve(), ""));
     }
 
     private Component idCell(AdvisoryCatalogEntry row) {
@@ -336,12 +332,12 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
         String version = knownVersion();
         menu.addItem(version.isEmpty() ? getTranslation("advisories.menu.ask", id)
-                : getTranslation("advisories.menu.askOnVersion", id), click -> ask(id, version))
+                : getTranslation("advisories.menu.askOnVersion", id), click -> openCve(id, version))
                 .addClassName("menu-ask");
     }
 
     /** Opens the answer for the id on the side the list was opened from, the team's or the customer's. */
-    private void answer(String id, String version) {
+    private void openCve(String id, String version) {
         // The list's own address says where it was opened: under it, the answer opens the same way.
         String where = path.peek();
         String base = where.substring(0, Math.max(0, where.lastIndexOf("advisories"))) + "cve/";
@@ -352,10 +348,5 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     private String knownVersion() {
         String beside = LookupInput.cleanVersion(lookup.idsVersion().peek());
         return beside.isEmpty() ? LookupInput.cleanVersion(lookup.version().peek()) : beside;
-    }
-
-    /** Opens the answer for the id, on the reader's version when there is one. */
-    private void ask(String id, String version) {
-        answer(id, version);
     }
 }

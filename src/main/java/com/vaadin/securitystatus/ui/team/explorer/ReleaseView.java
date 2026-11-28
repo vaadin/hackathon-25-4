@@ -185,7 +185,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         if (version.isPresent()) {
             ui.navigate(ReleaseView.class, parameters(version.get()));
         } else {
-            ExplorerView.search(typed).go(ui);
+            ExplorerView.searchAddress(typed).go(ui);
         }
     }
 
@@ -251,7 +251,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         }
         Shape shape = ExplorerAnswer.shape(front, catalogue, off);
         Split split = ExplorerAnswer.split(line, shape, Asked.nothing());
-        ExplorerRules.Badge state = ExplorerAnswer.state(line, shape);
+        ExplorerRules.LineState state = ExplorerAnswer.state(line, shape);
 
         drawProducts(line, catalogue, shape, off, chosen, starter, twoShapes, record.version());
 
@@ -283,12 +283,12 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
                     split.ours().size() + split.theirs().size() + split.build().size(),
                     getTranslation("explorer.summary.split", split.ours().risk().size(),
-                            split.ours().pending().size(), split.theirs().size(), split.build().size(),
-                            split.ours().ruled().size()))));
+                            split.ours().triage().size(), split.theirs().size(), split.build().size(),
+                            split.ours().ruledOut().size()))));
             advice(front, record, line, shape, split).ifPresent(detail::add);
             detail.add(new ReleaseFiles(data, record.version(), ReleaseRules.files(record.scannerFiles()), true));
             Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-            parts.halves(detail, line, split, new FindingList.Routes(catalogue, shape, shape.hidden(line), optional),
+            parts.halves(detail, line, split, new FindingList.RowContext(catalogue, shape, shape.hidden(line), optional),
                     true);
         }
 

@@ -161,7 +161,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         try {
             front = data.explorerFront();
         } catch (DataUnreachableException unreachable) {
-            set(q, open);
+            applyAddress(q, open);
             return;
         }
         List<Product> catalogue = ExplorerAnswer.catalogue(front);
@@ -183,10 +183,10 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         } else {
             selection.useDefault(defaults);
         }
-        set(q, open);
+        applyAddress(q, open);
     }
 
-    private void set(String q, Optional<String> open) {
+    private void applyAddress(String q, Optional<String> open) {
         if (!q.equals(query.peek())) {
             query.set(q);
         }
@@ -201,7 +201,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     // Writing the address
 
     /** The explorer's address for a search alone, which the release page sends a search to. */
-    static Address search(String q) {
+    static Address searchAddress(String q) {
         return Address.of(PATH).with(QueryFlag.Q, q.isBlank() ? Optional.empty() : Optional.of(q.strip()));
     }
 
@@ -221,7 +221,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
      * reader back to the default rather than being restored over it.
      */
     private Address address(String q, Set<String> off, Optional<String> open, boolean said) {
-        Address address = search(q).with(QueryFlag.OPEN, open);
+        Address address = searchAddress(q).with(QueryFlag.OPEN, open);
         try {
             List<Product> catalogue = ExplorerAnswer.catalogue(data.explorerFront());
             if (!said && off.equals(ExplorerAnswer.defaultOff(catalogue))) {
@@ -301,7 +301,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         drawProducts(front, catalogue, off, shape, asked);
         drawNote(asked);
 
-        var counts = new LinkedHashMap<ExplorerRules.Badge, Integer>();
+        var counts = new LinkedHashMap<ExplorerRules.LineState, Integer>();
         int shown = 0;
         for (Line line : front.lines()) {
             if (!asked.keeps(line)) {
@@ -312,7 +312,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
                 continue;
             }
             shown++;
-            ExplorerRules.Badge state = ExplorerAnswer.state(line, shape);
+            ExplorerRules.LineState state = ExplorerAnswer.state(line, shape);
             counts.merge(state, 1, Integer::sum);
             boolean isOpen = open.filter(line.line()::equals).isPresent();
             rows.add(row(front, line, catalogue, shape, asked, state, isOpen));
@@ -327,21 +327,21 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         }
     }
 
-    private String leadText(Asked asked, int shown, int all, Map<ExplorerRules.Badge, Integer> counts) {
+    private String leadText(Asked asked, int shown, int all, Map<ExplorerRules.LineState, Integer> counts) {
         if (shown == 0) {
             return ExplorerAnswer.number(asked.raw())
                     ? getTranslation("explorer.lead.unfollowed", all, asked.raw())
                     : getTranslation("explorer.lead.none", all, asked.raw());
         }
         var said = new ArrayList<String>();
-        if (counts.getOrDefault(ExplorerRules.Badge.VULNERABLE, 0) > 0) {
-            said.add(getTranslation("explorer.lead.vulnerable", counts.get(ExplorerRules.Badge.VULNERABLE)));
+        if (counts.getOrDefault(ExplorerRules.LineState.VULNERABLE, 0) > 0) {
+            said.add(getTranslation("explorer.lead.vulnerable", counts.get(ExplorerRules.LineState.VULNERABLE)));
         }
-        if (counts.getOrDefault(ExplorerRules.Badge.UNJUDGED, 0) > 0) {
-            said.add(getTranslation("explorer.lead.unjudged", counts.get(ExplorerRules.Badge.UNJUDGED)));
+        if (counts.getOrDefault(ExplorerRules.LineState.UNJUDGED, 0) > 0) {
+            said.add(getTranslation("explorer.lead.unjudged", counts.get(ExplorerRules.LineState.UNJUDGED)));
         }
-        if (counts.getOrDefault(ExplorerRules.Badge.NOT_AFFECTED, 0) > 0) {
-            said.add(getTranslation("explorer.lead.clear", counts.get(ExplorerRules.Badge.NOT_AFFECTED)));
+        if (counts.getOrDefault(ExplorerRules.LineState.NOT_AFFECTED, 0) > 0) {
+            said.add(getTranslation("explorer.lead.clear", counts.get(ExplorerRules.LineState.NOT_AFFECTED)));
         }
         return shown == all ? getTranslation("explorer.lead.all", all, asked.raw(), String.join(", ", said))
                 : getTranslation("explorer.lead.some", shown, all, asked.raw(), String.join(", ", said));
@@ -527,7 +527,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     // The series rows
 
     private Component row(ExplorerFront front, Line line, List<Product> catalogue, Shape shape, Asked asked,
-            ExplorerRules.Badge state, boolean isOpen) {
+            ExplorerRules.LineState state, boolean isOpen) {
         var summary = css(new Div(), "explorer-row-summary");
         var name = css(new Span(line.line()), "explorer-row-line");
         var version = css(new Span(line.version().toString()), "explorer-row-version");
@@ -583,14 +583,14 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         }
         detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
                 split.ours().size() + split.theirs().size() + split.build().size(),
-                getTranslation("explorer.summary.split", split.ours().risk().size(), split.ours().pending().size(),
-                        split.theirs().size(), split.build().size(), split.ours().ruled().size()))));
+                getTranslation("explorer.summary.split", split.ours().risk().size(), split.ours().triage().size(),
+                        split.theirs().size(), split.build().size(), split.ours().ruledOut().size()))));
         if (shape.plain()) {
             detail.add(hint(getTranslation("explorer.detail.plain")));
         }
 
         Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-        var routes = new FindingList.Routes(catalogue, shape, shape.hidden(line), optional);
+        var routes = new FindingList.RowContext(catalogue, shape, shape.hidden(line), optional);
         parts.halves(detail, line, split, routes, false);
 
         detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));

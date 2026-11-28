@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.customer.VersionRules;
+import com.vaadin.securitystatus.customer.VerdictFor;
 import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
@@ -45,7 +46,7 @@ final class FindingCard extends Composite<Div> {
         card.addClassName("finding-card");
         card.getElement().setAttribute("data-advisory", advisory);
 
-        List<VersionRules.Said> said = VersionRules.verdictsFor(answer, advisory);
+        List<VerdictFor> said = VersionRules.verdictsFor(answer, advisory);
         Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
 
         var head = css(new Div(advisoryLink(advisory, answer)), "finding-head");
@@ -57,7 +58,7 @@ final class FindingCard extends Composite<Div> {
         head.add(vulnerable);
         card.add(head);
 
-        for (VersionRules.Said one : said) {
+        for (VerdictFor one : said) {
             var route = css(new Div(), "finding-route");
             if (said.size() > 1 && !one.packages().isEmpty()) {
                 var through = css(new Paragraph(getTranslation("version.finding.through", String.join(", ", one.packages()))), "finding-through");
@@ -155,10 +156,10 @@ final class FindingCard extends Composite<Div> {
         private final List<Details> opened = new ArrayList<>();
         private Details means;
 
-        Layers(VersionAnswer answer, CasesIndex index, String advisory, List<VersionRules.Said> said,
+        Layers(VersionAnswer answer, CasesIndex index, String advisory, List<VerdictFor> said,
                 Optional<CasesIndex.AdvisoryCatalogEntry> entry, boolean open) {
             getContent().addClassName("finding-layers");
-            Optional<Assessment> first = said.stream().findFirst().map(VersionRules.Said::assessment);
+            Optional<Assessment> first = said.stream().findFirst().map(VerdictFor::assessment);
 
             var meansBody = pairs();
             first.flatMap(Assessment::impact)

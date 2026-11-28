@@ -64,10 +64,6 @@ final class SeriesParts {
         this.selection = selection;
     }
 
-    private String t(String key, Object... params) {
-        return owner.getTranslation(key, params);
-    }
-
     // The product chips
 
     /** What a product chip holds: its box, its name, the discontinued mark and the count of what it brings. */
@@ -76,7 +72,7 @@ final class SeriesParts {
         parts.add(decorative(new Span(), "chip-box", isOn ? "ticked" : "none"));
         parts.add(css(new Span(product.name()), "chip-name"));
         if (product.discontinued()) {
-            parts.add(css(new Span(t("explorer.products.discontinued")), "chip-discontinued"));
+            parts.add(css(new Span(owner.getTranslation("explorer.products.discontinued")), "chip-discontinued"));
         }
         parts.add(isOn && brings > 0
                 ? css(new Span(String.valueOf(brings)), "chip-count", "product-ring", "ring-" + product.ring())
@@ -86,55 +82,55 @@ final class SeriesParts {
 
     /** A chip's hover text; the screen names its own words for what the number counts. */
     String chipTitle(String screen, Product product, boolean isOn, boolean cannot) {
-        String gone = product.discontinued() ? t("explorer.chip.gone") + " " : "";
+        String gone = product.discontinued() ? owner.getTranslation("explorer.chip.gone") + " " : "";
         if (cannot) {
-            return gone + t("explorer.chip.cannot");
+            return gone + owner.getTranslation("explorer.chip.cannot");
         }
         if (product.fixed()) {
-            return gone + t(screen + ".chip.fixed");
+            return gone + owner.getTranslation(screen + ".chip.fixed");
         }
-        return gone + t(isOn ? screen + ".chip.on" : screen + ".chip.off") + " " + t("explorer.chip.narrows");
+        return gone + owner.getTranslation(isOn ? screen + ".chip.on" : screen + ".chip.off") + " " + owner.getTranslation("explorer.chip.narrows");
     }
 
     // The row
 
-    static Badge badge(String side, ExplorerRules.Badge state, String text) {
+    static Badge badge(String side, ExplorerRules.LineState state, String text) {
         return css(new Badge(text), "explorer-badge", side, "badge-" + state.name().toLowerCase(Locale.ROOT));
     }
 
     /** "Vaadin: <state>" with what the state means on hover. */
-    Badge vaadinBadge(ExplorerRules.Badge state) {
-        var vaadin = badge("vaadin", state, t("explorer.badge.vaadin", t("explorer.state." + state.name())));
-        Tooltip.forComponent(vaadin).setText(t("explorer.state." + state.name() + ".means"));
+    Badge vaadinBadge(ExplorerRules.LineState state) {
+        var vaadin = badge("vaadin", state, owner.getTranslation("explorer.badge.vaadin", owner.getTranslation("explorer.state." + state.name())));
+        Tooltip.forComponent(vaadin).setText(owner.getTranslation("explorer.state." + state.name() + ".means"));
         return vaadin;
     }
 
     /** "Spring Boot: <state>", the Spring Boot it was measured against said on hover. */
-    Badge springBadge(ExplorerRules.Badge state, String title) {
-        var spring = badge("spring", state, t("explorer.badge.spring", t("explorer.state." + state.name())));
+    Badge springBadge(ExplorerRules.LineState state, String title) {
+        var spring = badge("spring", state, owner.getTranslation("explorer.badge.spring", owner.getTranslation("explorer.state." + state.name())));
         Tooltip.forComponent(spring).setText(title);
         return spring;
     }
 
     /** What the row says beside the badge, counted over the same findings as the badge, D-205. */
-    Optional<String> sentence(Line line, Shape shape, ExplorerRules.Badge state) {
+    Optional<String> sentence(Line line, Shape shape, ExplorerRules.LineState state) {
         List<Finding> mine = ExplorerAnswer.stateFindings(line, shape);
-        long risks = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.VULNERABLE)
+        long risks = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.LineState.VULNERABLE)
                 .count();
-        long open = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.Badge.UNJUDGED)
+        long open = mine.stream().filter(finding -> ExplorerRules.stateOf(finding) == ExplorerRules.LineState.UNJUDGED)
                 .count();
         switch (state) {
             case VULNERABLE:
-                return Optional.of(open > 0 ? t("explorer.says.riskOpen", (int) risks, (int) open)
-                        : t("explorer.says.risk", (int) risks));
+                return Optional.of(open > 0 ? owner.getTranslation("explorer.says.riskOpen", (int) risks, (int) open)
+                        : owner.getTranslation("explorer.says.risk", (int) risks));
             case UNJUDGED:
-                return Optional.of(!ExplorerAnswer.measured(line, shape) || mine.isEmpty()
-                        ? t("explorer.says.unmeasured")
-                        : t("explorer.says.unjudged", (int) open));
+                return Optional.of(!ExplorerAnswer.isShapeMeasured(line, shape) || mine.isEmpty()
+                        ? owner.getTranslation("explorer.says.unmeasured")
+                        : owner.getTranslation("explorer.says.unjudged", (int) open));
             default:
                 Groups theirs = ExplorerAnswer.split(line, shape, Asked.nothing()).theirs();
-                int waiting = theirs.risk().size() + theirs.pending().size();
-                return waiting > 0 ? Optional.of(t("explorer.says.spring", waiting)) : Optional.empty();
+                int waiting = theirs.risk().size() + theirs.triage().size();
+                return waiting > 0 ? Optional.of(owner.getTranslation("explorer.says.spring", waiting)) : Optional.empty();
         }
     }
 
@@ -149,10 +145,10 @@ final class SeriesParts {
             var ring = css(new Span(String.valueOf(count)), "explorer-ring");
             if (count > 0) {
                 ring.addClassNames("product-ring", "ring-" + product.ring());
-                Tooltip.forComponent(ring).setText(t("explorer.ring.some", count, product.name()));
+                Tooltip.forComponent(ring).setText(owner.getTranslation("explorer.ring.some", count, product.name()));
             } else {
                 ring.addClassName("none");
-                Tooltip.forComponent(ring).setText(t("explorer.ring.none", product.name()));
+                Tooltip.forComponent(ring).setText(owner.getTranslation("explorer.ring.none", product.name()));
             }
             ring.getElement().setAttribute("data-product", product.name());
             rings.add(ring);
@@ -171,14 +167,14 @@ final class SeriesParts {
      * off sentence in the release's words, and no sentence under With Spring
      * Boot, whose advice the card has already given.
      */
-    void halves(Div into, Line line, Split split, FindingList.Routes routes, boolean release) {
+    void halves(Div into, Line line, Split split, FindingList.RowContext routes, boolean release) {
         boolean halves = split.theirs().size() > 0 && !routes.shape().plain();
         if (halves) {
             into.add(halfTitle("explorer.half.ours"));
         }
         groups(into, line, "", split.ours(), routes, release);
-        if (split.ours().risk().isEmpty() && split.ours().pending().isEmpty()) {
-            into.add(hint(t("explorer.detail.nothing")));
+        if (split.ours().risk().isEmpty() && split.ours().triage().isEmpty()) {
+            into.add(hint(owner.getTranslation("explorer.detail.nothing")));
         }
 
         // On the release page the prototype counts every finding of Vaadin's with no route, the pinned
@@ -191,13 +187,13 @@ final class SeriesParts {
                 : split.unattributed().stream().filter(finding -> finding.bundledIn().isEmpty()).toList();
         int frontend = (int) blind.stream().filter(ExplorerRules::frontend).count();
         if (frontend > 0) {
-            into.add(hint(t("explorer.detail.frontend", frontend)));
+            into.add(hint(owner.getTranslation("explorer.detail.frontend", frontend)));
         }
         if (blind.size() - frontend > 0) {
-            into.add(hint(t("explorer.detail.untraced", blind.size() - frontend)));
+            into.add(hint(owner.getTranslation("explorer.detail.untraced", blind.size() - frontend)));
         }
         if (split.elsewhere() > 0) {
-            into.add(hint(t("explorer.detail.elsewhere", split.elsewhere())));
+            into.add(hint(owner.getTranslation("explorer.detail.elsewhere", split.elsewhere())));
         }
 
         if (halves) {
@@ -206,14 +202,14 @@ final class SeriesParts {
             if (!release) {
                 var says = css(new Paragraph(), "explorer-hint");
                 String against = line.springBoot().map(VersionNumber::toString)
-                        .orElseGet(() -> t("explorer.half.theirs.unknown"));
-                var text = new StringBuilder(t("explorer.half.theirs.lead", split.theirs().size(), against));
+                        .orElseGet(() -> owner.getTranslation("explorer.half.theirs.unknown"));
+                var text = new StringBuilder(owner.getTranslation("explorer.half.theirs.lead", split.theirs().size(), against));
                 line.springBootDeclared().filter(declared -> line.springBoot().isPresent()
                         && !declared.equals(line.springBoot().get())).ifPresent(declared -> text.append(' ')
-                                .append(t("explorer.half.theirs.declared", declared.toString())));
-                text.append(' ').append(t("explorer.half.theirs.moves")).append(' ');
+                                .append(owner.getTranslation("explorer.half.theirs.declared", declared.toString())));
+                text.append(' ').append(owner.getTranslation("explorer.half.theirs.moves")).append(' ');
                 says.add(text.toString());
-                var link = css(new RouterLink(t("explorer.half.theirs.link"), SpringView.class), "explorer-spring-link");
+                var link = css(new RouterLink(owner.getTranslation("explorer.half.theirs.link"), SpringView.class), "explorer-spring-link");
                 says.add(link);
                 half.add(says);
             }
@@ -222,20 +218,20 @@ final class SeriesParts {
         }
 
         if (!split.build().isEmpty()) {
-            into.add(group(line, "BUILD", new Span(t("explorer.group.BUILD", split.build().size())), null,
+            into.add(group(line, "BUILD", new Span(owner.getTranslation("explorer.group.BUILD", split.build().size())), null,
                     "explorer.group.BUILD.note", split.build(), false, routes));
         }
     }
 
     private Component halfTitle(String key) {
-        var title = css(new Paragraph(t(key)), "explorer-half-title");
-        Tooltip.forComponent(title).setText(t(key + ".title"));
+        var title = css(new Paragraph(owner.getTranslation(key)), "explorer-half-title");
+        Tooltip.forComponent(title).setText(owner.getTranslation(key + ".title"));
         return title;
     }
 
-    private void groups(Div into, Line line, String prefix, Groups groups, FindingList.Routes routes,
+    private void groups(Div into, Line line, String prefix, Groups groups, FindingList.RowContext routes,
             boolean shut) {
-        List<List<Finding>> members = List.of(groups.risk(), groups.pending(), groups.ruled());
+        List<List<Finding>> members = List.of(groups.risk(), groups.triage(), groups.ruledOut());
         for (int i = 0; i < KINDS.size(); i++) {
             List<Finding> findings = members.get(i);
             if (findings.isEmpty()) {
@@ -244,14 +240,14 @@ final class SeriesParts {
             String kind = KINDS.get(i);
             // The count in bold and the words after it, as the prototype sets a group's heading.
             var count = css(new Span(String.valueOf(findings.size())), "explorer-group-count");
-            var heading = new Span(count, new Span(" " + t("explorer.half.group." + kind)));
-            into.add(group(line, prefix + kind, heading, t("explorer.half.group." + kind + ".title"), null, findings,
+            var heading = new Span(count, new Span(" " + owner.getTranslation("explorer.half.group." + kind)));
+            into.add(group(line, prefix + kind, heading, owner.getTranslation("explorer.half.group." + kind + ".title"), null, findings,
                     !shut && !"ANSWERED".equals(kind), routes));
         }
     }
 
     private Component group(Line line, String key, Span label, String title, String noteKey,
-            List<Finding> findings, boolean startsOpen, FindingList.Routes routes) {
+            List<Finding> findings, boolean startsOpen, FindingList.RowContext routes) {
         label.addClassName("explorer-group-label");
         if (title != null) {
             Tooltip.forComponent(label).setText(title);
@@ -268,13 +264,13 @@ final class SeriesParts {
             }
         });
         if (noteKey != null) {
-            details.add(paragraph("explorer-group-note", t(noteKey)));
+            details.add(paragraph("explorer-group-note", owner.getTranslation(noteKey)));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
         details.add(new FindingList(capped.shown(), routes, finding -> findingDetails(line.version(), finding,
                 routes.shape().plain()), cve -> paths(line.version(), cve, routes.shape().plain())));
         if (capped.more() > 0) {
-            details.add(paragraph("explorer-group-more", t("explorer.group.more", capped.more())));
+            details.add(paragraph("explorer-group-more", owner.getTranslation("explorer.group.more", capped.more())));
         }
         return details;
     }
@@ -315,7 +311,7 @@ final class SeriesParts {
     /** The "?" and the panel it opens, in the prototype's words, D-211. */
     Button legendButton(ValueSignal<Boolean> open) {
         var help = css(new Button("?", click -> open.set(true)), "explorer-help");
-        help.setAriaLabel(t("explorer.legend.open"));
+        help.setAriaLabel(owner.getTranslation("explorer.legend.open"));
         help.addThemeVariants(ButtonVariant.PRIMARY);
         help.bindVisible(open.map(shown -> !shown));
         return help;
@@ -323,31 +319,31 @@ final class SeriesParts {
 
     Aside legend(ValueSignal<Boolean> open) {
         var legend = css(new Aside(), "explorer-legend");
-        var title = new H2(t("explorer.legend.heading"));
+        var title = new H2(owner.getTranslation("explorer.legend.heading"));
         var close = new Button(VaadinIcon.CLOSE.create(), click -> open.set(false));
         close.addThemeVariants(ButtonVariant.TERTIARY);
-        close.setAriaLabel(t("explorer.legend.close"));
+        close.setAriaLabel(owner.getTranslation("explorer.legend.close"));
         close.addClassName("explorer-legend-close");
         var top = css(new Div(title, close), "explorer-legend-top");
-        legend.add(top, hint(t("explorer.legend.lead")));
+        legend.add(top, hint(owner.getTranslation("explorer.legend.lead")));
 
         var states = new LinkedHashMap<String, String>();
-        for (ExplorerRules.Badge state : ExplorerRules.Badge.values()) {
-            states.put(t("explorer.state." + state.name()), t("explorer.state." + state.name() + ".means"));
+        for (ExplorerRules.LineState state : ExplorerRules.LineState.values()) {
+            states.put(owner.getTranslation("explorer.state." + state.name()), owner.getTranslation("explorer.state." + state.name() + ".means"));
         }
-        legend.add(new H3(t("explorer.legend.badges")), terms(states));
+        legend.add(new H3(owner.getTranslation("explorer.legend.badges")), terms(states));
 
         var groups = new LinkedHashMap<String, String>();
-        KINDS.forEach(kind -> groups.put(t("explorer.half.group." + kind), t("explorer.half.group." + kind + ".title")));
-        legend.add(new H3(t("explorer.legend.groups")), terms(groups));
+        KINDS.forEach(kind -> groups.put(owner.getTranslation("explorer.half.group." + kind), owner.getTranslation("explorer.half.group." + kind + ".title")));
+        legend.add(new H3(owner.getTranslation("explorer.legend.groups")), terms(groups));
 
         var depth = new LinkedHashMap<String, String>();
-        depth.put(t("explorer.legend.reviewed"), t("explorer.legend.reviewed.means"));
-        depth.put(t("explorer.legend.reproduced"), t("explorer.legend.reproduced.means"));
-        legend.add(new H3(t("explorer.legend.depth")), terms(depth));
+        depth.put(owner.getTranslation("explorer.legend.reviewed"), owner.getTranslation("explorer.legend.reviewed.means"));
+        depth.put(owner.getTranslation("explorer.legend.reproduced"), owner.getTranslation("explorer.legend.reproduced.means"));
+        legend.add(new H3(owner.getTranslation("explorer.legend.depth")), terms(depth));
 
-        legend.add(new H3(t("explorer.legend.measuring")), hint(t("explorer.legend.measuring.shape")),
-                hint(t("explorer.legend.measuring.missing")));
+        legend.add(new H3(owner.getTranslation("explorer.legend.measuring")), hint(owner.getTranslation("explorer.legend.measuring.shape")),
+                hint(owner.getTranslation("explorer.legend.measuring.missing")));
         legend.bindVisible(open);
         return legend;
     }

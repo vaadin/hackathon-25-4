@@ -45,7 +45,7 @@ import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.security.CspViolations;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.assistant.AssistantTail;
-import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.Kind;
+import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.HandlerCount;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.Minute;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.Navigations;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.Requests;
@@ -369,7 +369,7 @@ public final class DiagnosticsView extends Composite<Div> {
             var kinds = css(new Table(), "diagnostics-kinds");
             kinds.addHeaderRow(getTranslation("diagnostics.requests.handler"),
                     getTranslation("diagnostics.requests.count"));
-            for (Kind kind : counted.kinds()) {
+            for (HandlerCount kind : counted.kinds()) {
                 TableRow row = kinds.addRow();
                 row.addDataCell(kind.handler().isEmpty() ? getTranslation("diagnostics.requests.noHandler")
                         : kind.handler());

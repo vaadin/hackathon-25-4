@@ -39,13 +39,13 @@ final class FindingList extends Composite<Div> {
      * contain on this line, and the products a reader chooses rather than gets
      * with Vaadin.
      */
-    record Routes(List<Product> catalogue, ExplorerAnswer.Shape shape, List<String> hidden, Set<String> optional) {
+    record RowContext(List<Product> catalogue, ExplorerAnswer.Shape shape, List<String> hidden, Set<String> optional) {
     }
 
     /** How many paths a dot's tooltip names before it counts the rest, the prototype's figure. */
     static final int PATHS_SHOWN = 4;
 
-    private final Routes routes;
+    private final RowContext routes;
     private final List<Finding> findings;
     private final Function<String, Map<String, List<String>>> paths;
 
@@ -54,7 +54,7 @@ final class FindingList extends Composite<Div> {
      * by, for the tooltips of its dots; an empty map when the release record
      * cannot say.
      */
-    FindingList(List<Finding> findings, Routes routes, Function<Finding, Component> details,
+    FindingList(List<Finding> findings, RowContext routes, Function<Finding, Component> details,
             Function<String, Map<String, List<String>>> paths) {
         this.routes = routes;
         this.paths = paths;

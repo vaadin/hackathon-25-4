@@ -27,7 +27,7 @@
 }
 
 .state-fix_available,
-.state-measured,
+.state-no_version,
 .state-none {
     --edge-style: solid;
     --face: var(--accent-face);

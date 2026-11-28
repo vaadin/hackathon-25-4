@@ -53,6 +53,7 @@ import com.vaadin.securitystatus.customer.AdvisoryRules;
 import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.customer.LookupInput;
 import com.vaadin.securitystatus.customer.VersionRules;
+import com.vaadin.securitystatus.customer.VerdictFor;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -106,7 +107,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     /** Everything the screen is drawn from. */
-    record Answer(@Nullable CasesIndex index, String version, @Nullable VersionAnswer measured, List<One> ones) {
+    record Loaded(@Nullable CasesIndex index, String version, @Nullable VersionAnswer measured, List<One> ones) {
 
         boolean unreachable() {
             return index == null;
@@ -127,7 +128,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         getContent().add(ViewHeading.hiddenAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
-        Signal<Answer> answer = Signal.computed(() -> {
+        Signal<Loaded> answer = Signal.computed(() -> {
             generatedAt.get();
             return load(asked.get());
         });
@@ -152,7 +153,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     // Loading
 
-    private Answer load(Question question) {
+    private Loaded load(Question question) {
         try {
             CasesIndex index = data.index();
             VersionAnswer measured = question.version().isBlank() ? null
@@ -160,9 +161,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             List<One> ones = new ArrayList<>(resolve(question.ids()));
             question.unparsed().stream().distinct().map(entry -> new One(entry, null, null, false))
                     .forEach(ones::add);
-            return new Answer(index, question.version(), measured, ones);
+            return new Loaded(index, question.version(), measured, ones);
         } catch (DataUnreachableException unreachable) {
-            return new Answer(null, question.version(), null, List.of());
+            return new Loaded(null, question.version(), null, List.of());
         }
     }
 
@@ -204,7 +205,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     // Drawing
 
-    private void draw(Answer answer) {
+    private void draw(Loaded answer) {
         body.removeAll();
         if (answer.unreachable()) {
             body.add(new DataOutageNotice());
@@ -227,7 +228,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     /** Said once, above the cards, rather than once per card. */
-    private Component unmeasuredNotice(CasesIndex index, Answer answer) {
+    private Component unmeasuredNotice(CasesIndex index, Loaded answer) {
         VersionNumber version = VersionNumber.of(answer.version());
         var notice = css(new Div(new Paragraph(getTranslation("cve.unmeasured.notice", answer.version()))), "cve-unmeasured");
         notice.getElement().setAttribute("role", "note");
@@ -240,7 +241,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         return notice;
     }
 
-    private Component oneAnswer(CasesIndex index, Answer answer, One one, boolean several) {
+    private Component oneAnswer(CasesIndex index, Loaded answer, One one, boolean several) {
         var section = css(new Section(), "cve-answer");
         if (several) {
             section.addClassName("framed");
@@ -251,7 +252,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         Optional<CveRules.Fix> fix = advisory == null ? Optional.empty()
                 : CveRules.fixFor(measured, index, advisory.cve());
         CveRules.State state = CveRules.state(advisory, measured, fix);
-        List<CveRules.Said> said = advisory == null ? List.of() : CveRules.verdicts(advisory, measured);
+        List<VerdictFor> said = advisory == null ? List.of() : CveRules.verdicts(advisory, measured);
 
         section.add(verdictCard(index, answer, one, state, fix, said));
         if (advisory == null) {
@@ -276,9 +277,9 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private record Words(String word, String title, List<String> why) {
     }
 
-    private Component verdictCard(CasesIndex index, Answer answer, One one, CveRules.State state,
-            Optional<CveRules.Fix> fix, List<CveRules.Said> said) {
-        var box = css(new Section(), "verdict-card", "state-" + stateClass(state));
+    private Component verdictCard(CasesIndex index, Loaded answer, One one, CveRules.State state,
+            Optional<CveRules.Fix> fix, List<VerdictFor> said) {
+        var box = css(new Section(), "verdict-card", "state-" + stateSlug(state));
         Words words = words(answer, one, state, fix, said);
 
         box.add(verdictState(stateIcon(state), words.word()), new H3(words.title()));
@@ -308,12 +309,12 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         return box;
     }
 
-    private Words words(Answer answer, One one, CveRules.State state, Optional<CveRules.Fix> fix,
-            List<CveRules.Said> said) {
+    private Words words(Loaded answer, One one, CveRules.State state, Optional<CveRules.Fix> fix,
+            List<VerdictFor> said) {
         String id = one.id();
         String version = answer.version();
         VersionAnswer measured = answer.measured();
-        Optional<String> impact = said.stream().map(CveRules.Said::assessment).map(Assessment::impact)
+        Optional<String> impact = said.stream().map(VerdictFor::assessment).map(Assessment::impact)
                 .flatMap(Optional::stream).findFirst().map(String::strip);
         var why = new ArrayList<String>();
         return switch (state) {
@@ -382,7 +383,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 yield new Words(getTranslation(state == CveRules.State.FIXED ? "cve.word.fixed" : "cve.word.notAffected"),
                         getTranslation("cve.title.notReported", id, version), why);
             }
-            case MEASURED -> {
+            case NO_VERSION -> {
                 why.add(getTranslation(version.isBlank() ? "cve.why.measured" : "cve.why.measured.unmeasured"));
                 yield new Words(getTranslation("cve.word.measured"), getTranslation("cve.title.measured", id), why);
             }
@@ -427,12 +428,12 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         return button;
     }
 
-    private static String stateClass(CveRules.State state) {
+    private static String stateSlug(CveRules.State state) {
         return switch (state) {
             case FIX -> "fix_available";
             case AFFECTS, TRIAGE, BOOT, DISCONTINUED -> "unresolved";
             case NOT_AFFECTED, FIXED, NOT_REPORTED -> "secure";
-            case MEASURED -> "measured";
+            case NO_VERSION -> "no_version";
             case UNKNOWN -> "unmeasured";
         };
     }
@@ -440,7 +441,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private static VaadinIcon stateIcon(CveRules.State state) {
         return switch (state) {
             // The glyph alone: the stylesheet draws the prototype's filled circle round it.
-            case FIX, MEASURED -> VaadinIcon.ARROW_UP;
+            case FIX, NO_VERSION -> VaadinIcon.ARROW_UP;
             case AFFECTS, BOOT, DISCONTINUED -> VaadinIcon.EXCLAMATION;
             case TRIAGE, UNKNOWN -> VaadinIcon.QUESTION;
             case NOT_AFFECTED, FIXED, NOT_REPORTED -> VaadinIcon.CHECK;
@@ -449,7 +450,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     // Across supported versions
 
-    private Component lineCards(CasesIndex index, CveAnswer advisory, Answer answer, Optional<CveRules.Fix> fix) {
+    private Component lineCards(CasesIndex index, CveAnswer advisory, Loaded answer, Optional<CveRules.Fix> fix) {
         String readers = answer.measured() != null ? CveRules.lineOf(answer.measured())
                 : answer.version().isBlank() ? "" : VersionNumber.of(answer.version()).line();
         var cards = css(new Div(), "cve-line-cards");
@@ -536,14 +537,14 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     // The three layers
 
-    private Component layers(CasesIndex index, Answer answer, One one, CveAnswer advisory, List<CveRules.Said> said,
+    private Component layers(CasesIndex index, Loaded answer, One one, CveAnswer advisory, List<VerdictFor> said,
             boolean several) {
         var layers = css(new Div(), "finding-layers");
         VersionAnswer measured = answer.measured();
         // Without a measured version no verdict is the reader's, so none is quoted as theirs: the
         // verdicts are listed with their coordinates instead, CVE-02.
         Optional<Assessment> first = measured == null ? Optional.empty()
-                : said.stream().findFirst().map(CveRules.Said::assessment);
+                : said.stream().findFirst().map(VerdictFor::assessment);
 
         // 1. What this means for you
         var means = pairs();
@@ -663,7 +664,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * The dependency as each line resolves it, which is what a scanner reads:
      * the reader's line when a version was given, every line otherwise.
      */
-    private Optional<Component> box(CveAnswer advisory, Answer answer) {
+    private Optional<Component> box(CveAnswer advisory, Loaded answer) {
         String mine = answer.measured() != null ? CveRules.lineOf(answer.measured())
                 : answer.version().isBlank() ? null : VersionNumber.of(answer.version()).line();
         List<String> lines = mine == null ? new ArrayList<>(advisory.arrives().keySet())
@@ -724,7 +725,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     /** One row per verdict, each naming the coordinate it answers for with the differing part marked, rule 6.4.9. */
-    private Table verdictsTable(CasesIndex index, List<CveRules.Said> said) {
+    private Table verdictsTable(CasesIndex index, List<VerdictFor> said) {
         var table = answerTable(getTranslation("cve.verdicts.col.coordinate"), getTranslation("cve.verdicts.col.verdict"),
                 getTranslation("cve.verdicts.col.impact"));
         table.addClassName("cve-verdicts-table");
@@ -732,7 +733,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 ? one.assessment().purl().orElse(one.id()) : String.join(", ", one.packages())).toList();
         List<CveRules.Marked> marked = CveRules.markDifference(coordinates);
         for (int i = 0; i < said.size(); i++) {
-            CveRules.Said one = said.get(i);
+            VerdictFor one = said.get(i);
             TableRow row = table.addRow();
             row.getElement().setAttribute("data-verdict", one.id());
             var coordinate = css(new Span(), "coordinate");

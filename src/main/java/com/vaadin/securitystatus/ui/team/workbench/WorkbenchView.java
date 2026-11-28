@@ -123,7 +123,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     private final Paragraph footer = new Paragraph();
 
     private final Section composer = new Section();
-    private final Details home = new Details();
+    private final Details formDock = new Details();
     private final H2 composing = new H2();
     private final Div reuse = new Div();
     private final Paragraph filled = new Paragraph();
@@ -176,11 +176,11 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         footer.setText(getTranslation("workbench.footer"));
 
         buildComposer();
-        home.addClassNames("workbench-home", "workbench-compose-fold");
-        home.setSummary(foldSummary(getTranslation("workbench.home")));
-        home.add(composer);
+        formDock.addClassNames("workbench-home", "workbench-compose-fold");
+        formDock.setSummary(foldSummary(getTranslation("workbench.home")));
+        formDock.add(composer);
 
-        getContent().add(ReleaseView.back(), outage, lead, hint, filter, queue, home, summaryFold, footer, draftsSection());
+        getContent().add(ReleaseView.back(), outage, lead, hint, filter, queue, formDock, summaryFold, footer, draftsSection());
 
         var generatedAt = refresh.generatedAt();
         Signal<Optional<VerdictQueue>> read = Signal.computed(() -> {
@@ -246,7 +246,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     private void drawQueue(Optional<VerdictQueue> read, Optional<String> wanted) {
         loaded = read;
         outage.removeAll();
-        goHome();
+        dockForm();
         queue.removeAll();
         drawn.clear();
         rowsByName.clear();
@@ -353,7 +353,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     private void opened(String name, boolean isOpen) {
         if (!isOpen) {
             if (name.equals(openRow)) {
-                goHome();
+                dockForm();
             }
             return;
         }
@@ -363,7 +363,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
                 previous.setOpened(false);
             }
         }
-        goHome();
+        dockForm();
         Row row = rowsByName.get(name);
         Details details = drawn.get(name);
         if (row == null || details == null) {
@@ -375,7 +375,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     /** The form back at the foot of the page, and the row it was in emptied. */
-    private void goHome() {
+    private void dockForm() {
         if (openRow != null) {
             Details previous = drawn.get(openRow);
             if (previous != null) {
@@ -390,9 +390,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         reuse.setVisible(false);
         filled.setVisible(false);
         narrow.setVisible(false);
-        home.setVisible(true);
-        if (composer.getParent().filter(home::equals).isEmpty()) {
-            home.add(composer);
+        formDock.setVisible(true);
+        if (composer.getParent().filter(formDock::equals).isEmpty()) {
+            formDock.add(composer);
         }
     }
 
@@ -409,7 +409,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         fold.setSummary(foldSummary(getTranslation("workbench.compose")));
         fold.add(composer);
         content.add(fold);
-        home.setVisible(false);
+        formDock.setVisible(false);
         return content;
     }
 
@@ -983,10 +983,10 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
                 if (row != null) {
                     row.setOpened(false);
                 }
-                goHome();
+                dockForm();
             }
             restore(click.getItem());
-            home.setOpened(true);
+            formDock.setOpened(true);
         });
         section.add(title, none, draftList);
         return section;

@@ -78,10 +78,10 @@ class ExplorerRulesTest {
         // Without Spring nothing pins anything, so the pinned package is Vaadin's again.
         assertThat(all.stream().filter(finding -> ExplorerRules.ours(finding, true))).containsExactly(pinned, ours);
         assertThat(ExplorerRules.worst(all.stream().filter(finding -> ExplorerRules.ours(finding, false)).toList()))
-                .isEqualTo(ExplorerRules.Badge.NOT_AFFECTED);
-        assertThat(ExplorerRules.springBadge(all)).isEqualTo(ExplorerRules.Badge.VULNERABLE);
+                .isEqualTo(ExplorerRules.LineState.NOT_AFFECTED);
+        assertThat(ExplorerRules.springBadge(all)).isEqualTo(ExplorerRules.LineState.VULNERABLE);
         assertThat(ExplorerRules.worst(List.of(finding("D", "vaadin", "in_triage", 0))))
-                .isEqualTo(ExplorerRules.Badge.UNJUDGED);
+                .isEqualTo(ExplorerRules.LineState.UNJUDGED);
     }
 
     // D-209: a number is a version first, then an id, then a coordinate

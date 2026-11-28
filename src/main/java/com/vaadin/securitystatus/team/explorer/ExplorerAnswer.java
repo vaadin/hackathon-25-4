@@ -16,7 +16,7 @@ import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.History;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
-import com.vaadin.securitystatus.team.explorer.ExplorerRules.Badge;
+import com.vaadin.securitystatus.team.explorer.ExplorerRules.LineState;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
 import com.vaadin.securitystatus.data.model.ExplorerVersion;
 
@@ -183,13 +183,13 @@ public final class ExplorerAnswer {
     }
 
     /** Whether the shape this page reads was measured on this line. */
-    public static boolean measured(Line line, Shape shape) {
+    public static boolean isShapeMeasured(Line line, Shape shape) {
         return !shape.plain() || Boolean.TRUE.equals(line.noSpring()) || !line.withoutSpring().isEmpty();
     }
 
     /** The findings of the shape being read, narrowed to what a search names. */
     public static List<Finding> findingsOf(Line line, Shape shape, Asked asked) {
-        List<Finding> all = ExplorerRules.measured(line, shape.plain());
+        List<Finding> all = ExplorerRules.findingsOfShape(line, shape.plain());
         if (asked.ids().isEmpty()) {
             return all;
         }
@@ -198,10 +198,10 @@ public final class ExplorerAnswer {
     }
 
     /** The three groups of one half, worst first in each. */
-    public record Groups(List<Finding> risk, List<Finding> pending, List<Finding> ruled) {
+    public record Groups(List<Finding> risk, List<Finding> triage, List<Finding> ruledOut) {
 
         public int size() {
-            return risk.size() + pending.size() + ruled.size();
+            return risk.size() + triage.size() + ruledOut.size();
         }
     }
 
@@ -217,7 +217,7 @@ public final class ExplorerAnswer {
     }
 
     public static Split split(Line line, Shape shape, Asked asked) {
-        if (!measured(line, shape)) {
+        if (!isShapeMeasured(line, shape)) {
             return new Split(false, empty(), empty(), 0, List.of(), List.of());
         }
         var ours = new ArrayList<Finding>();
@@ -270,20 +270,20 @@ public final class ExplorerAnswer {
      * sentence cannot disagree.
      */
     public static List<Finding> stateFindings(Line line, Shape shape) {
-        return ExplorerRules.measured(line, shape.plain()).stream()
+        return ExplorerRules.findingsOfShape(line, shape.plain()).stream()
                 .filter(finding -> ExplorerRules.ours(finding, shape.plain()) && mine(finding, shape, line)).toList();
     }
 
     /** The Vaadin badge of a series: unjudged when the shape was never measured on it. */
-    public static Badge state(Line line, Shape shape) {
-        if (!measured(line, shape)) {
-            return Badge.UNJUDGED;
+    public static LineState state(Line line, Shape shape) {
+        if (!isShapeMeasured(line, shape)) {
+            return LineState.UNJUDGED;
         }
         return ExplorerRules.worst(stateFindings(line, shape));
     }
 
     /** The Spring Boot badge: none on the shape without Spring, none when nothing is theirs. */
-    public static Optional<Badge> springState(Line line, Shape shape) {
+    public static Optional<LineState> springState(Line line, Shape shape) {
         if (shape.plain()) {
             return Optional.empty();
         }

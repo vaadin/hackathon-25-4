@@ -94,12 +94,12 @@ public class DiagnosticsCounters {
     }
 
     /** How many requests one kind of handler answered. */
-    public record Kind(String handler, long count) {
+    public record HandlerCount(String handler, long count) {
     }
 
     /** The request timing summary: totals since the start, the last minutes, and the handler kinds. */
     public record Requests(long count, long failed, long totalMicros, long longestMicros, List<Minute> minutes,
-            List<Kind> kinds) {
+            List<HandlerCount> kinds) {
     }
 
     private final Clock clock;
@@ -165,7 +165,7 @@ public class DiagnosticsCounters {
             while (minutes.size() > MINUTES_KEPT) {
                 minutes.removeFirst();
             }
-            List<Kind> kinds = new ArrayList<>(current.kinds());
+            List<HandlerCount> kinds = new ArrayList<>(current.kinds());
             int at = -1;
             for (int i = 0; i < kinds.size(); i++) {
                 if (kinds.get(i).handler().equals(handler)) {
@@ -173,11 +173,11 @@ public class DiagnosticsCounters {
                 }
             }
             if (at < 0) {
-                kinds.add(new Kind(handler, 1));
+                kinds.add(new HandlerCount(handler, 1));
             } else {
-                kinds.set(at, new Kind(handler, kinds.get(at).count() + 1));
+                kinds.set(at, new HandlerCount(handler, kinds.get(at).count() + 1));
             }
-            kinds.sort(Comparator.comparingLong(Kind::count).reversed().thenComparing(Kind::handler));
+            kinds.sort(Comparator.comparingLong(HandlerCount::count).reversed().thenComparing(HandlerCount::handler));
             return new Requests(current.count() + 1, current.failed() + (failure ? 1 : 0),
                     current.totalMicros() + micros, Math.max(current.longestMicros(), micros),
                     List.copyOf(minutes), List.copyOf(kinds));

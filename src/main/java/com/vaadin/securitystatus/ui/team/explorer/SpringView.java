@@ -114,7 +114,7 @@ public final class SpringView extends Composite<Div> {
         Optional<SpringBootTried> tried = Optional.ofNullable(front.springBootTried().get(release));
         Map<Kind, List<Finding>> groups = SpringRules.grouped(boot.findings());
         int risks = groups.getOrDefault(Kind.RISK, List.of()).size();
-        ExplorerRules.Badge state = ExplorerRules.springBadge(boot.findings());
+        ExplorerRules.LineState state = ExplorerRules.springBadge(boot.findings());
 
         var summary = css(new Div(), "explorer-row-summary", "spring-boot-top");
         var title = css(new Span(release), "explorer-row-line", "spring-boot-release");

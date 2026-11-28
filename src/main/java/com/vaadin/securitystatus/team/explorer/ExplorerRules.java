@@ -65,8 +65,8 @@ public final class ExplorerRules {
         }
     }
 
-    /** What a badge says about one side of a line. */
-    public enum Badge {
+    /** The state of one side of a line, which its badge shows. */
+    public enum LineState {
         VULNERABLE, UNJUDGED, NOT_AFFECTED
     }
 
@@ -102,7 +102,7 @@ public final class ExplorerRules {
      * Spring when the Spring Boot starter is off and the line has one, the
      * full one otherwise.
      */
-    static List<Finding> measured(Line line, boolean springOff) {
+    static List<Finding> findingsOfShape(Line line, boolean springOff) {
         if (!springOff || Boolean.TRUE.equals(line.noSpring()) || line.withoutSpring().isEmpty()) {
             return line.findings();
         }
@@ -132,7 +132,7 @@ public final class ExplorerRules {
     // Badges
 
     /** What the other half says: Spring Boot's own findings and the versions Spring Boot pins, D-205. */
-    public static Badge springBadge(List<Finding> findings) {
+    public static LineState springBadge(List<Finding> findings) {
         return worst(findings.stream().filter(ExplorerRules::theirs).toList());
     }
 
@@ -141,10 +141,10 @@ public final class ExplorerRules {
             "fixed");
 
     /** The worst state of a set of findings: a named risk, then one nobody judged, then answered. */
-    static Badge worst(List<Finding> findings) {
-        Badge worst = Badge.NOT_AFFECTED;
+    static LineState worst(List<Finding> findings) {
+        LineState worst = LineState.NOT_AFFECTED;
         for (Finding finding : findings) {
-            Badge state = stateOf(finding);
+            LineState state = stateOf(finding);
             if (state.ordinal() < worst.ordinal()) {
                 worst = state;
             }
@@ -153,12 +153,12 @@ public final class ExplorerRules {
     }
 
     /** The state one finding gives a release. */
-    public static Badge stateOf(Finding finding) {
+    public static LineState stateOf(Finding finding) {
         String verdict = finding.verdict().orElse("");
         if ("risk".equals(verdict)) {
-            return Badge.VULNERABLE;
+            return LineState.VULNERABLE;
         }
-        return RULED_OUT.contains(verdict) ? Badge.NOT_AFFECTED : Badge.UNJUDGED;
+        return RULED_OUT.contains(verdict) ? LineState.NOT_AFFECTED : LineState.UNJUDGED;
     }
 
     /**

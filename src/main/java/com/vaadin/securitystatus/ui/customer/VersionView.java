@@ -117,7 +117,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     /** What the screen is drawn from: the index and the version's own document, when there is one. */
-    record Answer(@Nullable CasesIndex index, VersionNumber version, Optional<VersionAnswer> measured) {
+    record Loaded(@Nullable CasesIndex index, VersionNumber version, Optional<VersionAnswer> measured) {
 
         boolean unreachable() {
             return index == null;
@@ -133,7 +133,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     private final ValueSignal<Boolean> disc = new ValueSignal<>(false);
     private final ValueSignal<Boolean> prereleases = new ValueSignal<>(false);
     private final ValueSignal<Optional<ZoneId>> zone = new ValueSignal<>(Optional.empty());
-    private final Signal<Answer> answer;
+    private final Signal<Loaded> answer;
 
     /** The address on screen. A section link reads it when clicked and keeps its own target in step with it. */
     private final ValueSignal<VersionAddress> shown = new ValueSignal<>(VersionAddress.of(""));
@@ -227,19 +227,19 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // Loading
 
-    private Answer load(String version) {
+    private Loaded load(String version) {
         VersionNumber number = VersionNumber.of(version.isBlank() ? "0" : version);
         try {
             CasesIndex index = data.index();
-            return new Answer(index, number, data.version(number));
+            return new Loaded(index, number, data.version(number));
         } catch (DataUnreachableException unreachable) {
-            return new Answer(null, number, Optional.empty());
+            return new Loaded(null, number, Optional.empty());
         }
     }
 
     // The answer, drawn whole when the version or the measurement changes
 
-    private void drawAnswer(Answer current) {
+    private void drawAnswer(Loaded current) {
         for (Div slot : List.of(card, noFix, triage, fixes, details)) {
             slot.removeAll();
         }
@@ -257,13 +257,13 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             return;
         }
         VersionAnswer measured = current.measured().get();
-        List<String> stuck = VersionRules.noFixYet(measured);
-        String lone = stuck.size() == 1 ? stuck.get(0) : null;
+        List<String> stuckRisks = VersionRules.stuckRisks(measured);
+        String lone = stuckRisks.size() == 1 ? stuckRisks.get(0) : null;
         String open = address.open();
 
-        card.add(verdictCard(index, measured, stuck, lone));
-        if (stuck.size() > 1) {
-            drawNoFix(index, measured, stuck, open);
+        card.add(verdictCard(index, measured, stuckRisks, lone));
+        if (stuckRisks.size() > 1) {
+            drawNoFix(index, measured, stuckRisks, open);
         }
         drawTriage(measured);
         drawFixes(index, measured);
@@ -282,13 +282,13 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // The verdict card
 
-    private Component verdictCard(CasesIndex index, VersionAnswer measured, List<String> stuck, @Nullable String lone) {
+    private Component verdictCard(CasesIndex index, VersionAnswer measured, List<String> stuckRisks, @Nullable String lone) {
         String state = measured.state().orElse("");
         var box = css(new Section(), "verdict-card", "state-" + (state.isEmpty() ? "none" : state));
 
         stateWord(state).ifPresent(word -> box.add(verdictState(stateIcon(state), word)));
 
-        Words words = words(index, measured, stuck);
+        Words words = words(index, measured, stuckRisks);
         words.title().ifPresent(title -> box.add(new H3(title)));
         if (!words.why().isEmpty()) {
             var why = css(new Paragraph(String.join(" ", words.why())), "verdict-why");
@@ -338,7 +338,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     private record Words(Optional<String> title, List<String> why) {
     }
 
-    private Words words(CasesIndex index, VersionAnswer measured, List<String> stuck) {
+    private Words words(CasesIndex index, VersionAnswer measured, List<String> stuckRisks) {
         String version = measured.version().toString();
         int open = VersionRules.openCount(measured);
         var why = new ArrayList<String>();
@@ -377,27 +377,27 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                     }
                     return new Words(Optional.of(getTranslation("version.card.fix.title", to.get().toString())), why);
                 }
-                if (stuck.isEmpty()) {
+                if (stuckRisks.isEmpty()) {
                     int unjudged = measured.triage().size();
                     return new Words(unjudged == 0 ? Optional.empty()
                             : Optional.of(getTranslation(plural("version.card.triage.title", unjudged), unjudged)), why);
                 }
-                boolean covered = stuck.stream()
+                boolean covered = stuckRisks.stream()
                         .allMatch(id -> VersionRules.hasWorkaround(VersionRules.verdictsFor(measured, id)));
                 if (covered) {
-                    why.add(getTranslation(plural("version.card.stuck.workaround", stuck.size())));
+                    why.add(getTranslation(plural("version.card.stuck.workaround", stuckRisks.size())));
                 }
                 if (VersionRules.isNewestOfItsLine(index, measured)) {
                     why.add(getTranslation("version.card.stuck.newest", version));
                 }
-                if (stuck.size() != 1) {
+                if (stuckRisks.size() != 1) {
                     why.add(getTranslation("version.card.stuck.below"));
                 }
                 if (measured.triage().isEmpty()) {
                     why.add(getTranslation("version.card.stuck.rest"));
                 }
-                return new Words(Optional.of(getTranslation(plural("version.card.stuck.title", stuck.size()),
-                        stuck.size())), why);
+                return new Words(Optional.of(getTranslation(plural("version.card.stuck.title", stuckRisks.size()),
+                        stuckRisks.size())), why);
             }
             default -> {
                 return new Words(Optional.empty(), why);
@@ -504,15 +504,15 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // Findings with no fix yet, the not assessed notice, and what the upgrade fixes
 
-    private void drawNoFix(CasesIndex index, VersionAnswer measured, List<String> stuck, @Nullable String open) {
+    private void drawNoFix(CasesIndex index, VersionAnswer measured, List<String> stuckRisks, @Nullable String open) {
         String version = measured.version().toString();
         int openCount = VersionRules.openCount(measured);
         String aside = VersionRules.upgradeTo(measured)
-                .map(to -> getTranslation(plural("version.noFix.aside", openCount), stuck.size(), openCount, version,
+                .map(to -> getTranslation(plural("version.noFix.aside", openCount), stuckRisks.size(), openCount, version,
                         to.toString()))
-                .orElseGet(() -> count(stuck.size()));
+                .orElseGet(() -> count(stuckRisks.size()));
         noFix.add(heading(getTranslation("version.noFix.title"), aside));
-        List<String> ordered = VersionRules.worstFirst(stuck, index);
+        List<String> ordered = VersionRules.worstFirst(stuckRisks, index);
         boolean named = open != null && ordered.contains(open);
         for (int i = 0; i < ordered.size(); i++) {
             String advisory = ordered.get(i);
@@ -626,7 +626,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // Spring Boot, in the two shapes of rule 6.11.6
 
-    private void drawSpringBoot(Answer current, BootShape shape) {
+    private void drawSpringBoot(Loaded current, BootShape shape) {
         spring.removeAll();
         if (current.unreachable() || current.measured().isEmpty()) {
             return;
@@ -639,7 +639,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         boolean table = switch (shape) {
             case TABLE -> true;
             case NOTE -> false;
-            case DEFAULT -> !VersionRules.noFixYet(measured).isEmpty();
+            case DEFAULT -> !VersionRules.stuckRisks(measured).isEmpty();
         };
         if (!table) {
             var note = css(new Div(new H3(getTranslation("version.boot.note.title")),
@@ -706,7 +706,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // Behind their flags: discontinued and ruled out
 
-    private void drawDiscontinued(Answer current, boolean open) {
+    private void drawDiscontinued(Loaded current, boolean open) {
         discontinued.removeAll();
         if (current.unreachable() || current.measured().isEmpty()) {
             return;
@@ -731,7 +731,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         }
     }
 
-    private void drawRuledOut(Answer current, boolean open) {
+    private void drawRuledOut(Loaded current, boolean open) {
         ruledOut.removeAll();
         if (current.unreachable() || current.measured().isEmpty()) {
             return;
@@ -769,7 +769,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     // All supported versions
 
-    private void drawLines(Answer current, boolean withPrereleases) {
+    private void drawLines(Loaded current, boolean withPrereleases) {
         lines.removeAll();
         if (current.unreachable()) {
             return;

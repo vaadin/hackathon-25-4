@@ -45,12 +45,8 @@ public final class VersionRules {
     public record Move(VersionNumber to, boolean sameLine) {
     }
 
-    /** One verdict that answers an advisory on this version, and the packages it speaks for. */
-    public record Said(String id, Assessment assessment, List<String> packages) {
-    }
-
     /** The findings a verdict calls a real risk and no release of the line fixes. */
-    public static List<String> noFixYet(VersionAnswer answer) {
+    public static List<String> stuckRisks(VersionAnswer answer) {
         return answer.stuck().stream().filter(answer.risk()::contains).toList();
     }
 
@@ -117,27 +113,27 @@ public final class VersionRules {
      * Every verdict that speaks for one advisory on this version, in the order
      * the version lists them, each with the packages it answers for.
      */
-    public static List<Said> verdictsFor(VersionAnswer answer, String advisory) {
+    public static List<VerdictFor> verdictsFor(VersionAnswer answer, String advisory) {
         Verdict verdict = answer.verdicts().get(advisory);
         if (verdict == null) {
             return List.of();
         }
         Map<String, List<String>> packages = new LinkedHashMap<>();
         verdict.saidByPackage().forEach((name, id) -> packages.computeIfAbsent(id, key -> new ArrayList<>()).add(name));
-        List<Said> said = new ArrayList<>();
+        List<VerdictFor> said = new ArrayList<>();
         for (String id : verdict.assessments()) {
             Assessment assessment = answer.assessments().get(id);
             if (assessment != null) {
                 List<String> names = new ArrayList<>(packages.getOrDefault(id, List.of()));
                 names.sort(Comparator.naturalOrder());
-                said.add(new Said(id, assessment, List.copyOf(names)));
+                said.add(new VerdictFor(id, assessment, List.copyOf(names)));
             }
         }
         return said;
     }
 
     /** Whether any verdict on this advisory offers a workaround. */
-    public static boolean hasWorkaround(List<Said> said) {
+    public static boolean hasWorkaround(List<VerdictFor> said) {
         return said.stream().anyMatch(one -> one.assessment().workaround().isPresent());
     }
 
@@ -145,8 +141,8 @@ public final class VersionRules {
      * The one line of prose a row shows: the first verdict's impact, sentence by
      * sentence until it has said something.
      */
-    public static Optional<String> oneLine(List<Said> said) {
-        for (Said one : said) {
+    public static Optional<String> oneLine(List<VerdictFor> said) {
+        for (VerdictFor one : said) {
             Optional<String> impact = one.assessment().impact().map(String::strip);
             if (impact.isPresent()) {
                 List<String> sentences = new ArrayList<>(List.of(SENTENCE_END.split(impact.get())));

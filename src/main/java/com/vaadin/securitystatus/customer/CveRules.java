@@ -44,17 +44,13 @@ public final class CveRules {
         /** Not reported on the reader's version, and never on its line. */
         NOT_REPORTED,
         /** No measured version to answer for: what the catalogue knows. */
-        MEASURED,
+        NO_VERSION,
         /** An id nobody measured. */
         UNKNOWN
     }
 
     /** The release that clears the advisory for the reader, and what moving there leaves. */
     public record Fix(VersionNumber to, boolean sameLine, boolean secure, @Nullable Integer remains) {
-    }
-
-    /** One verdict that answers the advisory, with the coordinates it answers for. */
-    public record Said(String id, Assessment assessment, List<String> packages) {
     }
 
     /**
@@ -77,7 +73,7 @@ public final class CveRules {
             return State.UNKNOWN;
         }
         if (version == null) {
-            return State.MEASURED;
+            return State.NO_VERSION;
         }
         String id = advisory.cve();
         if (fix.isPresent()) {
@@ -115,10 +111,10 @@ public final class CveRules {
      * its document lists, rule 6.4.8, and with no version every verdict the
      * advisory carries, each with the coordinates it spoke for on any line.
      */
-    public static List<Said> verdicts(CveAnswer advisory, @Nullable VersionAnswer version) {
+    public static List<VerdictFor> verdicts(CveAnswer advisory, @Nullable VersionAnswer version) {
         if (version != null) {
             return VersionRules.verdictsFor(version, advisory.cve()).stream()
-                    .map(one -> new Said(one.id(), one.assessment(), one.packages())).toList();
+                    .map(one -> new VerdictFor(one.id(), one.assessment(), one.packages())).toList();
         }
         Map<String, List<String>> packages = new LinkedHashMap<>();
         advisory.onVersions().values().forEach(verdict -> verdict.saidByPackage().forEach((name, id) -> {
@@ -127,11 +123,11 @@ public final class CveRules {
                 names.add(name);
             }
         }));
-        List<Said> said = new ArrayList<>();
+        List<VerdictFor> said = new ArrayList<>();
         advisory.assessments().forEach((id, assessment) -> {
             List<String> names = new ArrayList<>(packages.getOrDefault(id, List.of()));
             names.sort(Comparator.naturalOrder());
-            said.add(new Said(id, assessment, List.copyOf(names)));
+            said.add(new VerdictFor(id, assessment, List.copyOf(names)));
         });
         return said;
     }
