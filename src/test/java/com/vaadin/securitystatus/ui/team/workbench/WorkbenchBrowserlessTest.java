@@ -210,6 +210,26 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(yaml(view)).contains("supersedes: maven-com-vaadin-vaadin-swing-kit-flow");
     }
 
+    // D-278: a package that carries several verdicts arrives filled from the newest, on a series from the newest speaking there
+    @Test
+    void a_package_with_several_verdicts_arrives_filled_from_the_newest() {
+        WorkbenchView view = navigate(WorkbenchView.class);
+
+        view.open("org.apache.commons:commons-lang3");
+
+        assertThat(view.form().fields().get("supersedes").getValue())
+                .isEqualTo("maven-org-apache-commons-commons-lang3-7-8-build");
+        assertThat(view.form().fields().get("depth").getValue()).isEqualTo("cursory");
+        assertThat(text("workbench-filled")).startsWith("Filled from maven-org-apache-commons-commons-lang3-7-8-build");
+
+        // The 7 and 8 verdict is the newest, but on 24.9 it is the 24.9 one that speaks.
+        view = navigate("findings/workbench?series=24.9", WorkbenchView.class);
+        view.open("org.apache.commons:commons-lang3");
+
+        assertThat(view.form().fields().get("supersedes").getValue())
+                .isEqualTo("maven-org-apache-commons-commons-lang3-classutils-recursion-24-9-up");
+    }
+
     // AC2: the vocabulary is the closed set and nothing else is offered
     @Test
     void the_applicability_offers_the_closed_vocabulary_only() {

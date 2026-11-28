@@ -1,12 +1,13 @@
 package com.vaadin.securitystatus.ui.team.workbench;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
-import static com.vaadin.securitystatus.ui.common.Parts.css;
-
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -543,8 +544,8 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
 
     /**
      * A row chosen: the form opens on its package and advisories, or on the
-     * draft already kept for them; with exactly one verdict carried by the
-     * package and no draft, it arrives filled from that verdict, D-222.
+     * draft already kept for them; with no draft, it arrives filled from the
+     * newest verdict the package carries, D-222 and D-278.
      */
     private void choose(Row row) {
         Optional<String> line = line();
@@ -567,11 +568,26 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         form.edit(fresh);
         saved.set(Optional.empty());
         changed();
-        List<String> carried = carried(row);
-        if (carried.size() == 1) {
-            fillFrom(row, carried.getFirst());
-        }
+        newest(row, line).ifPresent(id -> fillFrom(row, id));
         syncTicks();
+    }
+
+    /**
+     * The verdict a new one most likely follows, D-278: the newest by the day
+     * it was assessed among those that speak for an advisory of the package on
+     * the series chosen, since a package's verdicts often split by series, and
+     * the newest of all with no series or none speaking there. One with no day
+     * counts as the oldest; a tie goes to the first met.
+     */
+    private Optional<String> newest(Row row, Optional<String> line) {
+        Map<String, Assessment> written = loaded.map(VerdictQueue::assessments).orElse(Map.of());
+        List<String> carried = carried(row);
+        List<String> speaking = line.map(series -> carried.stream().filter(id -> row.entry().cves().stream()
+                .anyMatch(advisory -> id.equals(advisory.saidByLine().get(series)))).toList()).orElse(List.of());
+        List<String> among = speaking.isEmpty() ? carried : speaking;
+        return among.stream().max(Comparator.comparing(
+                (String id) -> Optional.ofNullable(written.get(id)).flatMap(Assessment::assessedAt).orElse(LocalDate.MIN))
+                .thenComparing(id -> -among.indexOf(id)));
     }
 
     /** The verdicts this package already carries, as the queue publishes them, in the order first met. */
