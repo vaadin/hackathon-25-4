@@ -16,6 +16,10 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.securitystatus.data.DataUnreachableException;
+import com.vaadin.securitystatus.data.SecurityDataService;
+import com.vaadin.securitystatus.team.explorer.ExplorerAnswer;
+import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
 
 /**
  * What the reader arranged on the explorer, for the whole session and, through
@@ -97,6 +101,29 @@ public class ProductSelection {
     /** Whether a group is open: as the reader left it, or as it starts. */
     boolean isOpen(String key, boolean startsOpen) {
         return groups.peek().getOrDefault(key, startsOpen);
+    }
+
+    /**
+     * What a page of the explorer does on attach: while nothing has settled the
+     * selection, it reads what an earlier visit remembered against the products
+     * a reader can switch, and hands it to {@code then} if it is still unsettled.
+     */
+    void restore(UI ui, SecurityDataService data, Consumer<List<String>> then) {
+        if (!unsettled()) {
+            return;
+        }
+        try {
+            Set<String> names = new LinkedHashSet<>();
+            ExplorerAnswer.catalogue(data.explorerFront()).stream().filter(Product::switchable)
+                    .forEach(product -> names.add(product.name()));
+            readStorage(ui, names, restored -> {
+                if (unsettled()) {
+                    then.accept(restored);
+                }
+            });
+        } catch (DataUnreachableException unreachable) {
+            // Nothing to restore against; the default stays.
+        }
     }
 
     /**

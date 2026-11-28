@@ -1,5 +1,6 @@
 package com.vaadin.securitystatus.ui.team.workbench;
 
+import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
@@ -40,7 +41,6 @@ import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.notification.Notification;
@@ -519,8 +519,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         var line = css(new Div(), "workbench-pkg");
         line.add(new Code(code));
         if (through != null) {
-            var span = css(new Span(through), "workbench-through");
-            line.add(span);
+            line.add(css(new Span(through), "workbench-through"));
         }
         return line;
     }
@@ -531,10 +530,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     private Component table(String kind, Map<String, int[]> counts, boolean words) {
-        var table = css(new Table(), "workbench-summary-table", "workbench-summary-" + kind, "answer-table",
-                "vaadin-themed-html");
-        table.addHeaderRow(getTranslation("workbench.summary." + kind), getTranslation("workbench.summary.findings"),
-                getTranslation("workbench.summary.unjudged"));
+        var table = css(answerTable(getTranslation("workbench.summary." + kind),
+                getTranslation("workbench.summary.findings"), getTranslation("workbench.summary.unjudged")),
+                "workbench-summary-table", "workbench-summary-" + kind);
         counts.forEach((key, numbers) -> {
             TableRow row = table.addRow();
             row.getElement().setAttribute("data-key", key);

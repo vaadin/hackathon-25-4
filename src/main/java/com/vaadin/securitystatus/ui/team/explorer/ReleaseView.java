@@ -17,14 +17,10 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
@@ -110,23 +106,9 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             Set<String> products = off.get();
             shown.get().ifPresent(version -> draw(version, products));
         });
+        // The choice the explorer remembers, read here too, as the prototype's page reads it.
         whenAttached(ui -> {
-            if (!selection.unsettled()) {
-                return null;
-            }
-            try {
-                Set<String> names = new LinkedHashSet<>();
-                ExplorerAnswer.catalogue(data.explorerFront()).stream().filter(Product::switchable)
-                        .forEach(product -> names.add(product.name()));
-                // The choice the explorer remembers, read here too, as the prototype's page reads it.
-                selection.readStorage(ui, names, restored -> {
-                    if (selection.unsettled()) {
-                        selection.select(restored);
-                    }
-                });
-            } catch (DataUnreachableException unreachable) {
-                // Nothing to restore against; the default stays.
-            }
+            selection.restore(ui, data, selection::select);
             return null;
         });
     }
@@ -160,22 +142,9 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
 
     private void buildPanel() {
         panel.addClassNames("explorer-panel", "release-panel");
-        var heading = css(new H2(getTranslation("explorer.lookup.heading")), "explorer-panel-heading");
-        lookup.addClassNames("explorer-search", "release-lookup");
-        lookup.setAriaLabel(getTranslation("explorer.lookup.heading"));
-        lookup.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                jump(change.getValue());
-            }
-        });
-        var filter = new Button(VaadinIcon.SEARCH.create(), click -> jump(lookup.getValue()));
-        filter.addThemeVariants(ButtonVariant.PRIMARY);
-        filter.setAriaLabel(getTranslation("explorer.search.button"));
-        filter.addClassName("explorer-filter");
-        var form = css(new Div(lookup, filter), "explorer-form");
-        var section = css(new Section(heading, form), "explorer-lookup");
+        lookup.addClassName("release-lookup");
         profile.addClassName("explorer-profile");
-        panel.add(section, profile);
+        panel.add(parts.lookup(lookup, this::jump), profile);
     }
 
     /** A full version is a place and opens its release; anything else is a question for the explorer. */
@@ -259,37 +228,19 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         var name = css(new Span(record.version().toString()), "explorer-row-line", "release-card-version");
         var in = css(new Span(getTranslation("release.card.in", line.line())), "explorer-row-version", "release-card-line");
         summary.add(name, in);
-        record.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
-            var scanned = css(new Span(getTranslation("explorer.row.scannedOn", day.toString())), "explorer-row-scanned", "release-card-scanned");
-            Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
-            summary.add(scanned);
-        });
-        summary.add(parts.vaadinBadge(state));
-        ExplorerAnswer.springState(line, shape).ifPresent(theirs -> {
-            String against = record.springBootDeclared().or(record::springBoot).map(VersionNumber::toString)
-                    .orElseGet(() -> getTranslation("release.badge.spring.measured"));
-            summary.add(parts.springBadge(theirs, getTranslation("release.badge.spring.title", against)));
-        });
-        parts.sentence(line, shape, state).ifPresent(text -> {
-            var says = css(new Span(text), "explorer-row-says");
-            summary.add(says);
-        });
-        summary.add(parts.rings(line, catalogue, shape, Asked.nothing()));
+        String against = record.springBootDeclared().or(record::springBoot).map(VersionNumber::toString)
+                .orElseGet(() -> getTranslation("release.badge.spring.measured"));
+        parts.summaryTail(summary, record.scannedAt(), line, shape, state, catalogue, Asked.nothing(),
+                getTranslation("release.badge.spring.title", against));
 
         var detail = css(new Div(), "explorer-detail", "release-detail");
         if (!split.measured()) {
             detail.add(SeriesParts.hint(getTranslation("explorer.detail.unmeasured")));
         } else {
-            detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
-                    split.ours().size() + split.theirs().size() + split.build().size(),
-                    getTranslation("explorer.summary.split", split.ours().risk().size(),
-                            split.ours().triage().size(), split.theirs().size(), split.build().size(),
-                            split.ours().ruledOut().size()))));
+            detail.add(parts.splitSummary(split));
             advice(front, record, line, shape, split).ifPresent(detail::add);
             detail.add(new ReleaseFiles(data, record.version(), ReleaseRules.files(record.scannerFiles()), true));
-            Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-            parts.halves(detail, line, split, new FindingList.RowContext(catalogue, shape, shape.hidden(line), optional),
-                    true);
+            parts.halves(detail, line, split, SeriesParts.rowContext(front, catalogue, shape, line), true);
         }
 
         var card = new Details();
@@ -315,14 +266,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
      */
     private void drawProducts(Line line, List<Product> catalogue, Shape shape, Set<String> off, Set<String> chosen,
             String starter, boolean twoShapes, VersionNumber version) {
-        var titleRow = css(new Div(), "explorer-profile-title");
-        var title = css(new H2(getTranslation("explorer.profile.heading")), "explorer-panel-heading");
-        var mark = new Button(VaadinIcon.INFO_CIRCLE_O.create());
-        mark.addThemeVariants(ButtonVariant.TERTIARY);
-        mark.addClassName("explorer-hint-mark");
-        mark.setAriaLabel(getTranslation("release.profile.hint"));
-        mark.setTooltipText(getTranslation("release.profile.hint"));
-        titleRow.add(title, mark);
+        var titleRow = parts.profileTitle("release.profile.hint");
 
         var chips = css(new Div(), "explorer-chips");
         for (Product product : catalogue) {
@@ -340,29 +284,13 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
     private Component chip(Product product, boolean isOn, boolean cannot, boolean stillStarter, int brings,
             Set<String> chosen, VersionNumber version) {
         boolean still = product.fixed() || cannot || stillStarter;
-        var chip = css(new NativeButton(), "explorer-chip", isOn ? "on" : "off");
-        if (product.fixed() || stillStarter) {
-            chip.addClassName("fixed");
-        }
-        if (cannot) {
-            chip.addClassName("impossible");
-        }
-        chip.getElement().setAttribute("role", "switch");
-        chip.getElement().setAttribute("aria-checked", String.valueOf(isOn));
-        chip.getElement().setAttribute("data-product", product.name());
+        var chip = new NativeButton();
+        SeriesParts.dressChip(chip.getElement(), product, isOn, product.fixed() || stillStarter, cannot);
         if (still) {
             chip.setEnabled(false);
             chip.getElement().setAttribute("aria-disabled", "true");
         } else {
-            chip.addClickListener(click -> {
-                var next = new LinkedHashSet<>(chosen);
-                if (isOn) {
-                    next.add(product.name());
-                } else {
-                    next.remove(product.name());
-                }
-                selection.select(next);
-            });
+            chip.addClickListener(click -> selection.select(SeriesParts.toggled(chosen, product.name(), isOn)));
         }
         chip.add(parts.chipParts(product, isOn, brings));
         Tooltip.forComponent(chip).setText(stillStarter
@@ -491,8 +419,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         body.add(paragraph("release-unmeasured", sentence));
         var go = releaseLink(getTranslation("release.unmeasured.go", line.version().toString()), line.version());
         go.addClassName("release-go");
-        var goes = css(new Paragraph(go), "explorer-hint");
-        body.add(goes);
+        body.add(css(new Paragraph(go), "explorer-hint"));
 
         List<VersionNumber> others = ReleaseRules.others(line, line.version());
         if (!others.isEmpty()) {

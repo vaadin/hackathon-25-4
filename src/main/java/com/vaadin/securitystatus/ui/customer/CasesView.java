@@ -1,8 +1,11 @@
 package com.vaadin.securitystatus.ui.customer;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.heading;
 
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,7 +15,6 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.badge.BadgeVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
@@ -93,14 +95,14 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
             catalog = data.cases();
             groups = CaseRules.grouped(catalog, data.index());
         } catch (DataUnreachableException unreachable) {
-            body.add(heading(new H2(getTranslation("cases.heading")), Optional.empty()), new DataOutageNotice());
+            body.add(heading(new H2(getTranslation("cases.heading")), null), new DataOutageNotice());
             return;
         }
         // The prototype's heading, aside and tip as the answer's H2; the title stays the trail's leaf, D-195.
         body.add(heading(new H2(getTranslation("cases.heading")), catalog.generatedAt()
-                .map(at -> getTranslation("cases.aside", at.atZone(java.time.ZoneOffset.UTC).toLocalDate().toString()))));
-        var tip = css(new Paragraph(getTranslation("cases.tip")), "section-tip");
-        body.add(tip);
+                .map(at -> getTranslation("cases.aside", at.atZone(ZoneOffset.UTC).toLocalDate().toString()))
+                .orElse(null)));
+        body.add(css(new Paragraph(getTranslation("cases.tip")), "section-tip"));
         for (CaseRules.Group group : CaseRules.Group.values()) {
             body.add(group(group, groups.get(group)));
         }
@@ -109,8 +111,8 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
     private Component group(CaseRules.Group group, List<CaseRules.Placed> cases) {
         String key = "cases.group." + group.name();
         // The aside is a count for two groups and a sentence for the third; passed as text, not grouped.
-        var section = css(new Section(heading(new H3(getTranslation(key)),
-                Optional.of(getTranslation(key + ".aside", String.valueOf(cases.size()))))), "cases-group", "cases-" + group.name().toLowerCase(java.util.Locale.ROOT));
+        var section = css(new Section(heading(getTranslation(key), getTranslation(key + ".aside", String.valueOf(cases.size())))),
+                "cases-group", "cases-" + group.name().toLowerCase(Locale.ROOT));
         if (cases.isEmpty()) {
             var empty = css(new Paragraph(getTranslation("cases.group.empty")), "cases-empty");
             section.add(empty);
@@ -122,15 +124,6 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
         }
         section.add(rows);
         return section;
-    }
-
-    private static Component heading(com.vaadin.flow.component.HtmlContainer title, Optional<String> aside) {
-        var row = css(new Div(title), "section-row");
-        aside.ifPresent(text -> {
-            var span = css(new Span(text), "section-aside");
-            row.add(span);
-        });
-        return row;
     }
 
     private Component row(CaseRules.Placed placed) {
@@ -145,22 +138,13 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
             case NONE_TODAY -> n == 0;
             case IMPOSSIBLE -> false;
         });
-        count.ifPresent(n -> {
-            var number = css(new Span(String.valueOf(n)), "case-count");
-            row.add(number);
-        });
+        count.ifPresent(n -> row.add(css(new Span(String.valueOf(n)), "case-count")));
 
         var what = css(new Div(), "case-what");
         var title = css(new Span(item.title().orElse(item.id())), "case-title");
         what.add(title);
-        item.screen().ifPresent(screen -> {
-            var where = css(new Span(screen), "case-screen");
-            what.add(where);
-        });
-        item.needs().ifPresent(needs -> {
-            var says = css(new Span(getTranslation("cases.needs", needs)), "case-needs");
-            what.add(says);
-        });
+        item.screen().ifPresent(screen -> what.add(css(new Span(screen), "case-screen")));
+        item.needs().ifPresent(needs -> what.add(css(new Span(getTranslation("cases.needs", needs)), "case-needs")));
         row.add(what);
 
         if (placed.group() == CaseRules.Group.RENDERABLE) {

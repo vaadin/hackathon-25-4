@@ -197,10 +197,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             var word = css(new Span(getTranslation(bucketKey(bucket))), "scan-bucket-word");
             var card = css(new Div(number, word), "scan-bucket", "state-" + bucket.name().toLowerCase(java.util.Locale.ROOT));
             Optional<String> detail = bucketDetail(bucket, result, answer);
-            detail.ifPresent(text -> {
-                var line = css(new Span(text), "scan-bucket-detail");
-                card.add(line);
-            });
+            detail.ifPresent(text -> card.add(css(new Span(text), "scan-bucket-detail")));
             cards.add(card);
             lead.add(count + " " + getTranslation(bucketKey(bucket)) + detail.map(text -> ": " + text).orElse(""));
         }
@@ -377,7 +374,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
             TableRow line = table.addRow();
             line.addClassName("scan-row");
             line.getElement().setAttribute("data-advisory", row.advisory());
-            line.addDataCell(advisoryLink(row.advisory(), version));
+            line.addDataCell(AnswerParts.advisoryLink(row.advisory(), version, "scan-advisory"));
             var component = new Span(row.component());
             Tooltip.forComponent(component).setText(row.coordinate());
             line.addDataCell(component);
@@ -398,11 +395,6 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
                 .go(UI.getCurrentOrThrow());
     }
 
-    private static Component advisoryLink(String advisory, String version) {
-        return css(new RouterLink(advisory, CveView.class, CveView.parameters(advisory, version)), "scan-advisory",
-                "advisory-id");
-    }
-
     private Component verdictCell(Triage.Row row, CasesIndex index) {
         var cell = css(new Span(), "scan-verdict");
         // The fourth word is no fourth state: the row stays counted under unresolved, rule 6.11.19.
@@ -410,10 +402,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
                 : getTranslation(bucketKey(row.bucket()))), "status-chip", "state-" + (row.pending().isPresent() ? "in_triage"
                 : row.bucket().name().toLowerCase(java.util.Locale.ROOT)));
         cell.add(chip);
-        Triage.settledVerdict(row, index).ifPresent(label -> {
-            var said = css(new Span(label), "scan-verdict-label");
-            cell.add(said);
-        });
+        Triage.settledVerdict(row, index).ifPresent(label -> cell.add(css(new Span(label), "scan-verdict-label")));
         return cell;
     }
 

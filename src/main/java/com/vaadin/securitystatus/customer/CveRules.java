@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.securitystatus.data.VersionNumber;
-import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.data.model.CveAnswer;
 import com.vaadin.securitystatus.data.model.VersionAnswer;

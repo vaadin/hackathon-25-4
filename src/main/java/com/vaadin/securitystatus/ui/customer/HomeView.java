@@ -138,10 +138,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         summary.flatMap(row -> stateIcon(row)).ifPresent(top::add);
         card.add(top);
 
-        summary.flatMap(this::stateWord).ifPresent(word -> {
-            var verdict = css(new Span(word), "line-card-state");
-            card.add(verdict);
-        });
+        summary.flatMap(this::stateWord).ifPresent(word -> card.add(css(new Span(word), "line-card-state")));
 
         var action = css(new Span(actionLine(index, line, summary, spoken)), "line-card-action");
         card.add(action);
@@ -244,10 +241,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         var id = css(new Span(cve.or(verdict::id).orElse("")), "recent-id");
         var parts = new ArrayList<Component>();
         parts.add(id);
-        VersionRules.firstSentence(verdict).ifPresent(says -> {
-            var text = css(new Span(says), "recent-says");
-            parts.add(text);
-        });
+        VersionRules.firstSentence(verdict).ifPresent(says -> parts.add(css(new Span(says), "recent-says")));
         String applicability = verdict.applicability().orElse("in_triage");
         Optional.ofNullable(index.labels().get(applicability)).ifPresent(words -> {
             var chip = css(new Badge(words), "verdict-chip", "verdict-" + applicability);
@@ -257,10 +251,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             }
             parts.add(chip);
         });
-        verdict.assessedAt().ifPresent(day -> {
-            var when = css(new Span(day.toString()), "recent-date");
-            parts.add(when);
-        });
+        verdict.assessedAt().ifPresent(day -> parts.add(css(new Span(day.toString()), "recent-date")));
         if (cve.isPresent()) {
             Icon chevron = decorative(VaadinIcon.ANGLE_RIGHT.create(), "recent-chevron");
             parts.add(chevron);

@@ -1,5 +1,6 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
@@ -124,10 +125,7 @@ public final class SpringView extends Composite<Div> {
         var says = css(new Span(risks > 0 ? getTranslation("spring.summary.risk", count, risks)
                 : getTranslation("spring.summary", count)), "explorer-row-says", "spring-boot-summary");
         summary.add(title, lines, stateBadge, says);
-        supply.flatMap(found -> note(found)).ifPresent(note -> {
-            var chip = css(new Span(note), "spring-supply-note");
-            summary.add(chip);
-        });
+        supply.flatMap(found -> note(found)).ifPresent(note -> summary.add(css(new Span(note), "spring-supply-note")));
 
         var detail = css(new Div(), "explorer-detail", "spring-boot-detail");
         supply.ifPresent(found -> {
@@ -174,9 +172,8 @@ public final class SpringView extends Composite<Div> {
         if (supply.open().isEmpty() && supply.commercial().isEmpty()) {
             return Optional.empty();
         }
-        var table = css(new Table(), "spring-supply-table", "answer-table", "vaadin-themed-html");
-        table.addHeaderRow(getTranslation("spring.supply.column.who"), getTranslation("spring.supply.column.release"),
-                getTranslation("spring.supply.column.note"));
+        var table = css(answerTable(getTranslation("spring.supply.column.who"), getTranslation("spring.supply.column.release"),
+                getTranslation("spring.supply.column.note")), "spring-supply-table");
         supply.open().ifPresent(open -> {
             String note;
             if (open.equals(boot.release())) {

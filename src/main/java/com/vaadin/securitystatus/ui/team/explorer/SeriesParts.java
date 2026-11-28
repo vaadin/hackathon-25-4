@@ -4,12 +4,16 @@ import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.decorative;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.badge.Badge;
@@ -31,6 +35,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
+import com.vaadin.securitystatus.data.model.ExplorerFront;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerVersion;
@@ -42,6 +47,9 @@ import com.vaadin.securitystatus.team.explorer.ExplorerAnswer;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
+import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Element;
 
 /**
  * What a series row and an opened series draw, shared by the explorer and the
@@ -64,7 +72,105 @@ final class SeriesParts {
         this.selection = selection;
     }
 
+    // A line's row and its detail
+
+    /** What follows the name in a line's summary: when it was scanned, the two badges, the sentence and the rings. */
+    void summaryTail(Div summary, Optional<OffsetDateTime> scannedAt, Line line, Shape shape,
+            ExplorerRules.LineState state, List<Product> catalogue, Asked asked, String springTitle) {
+        scannedAt.map(OffsetDateTime::toLocalDate).ifPresent(day -> {
+            var scanned = css(new Span(owner.getTranslation("explorer.row.scannedOn", day.toString())),
+                    "explorer-row-scanned");
+            Tooltip.forComponent(scanned).setText(owner.getTranslation("explorer.row.scanned.title"));
+            summary.add(scanned);
+        });
+        summary.add(vaadinBadge(state));
+        ExplorerAnswer.springState(line, shape).ifPresent(theirs -> summary.add(springBadge(theirs, springTitle)));
+        sentence(line, shape, state).ifPresent(text -> summary.add(css(new Span(text), "explorer-row-says")));
+        summary.add(rings(line, catalogue, shape, asked));
+    }
+
+    /** The detail's first sentence: how many findings the line has, and how they split. */
+    Paragraph splitSummary(Split split) {
+        return paragraph("explorer-detail-summary", owner.getTranslation("explorer.summary.all",
+                split.ours().size() + split.theirs().size() + split.build().size(),
+                owner.getTranslation("explorer.summary.split", split.ours().risk().size(),
+                        split.ours().triage().size(), split.theirs().size(), split.build().size(),
+                        split.ours().ruledOut().size())));
+    }
+
+    /** What every finding row of a line is drawn against: the products, the shape and the optional ones. */
+    static FindingList.RowContext rowContext(ExplorerFront front, List<Product> catalogue, Shape shape, Line line) {
+        Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
+        return new FindingList.RowContext(catalogue, shape, shape.hidden(line), optional);
+    }
+
+    // The left panel
+
+    /**
+     * The panel's search: its heading, the field and the button, both of which
+     * hand what was typed to {@code submit}, then whatever the page shows under it.
+     */
+    Section lookup(TextField field, Consumer<String> submit, Component... after) {
+        var heading = css(new H2(owner.getTranslation("explorer.lookup.heading")), "explorer-panel-heading");
+        field.addClassName("explorer-search");
+        field.setAriaLabel(owner.getTranslation("explorer.lookup.heading"));
+        field.addValueChangeListener(change -> {
+            if (change.isFromClient()) {
+                submit.accept(change.getValue());
+            }
+        });
+        var filter = css(new Button(VaadinIcon.SEARCH.create(), click -> submit.accept(field.getValue())),
+                "explorer-filter");
+        filter.addThemeVariants(ButtonVariant.PRIMARY);
+        filter.setAriaLabel(owner.getTranslation("explorer.search.button"));
+        var section = css(new Section(heading, css(new Div(field, filter), "explorer-form")), "explorer-lookup");
+        section.add(after);
+        return section;
+    }
+
+    /** The products' title row, with nothing to explain when there are no products to choose. */
+    Div profileTitle() {
+        return css(new Div(css(new H2(owner.getTranslation("explorer.profile.heading")), "explorer-panel-heading")),
+                "explorer-profile-title");
+    }
+
+    /** The products' title row with the mark that explains what choosing them does. */
+    Div profileTitle(String hintKey) {
+        var mark = css(new Button(VaadinIcon.INFO_CIRCLE_O.create()), "explorer-hint-mark");
+        mark.addThemeVariants(ButtonVariant.TERTIARY);
+        mark.setAriaLabel(owner.getTranslation(hintKey));
+        mark.setTooltipText(owner.getTranslation(hintKey));
+        var row = profileTitle();
+        row.add(mark);
+        return row;
+    }
+
     // The product chips
+
+    /** A product chip's classes and switch semantics, whatever element it is drawn as. */
+    static void dressChip(Element chip, Product product, boolean isOn, boolean fixed, boolean cannot) {
+        chip.getClassList().addAll(List.of("explorer-chip", isOn ? "on" : "off"));
+        if (fixed) {
+            chip.getClassList().add("fixed");
+        }
+        if (cannot) {
+            chip.getClassList().add("impossible");
+        }
+        chip.setAttribute("role", "switch");
+        chip.setAttribute("aria-checked", String.valueOf(isOn));
+        chip.setAttribute("data-product", product.name());
+    }
+
+    /** The products left off once a chip is clicked: one that was on goes off, one that was off comes back. */
+    static Set<String> toggled(Set<String> off, String name, boolean isOn) {
+        var next = new LinkedHashSet<>(off);
+        if (isOn) {
+            next.add(name);
+        } else {
+            next.remove(name);
+        }
+        return next;
+    }
 
     /** What a product chip holds: its box, its name, the discontinued mark and the count of what it brings. */
     Component[] chipParts(Product product, boolean isOn, int brings) {

@@ -48,7 +48,6 @@ import com.vaadin.securitystatus.customer.AdvisoryRules;
 import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.customer.LookupInput;
 import com.vaadin.securitystatus.customer.LookupState;
-import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -106,8 +105,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         configureMenu();
         // The prototype's heading, aside and tip as the answer's H2; the view's title stays the
         // trail's leaf and the document's title, D-191.
-        var heading = css(new Div(new H2(getTranslation("advisories.heading")), aside), "section-row");
-        aside.addClassName("section-aside");
+        var heading = AnswerParts.heading(new H2(getTranslation("advisories.heading")), aside);
         var tip = css(new Paragraph(getTranslation("advisories.tip")), "section-tip");
         getContent().add(heading, tip, outage, pills);
         // The ask exists only for the team, and the security context is asked
@@ -199,8 +197,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     private Component pill(String text, int count, Optional<String> word, boolean active) {
         var link = new RouterLink(text, AdvisoriesView.class);
         // The count in its own lighter span, as the prototype sets it; passed as text, not a quantity to group.
-        var number = css(new Span(String.valueOf(count)), "pill-count");
-        link.add(number);
+        link.add(css(new Span(String.valueOf(count)), "pill-count"));
         Address address = Address.of(path.peek()).with(QueryFlag.VERDICT, word);
         link.setQueryParameters(address.query());
         link.getElement().setAttribute("href", address.href());
@@ -243,16 +240,12 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
 
     /** Rule 4: no severity the index carries, no element in the cell, rather than an empty one. */
     private @Nullable Component severityCell(AdvisoryCatalogEntry row) {
-        return row.severity().flatMap(VersionRules::severity).<Component>map(known -> {
-            return css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
-        }).orElse(null);
+        return AnswerParts.severity(this, row.severity()).orElse(null);
     }
 
     /** Whose fix it is, by the fix owner rule of the version screen, D-51: no chip for an owner nobody established. */
     private @Nullable Component ownerCell(AdvisoryCatalogEntry row) {
-        return row.fixOwner().flatMap(FindingCard::ownerKey).<Component>map(key -> {
-            return css(new Badge(getTranslation(key)), "owner-chip");
-        }).orElse(null);
+        return AnswerParts.ownerChip(this, row.fixOwner()).orElse(null);
     }
 
     /** Every package, one to a line, whole: none is cut at the column's width, D-194. */

@@ -284,8 +284,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
         box.add(verdictState(stateIcon(state), words.word()), new H3(words.title()));
         if (!words.why().isEmpty()) {
-            var why = css(new Paragraph(String.join(" ", words.why())), "verdict-why");
-            box.add(why);
+            box.add(css(new Paragraph(String.join(" ", words.why())), "verdict-why"));
         }
         if (state == CveRules.State.UNKNOWN) {
             return box;
@@ -302,8 +301,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         }
         scanned.ifPresent(text -> {
             var clock = decorative(VaadinIcon.CLOCK.create());
-            var line = css(new Span(clock, new Span(text)), "verdict-scanned");
-            actions.add(line);
+            actions.add(css(new Span(clock, new Span(text)), "verdict-scanned"));
         });
         box.add(actions);
         return box;
@@ -529,8 +527,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             card.add(span);
         });
         coverage.flatMap(CveAnswer.Coverage::fixedInEnterprise).ifPresent(enterprise -> {
-            var span = css(new Span(getTranslation("cve.line.enterprise", enterprise.toString())), "cve-line-when");
-            card.add(span);
+            card.add(css(new Span(getTranslation("cve.line.enterprise", enterprise.toString())), "cve-line-when"));
         });
         return card;
     }
@@ -591,7 +588,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         if (said.size() > 1 || (measured == null && !said.isEmpty())) {
             packageVerdicts.addClassName("cve-verdicts");
             if (said.size() > 1) {
-                var note = css(new Paragraph(getTranslation("cve.verdicts.note", said.size())), "layer-note");
+                var note = note(getTranslation("cve.verdicts.note", said.size()));
                 packageVerdicts.add(note);
             }
             packageVerdicts.add(verdictsTable(index, said));

@@ -291,8 +291,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         Words words = words(index, measured, stuckRisks);
         words.title().ifPresent(title -> box.add(new H3(title)));
         if (!words.why().isEmpty()) {
-            var why = css(new Paragraph(String.join(" ", words.why())), "verdict-why");
-            box.add(why);
+            box.add(css(new Paragraph(String.join(" ", words.why())), "verdict-why"));
         }
 
         var badges = badges(index, measured);
@@ -491,8 +490,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             case OLDEST -> getTranslation("version.card.unmeasured.oldest", version.toString(),
                     found.version().toString());
         }).orElseGet(() -> getTranslation("version.card.unmeasured.none", version.line()));
-        var sentence = css(new Paragraph(why), "verdict-why");
-        box.add(sentence);
+        box.add(css(new Paragraph(why), "verdict-why"));
         nearest.ifPresent(found -> {
             var see = css(new RouterLink(getTranslation("version.card.unmeasured.see", found.version().toString()),
                     VersionView.class, new RouteParameters(VERSION, found.version().toString())), "verdict-action", "primary", "nearest-measured");
@@ -550,7 +548,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             if (i > 0) {
                 list.add(new Text(getTranslation("version.list.separator")));
             }
-            list.add(FindingCard.advisoryLink(named.get(i), measured));
+            list.add(AnswerParts.advisoryLink(named.get(i), measured.version().toString(), "finding-id"));
         }
         if (ids.size() > VersionRules.TRIAGE_NAMED) {
             list.add(new Text(" "));
@@ -592,14 +590,8 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         row.getElement().setAttribute("data-advisory", advisory);
         var id = css(new Span(advisory), "fix-id");
         row.add(id);
-        entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(VersionRules::severity).ifPresent(known -> {
-            var severity = css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
-            row.add(severity);
-        });
-        entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner).flatMap(FindingCard::ownerKey).ifPresent(key -> {
-            var chip = css(new Badge(getTranslation(key)), "owner-chip");
-            row.add(chip);
-        });
+        AnswerParts.severity(this, entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity)).ifPresent(row::add);
+        AnswerParts.ownerChip(this, entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner)).ifPresent(row::add);
         Optional<String> where = entry.flatMap(found -> found.packages().stream().findFirst()).map(VersionRules::shortName)
                 .or(() -> entry.flatMap(found -> found.modules().stream().findFirst()));
         Optional<String> impact = VersionRules.oneLine(VersionRules.verdictsFor(measured, advisory))
@@ -608,8 +600,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         where.ifPresent(says::add);
         impact.ifPresent(says::add);
         if (!says.isEmpty()) {
-            var text = css(new Span(String.join(" · ", says)), "fix-says");
-            row.add(text);
+            row.add(css(new Span(String.join(" · ", says)), "fix-says"));
         }
         var end = css(new Badge(VersionRules.fixedIn(index, advisory, line)
                 .map(release -> getTranslation("version.fixes.fixedIn", release.toString()))
@@ -752,7 +743,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             var grid = answerTable(getTranslation("version.ruled.col.advisory"), getTranslation("version.ruled.col.why"));
             for (String advisory : ordered) {
                 TableRow row = grid.addRow();
-                var id = row.addDataCell(FindingCard.advisoryLink(advisory, measured));
+                var id = row.addDataCell(AnswerParts.advisoryLink(advisory, measured.version().toString(), "finding-id"));
                 Optional<String> why = measured.fromBuild().contains(advisory)
                         ? Optional.of(getTranslation("version.ruled.build"))
                         : Optional.ofNullable(index.advisories().get(advisory))
@@ -902,7 +893,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         for (String advisory : advisories) {
             TableRow row = grid.addRow();
             row.addDataCell(packages(index, advisory));
-            row.addDataCell(FindingCard.advisoryLink(advisory, measured));
+            row.addDataCell(AnswerParts.advisoryLink(advisory, measured.version().toString(), "finding-id"));
             row.addDataCell(fix);
             row.getElement().setAttribute("data-advisory", advisory);
         }

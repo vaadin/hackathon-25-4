@@ -5,7 +5,6 @@ import static com.vaadin.securitystatus.ui.common.Parts.decorative;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 import static com.vaadin.securitystatus.ui.team.explorer.SeriesParts.hint;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -19,16 +18,12 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.badge.Badge;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -128,21 +123,8 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             draw(off.get(), query.get(), opened.get());
         });
         whenAttached(ui -> {
-            if (!selection.unsettled()) {
-                return null;
-            }
-            try {
-                ExplorerFront front = data.explorerFront();
-                Set<String> names = new LinkedHashSet<>();
-                ExplorerAnswer.catalogue(front).stream().filter(Product::switchable).forEach(product -> names.add(product.name()));
-                selection.readStorage(ui, names, restored -> {
-                    if (selection.unsettled()) {
-                        address(query.peek(), new LinkedHashSet<>(restored), opened.peek()).go(ui);
-                    }
-                });
-            } catch (DataUnreachableException unreachable) {
-                // Nothing to restore against; the default stays.
-            }
+            selection.restore(ui, data,
+                    restored -> address(query.peek(), new LinkedHashSet<>(restored), opened.peek()).go(ui));
             return null;
         });
     }
@@ -256,22 +238,9 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     private void buildPanel() {
         panel.addClassName("explorer-panel");
 
-        var lookupHeading = css(new H2(getTranslation("explorer.lookup.heading")), "explorer-panel-heading");
-        search.addClassName("explorer-search");
-        search.setAriaLabel(getTranslation("explorer.lookup.heading"));
         search.setClearButtonVisible(true);
-        search.addValueChangeListener(change -> {
-            if (change.isFromClient()) {
-                submit(change.getValue());
-            }
-        });
-        var filter = new Button(VaadinIcon.SEARCH.create(), click -> submit(search.getValue()));
-        filter.addThemeVariants(ButtonVariant.PRIMARY);
-        filter.setAriaLabel(getTranslation("explorer.search.button"));
-        filter.addClassName("explorer-filter");
-        var form = css(new Div(search, filter), "explorer-form");
         note.addClassName("explorer-note");
-        var lookup = css(new Section(lookupHeading, form, note), "explorer-lookup");
+        var lookup = parts.lookup(search, this::submit, note);
 
         profile.addClassName("explorer-profile");
         panel.add(lookup, profile);
@@ -430,21 +399,11 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             }
         }
 
-        var titleRow = css(new Div(), "explorer-profile-title");
-        var title = css(new H2(getTranslation("explorer.profile.heading")), "explorer-panel-heading");
-        titleRow.add(title);
         if (chips.getComponentCount() == 0) {
-            profile.add(titleRow, hint(getTranslation("explorer.profile.none")));
+            profile.add(parts.profileTitle(), hint(getTranslation("explorer.profile.none")));
             return;
         }
-        var mark = new Button(VaadinIcon.INFO_CIRCLE_O.create());
-        mark.addThemeVariants(ButtonVariant.TERTIARY);
-        mark.addClassName("explorer-hint-mark");
-        mark.setAriaLabel(getTranslation("explorer.profile.hint"));
-        mark.setTooltipText(getTranslation("explorer.profile.hint"));
-        titleRow.add(mark);
-
-        profile.add(titleRow, allBox(catalogue, off, shape), chips);
+        profile.add(parts.profileTitle("explorer.profile.hint"), allBox(catalogue, off, shape), chips);
     }
 
     /**
@@ -494,28 +453,13 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             chip = new Span();
             chip.getElement().setAttribute("aria-disabled", "true");
         } else {
-            var next = new LinkedHashSet<>(off);
-            if (isOn) {
-                next.add(product.name());
-            } else {
-                next.remove(product.name());
-            }
             var link = new RouterLink(ExplorerView.class);
-            link.setQueryParameters(address(query.peek(), next, opened.peek(), true).query());
+            link.setQueryParameters(
+                    address(query.peek(), SeriesParts.toggled(off, product.name(), isOn), opened.peek(), true).query());
             chip = link;
         }
         var element = chip.getElement();
-        element.getClassList().addAll(List.of("explorer-chip", isOn ? "on" : "off"));
-        if (product.fixed()) {
-            element.getClassList().add("fixed");
-        }
-        if (cannot) {
-            element.getClassList().add("impossible");
-        }
-        element.setAttribute("role", "switch");
-        element.setAttribute("aria-checked", String.valueOf(isOn));
-        element.setAttribute("data-product", product.name());
-
+        SeriesParts.dressChip(element, product, isOn, product.fixed(), cannot);
         for (Component part : parts.chipParts(product, isOn, brings)) {
             element.appendChild(part.getElement());
         }
@@ -532,22 +476,10 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         var name = css(new Span(line.line()), "explorer-row-line");
         var version = css(new Span(line.version().toString()), "explorer-row-version");
         summary.add(name, version);
-        line.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
-            var scanned = css(new Span(getTranslation("explorer.row.scannedOn", day.toString())), "explorer-row-scanned");
-            Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
-            summary.add(scanned);
-        });
-        summary.add(parts.vaadinBadge(state));
-        ExplorerAnswer.springState(line, shape).ifPresent(theirs -> {
-            String against = line.springBootDeclared().or(line::springBoot).map(VersionNumber::toString)
-                    .orElseGet(() -> getTranslation("explorer.badge.spring.declares"));
-            summary.add(parts.springBadge(theirs, getTranslation("explorer.badge.spring.title", against)));
-        });
-        parts.sentence(line, shape, state).ifPresent(text -> {
-            var says = css(new Span(text), "explorer-row-says");
-            summary.add(says);
-        });
-        summary.add(parts.rings(line, catalogue, shape, asked));
+        String against = line.springBootDeclared().or(line::springBoot).map(VersionNumber::toString)
+                .orElseGet(() -> getTranslation("explorer.badge.spring.declares"));
+        parts.summaryTail(summary, line.scannedAt(), line, shape, state, catalogue, asked,
+                getTranslation("explorer.badge.spring.title", against));
 
         var details = new Details();
         details.setSummary(summary);
@@ -581,17 +513,12 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             detail.add(hint(getTranslation("explorer.detail.unmeasured")));
             return detail;
         }
-        detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
-                split.ours().size() + split.theirs().size() + split.build().size(),
-                getTranslation("explorer.summary.split", split.ours().risk().size(), split.ours().triage().size(),
-                        split.theirs().size(), split.build().size(), split.ours().ruledOut().size()))));
+        detail.add(parts.splitSummary(split));
         if (shape.plain()) {
             detail.add(hint(getTranslation("explorer.detail.plain")));
         }
 
-        Set<String> optional = Set.copyOf(front.profile().map(ExplorerFront.Profile::off).orElse(List.of()));
-        var routes = new FindingList.RowContext(catalogue, shape, shape.hidden(line), optional);
-        parts.halves(detail, line, split, routes, false);
+        parts.halves(detail, line, split, SeriesParts.rowContext(front, catalogue, shape, line), false);
 
         detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));
         others(line).ifPresent(detail::add);

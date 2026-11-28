@@ -13,11 +13,32 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.badge.Badge;
+import com.vaadin.flow.router.RouterLink;
+import com.vaadin.securitystatus.customer.VersionRules;
+import java.util.Optional;
 
 /** The parts the version, CVE and finding answers are built from, so each is drawn the same way. */
 final class AnswerParts {
 
     private AnswerParts() {
+    }
+
+    /** An advisory id that opens its answer, at the version given when there is one. */
+    static RouterLink advisoryLink(String advisory, String version, String className) {
+        return css(new RouterLink(advisory, CveView.class, CveView.parameters(advisory, version)), className,
+                "advisory-id");
+    }
+
+    /** The severity a record names, in its colour, or nothing for one the data does not establish. */
+    static Optional<Component> severity(Component on, Optional<String> word) {
+        return word.flatMap(VersionRules::severity)
+                .map(known -> css(new Span(on.getTranslation("severity." + known)), "severity", "severity-" + known));
+    }
+
+    /** Whose fix it is, by the fix owner rule, D-51, or nothing for an owner nobody established. */
+    static Optional<Component> ownerChip(Component on, Optional<String> owner) {
+        return owner.flatMap(FindingCard::ownerKey).map(key -> css(new Badge(on.getTranslation(key)), "owner-chip"));
     }
 
     /** The verdict card's first row: its mark, then its word. */
@@ -50,7 +71,12 @@ final class AnswerParts {
 
     /** A section's H3 with an optional aside on the same row: a count as text, or a component. */
     static Component heading(String title, @Nullable Object aside) {
-        var row = css(new Div(new H3(title)), "section-row");
+        return heading(new H3(title), aside);
+    }
+
+    /** A section's heading, at whatever level the page gives it, with an optional aside on the same row. */
+    static Component heading(Component title, @Nullable Object aside) {
+        var row = css(new Div(title), "section-row");
         if (aside instanceof String text) {
             row.add(css(new Span(text), "section-aside"));
         } else if (aside instanceof Component component) {

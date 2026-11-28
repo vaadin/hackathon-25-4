@@ -128,8 +128,7 @@ final class FindingDetail extends Composite<Div> {
                 list.add(paragraph("explorer-route-none", getTranslation("explorer.finding.noRoute")));
             }
             for (String path : coordinate.paths()) {
-                var line = css(new Code(path), "explorer-route");
-                list.add(line);
+                list.add(css(new Code(path), "explorer-route"));
             }
         }
         return Optional.of(list);

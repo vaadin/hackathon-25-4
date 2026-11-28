@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.ui.customer;
 
 import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.note;
 import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.markdown.Markdown;
@@ -49,10 +49,9 @@ final class FindingCard extends Composite<Div> {
         List<VerdictFor> said = VersionRules.verdictsFor(answer, advisory);
         Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
 
-        var head = css(new Div(advisoryLink(advisory, answer)), "finding-head");
-        entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(this::severity).ifPresent(head::add);
-        entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner).flatMap(FindingCard::ownerKey)
-                .map(this::ownerChip).ifPresent(head::add);
+        var head = css(new Div(AnswerParts.advisoryLink(advisory, answer.version().toString(), "finding-id")), "finding-head");
+        AnswerParts.severity(this, entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity)).ifPresent(head::add);
+        AnswerParts.ownerChip(this, entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner)).ifPresent(head::add);
         var vulnerable = css(new Badge(getTranslation(VersionRules.hasWorkaround(said)
                 ? "version.finding.vulnerable.workaround" : "version.finding.vulnerable")), "status-chip", "state-unresolved");
         head.add(vulnerable);
@@ -84,21 +83,6 @@ final class FindingCard extends Composite<Div> {
         return layers;
     }
 
-    static RouterLink advisoryLink(String advisory, VersionAnswer answer) {
-        return css(new RouterLink(advisory, CveView.class, CveView.parameters(advisory, answer.version().toString())),
-                "finding-id", "advisory-id");
-    }
-
-    private Optional<Component> severity(String word) {
-        return VersionRules.severity(word).map(known -> {
-            return css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
-        });
-    }
-
-    private Component ownerChip(String key) {
-        return css(new Badge(getTranslation(key)), "owner-chip");
-    }
-
     /** Whose fix it is, in the chip's words: Vaadin's or the dependency's. An owner nobody established has no chip. */
     static Optional<String> ownerKey(String owner) {
         return switch (owner) {
@@ -111,7 +95,8 @@ final class FindingCard extends Composite<Div> {
     /** The two columns the design draws: what to do now, and what the fix waits on. Absent ones are left out. */
     private Optional<Component> doAndFix(Assessment verdict) {
         var columns = css(new Div(), "finding-columns");
-        verdict.workaround().ifPresent(text -> columns.add(column(getTranslation("version.finding.do"), new Markdown(text))));
+        verdict.workaround().ifPresent(text -> columns.add(
+                css(pair(getTranslation("version.finding.do"), new Markdown(text)), "finding-column")));
         var fix = new ArrayList<Component>();
         verdict.fixExpected().ifPresent(text -> fix.add(new Markdown(text)));
         if (!verdict.fixPrs().isEmpty()) {
@@ -120,16 +105,9 @@ final class FindingCard extends Composite<Div> {
             fix.add(tracking);
         }
         if (!fix.isEmpty()) {
-            columns.add(column(getTranslation("version.finding.fix"), fix.toArray(Component[]::new)));
+            columns.add(css(pair(getTranslation("version.finding.fix"), fix.toArray(Component[]::new)), "finding-column"));
         }
         return columns.getComponentCount() == 0 ? Optional.empty() : Optional.of(columns);
-    }
-
-    private static Div column(String heading, Component... body) {
-        var column = new Div(new H4(heading));
-        column.add(body);
-        column.addClassName("finding-column");
-        return column;
     }
 
     /**
@@ -174,7 +152,7 @@ final class FindingCard extends Composite<Div> {
 
             var modulesBody = pairs();
             entry.map(CasesIndex.AdvisoryCatalogEntry::modules).filter(list -> !list.isEmpty()).ifPresent(list -> {
-                var note = css(new Paragraph(getTranslation("version.layer.affected.note")), "layer-note");
+                var note = note(getTranslation("version.layer.affected.note"));
                 modulesBody.add(pair(getTranslation("version.layer.affected"), new Paragraph(String.join(", ", list)), note));
             });
             var tracking = new ArrayList<Component>();
@@ -201,8 +179,7 @@ final class FindingCard extends Composite<Div> {
             first.flatMap(Assessment::assessedAt)
                     .ifPresent(day -> facts.add(getTranslation("version.layer.written", day.toString())));
             if (!facts.isEmpty()) {
-                var says = css(new Paragraph(String.join(" ", facts)), "layer-note");
-                full.add(says);
+                full.add(note(String.join(" ", facts)));
             }
             var record = new RouterLink(getTranslation("version.layer.record", advisory), CveView.class,
                     CveView.parameters(advisory, answer.version().toString()));
