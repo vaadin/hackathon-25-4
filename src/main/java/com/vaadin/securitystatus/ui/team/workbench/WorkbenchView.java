@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -45,9 +46,12 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.TableRow;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
@@ -56,9 +60,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -180,9 +181,13 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         search.setPlaceholder(getTranslation("workbench.search.placeholder"));
         search.setPrefixComponent(VaadinIcon.SEARCH.create());
         search.setClearButtonVisible(true);
+        // It filters as the reader types, after a pause; the address follows without a navigation, so
+        // nothing is redrawn under the caret and the history keeps one entry, D-280.
+        search.setValueChangeMode(ValueChangeMode.LAZY);
         search.addValueChangeListener(change -> {
             if (change.isFromClient()) {
-                address(line(), change.getValue()).go(UI.getCurrentOrThrow());
+                typed.set(change.getValue());
+                UI.getCurrentOrThrow().getPage().getHistory().replaceState(null, address(line(), change.getValue()).href());
             }
         });
         matching.addClassName("workbench-matching");
