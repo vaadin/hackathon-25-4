@@ -29,10 +29,6 @@
     white-space: nowrap;
 }
 
-.internal-shell vaadin-drawer-toggle[hidden] {
-    display: none;
-}
-
 /* The destinations at the top of the left panel, D-237; the route's own panel under them. */
 .internal-drawer {
     display: flex;
@@ -56,7 +52,7 @@
 .internal-route-panel {
     margin: 0.25rem 0.5rem 0.75rem;
     border: 1px solid var(--vaadin-border-color-secondary);
-    border-radius: var(--vaadin-radius-l, 12px);
+    border-radius: var(--vaadin-radius-l);
     background: var(--vaadin-background-container);
     overflow: hidden;
 }
@@ -75,7 +71,7 @@
 .assistant-aside {
     flex: 0 0 22rem;
     box-sizing: border-box;
-    border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-inline-start: 1px solid var(--vaadin-border-color-secondary);
     display: flex;
     flex-direction: column;
     background: var(--vaadin-background-color);

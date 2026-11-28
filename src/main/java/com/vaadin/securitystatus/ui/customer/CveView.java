@@ -1,5 +1,15 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.layer;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.note;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.heading;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.verdictState;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,19 +23,16 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.clipboard.Clipboard;
-import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableDataCell;
 import com.vaadin.flow.component.html.TableRow;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.component.notification.Notification;
@@ -112,9 +119,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         addClassName("cve-view");
         body.addClassNames("version-body", "cve-body");
         // No visible title above the answer, as in the prototype; kept for screen readers, D-270.
-        var heading = ViewHeading.ofAnswer();
-        heading.addClassName("visually-hidden");
-        getContent().add(heading, body);
+        getContent().add(ViewHeading.hiddenAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         Signal<Answer> answer = Signal.computed(() -> {
@@ -219,22 +224,19 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     /** Said once, above the cards, rather than once per card. */
     private Component unmeasuredNotice(CasesIndex index, Answer answer) {
         VersionNumber version = VersionNumber.of(answer.version());
-        var notice = new Div(new Paragraph(getTranslation("cve.unmeasured.notice", answer.version())));
-        notice.addClassName("cve-unmeasured");
+        var notice = css(new Div(new Paragraph(getTranslation("cve.unmeasured.notice", answer.version()))), "cve-unmeasured");
         notice.getElement().setAttribute("role", "note");
         VersionRules.nearestMeasured(index, version).ifPresent(nearest -> {
             String ids = String.join(",", answer.ones().stream().map(One::id).toList());
-            var link = new RouterLink(getTranslation("cve.unmeasured.nearest", nearest.version().toString()),
-                    CveView.class, new RouteParameters(Map.of(IDS, ids, VERSION, nearest.version().toString())));
-            link.addClassName("nearest-measured");
+            var link = css(new RouterLink(getTranslation("cve.unmeasured.nearest", nearest.version().toString()),
+                    CveView.class, new RouteParameters(Map.of(IDS, ids, VERSION, nearest.version().toString()))), "nearest-measured");
             notice.add(new Paragraph(link));
         });
         return notice;
     }
 
     private Component oneAnswer(CasesIndex index, Answer answer, One one, boolean several) {
-        var section = new Section();
-        section.addClassName("cve-answer");
+        var section = css(new Section(), "cve-answer");
         if (several) {
             section.addClassName("framed");
         }
@@ -250,16 +252,14 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         if (advisory == null) {
             return section;
         }
-        var lines = new Div(heading(getTranslation("cve.lines.title"),
+        var lines = css(new Div(heading(getTranslation("cve.lines.title"),
                 answer.version().isBlank() ? getTranslation("cve.lines.enter")
                         : getTranslation("cve.lines.yours", answer.version())),
-                lineCards(index, advisory, answer, fix));
-        lines.addClassName("cve-lines");
+                lineCards(index, advisory, answer, fix)), "cve-lines");
         section.add(lines);
 
-        var details = new Div(heading(several ? getTranslation("cve.details.for", one.id())
-                : getTranslation("cve.details.title"), null));
-        details.addClassName("cve-details");
+        var details = css(new Div(heading(several ? getTranslation("cve.details.for", one.id())
+                : getTranslation("cve.details.title"), null)), "cve-details");
         details.add(layers(index, answer, one, advisory, said, several));
         section.add(details);
         return section;
@@ -273,31 +273,21 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     private Component verdictCard(CasesIndex index, Answer answer, One one, CveRules.State state,
             Optional<CveRules.Fix> fix, List<CveRules.Said> said) {
-        var box = new Section();
-        box.addClassNames("verdict-card", "state-" + stateClass(state, fix));
+        var box = css(new Section(), "verdict-card", "state-" + stateClass(state));
         Words words = words(answer, one, state, fix, said);
 
-        Icon icon = stateIcon(state).create();
-        icon.addClassName("verdict-icon");
-        icon.getElement().setAttribute("aria-hidden", "true");
-        var row = new Div(icon, new Span(words.word()));
-        row.addClassName("verdict-state");
-        box.add(row, new H3(words.title()));
+        box.add(verdictState(stateIcon(state), words.word()), new H3(words.title()));
         if (!words.why().isEmpty()) {
-            var why = new Paragraph(String.join(" ", words.why()));
-            why.addClassName("verdict-why");
+            var why = css(new Paragraph(String.join(" ", words.why())), "verdict-why");
             box.add(why);
         }
         if (state == CveRules.State.UNKNOWN) {
             return box;
         }
 
-        var actions = new Div();
-        actions.addClassName("verdict-actions");
+        var actions = css(new Div(), "verdict-actions");
         fix.flatMap(found -> VersionRules.releaseNotes(index, found.to()).map(url -> {
-            var notes = new Anchor(url, getTranslation("version.action.releaseNotes", found.to().toString()));
-            notes.addClassNames("verdict-action", "primary");
-            return notes;
+            return css(new Anchor(url, getTranslation("version.action.releaseNotes", found.to().toString())), "verdict-action", "primary");
         })).ifPresent(actions::add);
         Optional<String> scanned = Optional.ofNullable(answer.measured()).flatMap(VersionAnswer::scannedAt)
                 .map(at -> getTranslation("version.scanned", at.toLocalDate().toString()));
@@ -305,10 +295,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             actions.add(copyButton(one.id(), copyText(words, scanned, Optional.ofNullable(address))));
         }
         scanned.ifPresent(text -> {
-            var clock = VaadinIcon.CLOCK.create();
-            clock.getElement().setAttribute("aria-hidden", "true");
-            var line = new Span(clock, new Span(text));
-            line.addClassName("verdict-scanned");
+            var clock = decorative(VaadinIcon.CLOCK.create());
+            var line = css(new Span(clock, new Span(text)), "verdict-scanned");
             actions.add(line);
         });
         box.add(actions);
@@ -419,8 +407,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * browser's answer back here, and one notice saying how it went, D-63.
      */
     private Component copyButton(String id, String text) {
-        var button = new Button(getTranslation("cve.action.copy"), VaadinIcon.COPY_O.create());
-        button.addClassName("copy-answer");
+        var button = css(new Button(getTranslation("cve.action.copy"), VaadinIcon.COPY_O.create()), "copy-answer");
         button.addThemeVariants(ButtonVariant.TERTIARY);
         button.getElement().setAttribute("data-answer", text);
         Clipboard.onClick(button).writeText(text, copied -> {
@@ -435,7 +422,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         return button;
     }
 
-    private static String stateClass(CveRules.State state, Optional<CveRules.Fix> fix) {
+    private static String stateClass(CveRules.State state) {
         return switch (state) {
             case FIX -> "fix_available";
             case AFFECTS, TRIAGE, BOOT, DISCONTINUED -> "unresolved";
@@ -460,8 +447,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     private Component lineCards(CasesIndex index, CveAnswer advisory, Answer answer, Optional<CveRules.Fix> fix) {
         String readers = answer.measured() != null ? CveRules.lineOf(answer.measured())
                 : answer.version().isBlank() ? "" : VersionNumber.of(answer.version()).line();
-        var cards = new Div();
-        cards.addClassName("cve-line-cards");
+        var cards = css(new Div(), "cve-line-cards");
         for (CasesIndex.Line line : VersionRules.tableLines(index, readers, false)) {
             cards.add(lineCard(advisory, line, line.line().equals(readers), fix));
         }
@@ -524,25 +510,20 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             detail = Optional.empty();
         }
 
-        var card = new RouterLink(VersionView.class, new RouteParameters(VersionView.VERSION, head.toString()));
-        card.addClassNames("cve-line-card", "state-" + state);
+        var card = css(new RouterLink(VersionView.class, new RouteParameters(VersionView.VERSION, head.toString())), "cve-line-card", "state-" + state);
         card.getElement().setAttribute("data-line", line.line());
         if (yours) {
             card.addClassName("yours");
         }
-        var minor = new Span(yours ? getTranslation("version.lines.yours", line.line()) : line.line());
-        minor.addClassName("cve-line-minor");
-        var verdict = new Span(word);
-        verdict.addClassName("cve-line-word");
+        var minor = css(new Span(yours ? getTranslation("version.lines.yours", line.line()) : line.line()), "cve-line-minor");
+        var verdict = css(new Span(word), "cve-line-word");
         card.add(minor, verdict);
         detail.ifPresent(text -> {
-            var span = new Span(text);
-            span.addClassName("cve-line-detail");
+            var span = css(new Span(text), "cve-line-detail");
             card.add(span);
         });
         coverage.flatMap(CveAnswer.Coverage::fixedInEnterprise).ifPresent(enterprise -> {
-            var span = new Span(getTranslation("cve.line.enterprise", enterprise.toString()));
-            span.addClassName("cve-line-when");
+            var span = css(new Span(getTranslation("cve.line.enterprise", enterprise.toString())), "cve-line-when");
             card.add(span);
         });
         return card;
@@ -552,8 +533,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     private Component layers(CasesIndex index, Answer answer, One one, CveAnswer advisory, List<CveRules.Said> said,
             boolean several) {
-        var layers = new Div();
-        layers.addClassName("finding-layers");
+        var layers = css(new Div(), "finding-layers");
         VersionAnswer measured = answer.measured();
         // Without a measured version no verdict is the reader's, so none is quoted as theirs: the
         // verdicts are listed with their coordinates instead, CVE-02.
@@ -574,7 +554,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
                 .ifPresent(label -> means.add(pair(getTranslation("version.layer.assessment"), new Paragraph(label))));
         source(index, advisory).ifPresent(text -> means.add(pair(getTranslation("cve.layer.source"), new Paragraph(text))));
         // Shut when several advisories share the page, so each one reads as its card first, D-242.
-        layer(layers, "means", getTranslation("version.layer.means"), means, !several);
+        layers.add(layer("means", getTranslation("version.layer.means"), means, !several));
 
         // 2. Affected modules and the fix
         var modules = pairs();
@@ -592,8 +572,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         }).ifPresent(key -> fix.add(new Paragraph(getTranslation(key))));
         first.flatMap(Assessment::fixExpected).ifPresent(text -> fix.add(new Markdown(text)));
         first.map(Assessment::fixPrs).filter(list -> !list.isEmpty()).ifPresent(list -> {
-            var prs = new Paragraph();
-            prs.addClassName("finding-tracking");
+            var prs = css(new Paragraph(), "finding-tracking");
             list.forEach(url -> prs.add(FindingCard.pullRequest(url)));
             fix.add(prs);
         });
@@ -606,8 +585,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         if (said.size() > 1 || (measured == null && !said.isEmpty())) {
             packageVerdicts.addClassName("cve-verdicts");
             if (said.size() > 1) {
-                var note = new Paragraph(getTranslation("cve.verdicts.note", said.size()));
-                note.addClassName("layer-note");
+                var note = css(new Paragraph(getTranslation("cve.verdicts.note", said.size())), "layer-note");
                 packageVerdicts.add(note);
             }
             packageVerdicts.add(verdictsTable(index, said));
@@ -617,12 +595,11 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             modulesBody.add(packageVerdicts);
         }
         if (modules.getComponentCount() > 0 || packageVerdicts.getComponentCount() > 0) {
-            layer(layers, "modules", getTranslation("version.layer.modules"), modulesBody, false);
+            layers.add(layer("modules", getTranslation("version.layer.modules"), modulesBody, false));
         }
 
         // 3. The advisory and the evidence
-        var evidence = new Div();
-        evidence.addClassName("layer-full");
+        var evidence = css(new Div(), "layer-full");
         // The severity word as the data writes it, as the prototype prints it, D-188.
         advisory.severity().flatMap(VersionRules::severity).ifPresent(known -> evidence.add(note(
                 getTranslation("cve.evidence.severity", known))));
@@ -641,9 +618,8 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         }
         advisory.firstSeen().ifPresent(seen -> evidence.add(note(getTranslation("cve.evidence.firstSeen",
                 seen.toLocalDate().toString()))));
-        var record = new Paragraph(new Anchor(CveRules.recordUrl(advisory.cve()),
-                getTranslation("cve.evidence.record", advisory.cve())), new Text("."));
-        record.addClassName("cve-record");
+        var record = css(new Paragraph(new Anchor(CveRules.recordUrl(advisory.cve()),
+                getTranslation("cve.evidence.record", advisory.cve())), new Text(".")), "cve-record");
         if (!advisory.aliases().isEmpty()) {
             var aliases = new Span();
             AdvisoryIds.fill(aliases, " " + getTranslation("cve.evidence.aliases", AdvisoryIds.HERE), advisory.aliases());
@@ -659,7 +635,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             record.add(new Span(" " + getTranslation("cve.evidence.vaadin")));
         }
         evidence.add(record);
-        layer(layers, "evidence", getTranslation("cve.layer.evidence"), evidence, false);
+        layers.add(layer("evidence", getTranslation("cve.layer.evidence"), evidence, false));
         return layers;
     }
 
@@ -694,7 +670,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             return boxSentences(mine, advisory.arrives().get(mine));
         }
         lines.sort((a, b) -> VersionNumber.of(b).compareTo(VersionNumber.of(a)));
-        var table = table(getTranslation("cve.box.col.line"), getTranslation("cve.box.col.package"),
+        var table = answerTable(getTranslation("cve.box.col.line"), getTranslation("cve.box.col.package"),
                 getTranslation("cve.box.col.scanned"));
         table.addClassName("cve-box");
         for (String line : lines) {
@@ -725,8 +701,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
      * fix where the data names one, D-188.
      */
     private Optional<Component> boxSentences(String line, List<CveAnswer.Arrival> arrivals) {
-        var says = new Div();
-        says.addClassName("cve-box");
+        var says = css(new Div(), "cve-box");
         for (CveAnswer.Arrival arrival : arrivals) {
             if (arrival.packageName().isEmpty()) {
                 continue;
@@ -745,7 +720,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     /** One row per verdict, each naming the coordinate it answers for with the differing part marked, rule 6.4.9. */
     private Table verdictsTable(CasesIndex index, List<CveRules.Said> said) {
-        var table = table(getTranslation("cve.verdicts.col.coordinate"), getTranslation("cve.verdicts.col.verdict"),
+        var table = answerTable(getTranslation("cve.verdicts.col.coordinate"), getTranslation("cve.verdicts.col.verdict"),
                 getTranslation("cve.verdicts.col.impact"));
         table.addClassName("cve-verdicts-table");
         List<String> coordinates = said.stream().map(one -> one.packages().isEmpty()
@@ -755,8 +730,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
             CveRules.Said one = said.get(i);
             TableRow row = table.addRow();
             row.getElement().setAttribute("data-verdict", one.id());
-            var coordinate = new Span();
-            coordinate.addClassName("coordinate");
+            var coordinate = css(new Span(), "coordinate");
             CveRules.Marked parts = marked.get(i);
             if (!parts.before().isEmpty()) {
                 coordinate.add(new Span(parts.before()));
@@ -830,50 +804,6 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     // Small parts
-
-    private static void layer(Div layers, String key, String title, Component body, boolean open) {
-        var details = new Details(title, body);
-        details.addClassName("finding-layer");
-        details.getElement().setAttribute("data-layer", key);
-        details.setOpened(open);
-        layers.add(details);
-    }
-
-    private static Div pairs() {
-        var pairs = new Div();
-        pairs.addClassName("layer-pairs");
-        return pairs;
-    }
-
-    private static Div pair(String heading, Component... body) {
-        var pair = new Div(new H4(heading));
-        pair.add(body);
-        return pair;
-    }
-
-    private static Paragraph note(String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName("layer-note");
-        return paragraph;
-    }
-
-    private static Component heading(String title, @Nullable String aside) {
-        var row = new Div(new H3(title));
-        row.addClassName("section-row");
-        if (aside != null) {
-            var span = new Span(aside);
-            span.addClassName("section-aside");
-            row.add(span);
-        }
-        return row;
-    }
-
-    private static Table table(String... headers) {
-        var table = new Table();
-        table.addClassNames("answer-table", "vaadin-themed-html");
-        table.addHeaderRow(headers);
-        return table;
-    }
 
     private static String capitalised(String text) {
         return text.isEmpty() ? text : Character.toUpperCase(text.charAt(0)) + text.substring(1);

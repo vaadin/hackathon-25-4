@@ -58,16 +58,13 @@
     padding: 0.25rem 0.75rem 0.25rem 0;
     text-align: start;
     vertical-align: top;
-    border-bottom: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.12));
+    border-bottom: 1px solid var(--vaadin-border-color);
 }
 
-.diagnostics-panel thead th {
-    font-weight: var(--aura-font-weight-semibold, 600);
-}
-
+.diagnostics-panel thead th,
 .diagnostics-total th,
 .diagnostics-total td {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
 }
 
 .diagnostics-request-tables {
@@ -79,7 +76,7 @@
 
 .diagnostics-note {
     margin: 0.5rem 0;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .diagnostics-text {

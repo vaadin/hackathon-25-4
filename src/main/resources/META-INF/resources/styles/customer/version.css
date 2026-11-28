@@ -11,20 +11,15 @@
     display: none;
 }
 
-.version-body h2 {
-    margin: 0;
-    font-size: 1.25rem;
-}
-
-.version-body h3 {
-    margin: 0;
-    font-size: 1.125rem;
+.verdict-card h3 {
+    font-size: 28px;
+    line-height: 34px;
 }
 
 .version-body h4 {
     margin: 0 0 0.25rem;
     font-size: 0.875rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .version-body p {
@@ -32,56 +27,13 @@
 }
 
 /* The verdict card, the prototype's: tinted by its state, a filled mark, the state word in capitals. */
+/* Tinted by its state in common/state.css; every verdict card carries one. */
 .verdict-card {
-    --verdict-face: light-dark(#f4f7ff, #151e33);
-    --verdict-edge: light-dark(#c9d7fb, color-mix(in srgb, var(--aura-accent-color, #3266e4) 30%, transparent));
-    --verdict-ink: light-dark(#1a3860, var(--aura-accent-text-color, #8fb0ff));
-    --verdict-mark: light-dark(#3266e4, var(--aura-accent-color, #3266e4));
-    --verdict-tint: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
     padding: 28px;
-    border: 1px solid var(--verdict-edge);
-    border-radius: 15px;
-    background: var(--verdict-face);
-}
-
-.verdict-card.state-secure {
-    --verdict-face: light-dark(#f1f9f3, #12271d);
-    --verdict-edge: light-dark(#c3e5cd, color-mix(in srgb, var(--status-secure) 30%, transparent));
-    --verdict-ink: light-dark(#0b5e28, var(--status-secure));
-    --verdict-mark: light-dark(#0b5e28, var(--status-secure));
-    --verdict-tint: light-dark(#daf3e6, color-mix(in srgb, var(--status-secure) 25%, transparent));
-}
-
-.verdict-card.state-unresolved {
-    --verdict-face: light-dark(#fff5f5, #2a1615);
-    --verdict-edge: light-dark(#f0c4c5, color-mix(in srgb, var(--status-unresolved) 30%, transparent));
-    --verdict-ink: light-dark(#a20519, var(--status-unresolved));
-    --verdict-mark: light-dark(#a20519, var(--status-unresolved));
-    --verdict-tint: light-dark(#fbe5e5, color-mix(in srgb, var(--status-unresolved) 25%, transparent));
-}
-
-/* The answer by advisory across every line: the prototype's blue card, the default colours above. */
-.verdict-card.state-measured {
-    border-style: solid;
-}
-
-.verdict-card.state-unmeasured {
-    --verdict-face: light-dark(#fafbfc, var(--vaadin-background-container));
-    --verdict-edge: light-dark(#c9ced6, var(--vaadin-border-color));
-    --verdict-ink: light-dark(#3f4247, var(--vaadin-text-color-secondary));
-    --verdict-mark: light-dark(#3f4247, var(--vaadin-text-color-secondary));
-    border-style: dashed;
-}
-
-.verdict-card h2,
-.verdict-card h3 {
-    margin: 0;
-    font-size: 28px;
-    line-height: 34px;
 }
 
 .verdict-state {
@@ -92,7 +44,7 @@
     font-weight: 600;
     letter-spacing: 0.56px;
     text-transform: uppercase;
-    color: var(--verdict-ink);
+    color: var(--ink-deep, var(--ink));
 }
 
 .verdict-icon {
@@ -102,30 +54,21 @@
     height: 32px;
     padding: 8px;
     border-radius: 999px;
-    background: var(--verdict-mark);
-    color: light-dark(#ffffff, var(--vaadin-background-color));
+    background: var(--mark, var(--ink));
+    color: var(--surface);
 }
 
 .verdict-why {
     max-width: 68ch;
     font-size: 16px;
     line-height: 24px;
-    color: light-dark(rgb(11 11 11 / 0.8), var(--vaadin-text-color));
+    color: var(--ink-soft);
 }
 
 .verdict-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-}
-
-.verdict-badge {
-    --vaadin-badge-background: var(--verdict-tint);
-    --vaadin-badge-text-color: var(--verdict-ink);
-    --vaadin-badge-font-size: 12px;
-    --vaadin-badge-font-weight: 600;
-    --vaadin-badge-padding: 3px 8px;
-    --vaadin-badge-border-width: 0;
 }
 
 .verdict-actions {
@@ -142,9 +85,9 @@
     min-height: 2.25rem;
     padding: 8px 14px;
     border-radius: 9px;
-    background: light-dark(#3266e4, var(--aura-accent-color, #3266e4));
+    background: var(--accent);
     color: #ffffff;
-    box-shadow: 0 2px 5px -1px rgb(20 20 20 / 0.2);
+    box-shadow: var(--shadow-button);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -156,7 +99,7 @@
     gap: 6px;
     margin-inline-start: auto;
     font-size: 12px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .verdict-scanned vaadin-icon {
@@ -175,12 +118,16 @@
 }
 
 .section-aside {
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .section-tip {
     max-width: 56rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.version-body .section-tip {
+    font-size: 13px;
 }
 
 /* Findings */
@@ -190,12 +137,13 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     margin-block-end: 1rem;
-    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-m);
 }
 
 .verdict-card .finding-card {
     margin: 0;
+    background: var(--vaadin-background-color);
 }
 
 .finding-head {
@@ -206,7 +154,7 @@
 }
 
 .finding-id {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
@@ -224,23 +172,25 @@
 }
 
 .finding-through,
-.layer-note {
+.layer-note,
+.case-screen,
+.case-needs {
     font-size: 0.875rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The layered details, the prototype's accordion: one frame, a hairline between layers. */
 .finding-layers {
     display: flex;
     flex-direction: column;
-    border: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border: 1px solid var(--hairline);
     border-radius: 12px;
     overflow: hidden;
-    background: light-dark(#ffffff, var(--vaadin-background-color));
+    background: var(--surface);
 }
 
 .finding-layer + .finding-layer {
-    border-block-start: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border-block-start: 1px solid var(--hairline);
 }
 
 .finding-layer > vaadin-details-summary {
@@ -258,13 +208,13 @@
     margin: 0 0 4px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The severity is the advisory's own word, in the tokens reserved for it */
 .severity {
     font-size: 0.875rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
 }
 
 .severity-critical {
@@ -283,32 +233,6 @@
     color: var(--severity-low);
 }
 
-/* A state in a row: the prototype's small filled pill. */
-.status-chip {
-    --vaadin-badge-font-size: 12px;
-    --vaadin-badge-font-weight: 600;
-    --vaadin-badge-padding: 3px 8px;
-    --vaadin-badge-border-width: 0;
-    --vaadin-badge-background: light-dark(#eceff2, var(--vaadin-background-container));
-    --vaadin-badge-text-color: light-dark(#3f4247, var(--vaadin-text-color-secondary));
-}
-
-.status-chip.state-secure {
-    --vaadin-badge-background: light-dark(#daf3e6, color-mix(in srgb, var(--status-secure) 25%, transparent));
-    --vaadin-badge-text-color: light-dark(#0b5e28, var(--status-secure));
-}
-
-.status-chip.state-fix_available {
-    --vaadin-badge-background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
-    --vaadin-badge-text-color: light-dark(#1a3860, var(--aura-accent-text-color, #8fb0ff));
-}
-
-.status-chip.state-unresolved,
-.status-chip.state-in_triage {
-    --vaadin-badge-background: light-dark(#fbe5e5, color-mix(in srgb, var(--status-unresolved) 25%, transparent));
-    --vaadin-badge-text-color: light-dark(#a20519, var(--status-unresolved));
-}
-
 /* Not assessed yet, said out loud */
 .triage-notice {
     display: flex;
@@ -317,14 +241,15 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     border: 1px dashed var(--status-unresolved);
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border-radius: var(--vaadin-radius-m);
 }
 
 .triage-notice > div {
     flex: 1 1 20rem;
 }
 
-.triage-ids {
+.triage-ids,
+.version-body vaadin-markdown :is(p, li, code) {
     overflow-wrap: anywhere;
 }
 
@@ -340,14 +265,14 @@
     align-items: baseline;
     gap: 0.25rem 0.75rem;
     padding: 0.625rem 0;
-    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-block-end: 1px solid var(--vaadin-border-color-secondary);
     color: inherit;
     text-decoration: none;
 }
 
 .fix-id {
     min-width: 9rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
@@ -365,7 +290,7 @@
     align-self: center;
     width: 1rem;
     height: 1rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* Spring Boot, the note shape */
@@ -377,7 +302,7 @@
     column-gap: 16px;
     padding: 16px;
     border-radius: 12px;
-    background: light-dark(#f3f5f7, var(--vaadin-background-container));
+    background: var(--panel);
 }
 
 .boot-note h3 {
@@ -391,19 +316,18 @@
     grid-column: 1;
     margin: 4px 0 0;
     font-size: 13px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .boot-note .section-link {
     grid-column: 2;
     grid-row: 1 / span 2;
     font-size: 13px;
-    font-weight: 400;
     white-space: nowrap;
 }
 
 .section-link {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    text-decoration: none;
     /* A 24 pixel target, WCAG 2.5.8, without moving the text around it. */
     display: inline-block;
     padding-block: 4px;
@@ -413,13 +337,13 @@
 /* The tables, the prototype's: a rounded frame, a quiet header, rows split by hairlines. */
 .answer-table {
     width: 100%;
-    border: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border: 1px solid var(--hairline);
     border-radius: 12px;
     border-collapse: separate;
     border-spacing: 0;
     overflow: hidden;
     font-size: 14px;
-    background: light-dark(#ffffff, var(--vaadin-background-color));
+    background: var(--surface);
 }
 
 .answer-table :is(th, td) {
@@ -429,14 +353,14 @@
     overflow-wrap: anywhere;
     font-weight: 400;
     border: 0;
-    border-block-end: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border-block-end: 1px solid var(--hairline);
 }
 
 .answer-table thead th {
     padding: 10px 16px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     background: light-dark(#fbfcfd, var(--vaadin-background-container));
 }
 
@@ -445,16 +369,17 @@
 }
 
 .answer-table a {
-    color: light-dark(#2b59c8, var(--aura-accent-text-color));
+    color: var(--accent-ink);
+    font-weight: 400;
     text-decoration: none;
 }
 
-.answer-table a:hover {
+:is(.answer-table a, .section-link):hover {
     text-decoration: underline;
 }
 
 .lines-table tr.yours {
-    background: light-dark(#f4f7ff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 12%, transparent));
+    background: var(--accent-face);
 }
 
 .lines-table tr.yours th {
@@ -500,53 +425,6 @@
 .finding-column,
 .layer-pairs > div {
     min-width: 0;
-}
-
-.version-body vaadin-markdown :is(p, li, code) {
-    overflow-wrap: anywhere;
-}
-
-/*
- * The answer by version as the prototype lays it out, D-174 to D-177, and the answer by CVE, which
- * shares the classes above through `version-body` and is laid out the same way since D-186. The
- * rules are scoped to the two views so no other screen that reuses a class picks them up.
- *
- * The view's title is the answer's H2; the card's headline and every section heading are H3 under it.
- */
-:is(.version-view, .cve-view) .version-body h3 {
-    font-size: 18px;
-    font-weight: 600;
-}
-
-:is(.version-view, .cve-view) .version-body .boot-note h3 {
-    font-size: 15px;
-}
-
-:is(.version-view, .cve-view) .verdict-card h3 {
-    font-size: 28px;
-    line-height: 34px;
-}
-
-:is(.version-view, .cve-view) .verdict-card .finding-card {
-    background: var(--vaadin-background-color, #fff);
-}
-
-/* The sentence under a section heading and its show or hide link, the prototype's sizes. */
-:is(.version-view, .cve-view) .section-tip {
-    font-size: 13px;
-}
-
-:is(.version-view, .cve-view) .section-link {
-    font-weight: 400;
-    text-decoration: none;
-}
-
-:is(.version-view, .cve-view) .section-link:hover {
-    text-decoration: underline;
-}
-
-.answer-table a {
-    font-weight: 400;
 }
 
 /* A managed property or a product name inside a tip, in code type. */

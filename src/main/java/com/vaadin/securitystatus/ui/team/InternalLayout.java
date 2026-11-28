@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -72,14 +74,12 @@ public final class InternalLayout extends AppLayout {
 
         routePanel.addClassName("internal-route-panel");
         drawer.addClassName("internal-drawer");
-        var brand = new Div(getTranslation("shell.brand"));
-        brand.addClassName("internal-brand");
+        var brand = css(new Div(getTranslation("shell.brand")), "internal-brand");
         drawer.add(brand, nav, routePanel);
         addToDrawer(drawer);
 
         routeHolder.addClassName("internal-route");
-        var frame = new Div(routeHolder);
-        frame.addClassName("internal-frame");
+        var frame = css(new Div(routeHolder), "internal-frame");
         setContent(frame);
 
         ai.stream().filter(AiSurfaces::offered).findFirst().ifPresent(surfaces -> {
@@ -127,17 +127,5 @@ public final class InternalLayout extends AppLayout {
         if (oldContent != null) {
             oldContent.getElement().removeFromParent();
         }
-    }
-
-    /**
-     * Where the assistant panel is mounted by the feature that owns it.
-     */
-    public Div getAssistantMount() {
-        return assistantMount;
-    }
-
-    /** Opens or shuts the assistant panel on the right, for the tests and the bar's button. */
-    public void showAssistant(boolean open) {
-        assistantOpen.set(open);
     }
 }

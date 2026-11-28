@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +21,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerVersion;
 
@@ -44,19 +48,17 @@ final class FindingDetail extends Composite<Div> {
         var box = getContent();
         box.addClassName("explorer-finding");
         if (record.isEmpty()) {
-            box.add(lead("explorer-finding-missing", getTranslation("explorer.finding.missing", release.toString())));
+            box.add(paragraph("explorer-finding-missing", getTranslation("explorer.finding.missing", release.toString())));
         }
         record.ifPresent(found -> {
             List<Coordinate> coordinates = coordinates(found, springOff);
-            var top = new Div();
-            top.addClassName("explorer-finding-top");
+            var top = css(new Div(), "explorer-finding-top");
             coordinates.forEach(coordinate -> top.add(pill(coordinate.name())));
-            found.summary().ifPresent(text -> top.add(lead("explorer-finding-title", text)));
+            found.summary().ifPresent(text -> top.add(paragraph("explorer-finding-title", text)));
             if (top.getComponentCount() > 0) {
                 box.add(top);
             }
-            var verdict = new Div();
-            verdict.addClassName("explorer-verdict");
+            var verdict = css(new Div(), "explorer-verdict");
             found.impact().ifPresent(text -> verdict.add(field("impact", text)));
             found.commentary().ifPresent(text -> verdict.add(field("commentary", text)));
             found.workaround().ifPresent(text -> verdict.add(field("workaround", text)));
@@ -67,17 +69,12 @@ final class FindingDetail extends Composite<Div> {
             }
             routes(coordinates).ifPresent(box::add);
         });
-        var link = new Anchor(recordUrl(cve), getTranslation("explorer.finding.record"));
+        var link = new Anchor(CveRules.recordUrl(cve), getTranslation("explorer.finding.record"));
         link.setTarget(AnchorTarget.BLANK);
         link.addClassName("explorer-finding-record");
         box.add(link);
     }
 
-    /** Where an advisory's own record is: GitHub's database for a GHSA id, cve.org otherwise. */
-    static String recordUrl(String id) {
-        return id.startsWith("GHSA-") ? "https://github.com/advisories/" + id
-                : "https://www.cve.org/CVERecord?id=" + id;
-    }
 
     /**
      * The first sentences of a field, up to about a paragraph, cut where a
@@ -103,8 +100,7 @@ final class FindingDetail extends Composite<Div> {
 
     /** A label and its text, the text cut by {@link #brief} with "more" at the end of its last line. */
     private Component field(String name, String text) {
-        var label = new Span(getTranslation("explorer.finding." + name));
-        label.addClassName("explorer-field-label");
+        var label = css(new Span(getTranslation("explorer.finding." + name)), "explorer-field-label");
         Brief shown = brief(text);
         var body = new Paragraph(shown.text());
         if (shown.cut()) {
@@ -118,9 +114,7 @@ final class FindingDetail extends Composite<Div> {
             });
             body.add(new Text(" "), more);
         }
-        var field = new Div(label, body);
-        field.addClassNames("explorer-field", "field-" + name);
-        return field;
+        return css(new Div(label, body), "explorer-field", "field-" + name);
     }
 
     /**
@@ -169,19 +163,17 @@ final class FindingDetail extends Composite<Div> {
         if (coordinates.isEmpty()) {
             return Optional.empty();
         }
-        var list = new Div();
-        list.addClassName("explorer-routes");
+        var list = css(new Div(), "explorer-routes");
         boolean several = coordinates.size() > 1;
         for (Coordinate coordinate : coordinates) {
             if (several) {
-                list.add(lead("explorer-coordinate-name", coordinate.name()));
+                list.add(paragraph("explorer-coordinate-name", coordinate.name()));
             }
             if (coordinate.paths().isEmpty()) {
-                list.add(lead("explorer-route-none", getTranslation("explorer.finding.noRoute")));
+                list.add(paragraph("explorer-route-none", getTranslation("explorer.finding.noRoute")));
             }
             for (String path : coordinate.paths()) {
-                var line = new Code(path);
-                line.addClassName("explorer-route");
+                var line = css(new Code(path), "explorer-route");
                 list.add(line);
             }
         }
@@ -189,14 +181,7 @@ final class FindingDetail extends Composite<Div> {
     }
 
     private static Component pill(String coordinate) {
-        var code = new Code(coordinate);
-        code.addClassName("explorer-finding-pkg");
-        return code;
+        return css(new Code(coordinate), "explorer-finding-pkg");
     }
 
-    private static Paragraph lead(String className, String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName(className);
-        return paragraph;
-    }
 }

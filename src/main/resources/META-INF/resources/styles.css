@@ -1,5 +1,6 @@
 @import url("styles/common/shell.css");
 @import url("styles/common/data.css");
+@import url("styles/common/state.css");
 @import url("styles/customer/lookup.css");
 @import url("styles/customer/home.css");
 @import url("styles/customer/version.css");
@@ -24,8 +25,49 @@ html {
     /* The four severities, worst first. */
     --severity-critical: light-dark(#a40e26, #ff7b72);
     --severity-high: light-dark(#bc4c00, #ffa657);
-    --severity-moderate: light-dark(#9a6700, #e3b341);
+    --severity-moderate: var(--status-fix);
     --severity-low: light-dark(#57606a, #9da7b3);
+
+    /*
+     * The prototype's palette, each value named once. Surfaces and lines, then the accent, then
+     * per state the face and edge of a card, the ink of its words and marks and the tint of a
+     * small pill. styles/common/state.css hands them to whatever carries a state class.
+     */
+    --surface: light-dark(#ffffff, var(--vaadin-background-color));
+    --panel: light-dark(#f3f5f7, var(--vaadin-background-container));
+    --hairline: light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    --edge-neutral: light-dark(#c9ced6, var(--vaadin-border-color));
+    --ink-soft: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color-secondary));
+    --ink-neutral: light-dark(#3f4247, var(--vaadin-text-color-secondary));
+    --chip-neutral: light-dark(#eceff2, var(--vaadin-background-container));
+
+    --accent: light-dark(#3266e4, var(--aura-accent-color));
+    --accent-ink: light-dark(#2b59c8, var(--aura-accent-text-color));
+    --accent-deep: light-dark(#1a3860, var(--aura-accent-text-color));
+    --accent-chip: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color) 25%, transparent));
+    --accent-face: light-dark(#f4f7ff, #151e33);
+    --accent-edge: light-dark(#c9d7fb, color-mix(in srgb, var(--aura-accent-color) 30%, transparent));
+
+    --secure-face: light-dark(#f1f9f3, #12271d);
+    --secure-edge: light-dark(#c3e5cd, color-mix(in srgb, var(--status-secure) 30%, transparent));
+    --secure-ink: light-dark(#0b5e28, var(--status-secure));
+    --secure-chip: light-dark(#e7f5ee, #12271d);
+
+    --unresolved-face: light-dark(#fff5f5, #2a1615);
+    --unresolved-edge: light-dark(#f0c4c5, color-mix(in srgb, var(--status-unresolved) 30%, transparent));
+    --unresolved-ink: light-dark(#a20519, var(--status-unresolved));
+    --unresolved-chip: light-dark(#fbe5e5, #2a1615);
+
+    --unjudged-chip: light-dark(#fff6e0, #2a2314);
+
+    --neutral-face: light-dark(#fafbfc, var(--vaadin-background-container));
+
+    --r-card: 15px;
+    --r-panel: 12px;
+    --r-row: 10px;
+    --r-control: 9px;
+    --shadow-card: 0 1px 2px rgb(16 24 40 / 0.05);
+    --shadow-button: 0 2px 5px -1px rgb(20 20 20 / 0.2);
 
     /* Tooltips as the prototype draws them: a shade apart from the page, prose width, no delay to read. */
     --vaadin-tooltip-background: light-dark(#39414d, #2b323d);

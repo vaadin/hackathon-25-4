@@ -1,0 +1,86 @@
+/*
+ * The colours of a state, said once. Whatever carries a state class reads them as variables:
+ * --face and --edge for a card, --ink for its words, --mark for a filled mark and --chip for a
+ * small pill. The accent states write their words a shade deeper than their mark, as the
+ * prototype does. Every state sets all of them, so a state nested in another never inherits a
+ * colour from it. A card with no state class keeps the defaults its own rule gives.
+ */
+.state-secure {
+    --edge-style: solid;
+    --face: var(--secure-face);
+    --edge: var(--secure-edge);
+    --ink: var(--secure-ink);
+    --ink-deep: var(--secure-ink);
+    --mark: var(--secure-ink);
+    --chip: var(--secure-chip);
+}
+
+.state-unresolved,
+.state-in_triage {
+    --edge-style: solid;
+    --face: var(--unresolved-face);
+    --edge: var(--unresolved-edge);
+    --ink: var(--unresolved-ink);
+    --ink-deep: var(--unresolved-ink);
+    --mark: var(--unresolved-ink);
+    --chip: var(--unresolved-chip);
+}
+
+.state-fix_available,
+.state-measured,
+.state-none {
+    --edge-style: solid;
+    --face: var(--accent-face);
+    --edge: var(--accent-edge);
+    --ink: var(--accent-ink);
+    --ink-deep: var(--accent-deep);
+    --mark: var(--accent);
+    --chip: var(--accent-chip);
+}
+
+.state-unmeasured {
+    --face: var(--neutral-face);
+    --edge: var(--edge-neutral);
+    --ink: var(--ink-neutral);
+    --ink-deep: var(--ink-neutral);
+    --mark: var(--ink-neutral);
+    --chip: var(--chip-neutral);
+    --edge-style: dashed;
+}
+
+/* The tinted cards: the home's lines, the lines of an advisory, the report's buckets, the verdict. */
+:is(.line-card, .cve-line-card, .scan-bucket, .verdict-card) {
+    border: 1px var(--edge-style, solid) var(--edge, var(--secure-edge));
+    border-radius: var(--r-card);
+    background: var(--face, var(--secure-face));
+}
+
+:is(.line-card, .cve-line-card):is(:hover, :focus-visible) {
+    box-shadow: var(--shadow-card);
+}
+
+/* The minor of a line card and the word under it. */
+:is(.line-card-minor, .cve-line-minor) {
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 700;
+}
+
+:is(.line-card-state, .cve-line-word) {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink, var(--secure-ink));
+}
+
+/* The small filled pills that say a state or a verdict. */
+:is(.status-chip, .verdict-badge, .verdict-chip, .line-card-tier) {
+    --vaadin-badge-font-size: 12px;
+    --vaadin-badge-font-weight: 600;
+    --vaadin-badge-padding: 3px 8px;
+    --vaadin-badge-border-width: 0;
+}
+
+:is(.status-chip, .verdict-badge) {
+    --vaadin-badge-background: var(--chip, var(--chip-neutral));
+    --vaadin-badge-text-color: var(--ink-deep, var(--ink, var(--ink-neutral)));
+}

@@ -81,30 +81,21 @@ public final class VerdictForm extends Composite<FormLayout> {
                 fixExpected, fixExpectedVersion, fixPrs, evidence, supersedes, assessedBy);
 
         binder.setValidationErrorHandler(new TranslatedErrors());
-        binder.forField(verdictId).bind("verdictId");
-        binder.forField(purl).bind("purl");
-        binder.forField(advisories).bind("advisories");
         binder.forField(applicability).withConverter(blankAsNull()).bind("applicability");
         binder.forField(depth).withConverter(blankAsNull()).bind("depth");
-        binder.forField(affects).bind("affects");
         binder.forField(impact).withValidator((value, context) -> {
             boolean exporting = List.of(binder.getValidationGroups()).contains(Ready.class);
             boolean needed = VerdictDraft.NEED_IMPACT.contains(Optional.ofNullable(applicability.getValue()).orElse(""));
             return exporting && needed && value.isBlank() ? ValidationResult.error("workbench.invalid.impact")
                     : ValidationResult.ok();
         }).bind("impact");
-        binder.forField(workaround).bind("workaround");
-        binder.forField(commentary).bind("commentary");
-        binder.forField(fixExpected).bind("fixExpected");
         binder.forField(fixExpectedVersion).withValidator((value, context) -> VerdictYaml.promised(value).entrySet()
                 .stream().allMatch(promise -> promise.getValue().startsWith(promise.getKey() + "."))
                         ? ValidationResult.ok()
                         : ValidationResult.error("workbench.invalid.promise.line"))
                 .bind("fixExpectedVersion");
-        binder.forField(fixPrs).bind("fixPrs");
-        binder.forField(evidence).bind("evidence");
-        binder.forField(supersedes).bind("supersedes");
-        binder.forField(assessedBy).bind("assessedBy");
+        // Every other field is bound by its name, after the ones above that convert or check.
+        binder.bindInstanceFields(this);
         binder.setBean(new VerdictDraft());
     }
 
@@ -127,11 +118,6 @@ public final class VerdictForm extends Composite<FormLayout> {
     /** Edits a copy of the given draft. */
     public void edit(VerdictDraft draft) {
         binder.setBean(draft.copy());
-    }
-
-    /** The formats only: whether the draft may be saved. */
-    public boolean validForDraft() {
-        return invalidForDraft().isEmpty();
     }
 
     /** The labels of the fields whose format the {@link Draft} group refuses, in the form's order. */

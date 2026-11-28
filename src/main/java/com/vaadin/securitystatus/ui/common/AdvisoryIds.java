@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.common;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.util.List;
 
 import com.vaadin.flow.component.HasComponents;
@@ -30,8 +32,7 @@ public final class AdvisoryIds {
             if (i > 0) {
                 target.add(new Text(", "));
             }
-            var id = new Span(ids.get(i));
-            id.addClassName("advisory-id");
+            var id = css(new Span(ids.get(i)), "advisory-id");
             target.add(id);
         }
         target.add(new Text(sentence.substring(at + HERE.length())));

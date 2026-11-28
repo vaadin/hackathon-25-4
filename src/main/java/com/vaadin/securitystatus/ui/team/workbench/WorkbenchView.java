@@ -1,5 +1,9 @@
 package com.vaadin.securitystatus.ui.team.workbench;
 
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -69,7 +73,7 @@ import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
 import com.vaadin.securitystatus.ui.team.InternalLayout;
-import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
+import com.vaadin.securitystatus.ui.team.explorer.ReleaseView;
 
 import jakarta.annotation.security.RolesAllowed;
 
@@ -174,7 +178,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         home.setSummary(foldSummary(getTranslation("workbench.home")));
         home.add(composer);
 
-        getContent().add(backLink(), outage, lead, hint, filter, queue, home, summaryFold, footer, draftsSection());
+        getContent().add(ReleaseView.back(), outage, lead, hint, filter, queue, home, summaryFold, footer, draftsSection());
 
         var generatedAt = refresh.generatedAt();
         Signal<Optional<VerdictQueue>> read = Signal.computed(() -> {
@@ -188,14 +192,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         form.binder().addValueChangeListener(change -> changed());
         stored.set(drafts.list());
         changed();
-    }
-
-    private static RouterLink backLink() {
-        var back = new RouterLink(ExplorerView.class);
-        back.add(com.vaadin.flow.component.icon.VaadinIcon.ANGLE_LEFT.create(),
-                new Span(back.getTranslation("release.back")));
-        back.addClassName("release-back");
-        return back;
     }
 
     /** The verdict form, for whatever attaches to it later: the form AI controller of epic 11. */
@@ -304,8 +300,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         var link = new RouterLink("", WorkbenchView.class);
         link.add(new Span(text));
         if (count != null) {
-            var number = new Span(count);
-            number.addClassName("workbench-series-count");
+            var number = css(new Span(count), "workbench-series-count");
             link.add(new Text(" "), number);
         }
         link.setQueryParameters(Address.of(PATH).with(QueryFlag.SERIES, series).query());
@@ -324,23 +319,18 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     /** One package, as the prototype's row: what it would close, its name, its state and what it holds. */
     private Details packageRow(Row row) {
         QueueEntry entry = row.entry();
-        var summaryLine = new Div();
-        summaryLine.addClassName("workbench-row-summary");
-        var closes = new Span(String.valueOf(row.closes()));
-        closes.addClassName("workbench-row-closes");
-        var name = new Span(row.name());
-        name.addClassName("workbench-row-package");
+        var summaryLine = css(new Div(), "workbench-row-summary");
+        var closes = css(new Span(String.valueOf(row.closes())), "workbench-row-closes");
+        var name = css(new Span(row.name()), "workbench-row-package");
         Tooltip.forComponent(name).setText(entry.purl().orElse(row.name()));
         boolean todo = row.closes() > 0;
-        var state = new Span(getTranslation(todo ? "workbench.row.todo" : "workbench.row.done"));
-        state.addClassNames("workbench-row-state", todo ? "todo" : "done");
+        var state = css(new Span(getTranslation(todo ? "workbench.row.todo" : "workbench.row.done")), "workbench-row-state", todo ? "todo" : "done");
         List<String> lines = entry.lines().stream().sorted(QueueRules.NEWEST_FIRST).toList();
         String says = getTranslation("workbench.row.says", entry.cves().size(), lines.size(), String.join(", ", lines))
                 + (entry.origin().filter("spring-boot"::equals).isPresent()
                         ? getTranslation("workbench.row.spring")
                         : "");
-        var holds = new Span(says);
-        holds.addClassName("workbench-row-says");
+        var holds = css(new Span(says), "workbench-row-says");
         summaryLine.add(closes, name, state, holds);
 
         var details = new Details();
@@ -403,8 +393,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     private Component rowContent(Row row) {
-        var content = new Div();
-        content.addClassName("workbench-row-content");
+        var content = css(new Div(), "workbench-row-content");
         acknowledged(row).ifPresent(content::add);
         Optional<String> line = line();
         if (line.isPresent() && row.elsewhere() > 0) {
@@ -412,8 +401,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
                     row.elsewhere())));
         }
         content.add(evidence(row.entry()));
-        var fold = new Details();
-        fold.addClassName("workbench-compose-fold");
+        var fold = css(new Details(), "workbench-compose-fold");
         fold.setSummary(foldSummary(getTranslation("workbench.compose")));
         fold.add(composer);
         content.add(fold);
@@ -422,13 +410,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     private Component foldSummary(String label) {
-        var title = new Span(label);
-        title.addClassName("workbench-fold-label");
-        var says = new Span(getTranslation("workbench.compose.says"));
-        says.addClassName("workbench-fold-says");
-        var summaryLine = new Span(title, says);
-        summaryLine.addClassName("workbench-fold-summary");
-        return summaryLine;
+        var title = css(new Span(label), "workbench-fold-label");
+        var says = css(new Span(getTranslation("workbench.compose.says")), "workbench-fold-says");
+        return css(new Span(title, says), "workbench-fold-summary");
     }
 
     /**
@@ -470,8 +454,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
      * matched, who reported it, what upstream did, and the frontend trap.
      */
     private Component evidence(QueueEntry entry) {
-        var box = new Div();
-        box.addClassName("workbench-evidence");
+        var box = css(new Div(), "workbench-evidence");
 
         var byVersion = new LinkedHashMap<String, List<String>>();
         entry.resolved().forEach((series, versions) -> byVersion
@@ -497,8 +480,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         }
         if (!entry.cpes().isEmpty()) {
             box.add(label("workbench.evidence.cpes"));
-            var cpes = new Div();
-            cpes.addClassName("workbench-pkg");
+            var cpes = css(new Div(), "workbench-pkg");
             entry.cpes().forEach(cpe -> cpes.add(new Code(cpe)));
             box.add(cpes, paragraph("workbench-hint", getTranslation("workbench.evidence.cpes.hint")));
         }
@@ -526,33 +508,26 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     }
 
     private Component label(String key) {
-        var label = new Span(getTranslation(key));
-        label.addClassName("workbench-field-label");
-        return label;
+        return css(new Span(getTranslation(key)), "workbench-field-label");
     }
 
     private static Component pkgLine(String code, @Nullable String through) {
-        var line = new Div();
-        line.addClassName("workbench-pkg");
+        var line = css(new Div(), "workbench-pkg");
         line.add(new Code(code));
         if (through != null) {
-            var span = new Span(through);
-            span.addClassName("workbench-through");
+            var span = css(new Span(through), "workbench-through");
             line.add(span);
         }
         return line;
     }
 
     private Component summaryLine(Summary counts) {
-        var line = new Paragraph(getTranslation("workbench.summary.total", counts.findings(), counts.packages(),
-                counts.unjudged()));
-        line.addClassName("workbench-summary-total");
-        return line;
+        return css(new Paragraph(getTranslation("workbench.summary.total", counts.findings(), counts.packages(),
+                counts.unjudged())), "workbench-summary-total");
     }
 
     private Component table(String kind, Map<String, int[]> counts, boolean words) {
-        var table = new Table();
-        table.addClassNames("workbench-summary-table", "workbench-summary-" + kind, "answer-table",
+        var table = css(new Table(), "workbench-summary-table", "workbench-summary-" + kind, "answer-table",
                 "vaadin-themed-html");
         table.addHeaderRow(getTranslation("workbench.summary." + kind), getTranslation("workbench.summary.findings"),
                 getTranslation("workbench.summary.unjudged"));
@@ -617,16 +592,14 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         }
         Map<String, Assessment> written = loaded.map(VerdictQueue::assessments).orElse(Map.of());
         reuse.add(label("workbench.reuse"));
-        var chips = new Div();
-        chips.addClassName("workbench-reuse-chips");
+        var chips = css(new Div(), "workbench-reuse-chips");
         for (String id : carried) {
             var chip = new Button(getTranslation("workbench.reuse.fill", id), click -> fillFrom(row, id));
             chip.addThemeVariants(ButtonVariant.TERTIARY);
             chip.addClassName("workbench-reuse-chip");
             chip.getElement().setAttribute("data-verdict", id);
             Optional.ofNullable(written.get(id)).flatMap(Assessment::applicability).ifPresent(word -> {
-                var applicability = new Span(word);
-                applicability.addClassName("workbench-reuse-applicability");
+                var applicability = css(new Span(word), "workbench-reuse-applicability");
                 chip.setSuffixComponent(applicability);
             });
             chips.add(chip);
@@ -697,32 +670,26 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         picks.setVisible(true);
         picks.add(label("workbench.picks"));
         for (QueuedAdvisory advisory : row.entry().cves()) {
-            var tick = new Checkbox(advisory.cve());
-            tick.addClassName("workbench-pick-box");
+            var tick = css(new Checkbox(advisory.cve()), "workbench-pick-box");
             tick.addValueChangeListener(change -> {
                 if (change.isFromClient()) {
                     picked(row);
                 }
             });
             ticks.put(advisory.cve(), tick);
-            var pick = new Div(tick);
-            pick.addClassName("workbench-pick");
+            var pick = css(new Div(tick), "workbench-pick");
             pick.getElement().setAttribute("data-cve", advisory.cve());
             advisory.severity().ifPresent(word -> {
-                var severity = new Span(getTranslation("severity." + word));
-                severity.addClassNames("explorer-severity", "severity-" + word);
+                var severity = css(new Span(getTranslation("severity." + word)), "explorer-severity", "severity-" + word);
                 pick.add(severity);
             });
-            var series = new Span(String.join(", ", advisory.lines().stream().sorted(QueueRules.NEWEST_FIRST).toList()));
-            series.addClassName("workbench-through");
+            var series = css(new Span(String.join(", ", advisory.lines().stream().sorted(QueueRules.NEWEST_FIRST).toList())), "workbench-through");
             pick.add(series);
             List<String> said = said(advisory, line);
             if (!said.isEmpty()) {
-                var box = new Span();
-                box.addClassName("workbench-said");
+                var box = css(new Span(), "workbench-said");
                 said.forEach(text -> {
-                    var one = new Span(text);
-                    one.addClassName("workbench-said-one");
+                    var one = css(new Span(text), "workbench-said-one");
                     box.add(one);
                 });
                 pick.add(box);
@@ -827,10 +794,8 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         narrow.addClassName("workbench-narrow");
         picks.addClassName("workbench-picks");
 
-        var output = new Div();
-        output.addClassName("workbench-output");
-        Markdown preview = new Markdown(Signal.computed(() -> fenced(yaml.get())));
-        preview.addClassName("workbench-yaml");
+        var output = css(new Div(), "workbench-output");
+        Markdown preview = css(new Markdown(Signal.computed(() -> fenced(yaml.get()))), "workbench-yaml");
 
         reach.addClassName("workbench-reach");
         platform.addClassName("workbench-platform");
@@ -839,14 +804,11 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         tooLong.addClassName("workbench-too-long");
         lastSaved.addClassName("workbench-saved");
 
-        var save = new Button(getTranslation("workbench.save"), click -> save());
-        save.addClassName("workbench-save");
+        var save = css(new Button(getTranslation("workbench.save"), click -> save()), "workbench-save");
         form.lines().forEach(line -> save.addClickShortcut(Key.ENTER).listenOn(line));
-        var export = new Button(getTranslation("workbench.export"), click -> export());
-        export.addClassName("workbench-export");
+        var export = css(new Button(getTranslation("workbench.export"), click -> export()), "workbench-export");
         export.addThemeVariants(ButtonVariant.PRIMARY);
-        var copy = new Button(getTranslation("workbench.copy"));
-        copy.addClassName("workbench-copy");
+        var copy = css(new Button(getTranslation("workbench.copy")), "workbench-copy");
         Clipboard.onClick(copy).writeText(yamlSource, copied -> {
             var done = Notification.show(getTranslation("workbench.copy.done"));
             done.addThemeVariants(NotificationVariant.SUCCESS);
@@ -858,26 +820,22 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         open.setText(getTranslation("workbench.github"));
         open.setType(NativeButton.Type.SUBMIT);
         open.addClassName("workbench-github");
-        var github = new NativeForm(filename, value, open);
-        github.addClassName("workbench-handover");
+        var github = css(new NativeForm(filename, value, open), "workbench-handover");
         github.setMethod(NativeForm.Method.GET);
         github.setAction(VerdictYaml.EDITOR);
         github.setTarget(AnchorTarget.BLANK);
         github.getElement().setAttribute("rel", "noopener");
 
-        var actions = new Div(save, export, copy, github);
-        actions.addClassName("workbench-actions");
+        var actions = css(new Div(save, export, copy, github), "workbench-actions");
         var check = paragraph("workbench-check", getTranslation("workbench.check"));
         output.add(preview, reach, platform, path, actions, refusal, tooLong, lastSaved, check, yamlSource);
 
         // The paste box sits above the form, in the form's column: it fills the
         // form and nothing else, and saving stays the Save button's alone.
-        var formColumn = new Div();
-        formColumn.addClassName("workbench-form-column");
+        var formColumn = css(new Div(), "workbench-form-column");
         ai.ifAvailable(surfaces -> formColumn.add(surfaces.formFill(form.layout(), form.binder(), form.personOnly())));
         formColumn.add(picks, form);
-        var columns = new Div(formColumn, output);
-        columns.addClassName("workbench-columns");
+        var columns = css(new Div(formColumn, output), "workbench-columns");
         composer.add(composing, reuse, filled, narrow, columns);
     }
 
@@ -982,11 +940,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     // The drafts
 
     private Component draftsSection() {
-        var section = new Section();
-        section.addClassName("workbench-drafts");
+        var section = css(new Section(), "workbench-drafts");
         var title = new H2(getTranslation("workbench.drafts"));
-        var none = new Paragraph(getTranslation("workbench.drafts.none"));
-        none.addClassName("workbench-drafts-none");
+        var none = css(new Paragraph(getTranslation("workbench.drafts.none")), "workbench-drafts-none");
         none.bindVisible(Signal.computed(() -> stored.get().isEmpty()));
         draftList.addClassName("workbench-draft-list");
         draftList.setAllRowsVisible(true);
@@ -1017,11 +973,6 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         return section;
     }
 
-    private static Paragraph paragraph(String className, String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName(className);
-        return paragraph;
-    }
 
     private static Input hidden(String name) {
         var input = new Input();

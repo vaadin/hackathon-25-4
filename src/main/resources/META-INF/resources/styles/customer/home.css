@@ -5,11 +5,9 @@
     gap: 28px;
 }
 
-.home-part[hidden] {
-    display: none;
-}
-
-.home-body h2 {
+/* Section headings: the home's H2s and the version answer's H3s, its own H2 being hidden. */
+.home-body h2,
+.version-body h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 600;
@@ -18,13 +16,14 @@
 .home-tip {
     margin: 12px 0 0;
     font-size: 13px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The aside of a section heading sits at the right of the heading's line. */
-.section-aside {
+.section-aside,
+.line-card-scanned {
     font-size: 12px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The line cards as the prototype draws them: four to a row in the 912 pixel column, one on a phone. */
@@ -35,36 +34,14 @@
     margin-block: 12px 0;
 }
 
+/* Tinted by its state in common/state.css. */
 .line-card {
-    --card-face: light-dark(#f1f9f3, #12271d);
-    --card-edge: light-dark(#c3e5cd, color-mix(in srgb, var(--status-secure) 30%, transparent));
-    --card-ink: light-dark(#0b5e28, var(--status-secure));
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 18px;
-    border: 1px solid var(--card-edge);
-    border-radius: 15px;
-    background: var(--card-face);
     color: inherit;
     text-decoration: none;
-}
-
-.line-card.state-unresolved {
-    --card-face: light-dark(#fff5f5, #2a1615);
-    --card-edge: light-dark(#f0c4c5, color-mix(in srgb, var(--status-unresolved) 30%, transparent));
-    --card-ink: light-dark(#a20519, var(--status-unresolved));
-}
-
-.line-card.state-fix_available {
-    --card-face: light-dark(#f4f7ff, #151e33);
-    --card-edge: light-dark(#c9d7fb, color-mix(in srgb, var(--aura-accent-color, #3266e4) 30%, transparent));
-    --card-ink: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
-}
-
-.line-card:hover,
-.line-card:focus-visible {
-    box-shadow: 0 1px 2px rgb(16 24 40 / 0.05);
 }
 
 .line-card-top {
@@ -72,20 +49,10 @@
     align-items: center;
 }
 
-.line-card-minor {
-    font-size: 22px;
-    line-height: 28px;
-    font-weight: 700;
-}
-
 /* "Extended", grey and quiet, beside the state mark rather than adrift in the middle of the row. */
 .line-card-tier {
-    --vaadin-badge-background: light-dark(#eceff2, rgb(255 255 255 / 0.08));
-    --vaadin-badge-text-color: light-dark(#3f4247, var(--vaadin-text-color-secondary));
-    --vaadin-badge-font-size: 12px;
-    --vaadin-badge-font-weight: 600;
-    --vaadin-badge-padding: 3px 8px;
-    --vaadin-badge-border-width: 0;
+    --vaadin-badge-background: var(--chip-neutral);
+    --vaadin-badge-text-color: var(--ink-neutral);
     margin-inline: auto 8px;
 }
 
@@ -93,28 +60,19 @@
     margin-inline-start: auto;
     width: 20px;
     height: 20px;
-    color: var(--card-ink);
+    color: var(--ink, var(--secure-ink));
 }
 
 .line-card-tier + .line-card-icon {
     margin-inline-start: 0;
 }
 
-.line-card-state {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--card-ink);
-}
-
-.line-card-action {
+.line-card-action,
+.cve-line-detail,
+.cve-line-when {
     font-size: 13px;
-    color: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color));
+    color: var(--ink-soft);
     overflow-wrap: anywhere;
-}
-
-.line-card-scanned {
-    font-size: 12px;
-    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .section-heading {
@@ -130,7 +88,7 @@
     display: flex;
     flex-direction: column;
     margin-block-start: 12px;
-    border: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border: 1px solid var(--hairline);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -146,7 +104,7 @@
 }
 
 .recent-row + .recent-row {
-    border-block-start: 1px solid light-dark(#e7eaee, var(--vaadin-border-color-secondary));
+    border-block-start: 1px solid var(--hairline);
 }
 
 a.recent-row:hover,
@@ -158,7 +116,7 @@ a.recent-row:focus-visible {
     flex: 0 0 auto;
     width: 12px;
     height: 12px;
-    color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.45));
+    color: var(--vaadin-text-color-disabled);
 }
 
 .recent-id {
@@ -173,7 +131,7 @@ a.recent-row:focus-visible {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The verdict as the prototype words it: stated in plain ink, only "affects you" on its red tint. */
@@ -189,8 +147,8 @@ a.recent-row:focus-visible {
 }
 
 .recent-row .verdict-chip.verdict-risk {
-    --vaadin-badge-background: light-dark(#fbe5e5, #2a1615);
-    --vaadin-badge-text-color: light-dark(#a20519, var(--status-unresolved));
+    --vaadin-badge-background: var(--unresolved-chip);
+    --vaadin-badge-text-color: var(--unresolved-ink);
 }
 
 .recent-all {
@@ -205,7 +163,7 @@ a.recent-row:focus-visible {
 .recent-date {
     flex: 0 0 auto;
     font-size: 14px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-variant-numeric: tabular-nums;
 }
 
@@ -213,7 +171,7 @@ a.recent-row:focus-visible {
 .home-pointer {
     padding: 16px;
     border-radius: 12px;
-    background: light-dark(#f3f5f7, var(--vaadin-background-container));
+    background: var(--panel);
 }
 
 .home-pointer h3 {
@@ -225,6 +183,6 @@ a.recent-row:focus-visible {
 .home-pointer p {
     margin: 4px 0 0;
     font-size: 13px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 

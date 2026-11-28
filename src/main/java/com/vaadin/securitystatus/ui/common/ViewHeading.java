@@ -36,6 +36,16 @@ public final class ViewHeading extends Composite<HtmlContainer> {
         return new ViewHeading(true);
     }
 
+    /**
+     * The same H2, kept for screen readers and not drawn: the answer's card names it already,
+     * as the prototype does, D-270.
+     */
+    public static ViewHeading hiddenAnswer() {
+        var heading = ofAnswer();
+        heading.addClassName("visually-hidden");
+        return heading;
+    }
+
     @Override
     protected HtmlContainer initContent() {
         return answer ? new H2() : new H1();

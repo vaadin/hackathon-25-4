@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team.assistant;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.util.List;
 import java.util.Map;
 
@@ -67,12 +69,10 @@ final class AssistantPanel extends Composite<Section> {
         panel.addClassName("assistant-panel");
         panel.getElement().setAttribute("aria-label", getTranslation("assistant.title"));
 
-        var title = new H2(getTranslation("assistant.title"));
-        title.addClassName("assistant-title");
+        var title = css(new H2(getTranslation("assistant.title")), "assistant-title");
         panel.add(title);
         if (!providers.live()) {
-            var mock = new Paragraph(getTranslation("assistant.mock"));
-            mock.addClassName("assistant-mock");
+            var mock = css(new Paragraph(getTranslation("assistant.mock")), "assistant-mock");
             panel.add(mock);
         }
 
@@ -95,11 +95,9 @@ final class AssistantPanel extends Composite<Section> {
         attach.addClassName("assistant-attach");
         attach.setCapture(UploadCapture.ENVIRONMENT);
         attach.setTooltipText(getTranslation("assistant.attach.tooltip"));
-        var files = new UploadFileList(uploads);
-        files.addClassName("assistant-files");
+        var files = css(new UploadFileList(uploads), "assistant-files");
 
-        var compose = new Div(files, attach, input);
-        compose.addClassName("assistant-compose");
+        var compose = css(new Div(files, attach, input), "assistant-compose");
         panel.add(messages, compose);
 
         orchestrator = AIOrchestrator.builder(providers.create(getTranslation("assistant.unrecorded")),

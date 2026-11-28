@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.sidenav.SideNav;
@@ -44,8 +46,6 @@ public final class TeamNavigation extends Composite<SideNav> {
     }
 
     private SideNavItem item(String key, String path, VaadinIcon icon) {
-        var item = new SideNavItem(getTranslation(key), path, icon.create());
-        item.addClassName("internal-nav-link");
-        return item;
+        return css(new SideNavItem(getTranslation(key), path, icon.create()), "internal-nav-link");
     }
 }

@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team.diagnostics;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -153,8 +155,7 @@ public final class DiagnosticsView extends Composite<Div> {
             DataRefreshSignal refresh) {
         addClassName("diagnostics-view");
 
-        var since = new Paragraph();
-        since.addClassName("diagnostics-since");
+        var since = css(new Paragraph(), "diagnostics-since");
         // Read again whenever a request ends, so "minutes ago" moves with the page in use and needs no timer.
         var requests = counters.requests();
         Signal.effect(since, () -> {
@@ -180,8 +181,7 @@ public final class DiagnosticsView extends Composite<Div> {
         board.addItemRemovedListener(removed -> save());
         show(Card.DEFAULT);
 
-        var info = new Div(since, toolbar());
-        info.addClassNames("diagnostics-info", "aura-surface");
+        var info = css(new Div(since, toolbar()), "diagnostics-info", "aura-surface");
         getContent().add(info, board);
         whenAttached(ui -> {
             WebStorage.getItem(ui, WebStorage.Storage.LOCAL_STORAGE, LAYOUT_KEY).thenAccept(saved -> {
@@ -202,8 +202,7 @@ public final class DiagnosticsView extends Composite<Div> {
     // The board
 
     private Component toolbar() {
-        var edit = new Button();
-        edit.addClassName("diagnostics-edit");
+        var edit = css(new Button(), "diagnostics-edit");
         edit.addThemeVariants(ButtonVariant.TERTIARY);
         Signal.effect(edit, () -> {
             String label = getTranslation(editing.get() ? "diagnostics.board.done" : "diagnostics.board.edit");
@@ -216,8 +215,7 @@ public final class DiagnosticsView extends Composite<Div> {
             board.setEditable(editing.peek());
         });
 
-        var add = new MenuBar();
-        add.addClassName("diagnostics-add");
+        var add = css(new MenuBar(), "diagnostics-add");
         add.addThemeVariants(MenuBarVariant.TERTIARY);
         MenuItem cards = add.addItem(VaadinIcon.PLUS.create());
         cards.setAriaLabel(getTranslation("diagnostics.board.add"));
@@ -243,9 +241,7 @@ public final class DiagnosticsView extends Composite<Div> {
         restore.setTooltipText(getTranslation("diagnostics.board.restore"));
         restore.bindVisible(editing);
 
-        var bar = new Div(edit, add, restore);
-        bar.addClassName("diagnostics-toolbar");
-        return bar;
+        return css(new Div(edit, add, restore), "diagnostics-toolbar");
     }
 
     /** How long ago, in words: the largest whole unit, down to "less than a minute". */
@@ -305,9 +301,7 @@ public final class DiagnosticsView extends Composite<Div> {
     }
 
     private Section panel(String name) {
-        var section = new Section();
-        section.addClassNames("diagnostics-panel", "diagnostics-" + name);
-        return section;
+        return css(new Section(), "diagnostics-panel", "diagnostics-" + name);
     }
 
     private Section navigationsPanel(Signal<Navigations> navigations) {
@@ -321,26 +315,18 @@ public final class DiagnosticsView extends Composite<Div> {
                 body.add(note("diagnostics.navigations.none"));
                 return;
             }
-            var table = new Table();
-            table.addClassName("diagnostics-navigations-table");
+            var table = css(new Table(), "diagnostics-navigations-table");
             table.addHeaderRow(getTranslation("diagnostics.navigations.route"),
                     getTranslation("diagnostics.outcome.completed"), getTranslation("diagnostics.outcome.refused"),
                     getTranslation("diagnostics.outcome.broke"),
                     getTranslation("diagnostics.outcome.notShown"), getTranslation("diagnostics.outcome.postponed"),
                     getTranslation("diagnostics.navigations.mean"), getTranslation("diagnostics.navigations.longest"));
             for (RouteCount route : counted.routes()) {
-                TableRow row = table.addRow();
-                row.getElement().setAttribute("data-route", route.route());
-                row.addDataCell(DiagnosticsCounters.OTHER_ROUTE.equals(route.route())
-                        ? getTranslation("diagnostics.navigations.other")
-                        : route.route());
-                row.addDataCell(String.valueOf(route.completed()));
-                row.addDataCell(String.valueOf(route.refused()));
-                row.addDataCell(String.valueOf(route.broke()));
-                row.addDataCell(String.valueOf(route.notShown()));
-                row.addDataCell(String.valueOf(route.postponed()));
-                row.addDataCell(millis(route.totalMillis() / (double) route.total()));
-                row.addDataCell(millis(route.longestMillis()));
+                row(table, DiagnosticsCounters.OTHER_ROUTE.equals(route.route())
+                        ? getTranslation("diagnostics.navigations.other") : route.route(),
+                        route.completed(), route.refused(), route.broke(), route.notShown(), route.postponed(),
+                        millis(route.totalMillis() / (double) route.total()), millis(route.longestMillis()))
+                        .getElement().setAttribute("data-route", route.route());
             }
             TableRow total = table.addRow();
             total.addClassName("diagnostics-total");
@@ -366,28 +352,21 @@ public final class DiagnosticsView extends Composite<Div> {
                 body.add(note("diagnostics.requests.none"));
                 return;
             }
-            var summary = new Paragraph(getTranslation("diagnostics.requests.summary", counted.count(),
+            var summary = css(new Paragraph(getTranslation("diagnostics.requests.summary", counted.count(),
                     counted.failed(), millis(counted.totalMicros() / 1000.0 / counted.count()),
-                    millis(counted.longestMicros() / 1000.0)));
-            summary.addClassName("diagnostics-requests-summary");
+                    millis(counted.longestMicros() / 1000.0))), "diagnostics-requests-summary");
 
-            var minutes = new Table();
-            minutes.addClassName("diagnostics-minutes");
+            var minutes = css(new Table(), "diagnostics-minutes");
             minutes.addHeaderRow(getTranslation("diagnostics.requests.minute"),
                     getTranslation("diagnostics.requests.count"), getTranslation("diagnostics.requests.failed"),
                     getTranslation("diagnostics.requests.mean"), getTranslation("diagnostics.requests.longest"));
             List<Minute> newestFirst = counted.minutes().reversed();
             for (Minute minute : newestFirst.subList(0, Math.min(MINUTES_SHOWN, newestFirst.size()))) {
-                TableRow row = minutes.addRow();
-                row.addDataCell(MINUTE.format(minute.start()));
-                row.addDataCell(String.valueOf(minute.count()));
-                row.addDataCell(String.valueOf(minute.failed()));
-                row.addDataCell(millis(minute.totalMicros() / 1000.0 / minute.count()));
-                row.addDataCell(millis(minute.longestMicros() / 1000.0));
+                row(minutes, MINUTE.format(minute.start()), minute.count(), minute.failed(),
+                        millis(minute.totalMicros() / 1000.0 / minute.count()), millis(minute.longestMicros() / 1000.0));
             }
 
-            var kinds = new Table();
-            kinds.addClassName("diagnostics-kinds");
+            var kinds = css(new Table(), "diagnostics-kinds");
             kinds.addHeaderRow(getTranslation("diagnostics.requests.handler"),
                     getTranslation("diagnostics.requests.count"));
             for (Kind kind : counted.kinds()) {
@@ -396,8 +375,7 @@ public final class DiagnosticsView extends Composite<Div> {
                         : kind.handler());
                 row.addDataCell(String.valueOf(kind.count()));
             }
-            var tables = new Div(minutes, kinds);
-            tables.addClassName("diagnostics-request-tables");
+            var tables = css(new Div(minutes, kinds), "diagnostics-request-tables");
             body.add(summary, tables);
         });
         return section;
@@ -405,12 +383,10 @@ public final class DiagnosticsView extends Composite<Div> {
 
     private Section sessionsPanel(Signal<Long> sessions, Signal<@Nullable Instant> generatedAt) {
         Section section = panel("sessions");
-        var now = new Paragraph();
-        now.addClassName("diagnostics-sessions-now");
+        var now = css(new Paragraph(), "diagnostics-sessions-now");
         now.bindText(sessions.map(count -> getTranslation(
                 count == 1 ? "diagnostics.sessions.one" : "diagnostics.sessions.many", count)));
-        var data = new Paragraph();
-        data.addClassName("diagnostics-data");
+        var data = css(new Paragraph(), "diagnostics-data");
         data.bindText(generatedAt.map(at -> at == null ? getTranslation("diagnostics.data.unread")
                 : getTranslation("diagnostics.data.measured", AT.format(at))));
         section.add(now, note("diagnostics.sessions.signIn"), data);
@@ -486,8 +462,7 @@ public final class DiagnosticsView extends Composite<Div> {
             }
             int width = resized.length == 2 ? resized[0] : details.getWindowInnerWidth();
             int height = resized.length == 2 ? resized[1] : details.getWindowInnerHeight();
-            var table = new Table();
-            table.addClassName("diagnostics-client-table");
+            var table = css(new Table(), "diagnostics-client-table");
             fact(table, "diagnostics.client.zone", details.getZoneId().getId());
             fact(table, "diagnostics.client.browserTime",
                     details.getBrowserDateTime().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
@@ -511,12 +486,19 @@ public final class DiagnosticsView extends Composite<Div> {
     }
 
     private Paragraph note(String key) {
-        var paragraph = new Paragraph(getTranslation(key));
-        paragraph.addClassName("diagnostics-note");
-        return paragraph;
+        return css(new Paragraph(getTranslation(key)), "diagnostics-note");
     }
 
     private String millis(double millis) {
         return getTranslation("diagnostics.millis", String.format(getLocale(), "%.1f", millis));
+    }
+
+    /** A row of plain cells, each value written as text. */
+    private static TableRow row(Table table, Object... cells) {
+        TableRow row = table.addRow();
+        for (Object cell : cells) {
+            row.addDataCell(String.valueOf(cell));
+        }
+        return row;
     }
 }

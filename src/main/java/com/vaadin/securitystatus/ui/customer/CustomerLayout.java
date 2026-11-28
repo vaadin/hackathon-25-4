@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -40,10 +42,8 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
             ObjectProvider<ShellLookup> lookup, ObjectProvider<TeamEntrance> team) {
         addClassName("customer-shell");
 
-        var heading = new H1(getTranslation("shell.customer.title"));
-        heading.addClassName("view-heading");
-        var purpose = new Paragraph(getTranslation("shell.customer.purpose"));
-        purpose.addClassName("customer-purpose");
+        var heading = css(new H1(getTranslation("shell.customer.title")), "view-heading");
+        var purpose = css(new Paragraph(getTranslation("shell.customer.purpose")), "customer-purpose");
         lookupMount.addClassName("lookup-mount");
         lookup.ifAvailable(provider -> lookupMount.add(provider.create()));
         content.addClassName("customer-content");
@@ -51,17 +51,14 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
         purpose.bindVisible(asking);
         lookupMount.bindVisible(asking);
 
-        var column = new Main(heading, purpose, lookupMount, content);
-        column.addClassName("customer-column");
+        var column = css(new Main(heading, purpose, lookupMount, content), "customer-column");
         // A team member reads the customer pages with the team's navigation beside them, D-253,
         // when the team's part of the application is there to give it, D-254.
         Optional<TeamEntrance> entrance = team.stream().filter(TeamEntrance::admits).findFirst();
         var bar = AppBar.customer(dataRefresh, authentication, entrance.map(TeamEntrance::barLink));
         if (entrance.isPresent()) {
-            var side = new Aside(entrance.get().navigation());
-            side.addClassName("customer-team-nav");
-            var body = new Div(side, column);
-            body.addClassName("customer-team-body");
+            var side = css(new Aside(entrance.get().navigation()), "customer-team-nav");
+            var body = css(new Div(side, column), "customer-team-body");
             getContent().add(bar, body);
         } else {
             getContent().add(bar, column);

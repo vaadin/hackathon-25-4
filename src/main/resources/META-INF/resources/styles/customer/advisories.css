@@ -17,7 +17,7 @@
     align-items: center;
     min-height: 2rem;
     padding: 0 0.875rem;
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border: 1px solid var(--vaadin-border-color);
     border-radius: 999px;
     color: inherit;
     font-size: 0.875rem;
@@ -25,22 +25,17 @@
 }
 
 .verdict-pill.active {
-    border-color: color-mix(in srgb, var(--aura-accent-color, #1a73e8) 40%, transparent);
-    background: color-mix(in srgb, var(--aura-accent-color, #1a73e8) 10%, transparent);
-    font-weight: var(--aura-font-weight-semibold, 600);
+    border-color: color-mix(in srgb, var(--aura-accent-color) 40%, transparent);
+    background: color-mix(in srgb, var(--aura-accent-color) 10%, transparent);
+    font-weight: 600;
 }
 
 /* The count in lighter type beside the verdict's words, as the prototype sets it, D-192. */
 .verdict-pill .pill-count {
     margin-inline-start: 0.375rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-size: 0.8125rem;
     font-weight: normal;
-}
-
-.advisories-total {
-    margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .advisories-grid {
@@ -52,7 +47,7 @@
 }
 
 .advisories-grid .advisory-id {
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
 }
 
 /* Every package whole, one to a line, wrapping inside a long name rather than cut, D-194. */
@@ -77,7 +72,7 @@
 .advisories-grid .advisory-chevron {
     width: 1rem;
     height: 1rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .advisories-outage:empty {
@@ -91,12 +86,7 @@
     gap: 1rem;
 }
 
-.cases-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
+.cases-group,
 .cases-rows {
     display: flex;
     flex-direction: column;
@@ -109,19 +99,19 @@
     align-items: center;
     gap: 0.25rem 1rem;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border: 1px solid var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-m);
 }
 
 .case-row.case-impossible {
     border-style: dashed;
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+    background: var(--vaadin-background-container);
 }
 
 .case-count {
     grid-column: 1;
     text-align: end;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
@@ -130,12 +120,6 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-}
-
-.case-screen,
-.case-needs {
-    font-size: 0.875rem;
-    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 .case-link,

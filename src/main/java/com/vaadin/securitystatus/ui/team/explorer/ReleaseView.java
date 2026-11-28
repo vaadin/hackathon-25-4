@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -96,8 +99,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
 
         body.addClassName("release-body");
         footer.addClassName("release-footer");
-        var main = new Div(parts.legendButton(legendOpen), back(), body, footer);
-        main.addClassNames("explorer-main", "release-main");
+        var main = css(new Div(parts.legendButton(legendOpen), back(), body, footer), "explorer-main", "release-main");
         getContent().add(main, parts.legend(legendOpen));
         Shortcuts.addShortcutListener(this, () -> legendOpen.set(false), Key.ESCAPE);
 
@@ -138,7 +140,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
      * The one way back, above the content and in the same place on every
      * deep page, rule 6.1.6.
      */
-    static RouterLink back() {
+    public static RouterLink back() {
         var back = new RouterLink(ExplorerView.class);
         back.add(VaadinIcon.ANGLE_LEFT.create(), new Span(back.getTranslation("release.back")));
         back.addClassName("release-back");
@@ -162,8 +164,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
 
     private void buildPanel() {
         panel.addClassNames("explorer-panel", "release-panel");
-        var heading = new H2(getTranslation("explorer.lookup.heading"));
-        heading.addClassName("explorer-panel-heading");
+        var heading = css(new H2(getTranslation("explorer.lookup.heading")), "explorer-panel-heading");
         lookup.addClassNames("explorer-search", "release-lookup");
         lookup.setAriaLabel(getTranslation("explorer.lookup.heading"));
         lookup.addValueChangeListener(change -> {
@@ -175,10 +176,8 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         filter.addThemeVariants(ButtonVariant.PRIMARY);
         filter.setAriaLabel(getTranslation("explorer.search.button"));
         filter.addClassName("explorer-filter");
-        var form = new Div(lookup, filter);
-        form.addClassName("explorer-form");
-        var section = new Section(heading, form);
-        section.addClassName("explorer-lookup");
+        var form = css(new Div(lookup, filter), "explorer-form");
+        var section = css(new Section(heading, form), "explorer-lookup");
         profile.addClassName("explorer-profile");
         panel.add(section, profile);
     }
@@ -261,16 +260,12 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
 
         drawProducts(line, catalogue, shape, off, chosen, starter, twoShapes, record.version());
 
-        var summary = new Div();
-        summary.addClassNames("explorer-row-summary", "release-card-top");
-        var name = new Span(record.version().toString());
-        name.addClassNames("explorer-row-line", "release-card-version");
-        var in = new Span(getTranslation("release.card.in", line.line()));
-        in.addClassNames("explorer-row-version", "release-card-line");
+        var summary = css(new Div(), "explorer-row-summary", "release-card-top");
+        var name = css(new Span(record.version().toString()), "explorer-row-line", "release-card-version");
+        var in = css(new Span(getTranslation("release.card.in", line.line())), "explorer-row-version", "release-card-line");
         summary.add(name, in);
         record.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
-            var scanned = new Span(getTranslation("explorer.row.scannedOn", day.toString()));
-            scanned.addClassNames("explorer-row-scanned", "release-card-scanned");
+            var scanned = css(new Span(getTranslation("explorer.row.scannedOn", day.toString())), "explorer-row-scanned", "release-card-scanned");
             Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
             summary.add(scanned);
         });
@@ -281,18 +276,16 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             summary.add(parts.springBadge(theirs, getTranslation("release.badge.spring.title", against)));
         });
         parts.sentence(line, shape, state).ifPresent(text -> {
-            var says = new Span(text);
-            says.addClassName("explorer-row-says");
+            var says = css(new Span(text), "explorer-row-says");
             summary.add(says);
         });
         summary.add(parts.rings(line, catalogue, shape, Asked.nothing()));
 
-        var detail = new Div();
-        detail.addClassNames("explorer-detail", "release-detail");
+        var detail = css(new Div(), "explorer-detail", "release-detail");
         if (!split.measured()) {
             detail.add(SeriesParts.hint(getTranslation("explorer.detail.unmeasured")));
         } else {
-            detail.add(SeriesParts.lead("explorer-detail-summary", getTranslation("explorer.summary.all",
+            detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
                     split.ours().size() + split.theirs().size() + split.build().size(),
                     getTranslation("explorer.summary.split", split.ours().risk().size(),
                             split.ours().pending().size(), split.theirs().size(), split.build().size(),
@@ -327,10 +320,8 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
      */
     private void drawProducts(Line line, List<Product> catalogue, Shape shape, Set<String> off, Set<String> chosen,
             String starter, boolean twoShapes, VersionNumber version) {
-        var titleRow = new Div();
-        titleRow.addClassName("explorer-profile-title");
-        var title = new H2(getTranslation("explorer.profile.heading"));
-        title.addClassName("explorer-panel-heading");
+        var titleRow = css(new Div(), "explorer-profile-title");
+        var title = css(new H2(getTranslation("explorer.profile.heading")), "explorer-panel-heading");
         var mark = new Button(VaadinIcon.INFO_CIRCLE_O.create());
         mark.addThemeVariants(ButtonVariant.TERTIARY);
         mark.addClassName("explorer-hint-mark");
@@ -338,8 +329,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         mark.setTooltipText(getTranslation("release.profile.hint"));
         titleRow.add(title, mark);
 
-        var chips = new Div();
-        chips.addClassName("explorer-chips");
+        var chips = css(new Div(), "explorer-chips");
         for (Product product : catalogue) {
             String name = product.name();
             boolean cannot = shape.cannot().contains(name);
@@ -355,8 +345,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
     private Component chip(Product product, boolean isOn, boolean cannot, boolean stillStarter, int brings,
             Set<String> chosen, VersionNumber version) {
         boolean still = product.fixed() || cannot || stillStarter;
-        var chip = new NativeButton();
-        chip.addClassNames("explorer-chip", isOn ? "on" : "off");
+        var chip = css(new NativeButton(), "explorer-chip", isOn ? "on" : "off");
         if (product.fixed() || stillStarter) {
             chip.addClassName("fixed");
         }
@@ -380,42 +369,13 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
                 selection.select(next);
             });
         }
-        var box = new Span();
-        box.addClassNames("chip-box", isOn ? "ticked" : "none");
-        box.getElement().setAttribute("aria-hidden", "true");
-        var name = new Span(product.name());
-        name.addClassName("chip-name");
-        chip.add(box, name);
-        if (product.discontinued()) {
-            var mark = new Span(getTranslation("explorer.products.discontinued"));
-            mark.addClassName("chip-discontinued");
-            chip.add(mark);
-        }
-        var number = new Span(String.valueOf(brings));
-        number.addClassName("chip-count");
-        if (isOn && brings > 0) {
-            number.addClassNames("product-ring", "ring-" + product.ring());
-        } else {
-            number.addClassName("none");
-        }
-        chip.add(number);
+        chip.add(parts.chipParts(product, isOn, brings));
         Tooltip.forComponent(chip).setText(stillStarter
                 ? getTranslation("release.chip.starter", version.toString())
-                : chipTitle(product, isOn, cannot));
+                : parts.chipTitle("release", product, isOn, cannot));
         return chip;
     }
 
-    private String chipTitle(Product product, boolean isOn, boolean cannot) {
-        String gone = product.discontinued() ? getTranslation("explorer.chip.gone") + " " : "";
-        if (cannot) {
-            return gone + getTranslation("explorer.chip.cannot");
-        }
-        if (product.fixed()) {
-            return gone + getTranslation("release.chip.fixed");
-        }
-        return gone + getTranslation(isOn ? "release.chip.on" : "release.chip.off") + " "
-                + getTranslation("explorer.chip.narrows");
-    }
 
     /**
      * What to do about it, D-218: the Vaadin half moves with an update within
@@ -424,21 +384,20 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
      */
     private Optional<Component> advice(ExplorerFront front, ExplorerVersion record, Line line, Shape shape,
             Split split) {
-        var advice = new Div();
-        advice.addClassName("release-advice");
+        var advice = css(new Div(), "release-advice");
         Optional<VersionNumber> newest = record.newest();
         if (newest.isPresent() && newest.get().compareTo(record.version()) > 0) {
             List<String> removed = ReleaseRules.removedBy(record, line, shape);
             Paragraph says;
             if (removed.isEmpty()) {
-                says = SeriesParts.lead("release-advice-update",
+                says = paragraph("release-advice-update",
                         getTranslation("release.advice.removesNone", newest.get().toString()));
             } else {
                 String named = AdvisoryIds.HERE;
                 if (removed.size() > ReleaseRules.NAMED) {
                     named = getTranslation("release.advice.removes.more", named, removed.size() - ReleaseRules.NAMED);
                 }
-                says = SeriesParts.lead("release-advice-update", "");
+                says = paragraph("release-advice-update", "");
                 AdvisoryIds.fill(says,
                         getTranslation("release.advice.removes", newest.get().toString(), removed.size(), named),
                         removed.stream().limit(ReleaseRules.NAMED).toList());
@@ -447,7 +406,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             says.add(releaseLink(getTranslation("release.advice.newer", newest.get().toString()), newest.get()));
             advice.add(says);
         } else if (newest.filter(record.version()::equals).isPresent()) {
-            advice.add(SeriesParts.lead("release-advice-update",
+            advice.add(paragraph("release-advice-update",
                     getTranslation("release.advice.newest", line.line())));
         }
         int spring = split.theirs().size();
@@ -489,10 +448,9 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
                     .flatMap(supply -> supply.commercial()).isPresent();
             sentences.add(getTranslation(sold ? "release.advice.spring.none.commercial" : "release.advice.spring.none"));
         }
-        var says = SeriesParts.lead("release-advice-spring", String.join(" ", sentences));
+        var says = paragraph("release-advice-spring", String.join(" ", sentences));
         says.add(new Text(" "));
-        var link = new RouterLink(getTranslation("release.advice.spring.link"), SpringView.class);
-        link.addClassName("release-spring-link");
+        var link = css(new RouterLink(getTranslation("release.advice.spring.link"), SpringView.class), "release-spring-link");
         says.add(link);
         says.add(new Text("."));
         return says;
@@ -501,7 +459,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
     // A release without a record
 
     private void unpublished(Line line, VersionNumber version) {
-        body.add(SeriesParts.lead("release-unpublished",
+        body.add(paragraph("release-unpublished",
                 getTranslation("release.unpublished", version.toString(), line.line())));
         if (line.version().equals(version) && Boolean.TRUE.equals(line.scannerFiles())) {
             body.add(new ReleaseFiles(data, version));
@@ -516,12 +474,10 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         Optional<Line> own = ReleaseRules.lineOf(front, version);
         Optional<Line> answer = own.or(() -> ReleaseRules.sameMajor(front, version));
         if (answer.isEmpty()) {
-            body.add(SeriesParts.lead("release-unmeasured",
+            body.add(paragraph("release-unmeasured",
                     getTranslation("release.unmeasured.unfollowed", version.toString())));
-            var all = new RouterLink(getTranslation("release.unmeasured.all"), ExplorerView.class);
-            all.addClassName("release-go");
-            var go = new Paragraph(all);
-            go.addClassName("explorer-hint");
+            var all = css(new RouterLink(getTranslation("release.unmeasured.all"), ExplorerView.class), "release-go");
+            var go = css(new Paragraph(all), "explorer-hint");
             body.add(go);
             return;
         }
@@ -537,17 +493,15 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             sentence = getTranslation("release.unmeasured.line", version.toString(), line.line(),
                     line.version().toString());
         }
-        body.add(SeriesParts.lead("release-unmeasured", sentence));
+        body.add(paragraph("release-unmeasured", sentence));
         var go = releaseLink(getTranslation("release.unmeasured.go", line.version().toString()), line.version());
         go.addClassName("release-go");
-        var goes = new Paragraph(go);
-        goes.addClassName("explorer-hint");
+        var goes = css(new Paragraph(go), "explorer-hint");
         body.add(goes);
 
         List<VersionNumber> others = ReleaseRules.others(line, line.version());
         if (!others.isEmpty()) {
-            var more = new Paragraph(getTranslation("release.others", line.line()) + " ");
-            more.addClassNames("explorer-hint", "release-others");
+            var more = css(new Paragraph(getTranslation("release.others", line.line()) + " "), "explorer-hint", "release-others");
             List<VersionNumber> named = others.stream().limit(ReleaseRules.OTHERS).toList();
             for (int i = 0; i < named.size(); i++) {
                 if (i > 0) {

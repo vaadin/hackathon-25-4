@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -38,7 +41,6 @@ import com.vaadin.flow.js.JsSnippets;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.streams.UploadEvent;
-import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.securitystatus.customer.LookupInput;
@@ -155,11 +157,9 @@ public final class Lookup extends Composite<Div> {
         }));
         Signal.effect(this, () -> tabs.setSelectedTab(tabOf.get(state.tab().get())));
 
-        var fields = new Div(versionPanel(refresh), idsPanel(), reportPanel(), checkButton());
-        fields.addClassName("lookup-fields");
+        var fields = css(new Div(versionPanel(refresh), idsPanel(), reportPanel(), checkButton()), "lookup-fields");
 
-        var said = new Span();
-        said.addClassName("lookup-note");
+        var said = css(new Span(), "lookup-note");
         said.getElement().setAttribute("role", "status");
         said.bindText(note);
         said.bindVisible(note.map(text -> !text.isEmpty()));
@@ -220,8 +220,7 @@ public final class Lookup extends Composite<Div> {
         onEscape(version.getElement(), this::withdrawVersion);
         onEnter(version.getElement());
 
-        var panel = new Div(version);
-        panel.addClassName("lookup-panel");
+        var panel = css(new Div(version), "lookup-panel");
         panel.bindVisible(state.tab().map(LookupState.Tab.VERSION::equals));
         return panel;
     }
@@ -251,8 +250,7 @@ public final class Lookup extends Composite<Div> {
         onEscape(idsVersion.getElement(), this::withdrawIdsVersion);
         onEnter(idsVersion.getElement());
 
-        var panel = new Div(ids, idsVersion);
-        panel.addClassName("lookup-panel");
+        var panel = css(new Div(ids, idsVersion), "lookup-panel");
         panel.bindVisible(state.tab().map(LookupState.Tab.IDS::equals));
         return panel;
     }
@@ -266,33 +264,25 @@ public final class Lookup extends Composite<Div> {
             case INCORRECT_FILE_TYPE, UNKNOWN -> refusedFormat();
         }));
 
-        var choose = new UploadButton(reports);
-        choose.addClassName("lookup-report-choose");
+        var choose = css(new UploadButton(reports), "lookup-report-choose");
         choose.bindText(scan.held().map(held -> getTranslation(
                 held.isPresent() ? "lookup.report.replace" : "lookup.report.choose")));
 
         // The prototype's card: before a file its title asks for one and the line names the
         // formats read, and no others, rule 6.11.21; with one in, the title is the file's
         // name and the line says what is in it. The help mark and the button close the row.
-        var title = new Span();
-        title.addClassName("lookup-report-title");
+        var title = css(new Span(), "lookup-report-title");
         title.bindText(scan.held().map(held -> held.map(ScanState.Held::fileName)
                 .orElseGet(() -> getTranslation("lookup.report.drop"))));
-        var line = new Paragraph();
-        line.addClassName("lookup-report-formats");
+        var line = css(new Paragraph(), "lookup-report-formats");
         line.bindText(scan.held().map(held -> held.map(this::fileLine).orElseGet(this::formatsLine)));
-        var said = new Div(title, line);
-        said.addClassName("lookup-report-said");
+        var said = css(new Div(title, line), "lookup-report-said");
         choose.getElement().getThemeList().add("tertiary");
         // The prototype's mark at the start of the card: an arrow up, the file going in.
-        var mark = VaadinIcon.ARROW_UP.create();
-        mark.addClassName("lookup-report-mark");
-        mark.getElement().setAttribute("aria-hidden", "true");
-        var drop = new UploadDropZone(new Div(mark, said, reportHelp(), choose), reports);
-        drop.addClassName("lookup-report");
+        var mark = decorative(VaadinIcon.ARROW_UP.create(), "lookup-report-mark");
+        var drop = css(new UploadDropZone(new Div(mark, said, reportHelp(), choose), reports), "lookup-report");
 
-        var refused = new Span();
-        refused.addClassName("lookup-report-refused");
+        var refused = css(new Span(), "lookup-report-refused");
         refused.getElement().setAttribute("role", "alert");
         refused.bindText(scan.refusal());
         refused.bindVisible(scan.refusal().map(text -> !text.isEmpty()));
@@ -307,16 +297,13 @@ public final class Lookup extends Composite<Div> {
 
         // Under the card, as the prototype says it: why the file asks for a version, until
         // one is given.
-        var asks = new Paragraph();
-        asks.addClassName("lookup-report-asks");
+        var asks = css(new Paragraph(), "lookup-report-asks");
         asks.bindText(scan.held().map(held -> held.map(this::asksSentence).orElse("")));
         asks.bindVisible(Signal.computed(() -> reportAsks.get() && scanVersion.get().isEmpty()));
 
-        var card = new Div(drop, refused);
-        card.addClassName("lookup-report-card");
+        var card = css(new Div(drop, refused), "lookup-report-card");
 
-        var panel = new Div(reportVersion, card, asks);
-        panel.addClassNames("lookup-panel", "lookup-report-panel");
+        var panel = css(new Div(reportVersion, card, asks), "lookup-panel", "lookup-report-panel");
         panel.bindVisible(state.tab().map(LookupState.Tab.REPORT::equals));
         return panel;
     }
@@ -329,12 +316,7 @@ public final class Lookup extends Composite<Div> {
 
     /** The four formats the parser reads, in the parser's order, so the line cannot name another. */
     String formatsLine() {
-        var names = new ArrayList<String>();
-        for (ReportFormat format : ReportFormat.values()) {
-            names.add(getTranslation(format.nameKey()));
-        }
-        String last = names.removeLast();
-        return getTranslation("lookup.report.formats", String.join(", ", names), last);
+        return withFormats("lookup.report.formats");
     }
 
     private String fileLine(ScanState.Held held) {
@@ -348,12 +330,17 @@ public final class Lookup extends Composite<Div> {
     }
 
     private String refusedFormat() {
+        return withFormats("lookup.report.refused.format");
+    }
+
+    /** A sentence that names every format read: all but the last joined by commas, then the last. */
+    private String withFormats(String key) {
         var names = new ArrayList<String>();
         for (ReportFormat format : ReportFormat.values()) {
             names.add(getTranslation(format.nameKey()));
         }
         String last = names.removeLast();
-        return getTranslation("lookup.report.refused.format", String.join(", ", names), last);
+        return getTranslation(key, String.join(", ", names), last);
     }
 
     /**
@@ -627,8 +614,7 @@ public final class Lookup extends Composite<Div> {
     }
 
     private Element labelWithHelp(String key, HelpDialog help) {
-        var label = new Span(new Span(getTranslation(key)), help);
-        label.addClassName("lookup-label");
+        var label = css(new Span(new Span(getTranslation(key)), help), "lookup-label");
         label.getElement().setAttribute("slot", "label");
         return label.getElement();
     }
@@ -651,8 +637,7 @@ public final class Lookup extends Composite<Div> {
     }
 
     private HelpDialog reportHelp() {
-        var counted = new Paragraph();
-        counted.addClassName("lookup-help-scope");
+        var counted = css(new Paragraph(), "lookup-help-scope");
         counted.bindText(scan.held().map(held -> held.map(this::scopeSentence).orElse("")));
         counted.bindVisible(scan.held().map(Optional::isPresent));
         var assessed = HelpDialog.section(getTranslation("lookup.help.report.assessed"),
@@ -667,13 +652,11 @@ public final class Lookup extends Composite<Div> {
             var recipe = HelpDialog.section(getTranslation(format.nameKey()),
                     getTranslation("lookup.help.report." + format.name() + ".why"));
             recipe.addClassName("lookup-help-format");
-            var command = new Pre(getTranslation("lookup.help.report." + format.name() + ".run"));
-            command.addClassName("lookup-help-run");
+            var command = css(new Pre(getTranslation("lookup.help.report." + format.name() + ".run")), "lookup-help-run");
             recipe.add(command, new Paragraph(getTranslation("lookup.help.report." + format.name() + ".leaves")));
             if (format == ReportFormat.CYCLONEDX) {
                 // Its second half, the frontend's, is a second command and a second file.
-                var frontend = new Pre(getTranslation("lookup.help.report.CYCLONEDX.frontend.run"));
-                frontend.addClassName("lookup-help-run");
+                var frontend = css(new Pre(getTranslation("lookup.help.report.CYCLONEDX.frontend.run")), "lookup-help-run");
                 recipe.add(frontend, new Paragraph(getTranslation("lookup.help.report.CYCLONEDX.frontend.leaves")));
             }
             sections.add(recipe);

@@ -1,5 +1,9 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,7 +28,6 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -89,9 +92,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         addClassName("scan-view");
         body.addClassName("scan-body");
         // No visible title above the answer, as in the prototype; kept for screen readers, D-270.
-        var heading = ViewHeading.ofAnswer();
-        heading.addClassName("visually-hidden");
-        getContent().add(heading, body);
+        getContent().add(ViewHeading.hiddenAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         Signal.effect(body, () -> {
@@ -113,7 +114,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     private void draw(Optional<ScanState.Held> held, String version, boolean secureShown) {
         body.removeAll();
         if (held.isEmpty()) {
-            body.add(lead("scan-none", version.isEmpty() ? getTranslation("scan.none")
+            body.add(paragraph("scan-none", version.isEmpty() ? getTranslation("scan.none")
                     : getTranslation("scan.none.version", version)));
             return;
         }
@@ -148,7 +149,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         if (!report.skipped().isEmpty()) {
             body.add(skipped(report.skipped()));
         }
-        body.add(lead("scan-kept", getTranslation("scan.kept")));
+        body.add(paragraph("scan-kept", getTranslation("scan.kept")));
     }
 
     // The headline and the buckets
@@ -185,28 +186,20 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         }
         lead.add(title);
         lead.add(sentence);
-        var heading = new H3(title);
-        heading.addClassName("scan-headline");
-        var box = new Section(heading, new Paragraph(sentence));
-        box.addClassName("scan-answer");
-        return box;
+        var heading = css(new H3(title), "scan-headline");
+        return css(new Section(heading, new Paragraph(sentence)), "scan-answer");
     }
 
     private Component buckets(Triage.Result result, VersionAnswer answer, List<String> lead) {
-        var cards = new Div();
-        cards.addClassName("scan-buckets");
+        var cards = css(new Div(), "scan-buckets");
         for (Triage.Bucket bucket : Triage.Bucket.values()) {
             int count = result.count(bucket);
-            var number = new Span(Integer.toString(count));
-            number.addClassName("scan-bucket-count");
-            var word = new Span(getTranslation(bucketKey(bucket)));
-            word.addClassName("scan-bucket-word");
-            var card = new Div(number, word);
-            card.addClassNames("scan-bucket", "state-" + bucket.name().toLowerCase(java.util.Locale.ROOT));
+            var number = css(new Span(Integer.toString(count)), "scan-bucket-count");
+            var word = css(new Span(getTranslation(bucketKey(bucket))), "scan-bucket-word");
+            var card = css(new Div(number, word), "scan-bucket", "state-" + bucket.name().toLowerCase(java.util.Locale.ROOT));
             Optional<String> detail = bucketDetail(bucket, result, answer);
             detail.ifPresent(text -> {
-                var line = new Span(text);
-                line.addClassName("scan-bucket-detail");
+                var line = css(new Span(text), "scan-bucket-detail");
                 card.add(line);
             });
             cards.add(card);
@@ -257,20 +250,16 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
      *                 prototype says as "Your report was taken from"
      */
     private Component unmeasured(CasesIndex index, String version, boolean fromFile, List<String> lead) {
-        var notice = new Section();
-        notice.addClassName("scan-unmeasured");
-        var word = new Badge(getTranslation("scan.unmeasured.word"));
-        word.addClassNames("status-chip", "state-unmeasured");
+        var notice = css(new Section(), "scan-unmeasured");
+        var word = css(new Badge(getTranslation("scan.unmeasured.word")), "status-chip", "state-unmeasured");
         String said = getTranslation(fromFile ? "scan.unmeasured.text.file" : "scan.unmeasured.text", version);
         // One paragraph, as the prototype says it: the notice, then the nearest measured release.
-        var text = new Paragraph(new Span(said));
-        text.addClassName("scan-unmeasured-text");
+        var text = css(new Paragraph(new Span(said)), "scan-unmeasured-text");
         notice.add(word, text);
         lead.add(said);
         VersionRules.nearestMeasured(index, VersionNumber.of(version)).ifPresent(nearest -> {
             String near = nearest.version().toString();
-            var link = new RouterLink(near, ScanView.class, new RouteParameters(VERSION, near));
-            link.addClassName("scan-nearest");
+            var link = css(new RouterLink(near, ScanView.class, new RouteParameters(VERSION, near)), "scan-nearest");
             text.add(new Text(" "), new Span(getTranslation("scan.unmeasured.nearest." + nearest.kind().name(),
                     nearest.version().line())), new Text(" "), link,
                     new Span(getTranslation("scan.unmeasured.notYours")));
@@ -307,30 +296,24 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         Supplier<Optional<Downloads.Content>> csv = () -> content(TriageFiles.csv(sheet), TriageFiles.CSV);
         Supplier<Optional<Downloads.Content>> pdf = () -> content(TriageFiles.pdf(sheet), TriageFiles.PDF);
 
-        var bar = new Div();
-        bar.addClassName("scan-actions");
-        var triage = new Button(getTranslation("scan.download.csv"));
-        triage.addClassName("scan-download-csv");
+        var bar = css(new Div(), "scan-actions");
+        var triage = css(new Button(getTranslation("scan.download.csv")), "scan-download-csv");
         triage.addThemeVariants(ButtonVariant.PRIMARY);
         Downloads.onClick(triage, csvName, csv);
         bar.add(triage);
         // The prototype's two, the download and the release notes, then the app's audit report.
         upgrade.flatMap(to -> VersionRules.releaseNotes(index, to).map(href -> {
-            var notes = new Anchor(href, getTranslation("scan.releaseNotes", to.toString()));
-            notes.addClassName("scan-release-notes");
-            return notes;
+            return css(new Anchor(href, getTranslation("scan.releaseNotes", to.toString())), "scan-release-notes");
         })).ifPresent(bar::add);
 
         if (PdfPreview.available()) {
-            var preview = new Button(getTranslation("scan.preview.pdf"));
-            preview.addClassName("scan-preview-pdf");
+            var preview = css(new Button(getTranslation("scan.preview.pdf")), "scan-preview-pdf");
             preview.addClickListener(click -> previewDialog(pdfName, pdf).open());
             bar.add(preview);
         } else {
             // The viewer is an experimental component behind its flag. Without it the
             // auditor still takes the same document, unseen.
-            var download = new Button(getTranslation("scan.download.pdf"));
-            download.addClassName("scan-download-pdf");
+            var download = css(new Button(getTranslation("scan.download.pdf")), "scan-download-pdf");
             Downloads.onClick(download, pdfName, pdf);
             bar.add(download);
         }
@@ -338,8 +321,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private Dialog previewDialog(String pdfName, Supplier<Optional<Downloads.Content>> pdf) {
-        var dialog = new Dialog();
-        dialog.addClassName("scan-pdf-dialog");
+        var dialog = css(new Dialog(), "scan-pdf-dialog");
         dialog.setHeaderTitle(getTranslation("scan.preview.title"));
         dialog.setWidth("min(72rem, 95vw)");
         var viewer = PdfPreview.of(Downloads.shown(pdfName, pdf), pdfName);
@@ -347,8 +329,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         viewer.setWidthFull();
         viewer.setHeight("70vh");
         dialog.add(viewer);
-        var download = new Button(getTranslation("scan.download.pdf"));
-        download.addClassName("scan-download-pdf");
+        var download = css(new Button(getTranslation("scan.download.pdf")), "scan-download-pdf");
         download.addThemeVariants(ButtonVariant.PRIMARY);
         Downloads.onClick(download, pdfName, pdf);
         var close = new Button(getTranslation("help.close"), click -> dialog.close());
@@ -368,16 +349,13 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     // The table
 
     private Component findings(Triage.Result result, CasesIndex index, String version, boolean secureShown) {
-        var section = new Section();
-        section.addClassName("scan-findings");
-        var head = new Div(new H3(getTranslation("scan.findings.title")));
-        head.addClassName("scan-findings-head");
+        var section = css(new Section(), "scan-findings");
+        var head = css(new Div(new H3(getTranslation("scan.findings.title"))), "scan-findings-head");
         int secure = result.count(Triage.Bucket.SECURE);
         if (secure > 0) {
             String label = secureShown ? (secure == 1 ? "scan.findings.secure.hide.one" : "scan.findings.secure.hide.many")
                     : (secure == 1 ? "scan.findings.secure.one" : "scan.findings.secure.many");
-            var toggle = new Switch(getTranslation(label, secure));
-            toggle.addClassName("scan-secure-switch");
+            var toggle = css(new Switch(getTranslation(label, secure)), "scan-secure-switch");
             toggle.setValue(secureShown);
             toggle.addValueChangeListener(change -> {
                 if (change.isFromClient() || !change.getValue().equals(secureShown)) {
@@ -390,14 +368,12 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
 
         List<Triage.Row> rows = secureShown ? result.rows() : result.open();
         if (rows.isEmpty()) {
-            section.add(lead("scan-findings-empty", getTranslation("scan.findings.none")));
+            section.add(paragraph("scan-findings-empty", getTranslation("scan.findings.none")));
             return section;
         }
-        var table = new Table();
-        table.addClassNames("scan-table", "answer-table", "vaadin-themed-html");
-        table.addHeaderRow(getTranslation("scan.column.cve"), getTranslation("scan.column.component"),
-                getTranslation("scan.column.owner"), getTranslation("scan.column.verdict"),
-                getTranslation("scan.column.action"));
+        var table = css(answerTable(getTranslation("scan.column.cve"),
+                getTranslation("scan.column.component"), getTranslation("scan.column.owner"),
+                getTranslation("scan.column.verdict"), getTranslation("scan.column.action")), "scan-table");
         for (Triage.Row row : rows.subList(0, Math.min(rows.size(), TABLE_CAP))) {
             TableRow line = table.addRow();
             line.addClassName("scan-row");
@@ -412,7 +388,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         }
         section.add(table);
         if (rows.size() > TABLE_CAP) {
-            section.add(lead("scan-cap", getTranslation("scan.findings.cap", TABLE_CAP, rows.size(),
+            section.add(paragraph("scan-cap", getTranslation("scan.findings.cap", TABLE_CAP, rows.size(),
                     result.rows().size())));
         }
         return section;
@@ -429,23 +405,18 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         if (!version.isEmpty()) {
             parameters.put(CveView.VERSION, version);
         }
-        var link = new RouterLink(advisory, CveView.class, new RouteParameters(parameters));
-        link.addClassNames("scan-advisory", "advisory-id");
-        return link;
+        return css(new RouterLink(advisory, CveView.class, new RouteParameters(parameters)), "scan-advisory", "advisory-id");
     }
 
     private Component verdictCell(Triage.Row row, CasesIndex index) {
-        var cell = new Span();
-        cell.addClassName("scan-verdict");
+        var cell = css(new Span(), "scan-verdict");
         // The fourth word is no fourth state: the row stays counted under unresolved, rule 6.11.19.
-        var chip = new Badge(row.pending().isPresent() ? getTranslation("state.notAssessed")
-                : getTranslation(bucketKey(row.bucket())));
-        chip.addClassNames("status-chip", "state-" + (row.pending().isPresent() ? "in_triage"
+        var chip = css(new Badge(row.pending().isPresent() ? getTranslation("state.notAssessed")
+                : getTranslation(bucketKey(row.bucket()))), "status-chip", "state-" + (row.pending().isPresent() ? "in_triage"
                 : row.bucket().name().toLowerCase(java.util.Locale.ROOT)));
         cell.add(chip);
         settledVerdict(row, index).ifPresent(label -> {
-            var said = new Span(label);
-            said.addClassName("scan-verdict-label");
+            var said = css(new Span(label), "scan-verdict-label");
             cell.add(said);
         });
         return cell;
@@ -488,12 +459,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
         String key = names.size() == 1 ? "scan.skipped.one" : "scan.skipped.many";
         String said = shown.isEmpty() ? getTranslation(key, names.size())
                 : getTranslation(key + ".named", names.size(), String.join(", ", shown));
-        return lead("scan-skipped", said);
+        return paragraph("scan-skipped", said);
     }
 
-    private static Paragraph lead(String className, String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName(className);
-        return paragraph;
-    }
 }

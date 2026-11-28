@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.common;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,9 +68,8 @@ public final class AppBar extends Composite<Header> {
         Signal.effect(this, () -> showTrail(routerState.get()));
 
         var generatedAt = dataRefresh.generatedAt();
-        var measured = new Badge(generatedAt.map(
-                at -> at == null ? "" : getTranslation("shell.measured", MEASURED_DATE.format(at))));
-        measured.addClassName("measured-chip");
+        var measured = css(new Badge(generatedAt.map(
+                at -> at == null ? "" : getTranslation("shell.measured", MEASURED_DATE.format(at)))), "measured-chip");
         Tooltip.forComponent(measured).setText(getTranslation("shell.measured.title"));
         measured.bindVisible(generatedAt.map(Objects::nonNull));
 

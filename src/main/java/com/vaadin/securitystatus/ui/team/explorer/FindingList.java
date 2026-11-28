@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +78,7 @@ final class FindingList extends Composite<Div> {
 
     /** One finding, shut, its detail built the first time it is opened so a shut row reads no record. */
     private Details row(Finding finding, Function<Finding, Component> details) {
-        var summary = new Div();
-        summary.addClassName("explorer-finding-summary");
+        var summary = css(new Div(), "explorer-finding-summary");
         summary.add(advisoryId(finding));
         Component severity = severity(finding);
         if (severity != null) {
@@ -87,8 +89,7 @@ final class FindingList extends Composite<Div> {
         if (dots != null) {
             summary.add(dots);
         }
-        var row = new Details(summary);
-        row.addClassName("explorer-finding-row");
+        var row = css(new Details(summary), "explorer-finding-row");
         row.getElement().setAttribute("data-cve", finding.cve());
         row.addOpenedChangeListener(change -> {
             if (change.isOpened() && row.getContent().findAny().isEmpty()) {
@@ -98,25 +99,17 @@ final class FindingList extends Composite<Div> {
         return row;
     }
 
-    /** Every product on and nothing hidden: the release page, which narrows nothing, D-111. */
-    static Routes everything(List<Product> catalogue, ExplorerAnswer.Shape shape, Set<String> optional) {
-        return new Routes(catalogue, shape, List.of(), optional);
-    }
-
     /** Rule 4: a finding with no severity gets no element in the cell, rather than an empty one. */
     private @Nullable Component severity(Finding finding) {
         return finding.severity().<Component>map(word -> {
-            var badge = new Badge(getTranslation("severity." + word));
-            badge.addClassNames("explorer-severity", "severity-" + word);
-            return badge;
+            return css(new Badge(getTranslation("severity." + word)), "explorer-severity", "severity-" + word);
         }).orElse(null);
     }
 
     /** The words after the severity, with the products named in the tooltip. */
     private Component through(Finding finding) {
         Optional<List<String>> named = ExplorerAnswer.routes(finding, routes.shape(), routes.hidden());
-        var words = new Span();
-        words.addClassName("explorer-through");
+        var words = css(new Span(), "explorer-through");
         if (named.isPresent() && !named.get().isEmpty()) {
             List<String> all = named.get();
             if (all.stream().allMatch(routes.optional()::contains)) {
@@ -162,8 +155,7 @@ final class FindingList extends Composite<Div> {
         if (named.isEmpty() || named.get().isEmpty()) {
             return null;
         }
-        var dots = new Span();
-        dots.addClassName("explorer-dots");
+        var dots = css(new Span(), "explorer-dots");
         Map<String, List<String>> byProduct = paths.apply(finding.cve());
         for (Product product : routes.catalogue()) {
             if (named.get().contains(product.name()) && routes.shape().on().contains(product.name())) {
@@ -194,15 +186,11 @@ final class FindingList extends Composite<Div> {
 
     /** One product's ring, coloured by its place in the catalogue. */
     static Span ring(Product product) {
-        var ring = new Span();
-        ring.addClassNames("product-ring", "ring-" + product.ring());
-        ring.getElement().setAttribute("aria-hidden", "true");
+        var ring = decorative(new Span(), "product-ring", "ring-" + product.ring());
         return ring;
     }
 
     private static Span advisoryId(Finding finding) {
-        var id = new Span(finding.cve());
-        id.addClassName("advisory-id");
-        return id;
+        return css(new Span(finding.cve()), "advisory-id");
     }
 }

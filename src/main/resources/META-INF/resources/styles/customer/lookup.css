@@ -3,12 +3,12 @@
     margin-block-start: 28px;
     padding: 24px;
     border-radius: 15px;
-    background: light-dark(#f3f5f7, var(--vaadin-background-container));
+    background: var(--panel);
 }
 
 /* The three tabs as one control, the prototype's: a white pill as wide as its tabs, the chosen one tinted. */
 .lookup-tabs {
-    --vaadin-tabs-background: light-dark(#ffffff, var(--vaadin-background-color));
+    --vaadin-tabs-background: var(--surface);
     --vaadin-tabs-border-radius: 999px;
     --vaadin-tabs-border-width: 0;
     --vaadin-tabs-padding: 3px;
@@ -28,8 +28,8 @@
 }
 
 .lookup-tabs vaadin-tab[selected] {
-    --vaadin-tab-background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
-    --vaadin-tab-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    --vaadin-tab-background: var(--accent-chip);
+    --vaadin-tab-text-color: var(--accent-ink);
     --vaadin-tab-font-weight: 600;
 }
 
@@ -43,13 +43,13 @@
 .lookup vaadin-text-field {
     --vaadin-input-field-label-font-size: 13px;
     --vaadin-input-field-label-font-weight: 400;
-    --vaadin-input-field-label-color: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color-secondary));
-    --vaadin-input-field-background: light-dark(#ffffff, var(--vaadin-background-color));
-    --vaadin-input-field-border-color: light-dark(#c9ced6, var(--vaadin-border-color));
+    --vaadin-input-field-label-color: var(--ink-soft);
+    --vaadin-input-field-background: var(--surface);
+    --vaadin-input-field-border-color: var(--edge-neutral);
     --vaadin-input-field-border-width: 1px;
     --vaadin-input-field-border-radius: 9px;
     --vaadin-input-field-value-font-size: 15px;
-    --vaadin-input-field-placeholder-color: var(--vaadin-text-color-disabled, rgb(11 11 11 / 0.3));
+    --vaadin-input-field-placeholder-color: var(--vaadin-text-color-disabled);
 }
 
 .lookup-check {
@@ -57,12 +57,12 @@
     --vaadin-button-font-weight: 500;
     --vaadin-button-padding: 8px 14px;
     --vaadin-button-border-radius: 9px;
-    --vaadin-button-shadow: 0 2px 5px -1px rgb(20 20 20 / 0.2);
+    --vaadin-button-shadow: var(--shadow-button);
 }
 
 .lookup-check[disabled] {
-    --vaadin-button-background: light-dark(#eceff2, var(--vaadin-background-container));
-    --vaadin-button-text-color: var(--vaadin-text-color-disabled, rgb(11 11 11 / 0.45));
+    --vaadin-button-background: var(--chip-neutral);
+    --vaadin-button-text-color: var(--vaadin-text-color-disabled);
     --vaadin-button-shadow: none;
 }
 
@@ -83,14 +83,14 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: var(--vaadin-gap-m, 1rem);
+    gap: var(--vaadin-gap-m);
 }
 
 .lookup-panel {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: var(--vaadin-gap-m, 1rem);
+    gap: var(--vaadin-gap-m);
     min-width: 0;
 }
 
@@ -114,13 +114,11 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 13px;
-    color: light-dark(rgb(11 11 11 / 0.75), var(--vaadin-text-color-secondary));
+    color: var(--ink-soft);
 }
 
-/* The prototype's question mark: a 22 pixel filled circle in the page's lightest blue. The
-   element selector and the theme attribute outweigh Aura's own tertiary rules, which otherwise
-   keep their padding and font size and squeeze the mark into an oval. */
-vaadin-button.help-mark[theme] {
+/* The prototype's question mark: a 22 pixel filled circle in the page's lightest blue. */
+.help-mark {
     --vaadin-button-padding: 0;
     --vaadin-button-height: 22px;
     --vaadin-button-min-width: 22px;
@@ -129,33 +127,19 @@ vaadin-button.help-mark[theme] {
     --vaadin-button-font-size: 13px;
     --vaadin-button-font-weight: 600;
     --vaadin-button-line-height: 22px;
-    --vaadin-button-background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
-    --vaadin-button-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
-    box-sizing: border-box;
+    --vaadin-button-background: var(--accent-chip);
+    --vaadin-button-text-color: var(--accent-ink);
     width: 22px;
-    min-width: 22px;
-    height: 22px;
     padding: 0;
     margin-block: -3px;
     margin-inline-start: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 22px;
-    background: light-dark(#e4ecff, color-mix(in srgb, var(--aura-accent-color, #3266e4) 25%, transparent));
-    color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
-}
-
-vaadin-button.help-mark[theme]::part(label) {
-    padding: 0;
-    width: 100%;
-    text-align: center;
 }
 
 /* The example in an empty field is the faintest ink on the page, rule 6.11.16
    of the source spec. Written against vaadin-combo-box 25.4.0-beta1. */
 .lookup vaadin-combo-box > input::placeholder,
 .lookup vaadin-text-field > input::placeholder {
-    color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.35));
+    color: var(--vaadin-text-color-disabled);
     opacity: 1;
 }
 
@@ -185,18 +169,15 @@ vaadin-button.help-mark[theme]::part(label) {
     min-width: 0;
 }
 
-.lookup-report-asks {
+.lookup-report-asks,
+.lookup-report-formats,
+.advisories-total {
     margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
-}
-
-.lookup-report-formats {
-    margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .lookup-note {
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .help-dialog section + section {

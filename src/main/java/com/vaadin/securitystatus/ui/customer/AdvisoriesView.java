@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +38,6 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParent;
 import com.vaadin.flow.router.RouterLink;
 import jakarta.annotation.security.PermitAll;
@@ -104,11 +106,9 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         configureMenu();
         // The prototype's heading, aside and tip as the answer's H2; the view's title stays the
         // trail's leaf and the document's title, D-191.
-        var heading = new Div(new H2(getTranslation("advisories.heading")), aside);
-        heading.addClassName("section-row");
+        var heading = css(new Div(new H2(getTranslation("advisories.heading")), aside), "section-row");
         aside.addClassName("section-aside");
-        var tip = new Paragraph(getTranslation("advisories.tip"));
-        tip.addClassName("section-tip");
+        var tip = css(new Paragraph(getTranslation("advisories.tip")), "section-tip");
         getContent().add(heading, tip, outage, pills);
         // The ask exists only for the team, and the security context is asked
         // once, here: an anonymous reader gets no box and so no model call, D-141.
@@ -199,8 +199,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     private Component pill(String text, int count, Optional<String> word, boolean active) {
         var link = new RouterLink(text, AdvisoriesView.class);
         // The count in its own lighter span, as the prototype sets it; passed as text, not a quantity to group.
-        var number = new Span(String.valueOf(count));
-        number.addClassName("pill-count");
+        var number = css(new Span(String.valueOf(count)), "pill-count");
         link.add(number);
         Address address = Address.of(path.peek()).with(QueryFlag.VERDICT, word);
         link.setQueryParameters(address.query());
@@ -243,26 +242,20 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
     }
 
     private Component idCell(AdvisoryCatalogEntry row) {
-        var id = new Span(row.cve());
-        id.addClassName("advisory-id");
-        return id;
+        return css(new Span(row.cve()), "advisory-id");
     }
 
     /** Rule 4: no severity the index carries, no element in the cell, rather than an empty one. */
     private @Nullable Component severityCell(AdvisoryCatalogEntry row) {
         return row.severity().flatMap(VersionRules::severity).<Component>map(known -> {
-            var cell = new Span(getTranslation("severity." + known));
-            cell.addClassNames("severity", "severity-" + known);
-            return cell;
+            return css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
         }).orElse(null);
     }
 
     /** Whose fix it is, by the fix owner rule of the version screen, D-51: no chip for an owner nobody established. */
     private @Nullable Component ownerCell(AdvisoryCatalogEntry row) {
         return row.fixOwner().flatMap(FindingCard::ownerKey).<Component>map(key -> {
-            var chip = new Badge(getTranslation(key));
-            chip.addClassName("owner-chip");
-            return chip;
+            return css(new Badge(getTranslation(key)), "owner-chip");
         }).orElse(null);
     }
 
@@ -271,8 +264,7 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
         if (row.packages().isEmpty()) {
             return null;
         }
-        var cell = new Div();
-        cell.addClassName("advisory-packages");
+        var cell = css(new Div(), "advisory-packages");
         row.packages().forEach(name -> cell.add(new Span(name)));
         return cell;
     }
@@ -284,16 +276,12 @@ public final class AdvisoriesView extends Composite<Div> implements BeforeEnterO
      */
     private @Nullable Component verdictCell(AdvisoryCatalogEntry row) {
         return AdvisoryRules.listed(row).flatMap(word -> chipWords(word).map(words -> {
-            var chip = new Badge(words);
-            chip.addClassNames("verdict-chip", "verdict-" + word);
+            var chip = css(new Badge(words), "verdict-chip", "verdict-" + word);
             if ("risk".equals(word)) {
                 chip.addThemeVariants(BadgeVariant.ERROR);
             }
-            Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
-            chevron.addClassName("advisory-chevron");
-            chevron.getElement().setAttribute("aria-hidden", "true");
-            var cell = new Span(chip, chevron);
-            cell.addClassName("advisory-verdict");
+            Icon chevron = decorative(VaadinIcon.ANGLE_RIGHT.create(), "advisory-chevron");
+            var cell = css(new Span(chip, chevron), "advisory-verdict");
             return (Component) cell;
         })).orElse(null);
     }

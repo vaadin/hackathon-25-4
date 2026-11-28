@@ -1,5 +1,11 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.answerTable;
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.heading;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.verdictState;
+
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -22,7 +28,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Code;
 import com.vaadin.flow.component.html.Div;
@@ -59,6 +64,7 @@ import com.vaadin.securitystatus.data.model.SpringBootLatest;
 import com.vaadin.securitystatus.data.model.SpringBootSupply;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
+import com.vaadin.securitystatus.ui.common.HelpDialog;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
 
 /**
@@ -156,13 +162,10 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         this.data = data;
         this.clock = clock;
         addClassName("version-view");
-        var body = new Div(card, noFix, triage, fixes, spring, discontinued, details, ruledOut, lines);
-        body.addClassName("version-body");
+        var body = css(new Div(card, noFix, triage, fixes, spring, discontinued, details, ruledOut, lines), "version-body");
         // No visible "Vaadin X" above the card: its headline names the release, as in the prototype,
         // D-270. The heading stays for screen readers, so the page still reads H1, H2, H3.
-        var heading = ViewHeading.ofAnswer();
-        heading.addClassName("visually-hidden");
-        getContent().add(heading, body);
+        getContent().add(ViewHeading.hiddenAnswer(), body);
 
         var generatedAt = refresh.generatedAt();
         answer = Signal.computed(() -> {
@@ -281,23 +284,14 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     private Component verdictCard(CasesIndex index, VersionAnswer measured, List<String> stuck, @Nullable String lone) {
         String state = measured.state().orElse("");
-        var box = new Section();
-        box.addClassNames("verdict-card", "state-" + (state.isEmpty() ? "none" : state));
+        var box = css(new Section(), "verdict-card", "state-" + (state.isEmpty() ? "none" : state));
 
-        stateWord(state).ifPresent(word -> {
-            Icon icon = stateIcon(state).create();
-            icon.addClassName("verdict-icon");
-            icon.getElement().setAttribute("aria-hidden", "true");
-            var row = new Div(icon, new Span(word));
-            row.addClassName("verdict-state");
-            box.add(row);
-        });
+        stateWord(state).ifPresent(word -> box.add(verdictState(stateIcon(state), word)));
 
         Words words = words(index, measured, stuck);
         words.title().ifPresent(title -> box.add(new H3(title)));
         if (!words.why().isEmpty()) {
-            var why = new Paragraph(String.join(" ", words.why()));
-            why.addClassName("verdict-why");
+            var why = css(new Paragraph(String.join(" ", words.why())), "verdict-why");
             box.add(why);
         }
 
@@ -310,16 +304,13 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             box.add(new FindingCard(measured, index, lone, false, false));
         }
 
-        var actions = new Div();
-        actions.addClassName("verdict-actions");
+        var actions = css(new Div(), "verdict-actions");
         VersionRules.upgradeTo(measured).ifPresent(to -> VersionRules.releaseNotes(index, to).ifPresent(url -> {
-            var notes = new Anchor(url, getTranslation("version.action.releaseNotes", to.toString()));
-            notes.addClassNames("verdict-action", "primary");
+            var notes = css(new Anchor(url, getTranslation("version.action.releaseNotes", to.toString())), "verdict-action", "primary");
             actions.add(notes);
         }));
         if (!measured.fixable().isEmpty() && VersionRules.upgradeTo(measured).isPresent()) {
-            var what = new Button(getTranslation("version.action.fixes"), click -> scrollToFixes());
-            what.addClassName("what-it-fixes");
+            var what = css(new Button(getTranslation("version.action.fixes"), click -> scrollToFixes()), "what-it-fixes");
             what.addThemeVariants(ButtonVariant.TERTIARY);
             actions.add(what);
         }
@@ -331,9 +322,8 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                                 ? getTranslation("version.action.move.same", move.to().toString())
                                 : getTranslation("version.action.move.other", move.to().toString(),
                                         measured.line().orElse(measured.version().line()));
-                        var link = new RouterLink(text, VersionView.class,
-                                new RouteParameters(VERSION, move.to().toString()));
-                        link.addClassNames("verdict-action", "secure-move");
+                        var link = css(new RouterLink(text, VersionView.class,
+                                new RouteParameters(VERSION, move.to().toString())), "verdict-action", "secure-move");
                         actions.add(link);
                     });
         }
@@ -421,8 +411,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     private Div badges(CasesIndex index, VersionAnswer measured) {
-        var badges = new Div();
-        badges.addClassName("verdict-badges");
+        var badges = css(new Div(), "verdict-badges");
         String line = measured.line().orElse(measured.version().line());
         if (measured.version().isPrerelease()) {
             badges.add(badge(getTranslation("version.badge.prerelease")));
@@ -452,39 +441,27 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     }
 
     private static Badge badge(String text) {
-        var badge = new Badge(text);
-        badge.addClassName("verdict-badge");
-        return badge;
+        return css(new Badge(text), "verdict-badge");
     }
 
     /** The design's button, live, saying it is not built and what that would take, rule 6.11.15. */
     private Component notifyMe() {
-        var dialog = new Dialog();
-        dialog.addClassName("help-dialog");
-        dialog.setHeaderTitle(getTranslation("version.notify.title"));
-        dialog.add(new Paragraph(getTranslation("version.notify.asks")),
-                new Paragraph(getTranslation("version.notify.why")),
+        var dialog = HelpDialog.dialog(getTranslation("version.notify.title"),
+                new Paragraph(getTranslation("version.notify.asks")), new Paragraph(getTranslation("version.notify.why")),
                 new Paragraph(getTranslation("version.notify.needs")));
-        var close = new Button(getTranslation("help.close"), click -> dialog.close());
-        close.addThemeVariants(ButtonVariant.PRIMARY);
-        dialog.getFooter().add(close);
 
-        var button = new Button(getTranslation("version.action.notify"), VaadinIcon.BELL.create(),
-                click -> dialog.open());
-        button.addClassName("notify-me");
+        var button = css(new Button(getTranslation("version.action.notify"), VaadinIcon.BELL.create(),
+                click -> dialog.open()), "notify-me");
         button.addThemeVariants(ButtonVariant.TERTIARY);
         return new Span(button, dialog);
     }
 
     /** The scan date, and once the reader's timezone is known, how long ago that is in their calendar. */
     private Component scannedLine(OffsetDateTime scanned) {
-        var icon = VaadinIcon.CLOCK.create();
-        icon.getElement().setAttribute("aria-hidden", "true");
+        var icon = decorative(VaadinIcon.CLOCK.create());
         var text = new Span();
         text.bindText(zone.map(known -> scannedText(scanned, known)));
-        var line = new Span(icon, text);
-        line.addClassName("verdict-scanned");
-        return line;
+        return css(new Span(icon, text), "verdict-scanned");
     }
 
     private String scannedText(OffsetDateTime scanned, Optional<ZoneId> readersZone) {
@@ -508,14 +485,8 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     /** A version nobody measured, answered where it was asked, rule 6.9.7. */
     private Component unmeasuredCard(CasesIndex index, VersionNumber version) {
-        var box = new Section();
-        box.addClassNames("verdict-card", "state-unmeasured");
-        Icon icon = VaadinIcon.QUESTION_CIRCLE_O.create();
-        icon.addClassName("verdict-icon");
-        icon.getElement().setAttribute("aria-hidden", "true");
-        var row = new Div(icon, new Span(getTranslation("version.card.unmeasured.word")));
-        row.addClassName("verdict-state");
-        box.add(row, new H3(getTranslation("version.card.unmeasured.title", version.toString())));
+        var box = css(new Section(), "verdict-card", "state-unmeasured");
+        box.add(verdictState(VaadinIcon.QUESTION_CIRCLE_O, getTranslation("version.card.unmeasured.word")), new H3(getTranslation("version.card.unmeasured.title", version.toString())));
 
         Optional<VersionRules.Nearest> nearest = VersionRules.nearestMeasured(index, version);
         String why = nearest.map(found -> switch (found.kind()) {
@@ -525,15 +496,12 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             case OLDEST -> getTranslation("version.card.unmeasured.oldest", version.toString(),
                     found.version().toString());
         }).orElseGet(() -> getTranslation("version.card.unmeasured.none", version.line()));
-        var sentence = new Paragraph(why);
-        sentence.addClassName("verdict-why");
+        var sentence = css(new Paragraph(why), "verdict-why");
         box.add(sentence);
         nearest.ifPresent(found -> {
-            var see = new RouterLink(getTranslation("version.card.unmeasured.see", found.version().toString()),
-                    VersionView.class, new RouteParameters(VERSION, found.version().toString()));
-            see.addClassNames("verdict-action", "primary", "nearest-measured");
-            var actions = new Div(see);
-            actions.addClassName("verdict-actions");
+            var see = css(new RouterLink(getTranslation("version.card.unmeasured.see", found.version().toString()),
+                    VersionView.class, new RouteParameters(VERSION, found.version().toString())), "verdict-action", "primary", "nearest-measured");
+            var actions = css(new Div(see), "verdict-actions");
             box.add(actions);
         });
         return box;
@@ -579,11 +547,9 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         if (ids.isEmpty()) {
             return;
         }
-        var chip = new Badge(getTranslation("state.notAssessed"));
-        chip.addClassNames("status-chip", "state-in_triage");
+        var chip = css(new Badge(getTranslation("state.notAssessed")), "status-chip", "state-in_triage");
         var text = new Paragraph(getTranslation(plural("version.triage.text", ids.size()), ids.size()));
-        var list = new Paragraph();
-        list.addClassName("triage-ids");
+        var list = css(new Paragraph(), "triage-ids");
         List<String> named = ids.subList(0, Math.min(VersionRules.TRIAGE_NAMED, ids.size()));
         for (int i = 0; i < named.size(); i++) {
             if (i > 0) {
@@ -593,12 +559,10 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         }
         if (ids.size() > VersionRules.TRIAGE_NAMED) {
             list.add(new Text(" "));
-            var more = new Span(getTranslation("version.triage.more", ids.size() - VersionRules.TRIAGE_NAMED));
-            more.addClassName("triage-more");
+            var more = css(new Span(getTranslation("version.triage.more", ids.size() - VersionRules.TRIAGE_NAMED)), "triage-more");
             list.add(more);
         }
-        var notice = new Div(chip, new Div(text, list));
-        notice.addClassName("triage-notice");
+        var notice = css(new Div(chip, new Div(text, list)), "triage-notice");
         notice.getElement().setAttribute("role", "note");
         triage.add(notice);
     }
@@ -613,8 +577,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         int openCount = VersionRules.openCount(measured);
         fixes.add(heading(getTranslation("version.fixes.title", to.get().toString()),
                 getTranslation(plural("version.fixes.aside", openCount), measured.fixable().size(), openCount, version)));
-        var list = new Div();
-        list.addClassName("fix-rows");
+        var list = css(new Div(), "fix-rows");
         List<String> ordered = VersionRules.worstFirst(measured.fixable(), index);
         for (String advisory : ordered.subList(0, Math.min(VersionRules.FIXES_SHOWN, ordered.size()))) {
             var row = fixRow(index, measured, advisory, line, to.get());
@@ -622,8 +585,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             list.add(row);
         }
         if (ordered.size() > VersionRules.FIXES_SHOWN) {
-            var more = new Div(new Span(getTranslation("version.fixes.more", ordered.size() - VersionRules.FIXES_SHOWN)));
-            more.addClassNames("fix-row", "fix-more");
+            var more = css(new Div(new Span(getTranslation("version.fixes.more", ordered.size() - VersionRules.FIXES_SHOWN))), "fix-row", "fix-more");
             list.add(more);
         }
         fixes.add(list);
@@ -631,21 +593,17 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     private Component fixRow(CasesIndex index, VersionAnswer measured, String advisory, String line, VersionNumber to) {
         Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
-        var row = new RouterLink(CveView.class, new RouteParameters(Map.of(CveView.IDS, advisory, CveView.VERSION,
-                measured.version().toString())));
-        row.addClassName("fix-row");
+        var row = css(new RouterLink(CveView.class, new RouteParameters(Map.of(CveView.IDS, advisory, CveView.VERSION,
+                measured.version().toString()))), "fix-row");
         row.getElement().setAttribute("data-advisory", advisory);
-        var id = new Span(advisory);
-        id.addClassName("fix-id");
+        var id = css(new Span(advisory), "fix-id");
         row.add(id);
         entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(VersionRules::severity).ifPresent(known -> {
-            var severity = new Span(getTranslation("severity." + known));
-            severity.addClassNames("severity", "severity-" + known);
+            var severity = css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
             row.add(severity);
         });
         entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner).flatMap(FindingCard::ownerKey).ifPresent(key -> {
-            var chip = new Badge(getTranslation(key));
-            chip.addClassName("owner-chip");
+            var chip = css(new Badge(getTranslation(key)), "owner-chip");
             row.add(chip);
         });
         Optional<String> where = entry.flatMap(found -> found.packages().stream().findFirst()).map(VersionRules::shortName)
@@ -656,18 +614,14 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         where.ifPresent(says::add);
         impact.ifPresent(says::add);
         if (!says.isEmpty()) {
-            var text = new Span(String.join(" · ", says));
-            text.addClassName("fix-says");
+            var text = css(new Span(String.join(" · ", says)), "fix-says");
             row.add(text);
         }
-        var end = new Badge(VersionRules.fixedIn(index, advisory, line)
+        var end = css(new Badge(VersionRules.fixedIn(index, advisory, line)
                 .map(release -> getTranslation("version.fixes.fixedIn", release.toString()))
-                .orElseGet(() -> getTranslation("version.fixes.goneBy", to.toString())));
-        end.addClassNames("status-chip", "state-fix_available", "fix-end");
+                .orElseGet(() -> getTranslation("version.fixes.goneBy", to.toString()))), "status-chip", "state-fix_available", "fix-end");
         row.add(end);
-        Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
-        chevron.addClassName("fix-chevron");
-        chevron.getElement().setAttribute("aria-hidden", "true");
+        Icon chevron = decorative(VaadinIcon.ANGLE_RIGHT.create(), "fix-chevron");
         row.add(chevron);
         return row;
     }
@@ -694,11 +648,10 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             case DEFAULT -> !VersionRules.noFixYet(measured).isEmpty();
         };
         if (!table) {
-            var note = new Div(new H3(getTranslation("version.boot.note.title")),
+            var note = css(new Div(new H3(getTranslation("version.boot.note.title")),
                     new Paragraph(withCode(getTranslation("version.boot.note.text",
                             code(getTranslation("version.boot.property"))))),
-                    sectionLink(getTranslation("version.boot.show"), at -> at.withBoot(true)));
-            note.addClassName("boot-note");
+                    sectionLink(getTranslation("version.boot.show"), at -> at.withBoot(true))), "boot-note");
             spring.add(note);
             return;
         }
@@ -732,22 +685,12 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
         List<String> all = VersionRules.bootRows(measured, index);
         List<String> listed = all.subList(0, Math.min(VersionRules.BOOT_ROWS, all.size()));
-        var grid = table(getTranslation("version.boot.col.dependency"), getTranslation("version.boot.col.advisory"),
-                getTranslation("version.boot.col.fix"));
         String fix = target.map(release -> getTranslation("version.boot.fix.to", release.toString()))
                 .orElseGet(() -> getTranslation("version.boot.fix.any"));
-        for (String advisory : listed) {
-            TableRow row = grid.addRow();
-            row.addDataCell(packages(index, advisory));
-            row.addDataCell(FindingCard.advisoryLink(advisory, measured));
-            row.addDataCell(fix);
-            row.getElement().setAttribute("data-advisory", advisory);
-        }
-        spring.add(grid);
+        spring.add(advisoryTable(index, measured, listed, fix));
         if (total > listed.size()) {
-            var more = new Paragraph(getTranslation(measured.theirsRisk().isEmpty() ? "version.boot.more.all"
-                    : "version.boot.more.risk", total - listed.size()));
-            more.addClassName("section-tip");
+            var more = css(new Paragraph(getTranslation(measured.theirsRisk().isEmpty() ? "version.boot.more.all"
+                    : "version.boot.more.risk", total - listed.size())), "section-tip");
             spring.add(more);
         }
     }
@@ -785,21 +728,12 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         String tip = measured.discontinuedThrough().isEmpty() ? getTranslation("version.disc.tip.unnamed", version)
                 : getTranslation("version.disc.tip", measured.discontinuedThrough().stream().map(VersionView::code)
                         .collect(java.util.stream.Collectors.joining(getTranslation("version.list.separator"))), version);
-        var paragraph = new Paragraph(new Span(withCode(tip)), new Text(" "), sectionLink(
-                getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withDisc(!open)));
-        paragraph.addClassName("section-tip");
+        var paragraph = css(new Paragraph(new Span(withCode(tip)), new Text(" "), sectionLink(
+                getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withDisc(!open))), "section-tip");
         discontinued.add(paragraph);
         if (open) {
-            var grid = table(getTranslation("version.boot.col.dependency"), getTranslation("version.boot.col.advisory"),
-                    getTranslation("version.boot.col.fix"));
-            for (String advisory : VersionRules.worstFirst(ids, index)) {
-                TableRow row = grid.addRow();
-                row.addDataCell(packages(index, advisory));
-                row.addDataCell(FindingCard.advisoryLink(advisory, measured));
-                row.addDataCell(getTranslation("version.disc.fix"));
-                row.getElement().setAttribute("data-advisory", advisory);
-            }
-            discontinued.add(grid);
+            discontinued.add(advisoryTable(index, measured, VersionRules.worstFirst(ids, index),
+                    getTranslation("version.disc.fix")));
         }
     }
 
@@ -817,12 +751,11 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         CasesIndex index = current.index();
         List<String> ordered = VersionRules.worstFirst(all, index);
         ruledOut.add(heading(getTranslation("version.ruled.title"), count(ordered.size())));
-        var paragraph = new Paragraph(new Span(getTranslation("version.ruled.tip")), new Text(" "), sectionLink(
-                getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withRuled(!open)));
-        paragraph.addClassName("section-tip");
+        var paragraph = css(new Paragraph(new Span(getTranslation("version.ruled.tip")), new Text(" "), sectionLink(
+                getTranslation(open ? "version.section.hide" : "version.section.show"), at -> at.withRuled(!open))), "section-tip");
         ruledOut.add(paragraph);
         if (open) {
-            var grid = table(getTranslation("version.ruled.col.advisory"), getTranslation("version.ruled.col.why"));
+            var grid = answerTable(getTranslation("version.ruled.col.advisory"), getTranslation("version.ruled.col.why"));
             for (String advisory : ordered) {
                 TableRow row = grid.addRow();
                 var id = row.addDataCell(FindingCard.advisoryLink(advisory, measured));
@@ -850,7 +783,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
         CasesIndex index = current.index();
         String readers = current.measured().flatMap(VersionAnswer::line).orElse(current.version().line());
         lines.add(heading(getTranslation("version.lines.title"), getTranslation("version.lines.aside")));
-        var grid = table(getTranslation("version.lines.col.minor"), getTranslation("version.lines.col.newest"),
+        var grid = answerTable(getTranslation("version.lines.col.minor"), getTranslation("version.lines.col.newest"),
                 getTranslation("version.lines.col.status"), getTranslation("version.lines.col.open"),
                 getTranslation("version.lines.col.maintenance"), getTranslation("version.lines.col.scanned"));
         grid.addClassName("lines-table");
@@ -868,16 +801,14 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
             var newest = new Span(new RouterLink(spoken.toString(), VersionView.class,
                     new RouteParameters(VERSION, spoken.toString())));
             HomeView.secureFrom(index, line.line()).filter(from -> !from.equals(spoken)).ifPresent(from -> {
-                var safe = new Span(getTranslation("version.lines.safeFrom", from.toString()));
-                safe.addClassName("safe-from");
+                var safe = css(new Span(getTranslation("version.lines.safeFrom", from.toString())), "safe-from");
                 newest.add(new Text(" "), safe);
             });
             row.addDataCell(newest);
 
             var status = row.addDataCell();
             summary.flatMap(CasesIndex.Summary::state).flatMap(this::stateWord).ifPresent(word -> {
-                var chip = new Badge(word);
-                chip.addClassNames("status-chip", "state-" + summary.get().state().orElse(""));
+                var chip = css(new Badge(word), "status-chip", "state-" + summary.get().state().orElse(""));
                 status.add(chip);
             });
             row.addDataCell(summary.map(found -> {
@@ -956,8 +887,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
      * be copied or opened in a new tab, and a plain click answered in place.
      */
     private Anchor sectionLink(String text, java.util.function.UnaryOperator<VersionAddress> change) {
-        var link = new Anchor(change.apply(shown.peek()).href(), text);
-        link.addClassName("section-link");
+        var link = css(new Anchor(change.apply(shown.peek()).href(), text), "section-link");
         link.getElement().setAttribute("router-ignore", true);
         Signal.effect(link, () -> link.setHref(change.apply(shown.get()).href()));
         link.getElement().addEventListener("click", click -> write(change.apply(shown.peek())))
@@ -968,30 +898,21 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
     // Small parts
 
     private static Div section(String className) {
-        var slot = new Div();
-        slot.addClassName(className);
-        return slot;
+        return css(new Div(), className);
     }
 
-    private static Component heading(String title, @Nullable Object aside) {
-        var row = new Div(new H3(title));
-        row.addClassName("section-row");
-        if (aside instanceof String text) {
-            var span = new Span(text);
-            span.addClassName("section-aside");
-            row.add(span);
-        } else if (aside instanceof Component component) {
-            component.getElement().getClassList().add("section-aside");
-            row.add(component);
+    /** The dependency, advisory and fix table of the Spring Boot and discontinued sections. */
+    private Table advisoryTable(CasesIndex index, VersionAnswer measured, List<String> advisories, String fix) {
+        var grid = answerTable(getTranslation("version.boot.col.dependency"), getTranslation("version.boot.col.advisory"),
+                getTranslation("version.boot.col.fix"));
+        for (String advisory : advisories) {
+            TableRow row = grid.addRow();
+            row.addDataCell(packages(index, advisory));
+            row.addDataCell(FindingCard.advisoryLink(advisory, measured));
+            row.addDataCell(fix);
+            row.getElement().setAttribute("data-advisory", advisory);
         }
-        return row;
-    }
-
-    private static Table table(String... headers) {
-        var table = new Table();
-        table.addClassNames("answer-table", "vaadin-themed-html");
-        table.addHeaderRow(headers);
-        return table;
+        return grid;
     }
 
     private Component packages(CasesIndex index, String advisory) {

@@ -1,5 +1,8 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -149,20 +152,14 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private Component linesSection(CasesIndex index, boolean withPrereleases) {
-        var aside = new Span(getTranslation("home.lines.lead"));
-        aside.addClassName("section-aside");
-        var heading = new Div(new H2(getTranslation("home.lines.title")), aside);
-        heading.addClassName("section-heading");
-        var cards = new Div();
-        cards.addClassName("line-cards");
+        var aside = css(new Span(getTranslation("home.lines.lead")), "section-aside");
+        var heading = css(new Div(new H2(getTranslation("home.lines.title")), aside), "section-heading");
+        var cards = css(new Div(), "line-cards");
         for (CasesIndex.Line line : shownLines(index, withPrereleases)) {
             cards.add(card(index, line));
         }
-        var tip = new Paragraph(getTranslation("home.lines.tip"));
-        tip.addClassName("home-tip");
-        var section = new Section(heading, cards, tip);
-        section.addClassName("home-lines");
-        return section;
+        var tip = css(new Paragraph(getTranslation("home.lines.tip")), "home-tip");
+        return css(new Section(heading, cards, tip), "home-lines");
     }
 
     private Component card(CasesIndex index, CasesIndex.Line line) {
@@ -170,32 +167,26 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         Optional<CasesIndex.Summary> summary = index.summaryOf(spoken);
         Optional<String> state = summary.flatMap(CasesIndex.Summary::state);
 
-        var card = new RouterLink(VersionView.class, new RouteParameters(VersionView.VERSION, spoken.toString()));
-        card.addClassName("line-card");
+        var card = css(new RouterLink(VersionView.class, new RouteParameters(VersionView.VERSION, spoken.toString())), "line-card");
         state.ifPresent(word -> card.addClassName("state-" + word));
 
-        var minor = new Span(line.line());
-        minor.addClassName("line-card-minor");
-        var top = new Div(minor);
-        top.addClassName("line-card-top");
+        var minor = css(new Span(line.line()), "line-card-minor");
+        var top = css(new Div(minor), "line-card-top");
         tierBadge(line).ifPresent(top::add);
         summary.flatMap(row -> stateIcon(row)).ifPresent(top::add);
         card.add(top);
 
         summary.flatMap(this::stateWord).ifPresent(word -> {
-            var verdict = new Span(word);
-            verdict.addClassName("line-card-state");
+            var verdict = css(new Span(word), "line-card-state");
             card.add(verdict);
         });
 
-        var action = new Span(actionLine(index, line, summary, spoken));
-        action.addClassName("line-card-action");
+        var action = css(new Span(actionLine(index, line, summary, spoken)), "line-card-action");
         card.add(action);
 
         summary.flatMap(CasesIndex.Summary::scannedAt).or(line::scannedAt).map(OffsetDateTime::toLocalDate)
                 .ifPresent(day -> {
-                    var scanned = new Span(getTranslation("home.card.scanned", day.toString()));
-                    scanned.addClassName("line-card-scanned");
+                    var scanned = css(new Span(getTranslation("home.card.scanned", day.toString())), "line-card-scanned");
                     card.add(scanned);
                 });
         return card;
@@ -205,8 +196,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     private Optional<Component> tierBadge(CasesIndex.Line line) {
         return line.support().filter(support -> support.tier().filter("extended"::equals).isPresent())
                 .map(support -> {
-                    var badge = new Badge(getTranslation("home.card.extended"));
-                    badge.addClassName("line-card-tier");
+                    var badge = css(new Badge(getTranslation("home.card.extended")), "line-card-tier");
                     extendedSentence(support).ifPresent(text -> Tooltip.forComponent(badge).setText(text));
                     return badge;
                 });
@@ -255,9 +245,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
                     : notAssessedOnly(row) ? VaadinIcon.CLOCK
                             : "fix_available".equals(state) ? VaadinIcon.ARROW_CIRCLE_UP
                                     : VaadinIcon.EXCLAMATION_CIRCLE;
-            Icon icon = shape.create();
-            icon.addClassName("line-card-icon");
-            icon.getElement().setAttribute("aria-hidden", "true");
+            Icon icon = decorative(shape.create(), "line-card-icon");
             return icon;
         });
     }
@@ -304,38 +292,30 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private Component recentSection(CasesIndex index) {
-        var heading = new Div(new H2(getTranslation("home.recent.title")));
-        heading.addClassName("section-heading");
+        var heading = css(new Div(new H2(getTranslation("home.recent.title"))), "section-heading");
         index.counts().map(CasesIndex.Counts::cves).ifPresent(total -> {
-            var all = new RouterLink(getTranslation("home.recent.all", total), AdvisoriesView.class);
-            all.addClassName("recent-all");
+            var all = css(new RouterLink(getTranslation("home.recent.all", total), AdvisoriesView.class), "recent-all");
             heading.add(all);
         });
-        var rows = new Div();
-        rows.addClassName("recent-rows");
+        var rows = css(new Div(), "recent-rows");
         for (Assessment verdict : recent(index)) {
             rows.add(recentRow(index, verdict));
         }
-        var section = new Section(heading, rows);
-        section.addClassName("home-recent");
-        return section;
+        return css(new Section(heading, rows), "home-recent");
     }
 
     private Component recentRow(CasesIndex index, Assessment verdict) {
         Optional<String> cve = verdict.cves().stream().findFirst();
-        var id = new Span(cve.or(verdict::id).orElse(""));
-        id.addClassName("recent-id");
+        var id = css(new Span(cve.or(verdict::id).orElse("")), "recent-id");
         var parts = new ArrayList<Component>();
         parts.add(id);
         firstSentence(verdict).ifPresent(says -> {
-            var text = new Span(says);
-            text.addClassName("recent-says");
+            var text = css(new Span(says), "recent-says");
             parts.add(text);
         });
         String applicability = verdict.applicability().orElse("in_triage");
         Optional.ofNullable(index.labels().get(applicability)).ifPresent(words -> {
-            var chip = new Badge(words);
-            chip.addClassNames("verdict-chip", "verdict-" + applicability);
+            var chip = css(new Badge(words), "verdict-chip", "verdict-" + applicability);
             if ("risk".equals(applicability)) {
                 // The one verdict that asks something of the reader stands out, as in the prototype.
                 chip.addThemeVariants(BadgeVariant.ERROR);
@@ -343,14 +323,11 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             parts.add(chip);
         });
         verdict.assessedAt().ifPresent(day -> {
-            var when = new Span(day.toString());
-            when.addClassName("recent-date");
+            var when = css(new Span(day.toString()), "recent-date");
             parts.add(when);
         });
         if (cve.isPresent()) {
-            Icon chevron = VaadinIcon.ANGLE_RIGHT.create();
-            chevron.addClassName("recent-chevron");
-            chevron.getElement().setAttribute("aria-hidden", "true");
+            Icon chevron = decorative(VaadinIcon.ANGLE_RIGHT.create(), "recent-chevron");
             parts.add(chevron);
         }
         Component[] children = parts.toArray(Component[]::new);
@@ -360,17 +337,13 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             row.addClassName("recent-row");
             return row;
         }
-        var row = new Div(children);
-        row.addClassName("recent-row");
-        return row;
+        return css(new Div(children), "recent-row");
     }
 
     // The designer's pointer
 
     private Component pointer() {
-        var box = new Div(new H3(getTranslation("home.pointer.title")),
-                new Paragraph(getTranslation("home.pointer.text")));
-        box.addClassName("home-pointer");
-        return box;
+        return css(new Div(new H3(getTranslation("home.pointer.title")),
+                new Paragraph(getTranslation("home.pointer.text"))), "home-pointer");
     }
 }

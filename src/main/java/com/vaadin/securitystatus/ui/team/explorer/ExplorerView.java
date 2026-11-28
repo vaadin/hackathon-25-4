@@ -1,5 +1,10 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+import static com.vaadin.securitystatus.ui.team.explorer.SeriesParts.hint;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,8 +23,6 @@ import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.html.Aside;
-import com.vaadin.flow.component.html.DescriptionList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -42,14 +45,11 @@ import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
-import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.data.model.ExplorerFront.History;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
-import com.vaadin.securitystatus.data.model.ExplorerVersion;
 import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer.Asked;
-import com.vaadin.securitystatus.team.explorer.ExplorerAnswer.Groups;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer.Shape;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer.Split;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer;
@@ -115,10 +115,8 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         lead.addClassName("explorer-lead");
         heading.addClassName("explorer-series-heading");
         rows.addClassName("explorer-rows");
-        var series = new Section(heading, rows);
-        series.addClassName("explorer-series");
-        var main = new Div(help, outage, lead, series);
-        main.addClassName("explorer-main");
+        var series = css(new Section(heading, rows), "explorer-series");
+        var main = css(new Div(help, outage, lead, series), "explorer-main");
 
         getContent().add(main, parts.legend(legendOpen));
         Shortcuts.addShortcutListener(this, () -> legendOpen.set(false), Key.ESCAPE);
@@ -263,8 +261,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     private void buildPanel() {
         panel.addClassName("explorer-panel");
 
-        var lookupHeading = new H2(getTranslation("explorer.lookup.heading"));
-        lookupHeading.addClassName("explorer-panel-heading");
+        var lookupHeading = css(new H2(getTranslation("explorer.lookup.heading")), "explorer-panel-heading");
         search.addClassName("explorer-search");
         search.setAriaLabel(getTranslation("explorer.lookup.heading"));
         search.setClearButtonVisible(true);
@@ -277,11 +274,9 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         filter.addThemeVariants(ButtonVariant.PRIMARY);
         filter.setAriaLabel(getTranslation("explorer.search.button"));
         filter.addClassName("explorer-filter");
-        var form = new Div(search, filter);
-        form.addClassName("explorer-form");
+        var form = css(new Div(search, filter), "explorer-form");
         note.addClassName("explorer-note");
-        var lookup = new Section(lookupHeading, form, note);
-        lookup.addClassName("explorer-lookup");
+        var lookup = css(new Section(lookupHeading, form, note), "explorer-lookup");
 
         profile.addClassName("explorer-profile");
         panel.add(lookup, profile);
@@ -310,7 +305,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         Asked asked = ExplorerAnswer.asked(q, front);
 
         drawProducts(front, catalogue, off, shape, asked);
-        drawNote(front, asked);
+        drawNote(asked);
 
         var counts = new LinkedHashMap<ExplorerRules.Badge, Integer>();
         int shown = 0;
@@ -326,7 +321,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             ExplorerRules.Badge state = ExplorerAnswer.state(line, shape);
             counts.merge(state, 1, Integer::sum);
             boolean isOpen = open.filter(line.line()::equals).isPresent();
-            rows.add(row(front, line, registry, catalogue, shape, asked, state, isOpen, off));
+            rows.add(row(front, line, catalogue, shape, asked, state, isOpen));
         }
 
         int all = front.lines().size();
@@ -359,7 +354,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     }
 
     /** What the search found or did not, said under the field, D-209. */
-    private void drawNote(ExplorerFront front, Asked asked) {
+    private void drawNote(Asked asked) {
         if (asked.raw().isEmpty()) {
             return;
         }
@@ -376,8 +371,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         int ids = asked.ids().map(Set::size).orElse(0);
         List<History> past = ids == 0 ? asked.past().stream().limit(8).toList() : List.of();
         for (History entry : past) {
-            var line = new Paragraph(entry.cve() + ": ");
-            line.addClassName("explorer-note-says");
+            var line = css(new Paragraph(entry.cve() + ": "), "explorer-note-says");
             boolean first = true;
             for (var span : new java.util.TreeMap<>(entry.lines()).entrySet()) {
                 String until = span.getValue().until().map(VersionNumber::toString).orElse("");
@@ -428,8 +422,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         Set<String> plainOnly = shape.plain() ? Set.of(shape.starter()) : Set.of();
         Shape everything = ExplorerAnswer.shape(front, catalogue, plainOnly);
 
-        var chips = new Div();
-        chips.addClassName("explorer-chips");
+        var chips = css(new Div(), "explorer-chips");
         for (Product product : catalogue) {
             String name = product.name();
             boolean cannot = shape.cannot().contains(name);
@@ -443,10 +436,8 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             }
         }
 
-        var titleRow = new Div();
-        titleRow.addClassName("explorer-profile-title");
-        var title = new H2(getTranslation("explorer.profile.heading"));
-        title.addClassName("explorer-panel-heading");
+        var titleRow = css(new Div(), "explorer-profile-title");
+        var title = css(new H2(getTranslation("explorer.profile.heading")), "explorer-panel-heading");
         titleRow.add(title);
         if (chips.getComponentCount() == 0) {
             profile.add(titleRow, hint(getTranslation("explorer.profile.none")));
@@ -487,17 +478,12 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         link.getElement().setAttribute("aria-label",
                 getTranslation(all ? "explorer.all.off" : "explorer.all.on"));
         link.getElement().setAttribute("data-state", state);
-        var box = new Span();
-        box.addClassNames("chip-box", state);
-        box.getElement().setAttribute("aria-hidden", "true");
+        var box = decorative(new Span(), "chip-box", state);
         link.add(box);
 
-        var product = new Span(getTranslation("explorer.profile.product"));
-        product.addClassName("explorer-col-name");
-        var advisories = new Span(getTranslation("explorer.profile.advisories"));
-        advisories.addClassName("explorer-col-count");
-        var head = new Div(link, product, advisories);
-        head.addClassName("explorer-chips-head");
+        var product = css(new Span(getTranslation("explorer.profile.product")), "explorer-col-name");
+        var advisories = css(new Span(getTranslation("explorer.profile.advisories")), "explorer-col-count");
+        var head = css(new Div(link, product, advisories), "explorer-chips-head");
         head.setVisible(!counted.isEmpty());
         return head;
     }
@@ -536,55 +522,24 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         element.setAttribute("aria-checked", String.valueOf(isOn));
         element.setAttribute("data-product", product.name());
 
-        var box = new Span();
-        box.addClassNames("chip-box", isOn ? "ticked" : "none");
-        box.getElement().setAttribute("aria-hidden", "true");
-        var name = new Span(product.name());
-        name.addClassName("chip-name");
-        element.appendChild(box.getElement(), name.getElement());
-        if (product.discontinued()) {
-            var mark = new Span(getTranslation("explorer.products.discontinued"));
-            mark.addClassName("chip-discontinued");
-            element.appendChild(mark.getElement());
+        for (Component part : parts.chipParts(product, isOn, brings)) {
+            element.appendChild(part.getElement());
         }
-        var number = new Span(String.valueOf(brings));
-        number.addClassName("chip-count");
-        if (isOn && brings > 0) {
-            number.addClassNames("product-ring", "ring-" + product.ring());
-        } else {
-            number.addClassName("none");
-        }
-        element.appendChild(number.getElement());
-        Tooltip.forComponent(chip).setText(chipTitle(product, isOn, cannot));
+        Tooltip.forComponent(chip).setText(parts.chipTitle("explorer", product, isOn, cannot));
         return chip;
     }
 
-    private String chipTitle(Product product, boolean isOn, boolean cannot) {
-        String gone = product.discontinued() ? getTranslation("explorer.chip.gone") + " " : "";
-        if (cannot) {
-            return gone + getTranslation("explorer.chip.cannot");
-        }
-        if (product.fixed()) {
-            return gone + getTranslation("explorer.chip.fixed");
-        }
-        return gone + getTranslation(isOn ? "explorer.chip.on" : "explorer.chip.off") + " "
-                + getTranslation("explorer.chip.narrows");
-    }
 
     // The series rows
 
-    private Component row(ExplorerFront front, Line line, List<Product> registry, List<Product> catalogue,
-            Shape shape, Asked asked, ExplorerRules.Badge state, boolean isOpen, Set<String> off) {
-        var summary = new Div();
-        summary.addClassName("explorer-row-summary");
-        var name = new Span(line.line());
-        name.addClassName("explorer-row-line");
-        var version = new Span(line.version().toString());
-        version.addClassName("explorer-row-version");
+    private Component row(ExplorerFront front, Line line, List<Product> catalogue, Shape shape, Asked asked,
+            ExplorerRules.Badge state, boolean isOpen) {
+        var summary = css(new Div(), "explorer-row-summary");
+        var name = css(new Span(line.line()), "explorer-row-line");
+        var version = css(new Span(line.version().toString()), "explorer-row-version");
         summary.add(name, version);
         line.scannedAt().map(OffsetDateTime::toLocalDate).ifPresent(day -> {
-            var scanned = new Span(getTranslation("explorer.row.scannedOn", day.toString()));
-            scanned.addClassName("explorer-row-scanned");
+            var scanned = css(new Span(getTranslation("explorer.row.scannedOn", day.toString())), "explorer-row-scanned");
             Tooltip.forComponent(scanned).setText(getTranslation("explorer.row.scanned.title"));
             summary.add(scanned);
         });
@@ -595,8 +550,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             summary.add(parts.springBadge(theirs, getTranslation("explorer.badge.spring.title", against)));
         });
         parts.sentence(line, shape, state).ifPresent(text -> {
-            var says = new Span(text);
-            says.addClassName("explorer-row-says");
+            var says = css(new Span(text), "explorer-row-says");
             summary.add(says);
         });
         summary.add(parts.rings(line, catalogue, shape, asked));
@@ -607,7 +561,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         details.getElement().setAttribute("data-line", line.line());
         details.setOpened(isOpen);
         if (isOpen) {
-            details.add(detail(front, line, registry, catalogue, shape, asked, off));
+            details.add(detail(front, line, catalogue, shape, asked));
         }
         details.addOpenedChangeListener(change -> {
             if (change.isFromClient()) {
@@ -621,10 +575,8 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
 
     // The opened series
 
-    private Component detail(ExplorerFront front, Line line, List<Product> registry, List<Product> catalogue,
-            Shape shape, Asked asked, Set<String> off) {
-        var detail = new Div();
-        detail.addClassName("explorer-detail");
+    private Component detail(ExplorerFront front, Line line, List<Product> catalogue, Shape shape, Asked asked) {
+        var detail = css(new Div(), "explorer-detail");
         detail.getElement().setAttribute("data-line", line.line());
 
         // No title, no close button and no Spring switch: the row above names the line and release, its
@@ -635,7 +587,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             detail.add(hint(getTranslation("explorer.detail.unmeasured")));
             return detail;
         }
-        detail.add(lead("explorer-detail-summary", getTranslation("explorer.summary.all",
+        detail.add(paragraph("explorer-detail-summary", getTranslation("explorer.summary.all",
                 split.ours().size() + split.theirs().size() + split.build().size(),
                 getTranslation("explorer.summary.split", split.ours().risk().size(), split.ours().pending().size(),
                         split.theirs().size(), split.build().size(), split.ours().ruled().size()))));
@@ -650,10 +602,9 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         detail.add(new ReleaseFiles(data, line.version(), ReleaseRules.files(line.scannerFiles()), true));
         others(line).ifPresent(detail::add);
 
-        var release = new RouterLink(getTranslation("explorer.detail.release", line.version().toString()),
+        var release = css(new RouterLink(getTranslation("explorer.detail.release", line.version().toString()),
                 ReleaseView.class, new RouteParameters(Map.of(ReleaseView.LINE, line.line(), ReleaseView.VERSION,
-                        line.version().toString())));
-        release.addClassName("explorer-release-link");
+                        line.version().toString()))), "explorer-release-link");
         detail.add(release);
         return detail;
     }
@@ -665,8 +616,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         if (others.isEmpty()) {
             return Optional.empty();
         }
-        var list = new Paragraph(getTranslation("explorer.releases", line.line()) + " ");
-        list.addClassNames("explorer-hint", "explorer-releases");
+        var list = css(new Paragraph(getTranslation("explorer.releases", line.line()) + " "), "explorer-hint", "explorer-releases");
         for (int i = 0; i < others.size(); i++) {
             if (i > 0) {
                 list.add(", ");
@@ -683,17 +633,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
 
     // Small parts
 
-    private static Paragraph lead(String className, String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName(className);
-        return paragraph;
-    }
-
-    private static Paragraph hint(String text) {
-        return lead("explorer-hint", text);
-    }
-
     private static Paragraph says(String text) {
-        return lead("explorer-note-says", text);
+        return paragraph("explorer-note-says", text);
     }
 }

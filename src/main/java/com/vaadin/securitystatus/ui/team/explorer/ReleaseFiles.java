@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -21,12 +23,7 @@ import com.vaadin.securitystatus.ui.common.Downloads;
 final class ReleaseFiles extends Composite<Div> {
 
     ReleaseFiles(SecurityDataService data, VersionNumber version) {
-        this(data, version, EnumSet.allOf(ExportKind.class));
-    }
-
-    /** Only the files given, in the order of {@link ExportKind}. */
-    ReleaseFiles(SecurityDataService data, VersionNumber version, Set<ExportKind> kinds) {
-        this(data, version, kinds, false);
+        this(data, version, EnumSet.allOf(ExportKind.class), false);
     }
 
     /**
@@ -37,9 +34,8 @@ final class ReleaseFiles extends Composite<Div> {
     ReleaseFiles(SecurityDataService data, VersionNumber version, Set<ExportKind> kinds, boolean tooling) {
         var row = getContent();
         row.addClassName("release-files-row");
-        var label = new Span(tooling ? getTranslation("explorer.files.tooling")
-                : getTranslation("explorer.files", version.toString()));
-        label.addClassName("release-files-version");
+        var label = css(new Span(tooling ? getTranslation("explorer.files.tooling")
+                : getTranslation("explorer.files", version.toString())), "release-files-version");
         row.add(label);
         for (ExportKind kind : EnumSet.copyOf(kinds)) {
             var link = Downloads.link(getTranslation((tooling ? "explorer.file." : "export.") + kind.name()),

@@ -28,14 +28,16 @@
     max-width: 100%;
 }
 
-.release-card-summary,
 .spring-boot-summary,
 .spring-supply,
 .release-advice p,
 .spring-advice p,
 .spring-caveat,
 .spring-footer,
-.spring-lead {
+.spring-lead,
+.release-others,
+.explorer-lead,
+.explorer-legend-list {
     margin: 0;
 }
 
@@ -45,14 +47,20 @@
     flex-direction: column;
     gap: 0.375rem;
     padding: 0.625rem 0.75rem;
-    border-radius: var(--vaadin-radius-m, 0.5rem);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.04));
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-container);
 }
 
 .spring-advice-property,
 .spring-caveat,
-.spring-footer {
-    color: var(--vaadin-text-color-secondary, inherit);
+.spring-footer,
+.spring-finding-verdict,
+.spring-finding-gone,
+.workbench-hint,
+.workbench-acknowledged,
+.workbench-check,
+.workbench-footer {
+    color: var(--vaadin-text-color-secondary);
     font-size: 0.875rem;
 }
 
@@ -72,8 +80,10 @@
     font-size: 0.8125rem;
 }
 
-.spring-group > vaadin-details-summary {
-    font-weight: var(--aura-font-weight-semibold, 600);
+.spring-group > vaadin-details-summary,
+.explorer-legend-list dt,
+.explorer-finding-summary .advisory-id {
+    font-weight: 600;
 }
 
 .spring-findings {
@@ -87,7 +97,7 @@
     align-items: baseline;
     gap: 0.25rem 0.75rem;
     padding: 0.25rem 0;
-    border-bottom: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.1));
+    border-bottom: 1px solid var(--vaadin-border-color);
 }
 
 .spring-finding-record {
@@ -96,16 +106,6 @@
     line-height: 1.5rem;
     font-family: var(--vaadin-font-family-monospace, monospace);
     font-size: 0.875rem;
-}
-
-.spring-finding-verdict,
-.spring-finding-gone {
-    color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.875rem;
-}
-
-.release-others {
-    margin: 0;
 }
 
 /* The explorer front door in the prototype's distribution, D-203 to D-212: the filter and
@@ -136,14 +136,12 @@
     height: 2rem;
     border-radius: 50%;
     padding: 0;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
 }
 
-.explorer-lead {
-    margin: 0;
-}
-
-.explorer-series {
+.explorer-series,
+.explorer-half,
+.release-body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -154,10 +152,10 @@
     margin: 0;
     font-size: 0.8125rem;
     line-height: 1.35;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The left panel. */
@@ -178,7 +176,7 @@
     flex-direction: column;
     gap: 0.5rem;
     padding-block-end: 1rem;
-    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-block-end: 1px solid var(--vaadin-border-color-secondary);
 }
 
 .explorer-form {
@@ -207,7 +205,8 @@
     font-size: 0.875rem;
 }
 
-.explorer-profile {
+.explorer-profile,
+.workbench-compose {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -232,8 +231,8 @@
 
 .explorer-chips-head {
     padding-block-end: 0.25rem;
-    border-block-end: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    color: var(--vaadin-text-color-secondary, inherit);
+    border-block-end: 1px solid var(--vaadin-border-color-secondary);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .explorer-col-count {
@@ -264,8 +263,9 @@
 }
 
 .explorer-chip.off,
-.explorer-chip.fixed {
-    color: var(--vaadin-text-color-secondary, inherit);
+.explorer-chip.fixed,
+.field-fix p {
+    color: var(--vaadin-text-color-secondary);
 }
 
 .explorer-chip.impossible {
@@ -279,12 +279,13 @@
     justify-content: center;
     width: 1rem;
     height: 1rem;
-    border: 2px solid var(--vaadin-border-color, rgb(0 0 0 / 0.35));
+    border: 2px solid var(--vaadin-border-color);
     border-radius: 0.2rem;
     box-sizing: border-box;
 }
 
-.chip-box.ticked {
+.chip-box.ticked,
+.chip-box.some {
     border-color: var(--vaadin-accent-color, #1676f3);
     background: var(--vaadin-accent-color, #1676f3);
 }
@@ -303,11 +304,6 @@
     opacity: 0.5;
 }
 
-.chip-box.some {
-    border-color: var(--vaadin-accent-color, #1676f3);
-    background: var(--vaadin-accent-color, #1676f3);
-}
-
 .chip-box.some::after {
     content: "";
     width: 0.5rem;
@@ -323,12 +319,12 @@
 
 .chip-discontinued {
     padding: 0 0.25rem;
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.2));
+    border: 1px solid var(--vaadin-border-color);
     border-radius: 0.2rem;
     font-size: 0.6875rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The number in a ring, colored when the product is on and brings something. */
@@ -340,7 +336,7 @@
     min-width: 21px;
     height: 21px;
     padding: 0 5px;
-    border: 2px solid var(--ring, var(--vaadin-border-color, rgb(0 0 0 / 0.15)));
+    border: 2px solid var(--ring, var(--vaadin-border-color));
     border-radius: 999px;
     box-sizing: border-box;
     font-size: 11.5px;
@@ -351,8 +347,8 @@
 
 .chip-count.none,
 .explorer-ring.none {
-    border-color: var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.08));
-    color: var(--vaadin-text-color-disabled, rgb(0 0 0 / 0.35));
+    border-color: var(--vaadin-border-color-secondary);
+    color: var(--vaadin-text-color-disabled);
 }
 
 /* The palette the rings and dots take, by catalogue position, the prototype's six. */
@@ -381,13 +377,15 @@
     background: var(--ring, currentColor);
 }
 
-
+/* The five counts read like the other sentences of the opened series. */
 .explorer-hint,
 .explorer-group-note,
 .explorer-group-more,
-.explorer-finding-missing {
+.explorer-finding-missing,
+.explorer-detail-summary,
+.assistant-mock {
     margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-size: 0.875rem;
 }
 
@@ -399,10 +397,10 @@
 }
 
 .explorer-row {
-    border: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
+    border: 1px solid var(--vaadin-border-color);
     border-inline-start: 4px solid var(--status-secure);
     border-radius: 10px;
-    background: var(--vaadin-background-color, transparent);
+    background: var(--vaadin-background-color);
 }
 
 .explorer-row.state-vulnerable {
@@ -446,7 +444,7 @@
     font-size: 13px;
     font-weight: 650;
     /* The series in the accent text color, as the prototype draws it. */
-    color: var(--aura-accent-text-color, inherit);
+    color: var(--aura-accent-text-color);
 }
 
 .explorer-row-version {
@@ -456,7 +454,7 @@
 }
 
 .explorer-row-scanned {
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-size: 12px;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
@@ -467,14 +465,8 @@
     flex: 1 1 160px;
     min-width: 0;
     margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-size: 13.5px;
-}
-
-.explorer-row-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
 }
 
 /* The state badge as the prototype draws it: a small filled pill, the word in the state's colour on its tint. */
@@ -489,17 +481,17 @@
 
 .explorer-badge.badge-vulnerable {
     --vaadin-badge-text-color: var(--status-unresolved);
-    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
+    --vaadin-badge-background: var(--unresolved-chip);
 }
 
 .explorer-badge.badge-unjudged {
     --vaadin-badge-text-color: var(--status-fix);
-    --vaadin-badge-background: light-dark(#fff6e0, #2a2314);
+    --vaadin-badge-background: var(--unjudged-chip);
 }
 
 .explorer-badge.badge-not_affected {
     --vaadin-badge-text-color: var(--status-secure);
-    --vaadin-badge-background: light-dark(#e7f5ee, #12271d);
+    --vaadin-badge-background: var(--secure-chip);
 }
 
 /* The Spring Boot badge, for the half no Vaadin release moves: the same colours and a dashed edge. */
@@ -508,7 +500,6 @@
     --vaadin-badge-border-color: currentColor;
     border-style: dashed;
 }
-
 
 .explorer-rings {
     display: flex;
@@ -540,19 +531,13 @@
     padding: 0 0.75rem 1rem;
 }
 
-.explorer-half {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
 .explorer-half-title {
     margin: 0.5rem 0 0;
     font-size: 0.8125rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /*
@@ -561,8 +546,8 @@
  * same hue so the edge does not read as grey against the field.
  */
 .explorer-group {
-    --group-hue: var(--vaadin-border-color, rgb(0 0 0 / 0.15));
-    border: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1)));
+    --group-hue: var(--vaadin-border-color);
+    border: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary));
     border-radius: 9px;
     overflow: hidden;
 }
@@ -570,33 +555,33 @@
 .explorer-group.group-risk,
 .explorer-group.group-spring_risk {
     --group-hue: var(--severity-critical);
-    background: light-dark(#fdeceb, #2a1615);
+    background: var(--unresolved-chip);
 }
 
 .explorer-group.group-unjudged,
 .explorer-group.group-spring_unjudged {
     --group-hue: var(--severity-moderate);
-    background: light-dark(#fff6e0, #2a2314);
+    background: var(--unjudged-chip);
 }
 
 .explorer-group.group-answered,
 .explorer-group.group-spring_answered {
     --group-hue: var(--status-secure);
-    background: light-dark(#e7f5ee, #12271d);
+    background: var(--secure-chip);
 }
 
 .explorer-group > vaadin-details-summary {
     padding: 10px 13px;
     font-size: 13.5px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .explorer-group[opened] > vaadin-details-summary {
-    border-bottom: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1)));
+    border-bottom: 1px solid color-mix(in srgb, var(--group-hue) 22%, var(--vaadin-border-color-secondary));
 }
 
 .explorer-group > vaadin-details-summary:hover {
-    color: var(--vaadin-text-color, inherit);
+    color: var(--vaadin-text-color);
     background: color-mix(in srgb, currentColor 5%, transparent);
 }
 
@@ -606,14 +591,17 @@
 
 .explorer-group-count {
     font-weight: 650;
-    color: var(--vaadin-text-color, inherit);
+    color: var(--vaadin-text-color);
 }
 
-
-
+/* Text links on the deep pages are 24 pixels tall at least, like the rest of the application. */
 .explorer-releases a,
 .explorer-spring-link,
-.explorer-release-link {
+.explorer-release-link,
+.release-advice a,
+.release-view .release-file,
+.release-other,
+.release-go {
     display: inline-block;
     min-height: 1.5rem;
     line-height: 1.5rem;
@@ -625,8 +613,8 @@
     box-sizing: border-box;
     align-self: stretch;
     padding: 1rem 1.25rem;
-    border-inline-start: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.03));
+    border-inline-start: 1px solid var(--vaadin-border-color-secondary);
+    background: var(--vaadin-background-container);
     font-size: 0.875rem;
 }
 
@@ -647,24 +635,9 @@
     font-size: 0.9375rem;
 }
 
-.explorer-legend-list {
-    margin: 0;
-}
-
-.explorer-legend-list dt {
-    font-weight: var(--aura-font-weight-semibold, 600);
-}
-
 .explorer-legend-list dd {
     margin: 0 0 0.5rem;
-    color: var(--vaadin-text-color-secondary, inherit);
-}
-
-/* The five counts read like the other sentences of the opened series. */
-.explorer-detail-summary {
-    margin: 0;
-    color: var(--vaadin-text-color-secondary, inherit);
-    font-size: 0.875rem;
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* The findings of a group, one disclosure each, a hairline between them. */
@@ -673,7 +646,7 @@
 }
 
 .explorer-finding-row {
-    border-top: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-top: 1px solid var(--vaadin-border-color-secondary);
 }
 
 .explorer-finding-row:first-child {
@@ -693,10 +666,11 @@
 
 .explorer-finding-row > vaadin-details-summary::part(toggle) {
     scale: 0.7;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
-.explorer-finding-row > vaadin-details-summary::part(content) {
+.explorer-finding-row > vaadin-details-summary::part(content),
+.workbench-row > vaadin-details-summary::part(content) {
     flex: 1;
     min-width: 0;
 }
@@ -707,10 +681,6 @@
     align-items: center;
     gap: 9px;
     font-size: 13.5px;
-}
-
-.explorer-finding-summary .advisory-id {
-    font-weight: 600;
 }
 
 /* The severity as a small pill, lowercase as the prototype writes it, filled with the tint of its group. */
@@ -724,31 +694,34 @@
 
 .explorer-severity.severity-critical {
     --vaadin-badge-text-color: var(--severity-critical);
-    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
+    --vaadin-badge-background: var(--unresolved-chip);
 }
 
 .explorer-severity.severity-high {
     --vaadin-badge-text-color: var(--severity-high);
-    --vaadin-badge-background: light-dark(#fdeceb, #2a1615);
+    --vaadin-badge-background: var(--unresolved-chip);
 }
 
 .explorer-severity.severity-moderate {
     --vaadin-badge-text-color: var(--severity-moderate);
-    --vaadin-badge-background: light-dark(#fff6e0, #2a2314);
+    --vaadin-badge-background: var(--unjudged-chip);
 }
 
 .explorer-severity.severity-low {
-    --vaadin-badge-text-color: var(--vaadin-text-color-secondary, inherit);
-    --vaadin-badge-background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    --vaadin-badge-text-color: var(--vaadin-text-color-secondary);
+    --vaadin-badge-background: var(--vaadin-background-container);
 }
 
-.explorer-through {
-    color: var(--vaadin-text-color-secondary, inherit);
+.explorer-through,
+.workbench-through,
+.workbench-said,
+.workbench-fold-says {
+    color: var(--vaadin-text-color-secondary);
     font-size: 12.5px;
 }
 
 .explorer-through.only {
-    color: var(--vaadin-text-color, inherit);
+    color: var(--vaadin-text-color);
 }
 
 .explorer-through.dim {
@@ -772,7 +745,7 @@
     margin: 2px 8px 2px 0;
     padding: 1px 6px;
     border-radius: 5px;
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    background: var(--vaadin-background-container);
     font-size: 12.5px;
 }
 
@@ -786,15 +759,15 @@
 .explorer-verdict {
     margin: 4px 0 0;
     padding: 8px 11px;
-    border-left: 3px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-left: 3px solid var(--vaadin-border-color-secondary);
     border-radius: 0 8px 8px 0;
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    background: var(--vaadin-background-container);
 }
 
 .explorer-field + .explorer-field {
     margin-top: 9px;
     padding-top: 8px;
-    border-top: 1px solid var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.1));
+    border-top: 1px solid var(--vaadin-border-color-secondary);
 }
 
 .explorer-field-label {
@@ -804,7 +777,7 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .explorer-field p {
@@ -814,10 +787,6 @@
 
 .field-impact p {
     font-size: 14px;
-}
-
-.field-fix p {
-    color: var(--vaadin-text-color-secondary, inherit);
 }
 
 /* "… more" at the end of the line the text stops on, the paragraph's own size. */
@@ -833,7 +802,7 @@
     --vaadin-button-min-width: 0;
     --vaadin-button-font-size: 1em;
     --vaadin-button-font-weight: 400;
-    --vaadin-button-text-color: var(--aura-accent-text-color, var(--vaadin-text-color));
+    --vaadin-button-text-color: var(--aura-accent-text-color);
     vertical-align: baseline;
     text-decoration: underline;
     white-space: nowrap;
@@ -856,7 +825,7 @@
     padding-left: 14px;
     text-indent: -14px;
     font-size: 12px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     background: none;
     white-space: normal;
 }
@@ -864,7 +833,7 @@
 .explorer-route-none {
     margin: 3px 0 0;
     font-size: 12px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .explorer-finding-record {
@@ -875,26 +844,7 @@
 
 .explorer-detail .release-files-row {
     padding-block-start: 0.5rem;
-    border-top: 1px solid var(--vaadin-border-color, rgb(0 0 0 / 0.15));
-}
-
-/* Text links on the deep pages are 24 pixels tall at least, like the rest of the application. */
-.release-advice a,
-.release-view .release-file,
-.release-other,
-.release-go {
-    display: inline-block;
-    min-height: 1.5rem;
-    line-height: 1.5rem;
-}
-
-/* A ring holding a number: the palette's color on the border, the number centered. */
-.chip-count.product-ring,
-.explorer-ring.product-ring {
-    display: inline-flex;
-    width: auto;
-    height: 1.25rem;
-    border-width: 2px;
+    border-top: 1px solid var(--vaadin-border-color);
 }
 
 /* The release page in the explorer's frame, D-216: its products are buttons, since its address
@@ -916,7 +866,7 @@ button.explorer-chip:disabled {
 }
 
 button.explorer-chip:focus-visible {
-    outline: 2px solid var(--vaadin-focus-ring-color, #1676f3);
+    outline: 2px solid var(--vaadin-focus-ring-color);
     outline-offset: 2px;
 }
 
@@ -924,14 +874,8 @@ button.explorer-chip:focus-visible {
     max-width: 80rem;
 }
 
-.release-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
 .release-footer {
     margin: 0.5rem 0 0;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
     font-size: 0.8125rem;
 }

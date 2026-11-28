@@ -18,23 +18,24 @@ import com.vaadin.flow.component.html.Section;
  */
 public final class HelpDialog extends Composite<Button> {
 
-    private final Dialog dialog = new Dialog();
-
     public HelpDialog(String title, Component... body) {
+        var dialog = dialog(title, body);
         var mark = getContent();
         mark.setText("?");
         mark.addClassName("help-mark");
-        mark.addThemeVariants(ButtonVariant.TERTIARY);
         mark.setAriaLabel(title);
         mark.setTooltipText(title);
         mark.addClickListener(click -> dialog.open());
+    }
 
+    /** The dialog a hint opens: its title, its body and the one button that closes it. */
+    public static Dialog dialog(String title, Component... body) {
+        var dialog = new Dialog(title, body);
         dialog.addClassName("help-dialog");
-        dialog.setHeaderTitle(title);
-        dialog.add(body);
-        var close = new Button(getTranslation("help.close"), click -> dialog.close());
+        var close = new Button(dialog.getTranslation("help.close"), click -> dialog.close());
         close.addThemeVariants(ButtonVariant.PRIMARY);
         dialog.getFooter().add(close);
+        return dialog;
     }
 
     /** One part of a hint: a heading and the paragraphs under it. */
@@ -44,9 +45,5 @@ public final class HelpDialog extends Composite<Button> {
             section.add(new Paragraph(paragraph));
         }
         return section;
-    }
-
-    public boolean isOpened() {
-        return dialog.isOpened();
     }
 }

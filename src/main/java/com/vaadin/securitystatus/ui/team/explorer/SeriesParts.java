@@ -1,5 +1,10 @@
 package com.vaadin.securitystatus.ui.team.explorer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.common.Parts.decorative;
+import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -63,12 +68,38 @@ final class SeriesParts {
         return owner.getTranslation(key, params);
     }
 
+    // The product chips
+
+    /** What a product chip holds: its box, its name, the discontinued mark and the count of what it brings. */
+    Component[] chipParts(Product product, boolean isOn, int brings) {
+        var parts = new ArrayList<Component>();
+        parts.add(decorative(new Span(), "chip-box", isOn ? "ticked" : "none"));
+        parts.add(css(new Span(product.name()), "chip-name"));
+        if (product.discontinued()) {
+            parts.add(css(new Span(t("explorer.products.discontinued")), "chip-discontinued"));
+        }
+        parts.add(isOn && brings > 0
+                ? css(new Span(String.valueOf(brings)), "chip-count", "product-ring", "ring-" + product.ring())
+                : css(new Span(String.valueOf(brings)), "chip-count", "none"));
+        return parts.toArray(Component[]::new);
+    }
+
+    /** A chip's hover text; the screen names its own words for what the number counts. */
+    String chipTitle(String screen, Product product, boolean isOn, boolean cannot) {
+        String gone = product.discontinued() ? t("explorer.chip.gone") + " " : "";
+        if (cannot) {
+            return gone + t("explorer.chip.cannot");
+        }
+        if (product.fixed()) {
+            return gone + t(screen + ".chip.fixed");
+        }
+        return gone + t(isOn ? screen + ".chip.on" : screen + ".chip.off") + " " + t("explorer.chip.narrows");
+    }
+
     // The row
 
     static Badge badge(String side, ExplorerRules.Badge state, String text) {
-        var badge = new Badge(text);
-        badge.addClassNames("explorer-badge", side, "badge-" + state.name().toLowerCase(Locale.ROOT));
-        return badge;
+        return css(new Badge(text), "explorer-badge", side, "badge-" + state.name().toLowerCase(Locale.ROOT));
     }
 
     /** "Vaadin: <state>" with what the state means on hover. */
@@ -109,15 +140,13 @@ final class SeriesParts {
 
     /** One ring per product that is on, in catalogue order, with its count, the noughts drawn too, D-207. */
     Component rings(Line line, List<Product> catalogue, Shape shape, Asked asked) {
-        var rings = new Span();
-        rings.addClassName("explorer-rings");
+        var rings = css(new Span(), "explorer-rings");
         for (Product product : catalogue) {
             if (!shape.on().contains(product.name())) {
                 continue;
             }
             int count = ExplorerAnswer.arrivesThrough(line, product.name(), shape, asked).size();
-            var ring = new Span(String.valueOf(count));
-            ring.addClassName("explorer-ring");
+            var ring = css(new Span(String.valueOf(count)), "explorer-ring");
             if (count > 0) {
                 ring.addClassNames("product-ring", "ring-" + product.ring());
                 Tooltip.forComponent(ring).setText(t("explorer.ring.some", count, product.name()));
@@ -172,12 +201,10 @@ final class SeriesParts {
         }
 
         if (halves) {
-            var half = new Div();
-            half.addClassName("explorer-half");
+            var half = css(new Div(), "explorer-half");
             half.add(halfTitle("explorer.half.theirs"));
             if (!release) {
-                var says = new Paragraph();
-                says.addClassName("explorer-hint");
+                var says = css(new Paragraph(), "explorer-hint");
                 String against = line.springBoot().map(VersionNumber::toString)
                         .orElseGet(() -> t("explorer.half.theirs.unknown"));
                 var text = new StringBuilder(t("explorer.half.theirs.lead", split.theirs().size(), against));
@@ -186,8 +213,7 @@ final class SeriesParts {
                                 .append(t("explorer.half.theirs.declared", declared.toString())));
                 text.append(' ').append(t("explorer.half.theirs.moves")).append(' ');
                 says.add(text.toString());
-                var link = new RouterLink(t("explorer.half.theirs.link"), SpringView.class);
-                link.addClassName("explorer-spring-link");
+                var link = css(new RouterLink(t("explorer.half.theirs.link"), SpringView.class), "explorer-spring-link");
                 says.add(link);
                 half.add(says);
             }
@@ -202,8 +228,7 @@ final class SeriesParts {
     }
 
     private Component halfTitle(String key) {
-        var title = new Paragraph(t(key));
-        title.addClassName("explorer-half-title");
+        var title = css(new Paragraph(t(key)), "explorer-half-title");
         Tooltip.forComponent(title).setText(t(key + ".title"));
         return title;
     }
@@ -218,8 +243,7 @@ final class SeriesParts {
             }
             String kind = KINDS.get(i);
             // The count in bold and the words after it, as the prototype sets a group's heading.
-            var count = new Span(String.valueOf(findings.size()));
-            count.addClassName("explorer-group-count");
+            var count = css(new Span(String.valueOf(findings.size())), "explorer-group-count");
             var heading = new Span(count, new Span(" " + t("explorer.half.group." + kind)));
             into.add(group(line, prefix + kind, heading, t("explorer.half.group." + kind + ".title"), null, findings,
                     !shut && !"ANSWERED".equals(kind), routes));
@@ -244,13 +268,13 @@ final class SeriesParts {
             }
         });
         if (noteKey != null) {
-            details.add(lead("explorer-group-note", t(noteKey)));
+            details.add(paragraph("explorer-group-note", t(noteKey)));
         }
         ExplorerRules.Capped capped = ExplorerRules.capped(findings);
         details.add(new FindingList(capped.shown(), routes, finding -> findingDetails(line.version(), finding,
                 routes.shape().plain()), cve -> paths(line.version(), cve, routes.shape().plain())));
         if (capped.more() > 0) {
-            details.add(lead("explorer-group-more", t("explorer.group.more", capped.more())));
+            details.add(paragraph("explorer-group-more", t("explorer.group.more", capped.more())));
         }
         return details;
     }
@@ -281,9 +305,7 @@ final class SeriesParts {
             full = data.explorerVersion(version).flatMap(record -> record.findings().stream()
                     .filter(candidate -> candidate.cve().equals(finding.cve())).findFirst());
         } catch (DataUnreachableException unreachable) {
-            var box = new Div(new DataOutageNotice());
-            box.addClassName("explorer-finding");
-            return box;
+            return css(new Div(new DataOutageNotice()), "explorer-finding");
         }
         return new FindingDetail(finding.cve(), version, full, springOff);
     }
@@ -292,8 +314,7 @@ final class SeriesParts {
 
     /** The "?" and the panel it opens, in the prototype's words, D-211. */
     Button legendButton(ValueSignal<Boolean> open) {
-        var help = new Button("?", click -> open.set(true));
-        help.addClassName("explorer-help");
+        var help = css(new Button("?", click -> open.set(true)), "explorer-help");
         help.setAriaLabel(t("explorer.legend.open"));
         help.addThemeVariants(ButtonVariant.PRIMARY);
         help.bindVisible(open.map(shown -> !shown));
@@ -301,15 +322,13 @@ final class SeriesParts {
     }
 
     Aside legend(ValueSignal<Boolean> open) {
-        var legend = new Aside();
-        legend.addClassName("explorer-legend");
+        var legend = css(new Aside(), "explorer-legend");
         var title = new H2(t("explorer.legend.heading"));
         var close = new Button(VaadinIcon.CLOSE.create(), click -> open.set(false));
         close.addThemeVariants(ButtonVariant.TERTIARY);
         close.setAriaLabel(t("explorer.legend.close"));
         close.addClassName("explorer-legend-close");
-        var top = new Div(title, close);
-        top.addClassName("explorer-legend-top");
+        var top = css(new Div(title, close), "explorer-legend-top");
         legend.add(top, hint(t("explorer.legend.lead")));
 
         var states = new LinkedHashMap<String, String>();
@@ -334,8 +353,7 @@ final class SeriesParts {
     }
 
     private static DescriptionList terms(Map<String, String> entries) {
-        var list = new DescriptionList();
-        list.addClassName("explorer-legend-list");
+        var list = css(new DescriptionList(), "explorer-legend-list");
         entries.forEach((term, description) -> list.add(new DescriptionList.Term(term),
                 new DescriptionList.Description(description)));
         return list;
@@ -343,13 +361,7 @@ final class SeriesParts {
 
     // Small parts
 
-    static Paragraph lead(String className, String text) {
-        var paragraph = new Paragraph(text);
-        paragraph.addClassName(className);
-        return paragraph;
-    }
-
     static Paragraph hint(String text) {
-        return lead("explorer-hint", text);
+        return paragraph("explorer-hint", text);
     }
 }

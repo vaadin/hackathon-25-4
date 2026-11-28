@@ -1,5 +1,9 @@
 package com.vaadin.securitystatus.ui.customer;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pairs;
+import static com.vaadin.securitystatus.ui.customer.AnswerParts.pair;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,23 +49,19 @@ final class FindingCard extends Composite<Div> {
         List<VersionRules.Said> said = VersionRules.verdictsFor(answer, advisory);
         Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
 
-        var head = new Div(advisoryLink(advisory, answer));
-        head.addClassName("finding-head");
+        var head = css(new Div(advisoryLink(advisory, answer)), "finding-head");
         entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(this::severity).ifPresent(head::add);
         entry.flatMap(CasesIndex.AdvisoryCatalogEntry::fixOwner).flatMap(FindingCard::ownerKey)
                 .map(this::ownerChip).ifPresent(head::add);
-        var vulnerable = new Badge(getTranslation(VersionRules.hasWorkaround(said)
-                ? "version.finding.vulnerable.workaround" : "version.finding.vulnerable"));
-        vulnerable.addClassNames("status-chip", "state-unresolved");
+        var vulnerable = css(new Badge(getTranslation(VersionRules.hasWorkaround(said)
+                ? "version.finding.vulnerable.workaround" : "version.finding.vulnerable")), "status-chip", "state-unresolved");
         head.add(vulnerable);
         card.add(head);
 
         for (VersionRules.Said one : said) {
-            var route = new Div();
-            route.addClassName("finding-route");
+            var route = css(new Div(), "finding-route");
             if (said.size() > 1 && !one.packages().isEmpty()) {
-                var through = new Paragraph(getTranslation("version.finding.through", String.join(", ", one.packages())));
-                through.addClassName("finding-through");
+                var through = css(new Paragraph(getTranslation("version.finding.through", String.join(", ", one.packages()))), "finding-through");
                 route.add(through);
             }
             doAndFix(one.assessment()).ifPresent(route::add);
@@ -85,25 +85,19 @@ final class FindingCard extends Composite<Div> {
     }
 
     static RouterLink advisoryLink(String advisory, VersionAnswer answer) {
-        var link = new RouterLink(advisory, CveView.class,
+        return css(new RouterLink(advisory, CveView.class,
                 new RouteParameters(java.util.Map.of(CveView.IDS, advisory, CveView.VERSION,
-                        answer.version().toString())));
-        link.addClassNames("finding-id", "advisory-id");
-        return link;
+                        answer.version().toString()))), "finding-id", "advisory-id");
     }
 
     private Optional<Component> severity(String word) {
         return VersionRules.severity(word).map(known -> {
-            var severity = new Span(getTranslation("severity." + known));
-            severity.addClassNames("severity", "severity-" + known);
-            return severity;
+            return css(new Span(getTranslation("severity." + known)), "severity", "severity-" + known);
         });
     }
 
     private Component ownerChip(String key) {
-        var chip = new Badge(getTranslation(key));
-        chip.addClassName("owner-chip");
-        return chip;
+        return css(new Badge(getTranslation(key)), "owner-chip");
     }
 
     /** Whose fix it is, in the chip's words: Vaadin's or the dependency's. An owner nobody established has no chip. */
@@ -117,14 +111,12 @@ final class FindingCard extends Composite<Div> {
 
     /** The two columns the design draws: what to do now, and what the fix waits on. Absent ones are left out. */
     private Optional<Component> doAndFix(Assessment verdict) {
-        var columns = new Div();
-        columns.addClassName("finding-columns");
+        var columns = css(new Div(), "finding-columns");
         verdict.workaround().ifPresent(text -> columns.add(column(getTranslation("version.finding.do"), new Markdown(text))));
         var fix = new ArrayList<Component>();
         verdict.fixExpected().ifPresent(text -> fix.add(new Markdown(text)));
         if (!verdict.fixPrs().isEmpty()) {
-            var tracking = new Paragraph(new Span(getTranslation("version.finding.tracking")));
-            tracking.addClassName("finding-tracking");
+            var tracking = css(new Paragraph(new Span(getTranslation("version.finding.tracking"))), "finding-tracking");
             verdict.fixPrs().forEach(url -> tracking.add(pullRequest(url)));
             fix.add(tracking);
         }
@@ -150,13 +142,9 @@ final class FindingCard extends Composite<Div> {
         String[] parts = url.split("/");
         String name = parts.length >= 4 ? parts[parts.length - 3] + "#" + parts[parts.length - 1] : url;
         if (!url.regionMatches(true, 0, "https://", 0, 8)) {
-            var text = new Span(url);
-            text.addClassName("pull-request");
-            return text;
+            return css(new Span(url), "pull-request");
         }
-        var link = new Anchor(url, name);
-        link.addClassName("pull-request");
-        return link;
+        return css(new Anchor(url, name), "pull-request");
     }
 
     /**
@@ -187,8 +175,7 @@ final class FindingCard extends Composite<Div> {
 
             var modulesBody = pairs();
             entry.map(CasesIndex.AdvisoryCatalogEntry::modules).filter(list -> !list.isEmpty()).ifPresent(list -> {
-                var note = new Paragraph(getTranslation("version.layer.affected.note"));
-                note.addClassName("layer-note");
+                var note = css(new Paragraph(getTranslation("version.layer.affected.note")), "layer-note");
                 modulesBody.add(pair(getTranslation("version.layer.affected"), new Paragraph(String.join(", ", list)), note));
             });
             var tracking = new ArrayList<Component>();
@@ -204,8 +191,7 @@ final class FindingCard extends Composite<Div> {
             }
             layer("modules", getTranslation("version.layer.modules"), modulesBody, open);
 
-            var full = new Div();
-            full.addClassName("layer-full");
+            var full = css(new Div(), "layer-full");
             var facts = new ArrayList<String>();
             entry.flatMap(CasesIndex.AdvisoryCatalogEntry::severity).flatMap(VersionRules::severity)
                     .ifPresent(known -> facts.add(getTranslation("version.layer.severity",
@@ -216,8 +202,7 @@ final class FindingCard extends Composite<Div> {
             first.flatMap(Assessment::assessedAt)
                     .ifPresent(day -> facts.add(getTranslation("version.layer.written", day.toString())));
             if (!facts.isEmpty()) {
-                var says = new Paragraph(String.join(" ", facts));
-                says.addClassName("layer-note");
+                var says = css(new Paragraph(String.join(" ", facts)), "layer-note");
                 full.add(says);
             }
             var record = new RouterLink(getTranslation("version.layer.record", advisory), CveView.class,
@@ -240,25 +225,10 @@ final class FindingCard extends Composite<Div> {
             if (body.getComponentCount() == 0) {
                 return null;
             }
-            var details = new Details(title, body);
-            details.addClassName("finding-layer");
-            details.getElement().setAttribute("data-layer", key);
-            details.setOpened(open);
+            var details = AnswerParts.layer(key, title, body, open);
             getContent().add(details);
             opened.add(details);
             return details;
-        }
-
-        private static Div pairs() {
-            var pairs = new Div();
-            pairs.addClassName("layer-pairs");
-            return pairs;
-        }
-
-        private static Div pair(String heading, Component... body) {
-            var pair = new Div(new H4(heading));
-            pair.add(body);
-            return pair;
         }
     }
 }

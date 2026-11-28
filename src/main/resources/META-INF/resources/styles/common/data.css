@@ -1,7 +1,7 @@
 .data-outage {
     max-width: 40rem;
     margin-block: 1rem;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .release-files {
@@ -20,5 +20,5 @@
 
 .release-files-version {
     min-width: 7rem;
-    font-weight: var(--aura-font-weight-semibold, 600);
+    font-weight: 600;
 }

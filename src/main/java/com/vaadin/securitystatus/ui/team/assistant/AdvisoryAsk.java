@@ -1,5 +1,7 @@
 package com.vaadin.securitystatus.ui.team.assistant;
 
+import static com.vaadin.securitystatus.ui.common.Parts.css;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,8 +62,7 @@ final class AdvisoryAsk extends Composite<Div> {
         Div box = getContent();
         box.addClassName("advisories-ask");
 
-        var ask = new MessageInput();
-        ask.addClassName("advisories-ask-input");
+        var ask = css(new MessageInput(), "advisories-ask-input");
         ask.setI18n(new MessageInputI18n().setMessage(getTranslation("advisories.ask.message"))
                 .setSend(getTranslation("advisories.ask.send")));
         answer.addClassName("advisories-ask-answer");

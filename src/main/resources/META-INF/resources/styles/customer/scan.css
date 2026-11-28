@@ -5,29 +5,29 @@
     box-sizing: border-box;
     min-height: 65px;
     padding: 12px 16px;
-    border: 1px solid light-dark(#d7dce3, var(--vaadin-border-color));
+    border: 1px solid var(--edge-neutral);
     border-radius: 12px;
-    background: light-dark(#ffffff, var(--vaadin-background-color));
+    background: var(--surface);
 }
 
 .lookup-report-mark {
     flex: none;
     width: 20px;
     height: 20px;
-    color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    color: var(--accent-ink);
 }
 
 .lookup-report-choose {
     font-size: 14px;
     --vaadin-button-font-size: 14px;
     --vaadin-button-font-weight: 500;
-    --vaadin-button-text-color: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
+    --vaadin-button-text-color: var(--accent-ink);
     --vaadin-button-background: transparent;
     --vaadin-button-border-width: 0;
 }
 
 .lookup-report[dragover] {
-    border-color: var(--vaadin-focus-ring-color, currentColor);
+    border-color: var(--vaadin-focus-ring-color);
 }
 
 /* One row as in the prototype: the title and its line at the start, the help mark
@@ -62,7 +62,7 @@
     margin: 0;
     font-size: 13px;
     line-height: 17px;
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .lookup-report-refused {
@@ -80,8 +80,8 @@
     padding: 0.5rem 0.75rem;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    border-radius: var(--vaadin-radius-s, 0.25rem);
-    background: var(--vaadin-background-container, rgb(0 0 0 / 0.05));
+    border-radius: var(--vaadin-radius-s);
+    background: var(--vaadin-background-container);
 }
 
 .scan-body {
@@ -92,7 +92,6 @@
     max-width: 72rem;
 }
 
-.scan-body h2,
 .scan-body h3 {
     margin: 0;
 }
@@ -114,36 +113,19 @@
     gap: 12px;
 }
 
+/* Tinted by its state in common/state.css. */
 .scan-bucket {
-    --bucket-face: light-dark(#f1f9f3, #12271d);
-    --bucket-edge: light-dark(#c3e5cd, color-mix(in srgb, var(--status-secure) 30%, transparent));
-    --bucket-ink: light-dark(#0b5e28, var(--status-secure));
     display: flex;
     flex-direction: column;
     gap: 6px;
     padding: 19px;
-    border: 1px solid var(--bucket-edge);
-    border-radius: 15px;
-    background: var(--bucket-face);
-}
-
-.scan-bucket.state-fix_available {
-    --bucket-face: light-dark(#f4f7ff, #151e33);
-    --bucket-edge: light-dark(#c9d7fb, color-mix(in srgb, var(--aura-accent-color, #3266e4) 30%, transparent));
-    --bucket-ink: light-dark(#2b59c8, var(--aura-accent-text-color, #8fb0ff));
-}
-
-.scan-bucket.state-unresolved {
-    --bucket-face: light-dark(#fff5f5, #2a1615);
-    --bucket-edge: light-dark(#f0c4c5, color-mix(in srgb, var(--status-unresolved) 30%, transparent));
-    --bucket-ink: light-dark(#a20519, var(--status-unresolved));
 }
 
 .scan-bucket-count {
     font-size: 36px;
     font-weight: 700;
     line-height: 1;
-    color: var(--bucket-ink);
+    color: var(--ink);
 }
 
 .scan-bucket-word {
@@ -166,8 +148,8 @@
 
 .scan-unmeasured {
     padding: 1rem 1.25rem;
-    border: 1px dashed var(--vaadin-border-color-secondary, rgb(0 0 0 / 0.2));
-    border-radius: var(--vaadin-radius-m, 0.5rem);
+    border: 1px dashed var(--vaadin-border-color-secondary);
+    border-radius: var(--vaadin-radius-m);
 }
 
 /* The actions at the prototype's button size. */
@@ -221,7 +203,7 @@
 .scan-cap,
 .scan-skipped,
 .scan-kept {
-    color: var(--vaadin-text-color-secondary, inherit);
+    color: var(--vaadin-text-color-secondary);
 }
 
 /* A phone: the table scrolls inside its section, never the page. */
@@ -245,5 +227,3 @@
 .scan-table :is(th, td) {
     overflow-wrap: normal;
 }
-
-
