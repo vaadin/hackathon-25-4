@@ -29,7 +29,7 @@ TITLE: What the issue is called
 ---
 ```
 
-The title is written bare. `post.sh` posts it as `Hackathon 25.4: <title>`, which is how the teams tell these apart from customer reports.
+The title is written bare. `post.sh` posts it as `Hackathon 25.4: <title>`, which is how the teams tell these apart from customer reports. A finding that is not new in 25.4 adds a `PREFIX: PiT 25.4:` line to the header and goes out under that prefix instead.
 
 The body is as short as it can be and still be acted on by somebody who has never seen this application. Sections, in this order:
 

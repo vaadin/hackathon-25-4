@@ -8,8 +8,9 @@
 #   ./specs/issues/post.sh            # prints what it would do
 #   ./specs/issues/post.sh --confirm  # creates the issues and the comments
 #
-# A draft starts with REPO: and TITLE: lines followed by ---. Those lines are
-# instructions and are stripped from what is posted. A draft with a
+# A draft starts with REPO: and TITLE: lines followed by ---, and may carry a
+# PREFIX: line for its title. Those lines are instructions and are stripped
+# from what is posted. A draft with a
 # COMMENT-ON: <number> line instead of TITLE: is posted as a comment on that
 # issue.
 #
@@ -24,7 +25,9 @@ cd "$(dirname "$0")/../.."
 CONFIRM=no
 [ "${1:-}" = "--confirm" ] && CONFIRM=yes
 
-# A finding that is not new in this release can go out as "PiT 25.4: " instead.
+# A finding that is not new in this release goes out as "PiT 25.4: " instead,
+# through a PREFIX: line in its draft header, or for a whole run through the
+# environment.
 PREFIX="${PREFIX:-Hackathon 25.4: }"
 TRACKER=9642
 TRACKER_REPO=vaadin/platform
@@ -119,6 +122,9 @@ for draft in "${DRAFTS[@]}"; do
     repo=$(header "$file" REPO)
     title=$(header "$file" TITLE)
     target=$(header "$file" COMMENT-ON)
+    own=$(header "$file" PREFIX)
+    prefix=${own:+$own }
+    prefix=${prefix:-$PREFIX}
     body=$(mktemp)
     sed '1,/^---$/d' "$file" | sed "s/COMMIT_SHA/$SHA/g" > "$body"
 
@@ -131,11 +137,11 @@ for draft in "${DRAFTS[@]}"; do
         fi
     else
         if [ "$CONFIRM" = yes ]; then
-            url=$(gh issue create --repo "$repo" --title "$PREFIX$title" --body-file "$body")
+            url=$(gh issue create --repo "$repo" --title "$prefix$title" --body-file "$body")
             echo "$draft -> $url" | tee -a "$DIR/posted.txt"
             add_to_tracker "$url"
         else
-            echo "WOULD POST to $repo: $PREFIX$title  (from $draft, $(wc -c < "$body" | xargs) bytes)"
+            echo "WOULD POST to $repo: $prefix$title  (from $draft, $(wc -c < "$body" | xargs) bytes)"
             echo "    and add it to platform#$TRACKER under \"$TRACKER_HEADING\""
         fi
     fi

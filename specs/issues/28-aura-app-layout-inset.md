@@ -1,4 +1,5 @@
 REPO: vaadin/web-components
+PREFIX: PiT 25.4:
 TITLE: Aura's app layout inset is 1.5vmin unrounded, so the drawer's content sits on fractions of a pixel
 ---
 ### Description
@@ -19,6 +20,8 @@ vaadin-app-layout:not([overlay])::part(drawer) {
 ```
 
 `1.5vmin` is a whole number of pixels only when the shorter side of the window is a multiple of 200. In a 1728 × 963 window it is 14.445px, so the drawer is padded 6.445px and everything in it starts at x 22.4375 instead of 22. The padding tokens in `size.css` are rounded, `round(var(--aura-base-size) * 0.5 * 1px, 1px)`; this one is not.
+
+This is not specific to 25.4: it measures the same on 25.3.5, and the line is the same in 25.0.0, 25.2.0 and 25.3.5. It was found while testing 25.4.
 
 ### Why it matters
 
