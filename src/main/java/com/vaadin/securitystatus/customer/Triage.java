@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.data.model.ScanIndex;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
 
@@ -238,5 +239,15 @@ public final class Triage {
         List<String> unknown = listed.stream().filter(bare -> !scan.coordinates().containsKey(bare)).toList();
         return new Scope(!report.components().isEmpty(), listed.size(), listed.size() - unknown.size(),
                 unknown.stream().limit(3).map(ReportParser::componentName).toList());
+    }
+
+    /** The verdict a row names beside its action, only where the verdict is what settled it. */
+    public static Optional<String> settledVerdict(Row row, CasesIndex index) {
+        // A secure row names the verdict only when the verdict settled it. A row secure
+        // because the version does not report it says so in its action, and the
+        // catalogue's word for other releases beside it would contradict it, D-198.
+        boolean named = row.action() == Action.RULED_OUT || row.action() == Action.FROM_BUILD
+                || row.action() == Action.VERSION_UNMEASURED;
+        return row.verdict().filter(verdict -> named).map(index.labels()::get);
     }
 }

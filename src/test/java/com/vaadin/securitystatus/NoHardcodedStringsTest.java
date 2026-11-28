@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
@@ -76,11 +77,14 @@ class NoHardcodedStringsTest {
         assertThat(findings.getFirst().line()).isEqualTo(6);
     }
 
+    /** The team's two go with the team, so without it only the common one is expected, D-254. */
     @Test
     void the_exempt_files_exist_so_the_list_cannot_rot() throws IOException {
         try (var files = Files.walk(SOURCES)) {
             var names = files.map(path -> path.getFileName().toString()).toList();
-            assertThat(names).containsAll(NOT_WORDING.keySet());
+            var expected = Files.isDirectory(SOURCES.resolve("team")) ? NOT_WORDING.keySet()
+                    : Set.of("ThemeMemory.java");
+            assertThat(names).containsAll(expected);
         }
     }
 

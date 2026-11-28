@@ -19,7 +19,6 @@ import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.ui.common.AppBar;
-import com.vaadin.securitystatus.ui.common.ShellLookup;
 import com.vaadin.securitystatus.ui.common.TeamEntrance;
 
 /**
@@ -36,7 +35,7 @@ public final class CustomerLayout extends Composite<Div> implements RouterLayout
     private final Div content = new Div();
 
     CustomerLayout(DataRefreshSignal dataRefresh, AuthenticationContext authentication,
-            ObjectProvider<ShellLookup> lookup, ObjectProvider<TeamEntrance> team) {
+            ObjectProvider<LookupFactory> lookup, ObjectProvider<TeamEntrance> team) {
         addClassName("customer-shell");
 
         var heading = css(new H1(getTranslation("shell.customer.title")), "view-heading");

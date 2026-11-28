@@ -42,7 +42,7 @@ import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters.RouteCount
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsCounters;
 import com.vaadin.securitystatus.team.diagnostics.DiagnosticsListeners;
 import com.vaadin.securitystatus.team.diagnostics.Outcome;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
+import com.vaadin.securitystatus.ui.customer.NotFoundView;
 import com.vaadin.securitystatus.ui.customer.HomeView;
 import com.vaadin.securitystatus.ui.team.explorer.SpringView;
 

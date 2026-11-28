@@ -2,6 +2,7 @@ package com.vaadin.securitystatus.customer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import com.vaadin.securitystatus.data.model.Assessment;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.data.model.Verdict;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
-import com.vaadin.securitystatus.ui.customer.HomeView;
 
 /**
  * The questions the version screen asks of one measurement, answered once
@@ -35,6 +35,7 @@ public final class VersionRules {
 
     private static final List<String> SEVERITIES = List.of("critical", "high", "moderate", "low", "unknown");
 
+    private static final int RECENT_ROWS = 8;
     private static final Pattern SENTENCE_END = Pattern.compile("(?<=\\.)\\s+");
 
     private VersionRules() {
@@ -236,8 +237,75 @@ public final class VersionRules {
 
     /** The lines the versions table lists: the followed ones, a prerelease line when asked or when it is the reader's. */
     public static List<CasesIndex.Line> tableLines(CasesIndex index, String readersLine, boolean withPrereleases) {
-        return HomeView.shownLines(index, true).stream()
+        return shownLines(index, true).stream()
                 .filter(line -> withPrereleases || !line.isPrerelease() || line.line().equals(readersLine))
                 .filter(Objects::nonNull).toList();
+    }
+
+    /** The lines a customer can be on, newest first: the followed ones, prereleases only when asked. */
+    public static List<CasesIndex.Line> shownLines(CasesIndex index, boolean withPrereleases) {
+        var followed = index.lineRule().map(rule -> new HashSet<>(rule.followed())).orElse(null);
+        return index.lines().stream()
+                .filter(line -> followed == null || followed.isEmpty() || followed.contains(line.line()))
+                .filter(line -> withPrereleases || !line.isPrerelease())
+                .sorted(Comparator.comparing(CasesIndex.Line::version).reversed()).toList();
+    }
+
+    /** The release a line's card speaks for: the newest one measured, which is not always the head. */
+    public static VersionNumber spokenFor(CasesIndex.Line line) {
+        return line.measured().orElse(line.version());
+    }
+
+    /**
+     * The oldest release of the line from which every newer one is secure, or
+     * empty when the newest is not. "On X or later" is only true when everything
+     * above X is secure too.
+     */
+    public static Optional<VersionNumber> secureFrom(CasesIndex index, String line) {
+        VersionNumber answer = null;
+        var versions = new ArrayList<>(index.byLine().getOrDefault(line, List.of()));
+        versions.sort(Comparator.reverseOrder());
+        for (VersionNumber version : versions) {
+            boolean secure = index.summaryOf(version).flatMap(CasesIndex.Summary::state).filter("secure"::equals)
+                    .isPresent();
+            if (!secure) {
+                break;
+            }
+            answer = version;
+        }
+        return Optional.ofNullable(answer);
+    }
+
+    /**
+     * The newest verdicts, one row per advisory. A verdict is written per package
+     * and per range, so one advisory can arrive two or three times on the day it
+     * is judged.
+     */
+    public static List<Assessment> recent(CasesIndex index) {
+        var seen = new HashSet<String>();
+        var rows = new ArrayList<Assessment>();
+        for (Assessment verdict : index.recent()) {
+            String key = verdict.cves().stream().findFirst().or(verdict::id).orElse(null);
+            if (key == null || !seen.add(key)) {
+                continue;
+            }
+            rows.add(verdict);
+            if (rows.size() == RECENT_ROWS) {
+                break;
+            }
+        }
+        return rows;
+    }
+
+    /** The first sentence of what the verdict says it means, impact first. */
+    public static Optional<String> firstSentence(Assessment verdict) {
+        return verdict.impact().or(verdict::commentary).map(String::strip)
+                .map(text -> SENTENCE_END.split(text, 2)[0]);
+    }
+
+    /** Whether no release of its line is newer than this one. */
+    public static boolean isNewestOfItsLine(CasesIndex index, VersionAnswer measured) {
+        String line = measured.line().orElse(measured.version().line());
+        return index.byLine().getOrDefault(line, List.of()).stream().noneMatch(other -> other.compareTo(measured.version()) > 0);
     }
 }

@@ -23,7 +23,7 @@ class ReleaseRulesTest {
     private final ExplorerVersion record = data.explorerVersion(VersionNumber.of("24.9.21")).orElseThrow();
 
     private ExplorerAnswer.Shape shape(java.util.Set<String> off) {
-        return ExplorerAnswer.shape(front, ExplorerAnswer.catalogue(ExplorerRules.products(front), front), off);
+        return ExplorerAnswer.shape(front, ExplorerAnswer.catalogue(front), off);
     }
 
     @Test
@@ -47,7 +47,7 @@ class ReleaseRulesTest {
         assertThat(removed).containsExactlyElementsOf(order);
         // A product turned off takes its findings out of what an update is said to remove.
         var narrowed = ReleaseRules.removedBy(record, line, shape(java.util.Set.copyOf(
-                ExplorerAnswer.countedByDefault(ExplorerAnswer.catalogue(ExplorerRules.products(front), front)))));
+                ExplorerAnswer.countedByDefault(ExplorerAnswer.catalogue(front)))));
         assertThat(narrowed.size()).isLessThanOrEqualTo(removed.size());
         var newest = data.explorerVersion(VersionNumber.of("25.3.5")).orElseThrow();
         assertThat(ReleaseRules.removedBy(newest, ReleaseRules.asLine(front, newest), everything)).isEmpty();

@@ -187,4 +187,39 @@ public final class ExplorerRules {
         var matcher = FULL_VERSION.matcher(query.strip());
         return matcher.matches() ? Optional.of(VersionNumber.of(matcher.group(1))) : Optional.empty();
     }
+
+    /** How much of a field shows before "more", the prototype's figure. */
+    public static final int BRIEF = 240;
+
+    /** The first sentences of a text, and whether anything was left for "more". */
+    public record Brief(String text, boolean cut) {
+    }
+
+    /**
+     * The first sentences of a field, up to about a paragraph, cut where a
+     * sentence ends, or at a word when no sentence ends late enough. The rest
+     * is the same text, never rewritten.
+     */
+    public static Brief brief(String text) {
+        String whole = text.strip();
+        if (whole.length() <= BRIEF) {
+            return new Brief(whole, false);
+        }
+        int stop = -1;
+        int at = whole.indexOf(". ");
+        while (at >= 0 && at < BRIEF) {
+            stop = at;
+            at = whole.indexOf(". ", at + 1);
+        }
+        if (stop < 60) {
+            return new Brief(whole.substring(0, BRIEF).replaceFirst("\\s+\\S*$", ""), true);
+        }
+        return new Brief(whole.substring(0, stop + 1), true);
+    }
+
+    /** A frontend finding, which every application carries inside the framework's bundle. */
+    public static boolean frontend(Finding finding) {
+        String ecosystem = finding.ecosystem().orElse("");
+        return "npm".equals(ecosystem) || "javascript".equals(ecosystem);
+    }
 }

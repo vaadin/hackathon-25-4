@@ -11,12 +11,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.securitystatus.security.Roles;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.customer.HomeView;
-import com.vaadin.securitystatus.ui.team.explorer.ExplorerView;
 
 /** DAT-04. A cold cache and a dead upstream is one sentence in the shell, never an exception page. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -53,24 +50,6 @@ class DataOutageBrowserlessTest extends SpringBrowserlessTest {
         assertThat($(Badge.class).withClassName("measured-chip").exists()).isFalse();
         assertThat(fixtures.transport().requestsFor(SecurityDataService.INDEX)).isNotEmpty()
                 .allMatch(request -> request.status() == 0);
-    }
-
-    // DAT-04
-    @Test
-    @WithMockUser(username = "team", roles = Roles.SECURITY)
-    void the_internal_front_door_says_it_too() {
-        // The control: with the host up, one row for each of the ten lines.
-        navigate(ExplorerView.class);
-        assertThat($(com.vaadin.flow.component.details.Details.class).withClassName("explorer-row").all()).hasSize(10);
-        navigate("nothing-here", com.vaadin.flow.router.RouteNotFoundError.class);
-
-        fixtures.coldAndDown();
-
-        navigate(ExplorerView.class);
-
-        assertThat($(DataOutageNotice.class).single().getText()).isEqualTo(UNREACHABLE);
-        assertThat($(com.vaadin.flow.component.details.Details.class).withClassName("explorer-row").exists()).isFalse();
-        assertThat($(Anchor.class).withClassName("release-file").exists()).isFalse();
     }
 
     @Test

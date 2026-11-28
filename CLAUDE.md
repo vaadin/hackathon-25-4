@@ -31,7 +31,7 @@ src/main/java/com/vaadin/securitystatus/
 src/main/resources/META-INF/resources/   all CSS and images, styles/{common,customer,team}
 ```
 
-The team is removable, D-254: delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, and the team's tests. `TeamIsRemovableTest` keeps it that way.
+The team is removable, D-254: delete `team/`, `ui/team/`, `styles/team/` with its imports in `styles.css`, the team's tests, and its specifications: features and epics 08 to 12, and the rows of `01-foundation.md` that `ShellSecurityBrowserlessTest` verifies. `TeamIsRemovableTest` keeps it that way.
 
 ## Hard rules
 

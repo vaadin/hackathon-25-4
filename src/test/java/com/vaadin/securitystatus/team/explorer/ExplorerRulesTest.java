@@ -50,7 +50,7 @@ class ExplorerRulesTest {
     @Test
     void the_registry_keeps_usage_order_and_the_catalogue_the_profiles_order() {
         var products = ExplorerRules.products(front);
-        var catalogue = ExplorerAnswer.catalogue(products, front);
+        var catalogue = ExplorerAnswer.catalogue(front);
 
         assertThat(products.get(0).name()).isEqualTo("vaadin-server");
         // D-206: what comes with Vaadin first, then the choices, then what Vaadin no longer develops.

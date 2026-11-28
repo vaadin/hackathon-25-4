@@ -1,15 +1,15 @@
-package com.vaadin.securitystatus.ui.team.explorer;
+package com.vaadin.securitystatus.team.explorer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
 /** D-255: a field shows its first sentences and the rest is one click away, cut as the prototype cuts it. */
-class FindingDetailTest {
+class BriefTest {
 
     @Test
     void a_short_text_is_kept_whole() {
-        assertThat(FindingDetail.brief("  One sentence.  ")).isEqualTo(new FindingDetail.Brief("One sentence.", false));
+        assertThat(ExplorerRules.brief("  One sentence.  ")).isEqualTo(new ExplorerRules.Brief("One sentence.", false));
     }
 
     @Test
@@ -18,18 +18,18 @@ class FindingDetailTest {
         String second = "b".repeat(100) + ".";
         String third = "c".repeat(100) + ".";
 
-        var brief = FindingDetail.brief(first + " " + second + " " + third);
+        var brief = ExplorerRules.brief(first + " " + second + " " + third);
 
-        assertThat(brief).isEqualTo(new FindingDetail.Brief(first + " " + second, true));
+        assertThat(brief).isEqualTo(new ExplorerRules.Brief(first + " " + second, true));
     }
 
     @Test
     void a_long_text_with_no_sentence_ending_late_enough_is_cut_at_a_word() {
         String text = "Short. " + "word ".repeat(80);
 
-        var brief = FindingDetail.brief(text);
+        var brief = ExplorerRules.brief(text);
 
         assertThat(brief.cut()).isTrue();
-        assertThat(brief.text()).hasSizeLessThanOrEqualTo(FindingDetail.BRIEF).endsWith("word");
+        assertThat(brief.text()).hasSizeLessThanOrEqualTo(ExplorerRules.BRIEF).endsWith("word");
     }
 }

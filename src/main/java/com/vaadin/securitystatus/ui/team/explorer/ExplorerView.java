@@ -134,7 +134,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             try {
                 ExplorerFront front = data.explorerFront();
                 Set<String> names = new LinkedHashSet<>();
-                catalogue(front).stream().filter(Product::switchable).forEach(product -> names.add(product.name()));
+                ExplorerAnswer.catalogue(front).stream().filter(Product::switchable).forEach(product -> names.add(product.name()));
                 selection.readStorage(ui, names, restored -> {
                     if (selection.unsettled()) {
                         address(query.peek(), new LinkedHashSet<>(restored), opened.peek()).go(ui);
@@ -164,7 +164,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             set(q, open);
             return;
         }
-        List<Product> catalogue = catalogue(front);
+        List<Product> catalogue = ExplorerAnswer.catalogue(front);
         Set<String> defaults = ExplorerAnswer.defaultOff(catalogue);
         if (Address.has(asked, QueryFlag.OFF)) {
             List<String> written = Address.list(asked, QueryFlag.OFF);
@@ -223,7 +223,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
     private Address address(String q, Set<String> off, Optional<String> open, boolean said) {
         Address address = search(q).with(QueryFlag.OPEN, open);
         try {
-            List<Product> catalogue = catalogue(data.explorerFront());
+            List<Product> catalogue = ExplorerAnswer.catalogue(data.explorerFront());
             if (!said && off.equals(ExplorerAnswer.defaultOff(catalogue))) {
                 return address;
             }
@@ -249,10 +249,6 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             return;
         }
         address(typed, selection.off().peek(), opened.peek()).go(ui);
-    }
-
-    private static List<Product> catalogue(ExplorerFront front) {
-        return ExplorerAnswer.catalogue(ExplorerRules.products(front), front);
     }
 
     // The left panel
@@ -298,8 +294,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
             return;
         }
         heading.setVisible(true);
-        List<Product> registry = ExplorerRules.products(front);
-        List<Product> catalogue = ExplorerAnswer.catalogue(registry, front);
+        List<Product> catalogue = ExplorerAnswer.catalogue(front);
         Shape shape = ExplorerAnswer.shape(front, catalogue, off);
         Asked asked = ExplorerAnswer.asked(q, front);
 

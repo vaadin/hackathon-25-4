@@ -5,11 +5,8 @@ import static com.vaadin.securitystatus.ui.common.Parts.decorative;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -44,6 +41,7 @@ import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
+import com.vaadin.securitystatus.customer.VersionRules;
 
 /**
  * The front door: every followed line at a glance, the advisories reviewed
@@ -51,7 +49,7 @@ import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
  * whenever a new measurement is published.
  */
 @Route("")
-// The lookup is on every customer route, mounted by the shell through the ShellLookup
+// The lookup is on every customer route, mounted by the shell through the LookupFactory
 // bean, so no route's bytecode names it and the production bundle scanner never finds
 // its components. Named here, on the one route whose components load eagerly.
 @Uses(Lookup.class)
@@ -60,9 +58,7 @@ import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
 public final class HomeView extends Composite<Div> implements BeforeEnterObserver {
 
 
-    static final int RECENT_ROWS = 8;
 
-    private static final Pattern SENTENCE_END = Pattern.compile("(?<=\\.)\\s");
 
     private final SecurityDataService data;
     private final ValueSignal<Boolean> prereleases = new ValueSignal<>(false);
@@ -117,45 +113,11 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
 
     // The lines
 
-    /** The lines a customer can be on, newest first: the followed ones, prereleases only when asked. */
-    public static List<CasesIndex.Line> shownLines(CasesIndex index, boolean withPrereleases) {
-        var followed = index.lineRule().map(rule -> new HashSet<>(rule.followed())).orElse(null);
-        return index.lines().stream()
-                .filter(line -> followed == null || followed.isEmpty() || followed.contains(line.line()))
-                .filter(line -> withPrereleases || !line.isPrerelease())
-                .sorted(Comparator.comparing(CasesIndex.Line::version).reversed()).toList();
-    }
-
-    /** The release a line's card speaks for: the newest one measured, which is not always the head. */
-    static VersionNumber spokenFor(CasesIndex.Line line) {
-        return line.measured().orElse(line.version());
-    }
-
-    /**
-     * The oldest release of the line from which every newer one is secure, or
-     * empty when the newest is not. "On X or later" is only true when everything
-     * above X is secure too.
-     */
-    static Optional<VersionNumber> secureFrom(CasesIndex index, String line) {
-        VersionNumber answer = null;
-        var versions = new ArrayList<>(index.byLine().getOrDefault(line, List.of()));
-        versions.sort(Comparator.reverseOrder());
-        for (VersionNumber version : versions) {
-            boolean secure = index.summaryOf(version).flatMap(CasesIndex.Summary::state).filter("secure"::equals)
-                    .isPresent();
-            if (!secure) {
-                break;
-            }
-            answer = version;
-        }
-        return Optional.ofNullable(answer);
-    }
-
     private Component linesSection(CasesIndex index, boolean withPrereleases) {
         var aside = css(new Span(getTranslation("home.lines.lead")), "section-aside");
         var heading = css(new Div(new H2(getTranslation("home.lines.title")), aside), "section-heading");
         var cards = css(new Div(), "line-cards");
-        for (CasesIndex.Line line : shownLines(index, withPrereleases)) {
+        for (CasesIndex.Line line : VersionRules.shownLines(index, withPrereleases)) {
             cards.add(card(index, line));
         }
         var tip = css(new Paragraph(getTranslation("home.lines.tip")), "home-tip");
@@ -163,7 +125,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private Component card(CasesIndex index, CasesIndex.Line line) {
-        VersionNumber spoken = spokenFor(line);
+        VersionNumber spoken = VersionRules.spokenFor(line);
         Optional<CasesIndex.Summary> summary = index.summaryOf(spoken);
         Optional<String> state = summary.flatMap(CasesIndex.Summary::state);
 
@@ -257,39 +219,12 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         if (upgrade.isPresent()) {
             return getTranslation("home.card.upgrade", upgrade.get().toString());
         }
-        return secureFrom(index, line.line())
+        return VersionRules.secureFrom(index, line.line())
                 .map(from -> getTranslation("home.card.secureFrom", from.toString()))
                 .orElseGet(() -> getTranslation("home.card.newest", spoken.toString()));
     }
 
     // Recently reviewed
-
-    /**
-     * The newest verdicts, one row per advisory. A verdict is written per package
-     * and per range, so one advisory can arrive two or three times on the day it
-     * is judged.
-     */
-    static List<Assessment> recent(CasesIndex index) {
-        var seen = new HashSet<String>();
-        var rows = new ArrayList<Assessment>();
-        for (Assessment verdict : index.recent()) {
-            String key = verdict.cves().stream().findFirst().or(verdict::id).orElse(null);
-            if (key == null || !seen.add(key)) {
-                continue;
-            }
-            rows.add(verdict);
-            if (rows.size() == RECENT_ROWS) {
-                break;
-            }
-        }
-        return rows;
-    }
-
-    /** The first sentence of what the verdict says it means, impact first. */
-    static Optional<String> firstSentence(Assessment verdict) {
-        return verdict.impact().or(verdict::commentary).map(String::strip)
-                .map(text -> SENTENCE_END.split(text, 2)[0]);
-    }
 
     private Component recentSection(CasesIndex index) {
         var heading = css(new Div(new H2(getTranslation("home.recent.title"))), "section-heading");
@@ -298,7 +233,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
             heading.add(all);
         });
         var rows = css(new Div(), "recent-rows");
-        for (Assessment verdict : recent(index)) {
+        for (Assessment verdict : VersionRules.recent(index)) {
             rows.add(recentRow(index, verdict));
         }
         return css(new Section(heading, rows), "home-recent");
@@ -309,7 +244,7 @@ public final class HomeView extends Composite<Div> implements BeforeEnterObserve
         var id = css(new Span(cve.or(verdict::id).orElse("")), "recent-id");
         var parts = new ArrayList<Component>();
         parts.add(id);
-        firstSentence(verdict).ifPresent(says -> {
+        VersionRules.firstSentence(verdict).ifPresent(says -> {
             var text = css(new Span(says), "recent-says");
             parts.add(text);
         });

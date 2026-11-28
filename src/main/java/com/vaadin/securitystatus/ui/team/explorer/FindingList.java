@@ -22,6 +22,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
 import com.vaadin.securitystatus.team.explorer.ExplorerAnswer;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
+import com.vaadin.securitystatus.team.explorer.ExplorerRules;
 
 /**
  * The findings of one group, each a disclosure of its own as the prototype
@@ -133,7 +134,7 @@ final class FindingList extends Composite<Div> {
         }
         if (finding.bundledIn().isPresent()) {
             words.setText(getTranslation("explorer.through.bundled", finding.bundledIn().get()));
-        } else if (frontend(finding)) {
+        } else if (ExplorerRules.frontend(finding)) {
             words.setText(getTranslation("explorer.through.frontend"));
             Tooltip.forComponent(words).setText(getTranslation("explorer.through.frontend.title"));
         } else {
@@ -141,12 +142,6 @@ final class FindingList extends Composite<Div> {
             words.addClassName("dim");
         }
         return words;
-    }
-
-    /** A frontend finding, which every application carries inside the framework's bundle. */
-    static boolean frontend(Finding finding) {
-        String ecosystem = finding.ecosystem().orElse("");
-        return "npm".equals(ecosystem) || "javascript".equals(ecosystem);
     }
 
     /** One dot per product that brings it and is on, in catalogue order, with the product's ring colour. */

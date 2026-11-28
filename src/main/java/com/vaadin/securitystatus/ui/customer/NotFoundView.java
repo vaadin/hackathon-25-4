@@ -1,4 +1,4 @@
-package com.vaadin.securitystatus.ui.common;
+package com.vaadin.securitystatus.ui.customer;
 
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
@@ -8,7 +8,6 @@ import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.HttpStatusCode;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.securitystatus.ui.customer.CustomerLayout;
 
 /**
  * Flow's own not found view, kept inside the customer shell. Access control

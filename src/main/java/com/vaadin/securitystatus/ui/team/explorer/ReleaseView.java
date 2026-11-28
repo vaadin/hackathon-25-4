@@ -116,7 +116,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
             }
             try {
                 Set<String> names = new LinkedHashSet<>();
-                catalogue(data.explorerFront()).stream().filter(Product::switchable)
+                ExplorerAnswer.catalogue(data.explorerFront()).stream().filter(Product::switchable)
                         .forEach(product -> names.add(product.name()));
                 // The choice the explorer remembers, read here too, as the prototype's page reads it.
                 selection.readStorage(ui, names, restored -> {
@@ -154,10 +154,6 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
 
     private static RouterLink releaseLink(String text, VersionNumber version) {
         return new RouterLink(text, ReleaseView.class, parameters(version));
-    }
-
-    private static List<Product> catalogue(ExplorerFront front) {
-        return ExplorerAnswer.catalogue(ExplorerRules.products(front), front);
     }
 
     // The left panel
@@ -204,7 +200,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
         }
         lookup.setValue(version.toString());
         try {
-            selection.useDefault(ExplorerAnswer.defaultOff(catalogue(data.explorerFront())));
+            selection.useDefault(ExplorerAnswer.defaultOff(ExplorerAnswer.catalogue(data.explorerFront())));
         } catch (DataUnreachableException unreachable) {
             // The outage is said where the card would be.
         }
@@ -244,8 +240,7 @@ public final class ReleaseView extends Composite<Div> implements BeforeEnterObse
     // A measured release
 
     private void card(ExplorerFront front, ExplorerVersion record, Set<String> chosen) {
-        List<Product> registry = ExplorerRules.products(front);
-        List<Product> catalogue = ExplorerAnswer.catalogue(registry, front);
+        List<Product> catalogue = ExplorerAnswer.catalogue(front);
         Line line = ReleaseRules.asLine(front, record);
         boolean twoShapes = ReleaseRules.measuredWithoutSpring(record);
         String starter = catalogue.stream().filter(Product::switchesShape).map(Product::name).findFirst().orElse("");

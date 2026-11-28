@@ -8,6 +8,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerFront.Finding;
@@ -16,6 +18,7 @@ import com.vaadin.securitystatus.data.model.ExplorerFront.Line;
 import com.vaadin.securitystatus.data.model.ExplorerFront;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Badge;
 import com.vaadin.securitystatus.team.explorer.ExplorerRules.Product;
+import com.vaadin.securitystatus.data.model.ExplorerVersion;
 
 /**
  * What the explorer's front door answers, in the prototype's terms and
@@ -38,7 +41,8 @@ public final class ExplorerAnswer {
      * {@code off} lists narrowed to what {@code module_names} knows, the fixed
      * ones first, then the choices, then what Vaadin no longer develops.
      */
-    public static List<Product> catalogue(List<Product> registry, ExplorerFront front) {
+    public static List<Product> catalogue(ExplorerFront front) {
+        List<Product> registry = ExplorerRules.products(front);
         var named = new LinkedHashSet<String>();
         front.profile().ifPresent(profile -> {
             named.addAll(profile.on());
@@ -432,5 +436,20 @@ public final class ExplorerAnswer {
     /** The followed series a number falls under, when it names a release we hold no scan of. */
     static Optional<Line> followedPrefix(String raw, ExplorerFront front) {
         return front.lines().stream().filter(line -> raw.startsWith(line.line() + ".")).findFirst();
+    }
+
+    /**
+     * The paths each product brings this advisory by, in the shape being read,
+     * the steps after the product joined as the prototype joins them.
+     */
+    public static Map<String, List<String>> pathsByProduct(ExplorerVersion.Finding found, boolean springOff) {
+        var byProduct = new LinkedHashMap<String, List<String>>();
+        for (ExplorerVersion.PackageFinding coordinate : found.packages()) {
+            for (ExplorerVersion.Route route : springOff ? coordinate.routesWithoutSpring() : coordinate.routes()) {
+                route.entry().ifPresent(product -> byProduct.computeIfAbsent(product, name -> new ArrayList<>())
+                        .add(String.join(" -> ", route.steps())));
+            }
+        }
+        return byProduct;
     }
 }

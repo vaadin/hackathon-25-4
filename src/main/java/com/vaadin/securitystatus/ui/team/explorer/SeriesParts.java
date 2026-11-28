@@ -189,7 +189,7 @@ final class SeriesParts {
                                 && ExplorerAnswer.mine(finding, routes.shape(), line))
                         .toList()
                 : split.unattributed().stream().filter(finding -> finding.bundledIn().isEmpty()).toList();
-        int frontend = (int) blind.stream().filter(FindingList::frontend).count();
+        int frontend = (int) blind.stream().filter(ExplorerRules::frontend).count();
         if (frontend > 0) {
             into.add(hint(t("explorer.detail.frontend", frontend)));
         }
@@ -288,7 +288,7 @@ final class SeriesParts {
         try {
             return data.explorerVersion(version).flatMap(record -> record.findings().stream()
                     .filter(candidate -> candidate.cve().equals(cve)).findFirst())
-                    .map(found -> FindingDetail.pathsByProduct(found, springOff)).orElse(Map.of());
+                    .map(found -> ExplorerAnswer.pathsByProduct(found, springOff)).orElse(Map.of());
         } catch (DataUnreachableException unreachable) {
             return Map.of();
         }

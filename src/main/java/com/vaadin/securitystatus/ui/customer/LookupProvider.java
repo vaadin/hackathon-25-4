@@ -6,11 +6,10 @@ import com.vaadin.securitystatus.customer.LookupState;
 import com.vaadin.securitystatus.customer.ScanState;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.SecurityDataService;
-import com.vaadin.securitystatus.ui.common.ShellLookup;
 
 /** Gives the customer shell its lookup, over the session's state. */
 @SpringComponent
-class LookupProvider implements ShellLookup {
+class LookupProvider implements LookupFactory {
 
     private final org.springframework.beans.factory.ObjectProvider<LookupState> state;
     private final SecurityDataService data;

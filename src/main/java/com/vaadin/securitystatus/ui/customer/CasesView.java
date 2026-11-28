@@ -30,6 +30,10 @@ import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.model.CaseCatalog;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
+import com.vaadin.securitystatus.customer.CaseRules;
+import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.securitystatus.ui.common.nav.Address;
 
 /**
  * Every state the customer screens can show, for demos and reviews, in the
@@ -74,7 +78,7 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
             data.cases().cases().stream().filter(item -> item.id().equals(asked.get())).findFirst()
                     .map(item -> CaseRules.place(item, index)).flatMap(CaseRules.Placed::target)
                     .ifPresentOrElse(
-                            target -> event.forwardTo(target.view(), target.parameters(), target.query()),
+                            target -> event.forwardTo(view(target), parameters(target), query(target)),
                             () -> event.forwardTo(CasesView.class));
         } catch (DataUnreachableException unreachable) {
             event.forwardTo(CasesView.class);
@@ -161,8 +165,8 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
 
         if (placed.group() == CaseRules.Group.RENDERABLE) {
             placed.target().ifPresent(target -> {
-                var link = new RouterLink(getTranslation("cases.seeOne"), target.view(), target.parameters());
-                link.setQueryParameters(target.query());
+                var link = new RouterLink(getTranslation("cases.seeOne"), view(target), parameters(target));
+                link.setQueryParameters(query(target));
                 link.addClassName("case-link");
                 row.add(link);
             });
@@ -174,5 +178,21 @@ public final class CasesView extends Composite<Div> implements BeforeEnterObserv
             row.add(chip);
         }
         return row;
+    }
+
+    // Where an example opens
+
+    private static Class<? extends Component> view(CaseRules.Target target) {
+        return target.screen() == CaseRules.Screen.VERSION ? VersionView.class : CveView.class;
+    }
+
+    private static RouteParameters parameters(CaseRules.Target target) {
+        return target.screen() == CaseRules.Screen.VERSION ? new RouteParameters(VersionView.VERSION, target.version())
+                : CveView.parameters(target.ids(), target.version());
+    }
+
+    /** The catalogue's flags, read by the one writer of addresses. */
+    private static QueryParameters query(CaseRules.Target target) {
+        return Address.parse(target.path(), target.flags()).query();
     }
 }

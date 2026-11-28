@@ -4,9 +4,7 @@ import static com.vaadin.securitystatus.ui.common.Parts.css;
 import static com.vaadin.securitystatus.ui.common.Parts.paragraph;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -24,6 +22,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.securitystatus.customer.CveRules;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.ExplorerVersion;
+import com.vaadin.securitystatus.team.explorer.ExplorerRules;
 
 /**
  * An opened finding, read from its release's record, drawn as the prototype
@@ -35,13 +34,6 @@ import com.vaadin.securitystatus.data.model.ExplorerVersion;
  * is not published says so in one sentence.
  */
 final class FindingDetail extends Composite<Div> {
-
-    /** How much of a field shows before "more", the prototype's figure. */
-    static final int BRIEF = 240;
-
-    /** The first sentences of a text, and whether anything was left for "more". */
-    record Brief(String text, boolean cut) {
-    }
 
     FindingDetail(String cve, VersionNumber release, Optional<ExplorerVersion.Finding> record,
             boolean springOff) {
@@ -76,32 +68,10 @@ final class FindingDetail extends Composite<Div> {
     }
 
 
-    /**
-     * The first sentences of a field, up to about a paragraph, cut where a
-     * sentence ends, or at a word when no sentence ends late enough. The rest
-     * is the same text, never rewritten.
-     */
-    static Brief brief(String text) {
-        String whole = text.strip();
-        if (whole.length() <= BRIEF) {
-            return new Brief(whole, false);
-        }
-        int stop = -1;
-        int at = whole.indexOf(". ");
-        while (at >= 0 && at < BRIEF) {
-            stop = at;
-            at = whole.indexOf(". ", at + 1);
-        }
-        if (stop < 60) {
-            return new Brief(whole.substring(0, BRIEF).replaceFirst("\\s+\\S*$", ""), true);
-        }
-        return new Brief(whole.substring(0, stop + 1), true);
-    }
-
     /** A label and its text, the text cut by {@link #brief} with "more" at the end of its last line. */
     private Component field(String name, String text) {
         var label = css(new Span(getTranslation("explorer.finding." + name)), "explorer-field-label");
-        Brief shown = brief(text);
+        ExplorerRules.Brief shown = ExplorerRules.brief(text);
         var body = new Paragraph(shown.text());
         if (shown.cut()) {
             var more = new Button(getTranslation("explorer.finding.more"));
@@ -115,21 +85,6 @@ final class FindingDetail extends Composite<Div> {
             body.add(new Text(" "), more);
         }
         return css(new Div(label, body), "explorer-field", "field-" + name);
-    }
-
-    /**
-     * The paths each product brings this advisory by, in the shape being read,
-     * the steps after the product joined as the prototype joins them.
-     */
-    static Map<String, List<String>> pathsByProduct(ExplorerVersion.Finding found, boolean springOff) {
-        var byProduct = new LinkedHashMap<String, List<String>>();
-        for (ExplorerVersion.PackageFinding coordinate : found.packages()) {
-            for (ExplorerVersion.Route route : springOff ? coordinate.routesWithoutSpring() : coordinate.routes()) {
-                route.entry().ifPresent(product -> byProduct.computeIfAbsent(product, name -> new ArrayList<>())
-                        .add(String.join(" -> ", route.steps())));
-            }
-        }
-        return byProduct;
     }
 
     /** One package and the versions the shape being read resolves, with the routes to it. */

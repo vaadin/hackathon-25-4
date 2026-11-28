@@ -80,7 +80,7 @@ class ExplorerFilterBrowserlessTest extends SpringBrowserlessTest {
 
         var everything = new ArrayList<String>();
         var front = FixturePages.offline().explorerFront();
-        ExplorerAnswer.catalogue(ExplorerRules.products(front), front).stream()
+        ExplorerAnswer.catalogue(front).stream()
                 .filter(ExplorerRules.Product::switchable).filter(product -> !product.switchesShape())
                 .forEach(product -> everything.add(product.name()));
         navigate("findings?open=25.3&off=" + String.join(",", everything), ExplorerView.class);

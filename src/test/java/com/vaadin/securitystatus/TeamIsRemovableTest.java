@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 class TeamIsRemovableTest {
 
     private static final Path SOURCES = Path.of("src/main/java/com/vaadin/securitystatus");
+    private static final Path TESTS = Path.of("src/test/java/com/vaadin/securitystatus");
     private static final Path STYLES = Path.of("src/main/resources/META-INF/resources/styles");
 
     @Test
@@ -30,6 +31,21 @@ class TeamIsRemovableTest {
         try (Stream<Path> files = Files.walk(SOURCES)) {
             offenders = files.filter(path -> path.toString().endsWith(".java"))
                     .filter(path -> !path.startsWith(SOURCES.resolve("team")) && !path.startsWith(SOURCES.resolve("ui/team")))
+                    .filter(path -> read(path).contains("securitystatus.team.")
+                            || read(path).contains("securitystatus.ui.team."))
+                    .map(Path::toString).toList();
+        }
+        assertThat(offenders).isEmpty();
+    }
+
+    /** The tests go with what they test, so deleting the team deletes its tests and the rest still compile. */
+    @Test
+    void no_test_outside_the_team_names_the_team() throws IOException {
+        List<String> offenders;
+        try (Stream<Path> files = Files.walk(TESTS)) {
+            offenders = files.filter(path -> path.toString().endsWith(".java"))
+                    .filter(path -> !path.startsWith(TESTS.resolve("team")) && !path.startsWith(TESTS.resolve("ui/team")))
+                    .filter(path -> !path.getFileName().toString().equals("TeamIsRemovableTest.java"))
                     .filter(path -> read(path).contains("securitystatus.team.")
                             || read(path).contains("securitystatus.ui.team."))
                     .map(Path::toString).toList();

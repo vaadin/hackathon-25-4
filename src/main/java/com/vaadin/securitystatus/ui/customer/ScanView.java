@@ -54,7 +54,6 @@ import com.vaadin.securitystatus.data.model.ScanIndex;
 import com.vaadin.securitystatus.data.model.VersionAnswer;
 import com.vaadin.securitystatus.ui.common.DataOutageNotice;
 import com.vaadin.securitystatus.ui.common.Downloads;
-import com.vaadin.securitystatus.ui.common.PdfPreview;
 import com.vaadin.securitystatus.ui.common.ViewHeading;
 import com.vaadin.securitystatus.ui.common.nav.Address;
 import com.vaadin.securitystatus.ui.common.nav.QueryFlag;
@@ -411,7 +410,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
                 : getTranslation(bucketKey(row.bucket()))), "status-chip", "state-" + (row.pending().isPresent() ? "in_triage"
                 : row.bucket().name().toLowerCase(java.util.Locale.ROOT)));
         cell.add(chip);
-        settledVerdict(row, index).ifPresent(label -> {
+        Triage.settledVerdict(row, index).ifPresent(label -> {
             var said = css(new Span(label), "scan-verdict-label");
             cell.add(said);
         });
@@ -421,7 +420,7 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     private String verdictText(Triage.Row row, CasesIndex index) {
         String word = row.pending().isPresent() ? getTranslation("state.notAssessed")
                 : getTranslation(bucketKey(row.bucket()));
-        return settledVerdict(row, index).map(label -> word + ": " + label).orElse(word);
+        return Triage.settledVerdict(row, index).map(label -> word + ": " + label).orElse(word);
     }
 
     /**
@@ -429,15 +428,6 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
      * that settled it, and for a version nobody measured whatever the catalogue
      * says of the advisory, which is all that can be said.
      */
-    private static Optional<String> settledVerdict(Triage.Row row, CasesIndex index) {
-        // A secure row names the verdict only when the verdict settled it. A row secure
-        // because the version does not report it says so in its action, and the
-        // catalogue's word for other releases beside it would contradict it, D-198.
-        boolean named = row.action() == Triage.Action.RULED_OUT || row.action() == Triage.Action.FROM_BUILD
-                || row.action() == Triage.Action.VERSION_UNMEASURED;
-        return row.verdict().filter(verdict -> named).map(index.labels()::get);
-    }
-
     private String action(Triage.Row row) {
         return getTranslation(row.action().key(), row.arguments().toArray());
     }

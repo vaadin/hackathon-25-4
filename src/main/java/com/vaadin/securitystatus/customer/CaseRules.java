@@ -1,4 +1,4 @@
-package com.vaadin.securitystatus.ui.customer;
+package com.vaadin.securitystatus.customer;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -7,13 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.router.QueryParameters;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.CaseCatalog;
 import com.vaadin.securitystatus.data.model.CasesIndex;
-import com.vaadin.securitystatus.ui.common.nav.Address;
 
 /**
  * The case catalogue without components: which group a case is in, where its
@@ -23,19 +19,28 @@ import com.vaadin.securitystatus.ui.common.nav.Address;
  * {@code #cve/CVE-2016-1000027/23.6.19}, which maps one to one onto the
  * routes here.
  */
-final class CaseRules {
+public final class CaseRules {
 
     /** The source page's three groups, in the order it shows them. */
-    enum Group {
+    public enum Group {
         IMPOSSIBLE, NONE_TODAY, RENDERABLE
     }
 
-    /** Where a case's example opens: the view, its route parameters and its query flags. */
-    record Target(Class<? extends Component> view, RouteParameters parameters, QueryParameters query) {
+    /** The two screens an example can open. */
+    public enum Screen {
+        VERSION, CVE
+    }
+
+    /**
+     * Where a case's example opens: the screen, the ids and the version it
+     * asks about, an empty string for what it does not name, and the path and
+     * flags of the example, which the view turns into its address.
+     */
+    public record Target(Screen screen, String ids, String version, String path, String flags) {
     }
 
     /** One case, with the group it is shown in and the example it links to, when it has a live one. */
-    record Placed(CaseCatalog.Case item, Group group, Optional<Target> target) {
+    public record Placed(CaseCatalog.Case item, Group group, Optional<Target> target) {
     }
 
     private static final String VERSION_PREFIX = "#version/";
@@ -48,7 +53,7 @@ final class CaseRules {
      * Every case in its group, the most frequent first as the prototype orders
      * them, ties in the catalogue's own order, D-195.
      */
-    static Map<Group, List<Placed>> grouped(CaseCatalog catalog, CasesIndex index) {
+    public static Map<Group, List<Placed>> grouped(CaseCatalog catalog, CasesIndex index) {
         var groups = new EnumMap<Group, List<Placed>>(Group.class);
         for (Group group : Group.values()) {
             groups.put(group, new ArrayList<>());
@@ -67,7 +72,7 @@ final class CaseRules {
      * renderable only while its example parses and the data still shows what
      * the case names; otherwise it is none today, never a broken link.
      */
-    static Placed place(CaseCatalog.Case item, CasesIndex index) {
+    public static Placed place(CaseCatalog.Case item, CasesIndex index) {
         if (item.status().filter("impossible"::equals).isPresent()) {
             return new Placed(item, Group.IMPOSSIBLE, Optional.empty());
         }
@@ -78,7 +83,7 @@ final class CaseRules {
     }
 
     /** The route an example in the source page's grammar names, or empty for one this application has no screen for. */
-    static Optional<Target> target(String example) {
+    public static Optional<Target> target(String example) {
         String path = example;
         String flags = "";
         int question = example.indexOf('?');
@@ -86,22 +91,19 @@ final class CaseRules {
             path = example.substring(0, question);
             flags = example.substring(question + 1);
         }
-        // The catalogue's flags are read and written by the one writer of addresses.
-        QueryParameters query = Address.parse(path, flags).query();
         if (path.startsWith(VERSION_PREFIX)) {
             String version = path.substring(VERSION_PREFIX.length());
             if (version.isEmpty() || version.contains("/")) {
                 return Optional.empty();
             }
-            return Optional.of(new Target(VersionView.class, new RouteParameters(VersionView.VERSION, version), query));
+            return Optional.of(new Target(Screen.VERSION, "", version, path, flags));
         }
         if (path.startsWith(CVE_PREFIX)) {
             String[] parts = path.substring(CVE_PREFIX.length()).split("/");
             if (parts.length == 0 || parts.length > 2 || parts[0].isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(new Target(CveView.class,
-                    CveView.parameters(parts[0], parts.length == 2 ? parts[1] : ""), query));
+            return Optional.of(new Target(Screen.CVE, parts[0], parts.length == 2 ? parts[1] : "", path, flags));
         }
         return Optional.empty();
     }
@@ -111,21 +113,19 @@ final class CaseRules {
      * release or the advisory has to be one the index knows, and where the
      * index carries the fact the case is about, that fact has to hold.
      */
-    static boolean exhibits(String caseId, String example, CasesIndex index) {
+    public static boolean exhibits(String caseId, String example, CasesIndex index) {
         Optional<Target> target = target(example);
         if (target.isEmpty()) {
             return false;
         }
-        RouteParameters parameters = target.get().parameters();
-        if (target.get().view() == VersionView.class) {
-            Optional<CasesIndex.Summary> summary = summary(index, parameters.get(VersionView.VERSION).orElse(""));
-            return summary.filter(versionFact(caseId)).isPresent();
+        Target where = target.get();
+        if (where.screen() == Screen.VERSION) {
+            return summary(index, where.version()).filter(versionFact(caseId)).isPresent();
         }
-        Optional<String> version = parameters.get(CveView.VERSION);
-        if (version.isPresent() && summary(index, version.get()).isEmpty()) {
+        if (!where.version().isEmpty() && summary(index, where.version()).isEmpty()) {
             return false;
         }
-        String advisory = parameters.get(CveView.IDS).orElse("");
+        String advisory = where.ids();
         return Optional.ofNullable(index.advisories().get(advisory)).filter(advisoryFact(caseId, advisory))
                 .isPresent();
     }

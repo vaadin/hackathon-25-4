@@ -460,7 +460,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
     }
 
     private Component lineCard(CveAnswer advisory, CasesIndex.Line line, boolean yours, Optional<CveRules.Fix> fix) {
-        VersionNumber head = HomeView.spokenFor(line);
+        VersionNumber head = VersionRules.spokenFor(line);
         Optional<CveAnswer.Coverage> coverage = Optional.ofNullable(advisory.coverage().get(line.line()));
         Optional<String> status = coverage.flatMap(CveAnswer.Coverage::status);
         Optional<String> said = Optional.ofNullable(advisory.onVersions().get(head.toString()))

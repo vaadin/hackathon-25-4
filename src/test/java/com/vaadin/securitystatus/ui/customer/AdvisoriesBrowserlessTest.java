@@ -12,17 +12,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.browserless.internal.GridContextMenuSupport;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenuTester;
-import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -31,7 +23,6 @@ import com.vaadin.securitystatus.customer.LookupState;
 import com.vaadin.securitystatus.data.FixturePages;
 import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.model.CasesIndex.AdvisoryCatalogEntry;
-import com.vaadin.securitystatus.security.Roles;
 
 /**
  * ADV-01 to ADV-03: the whole catalogue worst first, the verdict pills and
@@ -39,7 +30,7 @@ import com.vaadin.securitystatus.security.Roles;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @WithMockUser(username = "guest")
-class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
+class AdvisoriesBrowserlessTest extends AdvisoriesTesting {
 
     @Autowired
     FixturePages fixtures;
@@ -247,36 +238,6 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
 
     // Helpers
 
-    /**
-     * Opens the context menu on a row the way the browser asks for it, with the
-     * row's key and the column's internal id in the event detail.
-     * {@code GridContextMenuTester.open} sends the key alone, and the 25.4
-     * dynamic content provider reads the column too, so the tester's open ends
-     * in a NullPointerException inside {@code GridContextMenu.onBeforeOpenMenu}.
-     * specs/FEEDBACK-25.4.md, draft 18.
-     */
-    private GridContextMenuTester<GridContextMenu<AdvisoryCatalogEntry>, AdvisoryCatalogEntry> openMenu(
-            AdvisoriesView view, int row) {
-        Grid<AdvisoryCatalogEntry> grid = view.grid();
-        String key = GridContextMenuSupport.getItemKey(grid, rows(grid).get(row));
-        String column = GridContextMenuSupport.getColumnInternalId(grid, "id");
-        GridContextMenuSupport.setTargetItem(grid, key, column);
-        ObjectNode detail = JacksonUtils.createObjectNode();
-        detail.put("key", key);
-        detail.put("internalColumnId", column);
-        ObjectNode data = JacksonUtils.createObjectNode();
-        data.set("event.detail", detail);
-        grid.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(new DomEvent(grid.getElement(), GridContextMenuSupport.BEFORE_OPEN_EVENT, data));
-        roundTrip();
-        assertThat(view.menu().isAttached()).as("the menu opened").isTrue();
-        return test(view.menu());
-    }
-
-    private static List<AdvisoryCatalogEntry> rows(Grid<AdvisoryCatalogEntry> grid) {
-        return grid.getLazyDataView().getItems().toList();
-    }
-
     private static int indexOf(Grid<AdvisoryCatalogEntry> grid, String id) {
         List<AdvisoryCatalogEntry> rows = rows(grid);
         for (int i = 0; i < rows.size(); i++) {
@@ -292,31 +253,6 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         return view.menu().getItems().stream().map(item -> item.getElement().getTextRecursively()).toList();
     }
 
-    // D-237: inside the internal shell the pills keep the internal address, so the side panel stays
-    @Test
-    @WithMockUser(username = "team", roles = Roles.SECURITY)
-    void the_pills_keep_the_internal_address_inside_the_internal_shell() {
-        navigate("findings/advisories", AdvisoriesView.class);
-
-        assertThat(pills()).extracting(RouterLink::getHref).first().isEqualTo("findings/advisories");
-        assertThat(pills()).extracting(RouterLink::getHref).contains("findings/advisories?verdict=risk");
-    }
-
-    // D-246: from the team's list, an answer opens inside the internal shell too
-    @Test
-    @WithMockUser(username = "team", roles = Roles.SECURITY)
-    void ask_from_the_internal_list_opens_the_internal_answer() {
-        var view = navigate("findings/advisories", AdvisoriesView.class);
-        openMenu(view, 0).clickItem("Ask about CVE-2016-1000027");
-
-        assertThat(getCurrentView()).isInstanceOf(CveView.class);
-        assertThat(currentLocation()).isEqualTo("findings/cve/CVE-2016-1000027");
-    }
-
-    private List<RouterLink> pills() {
-        return $(RouterLink.class).withClassName("verdict-pill").all();
-    }
-
     private RouterLink pill(String className) {
         return $(RouterLink.class).withClassName(className).single();
     }
@@ -325,7 +261,4 @@ class AdvisoriesBrowserlessTest extends SpringBrowserlessTest {
         return component.getElement().getTextRecursively();
     }
 
-    private String currentLocation() {
-        return com.vaadin.flow.component.UI.getCurrent().getInternals().getActiveViewLocation().getPathWithQueryParameters();
-    }
 }

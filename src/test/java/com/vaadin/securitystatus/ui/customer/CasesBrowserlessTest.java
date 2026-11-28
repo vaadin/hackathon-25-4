@@ -19,7 +19,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.data.FixturePages;
-import com.vaadin.securitystatus.ui.common.NotFoundView;
 
 /**
  * ADV-04: the case catalogue in the source page's three groups, each

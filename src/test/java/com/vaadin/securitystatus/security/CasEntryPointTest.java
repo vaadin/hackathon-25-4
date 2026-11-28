@@ -23,7 +23,8 @@ class CasEntryPointTest {
 
     @Test
     void a_visitor_without_a_session_is_sent_to_the_single_sign_on() throws Exception {
-        for (String page : new String[] { "/", "/version/24.9.21", "/findings" }) {
+        // The entry point is one for every address; the team's pages are reached the same way.
+        for (String page : new String[] { "/", "/version/24.9.21" }) {
             var answer = HttpClient.newHttpClient().send(
                     HttpRequest.newBuilder(URI.create("http://localhost:" + port + page)).GET().build(),
                     HttpResponse.BodyHandlers.discarding());

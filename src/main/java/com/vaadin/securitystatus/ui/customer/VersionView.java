@@ -387,7 +387,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 if (covered) {
                     why.add(getTranslation(plural("version.card.stuck.workaround", stuck.size())));
                 }
-                if (isNewestOfItsLine(index, measured)) {
+                if (VersionRules.isNewestOfItsLine(index, measured)) {
                     why.add(getTranslation("version.card.stuck.newest", version));
                 }
                 if (stuck.size() != 1) {
@@ -403,11 +403,6 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 return new Words(Optional.empty(), why);
             }
         }
-    }
-
-    private static boolean isNewestOfItsLine(CasesIndex index, VersionAnswer measured) {
-        String line = measured.line().orElse(measured.version().line());
-        return index.byLine().getOrDefault(line, List.of()).stream().noneMatch(other -> other.compareTo(measured.version()) > 0);
     }
 
     private Div badges(CasesIndex index, VersionAnswer measured) {
@@ -787,7 +782,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
                 getTranslation("version.lines.col.maintenance"), getTranslation("version.lines.col.scanned"));
         grid.addClassName("lines-table");
         for (CasesIndex.Line line : VersionRules.tableLines(index, readers, withPrereleases)) {
-            VersionNumber spoken = HomeView.spokenFor(line);
+            VersionNumber spoken = VersionRules.spokenFor(line);
             Optional<CasesIndex.Summary> summary = index.summaryOf(spoken);
             boolean yours = line.line().equals(readers);
             TableRow row = grid.addRow();
@@ -799,7 +794,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
             var newest = new Span(new RouterLink(spoken.toString(), VersionView.class,
                     new RouteParameters(VERSION, spoken.toString())));
-            HomeView.secureFrom(index, line.line()).filter(from -> !from.equals(spoken)).ifPresent(from -> {
+            VersionRules.secureFrom(index, line.line()).filter(from -> !from.equals(spoken)).ifPresent(from -> {
                 var safe = css(new Span(getTranslation("version.lines.safeFrom", from.toString())), "safe-from");
                 newest.add(new Text(" "), safe);
             });

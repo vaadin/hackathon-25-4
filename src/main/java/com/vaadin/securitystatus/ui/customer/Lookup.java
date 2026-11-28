@@ -56,6 +56,7 @@ import com.vaadin.securitystatus.data.SecurityDataService;
 import com.vaadin.securitystatus.data.VersionNumber;
 import com.vaadin.securitystatus.data.model.CasesIndex;
 import com.vaadin.securitystatus.ui.common.HelpDialog;
+import com.vaadin.securitystatus.customer.VersionRules;
 
 /**
  * The lookup: three tabs, by version, by advisory ids and by report, over the
@@ -417,8 +418,8 @@ public final class Lookup extends Composite<Div> {
             CasesIndex index = data.index();
             measured = index.byLine().values().stream().flatMap(List::stream).distinct()
                     .sorted(Comparator.reverseOrder()).map(VersionNumber::toString).toList();
-            newestShown = HomeView.shownLines(index, false).stream().findFirst()
-                    .map(line -> HomeView.spokenFor(line).toString()).orElse(null);
+            newestShown = VersionRules.shownLines(index, false).stream().findFirst()
+                    .map(line -> VersionRules.spokenFor(line).toString()).orElse(null);
         } catch (DataUnreachableException unreachable) {
             measured = List.of();
             newestShown = null;

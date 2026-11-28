@@ -1,4 +1,4 @@
-package com.vaadin.securitystatus.ui.common;
+package com.vaadin.securitystatus.ui.customer;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
