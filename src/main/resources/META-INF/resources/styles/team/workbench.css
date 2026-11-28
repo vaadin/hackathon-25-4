@@ -318,3 +318,13 @@
 .workbench-drafts h2 {
     margin: 1rem 0 0.5rem;
 }
+
+/* The words typed over the queue, D-280: a field the width of a long package name, then how many match. */
+.workbench-search {
+    width: min(26rem, 100%);
+}
+
+.workbench-matching {
+    margin: 0;
+    color: var(--vaadin-text-color-secondary);
+}

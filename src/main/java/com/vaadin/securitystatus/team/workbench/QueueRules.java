@@ -52,6 +52,21 @@ public final class QueueRules {
         }
     }
 
+    /**
+     * Whether a row answers the words typed over the queue, D-280: they appear,
+     * ignoring case, in the package's name, its purl or one of its advisory ids.
+     * Nothing typed matches every row.
+     */
+    public static boolean matches(Row row, String typed) {
+        String wanted = typed.strip().toLowerCase(Locale.ROOT);
+        if (wanted.isEmpty()) {
+            return true;
+        }
+        return row.name().toLowerCase(Locale.ROOT).contains(wanted)
+                || row.entry().purl().filter(purl -> purl.toLowerCase(Locale.ROOT).contains(wanted)).isPresent()
+                || row.entry().cves().stream().anyMatch(advisory -> advisory.cve().toLowerCase(Locale.ROOT).contains(wanted));
+    }
+
     /** What a verdict on some advisories of a package reaches, from the queue's own numbers. */
     public record Reach(int advisories, List<String> lines, int findings, int unjudged) {
     }

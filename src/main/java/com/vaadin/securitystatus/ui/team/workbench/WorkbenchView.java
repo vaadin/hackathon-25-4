@@ -56,6 +56,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.securitystatus.data.DataRefreshSignal;
 import com.vaadin.securitystatus.data.DataUnreachableException;
 import com.vaadin.securitystatus.data.SecurityDataService;
@@ -108,6 +111,10 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     private final VerdictDrafts drafts;
 
     private final ValueSignal<Optional<String>> asked = new ValueSignal<>(Optional.empty());
+    /** The words typed over the queue, held in {@code ?q}, D-280. */
+    private final ValueSignal<String> typed = new ValueSignal<>("");
+    private final TextField search = new TextField();
+    private final Paragraph matching = new Paragraph();
     private final ValueSignal<String> yaml = new ValueSignal<>("");
     private final ValueSignal<Optional<QueueEntry>> context = new ValueSignal<>(Optional.empty());
     private final ValueSignal<Optional<Handover>> handover = new ValueSignal<>(Optional.empty());
@@ -168,6 +175,17 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         hint.setText(getTranslation("workbench.hint"));
         filter.addClassName("workbench-series");
         filter.getElement().setAttribute("aria-label", getTranslation("workbench.series.label"));
+        search.addClassName("workbench-search");
+        search.setAriaLabel(getTranslation("workbench.search.label"));
+        search.setPlaceholder(getTranslation("workbench.search.placeholder"));
+        search.setPrefixComponent(VaadinIcon.SEARCH.create());
+        search.setClearButtonVisible(true);
+        search.addValueChangeListener(change -> {
+            if (change.isFromClient()) {
+                address(line(), change.getValue()).go(UI.getCurrentOrThrow());
+            }
+        });
+        matching.addClassName("workbench-matching");
         outage.addClassName("workbench-outage");
         queue.addClassName("workbench-queue");
         summary.addClassName("workbench-summary");
@@ -182,14 +200,14 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         formDock.setSummary(foldSummary(getTranslation("workbench.home")));
         formDock.add(composer);
 
-        getContent().add(ReleaseView.back(), outage, lead, hint, filter, queue, formDock, summaryFold, footer, draftsSection());
+        getContent().add(ReleaseView.back(), outage, lead, hint, filter, search, matching, queue, formDock, summaryFold, footer, draftsSection());
 
         var generatedAt = refresh.generatedAt();
         Signal<Optional<VerdictQueue>> read = Signal.computed(() -> {
             generatedAt.get();
             return load();
         });
-        Signal.effect(this, () -> drawQueue(read.get(), asked.get()));
+        Signal.effect(this, () -> drawQueue(read.get(), asked.get(), typed.get()));
         Signal.effect(this, () -> drawOutput(yaml.get(), context.get(), handover.get(), refused.get(), saved.get()));
         Signal.effect(this, () -> draftList.setItems(stored.get()));
 
@@ -229,6 +247,14 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         asked.set(Address.first(event.getLocation().getQueryParameters(), QueryFlag.SERIES));
+        typed.set(Address.first(event.getLocation().getQueryParameters(), QueryFlag.Q).orElse(""));
+        search.setValue(typed.peek());
+    }
+
+    /** The queue's address: the series chosen and the words typed, each left out when there is none. */
+    private static Address address(Optional<String> series, String words) {
+        return Address.of(PATH).with(QueryFlag.SERIES, series)
+                .with(QueryFlag.Q, Optional.of(words.strip()).filter(text -> !text.isEmpty()));
     }
 
     private Optional<VerdictQueue> load() {
@@ -245,7 +271,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
 
     // The queue
 
-    private void drawQueue(Optional<VerdictQueue> read, Optional<String> wanted) {
+    private void drawQueue(Optional<VerdictQueue> read, Optional<String> wanted, String words) {
         loaded = read;
         outage.removeAll();
         dockForm();
@@ -256,6 +282,8 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         lead.setVisible(reachable);
         hint.setVisible(reachable);
         filter.setVisible(reachable);
+        search.setVisible(reachable);
+        matching.setVisible(false);
         summaryFold.setVisible(reachable);
         if (!reachable) {
             outage.add(new DataOutageNotice());
@@ -285,7 +313,14 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
                     getTranslation("workbench.series.title", open, series)));
         }
 
-        for (Row row : rows) {
+        // The words narrow the list only: the lead, the chips and the figures still count the whole series.
+        List<Row> shown = rows.stream().filter(row -> QueueRules.matches(row, words)).toList();
+        if (!words.isBlank()) {
+            matching.setText(shown.isEmpty() ? getTranslation("workbench.search.none", words.strip())
+                    : getTranslation("workbench.search.matches", shown.size(), rows.size(), words.strip()));
+            matching.setVisible(true);
+        }
+        for (Row row : shown) {
             rowsByName.put(row.name(), row);
             Details details = packageRow(row);
             drawn.put(row.name(), details);
@@ -307,7 +342,7 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
             var number = css(new Span(count), "workbench-series-count");
             link.add(new Text(" "), number);
         }
-        link.setQueryParameters(Address.of(PATH).with(QueryFlag.SERIES, series).query());
+        link.setQueryParameters(address(series, typed.peek()).query());
         link.addClassName("workbench-series-link");
         series.ifPresent(word -> link.getElement().setAttribute("data-series", word));
         if (title != null) {

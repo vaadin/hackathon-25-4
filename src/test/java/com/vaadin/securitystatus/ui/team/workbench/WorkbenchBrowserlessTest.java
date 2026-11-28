@@ -124,6 +124,25 @@ class WorkbenchBrowserlessTest extends SpringBrowserlessTest {
         assertThat(rows(view)).hasSize(101);
     }
 
+    // D-280: words typed over the queue narrow the list by package, purl or advisory id, and live in the address
+    @Test
+    void the_words_typed_narrow_the_queue_and_live_in_the_address() {
+        WorkbenchView view = navigate("findings/workbench?q=JACKSON", WorkbenchView.class);
+        List<Row> rows = rows(view);
+        assertThat(rows).isNotEmpty().allMatch(row -> row.name().contains("jackson"));
+        assertThat(text("workbench-matching")).startsWith(rows.size() + " packages of 101 match JACKSON.");
+        // The chips keep the words.
+        assertThat($(RouterLink.class).withClassName("workbench-series-link").first().getHref()).contains("q=JACKSON");
+
+        view = navigate("findings/workbench?q=CVE-2026-45292", WorkbenchView.class);
+        assertThat(rows(view)).isNotEmpty().allMatch(row -> row.entry().cves().stream()
+                .anyMatch(advisory -> advisory.cve().equals("CVE-2026-45292")));
+
+        view = navigate("findings/workbench?q=nothing-is-called-this", WorkbenchView.class);
+        assertThat(rows(view)).isEmpty();
+        assertThat(text("workbench-matching")).isEqualTo("No package in the queue matches nothing-is-called-this.");
+    }
+
     // WRK-02
     @Test
     void a_selected_row_prefills_the_package_and_the_advisories() {
