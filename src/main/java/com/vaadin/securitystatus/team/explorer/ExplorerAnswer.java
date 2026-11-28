@@ -224,7 +224,7 @@ public final class ExplorerAnswer {
         for (Finding finding : findingsOf(line, shape, asked)) {
             if ("build".equals(finding.owner().orElse(""))) {
                 build.add(finding);
-            } else if (!ExplorerRules.ours(finding)) {
+            } else if (!ExplorerRules.ours(finding, shape.plain())) {
                 theirs.add(finding);
             } else if (!mine(finding, shape, line)) {
                 elsewhere++;
@@ -267,7 +267,7 @@ public final class ExplorerAnswer {
      */
     public static List<Finding> stateFindings(Line line, Shape shape) {
         return ExplorerRules.measured(line, shape.plain()).stream()
-                .filter(finding -> ExplorerRules.ours(finding) && mine(finding, shape, line)).toList();
+                .filter(finding -> ExplorerRules.ours(finding, shape.plain()) && mine(finding, shape, line)).toList();
     }
 
     /** The Vaadin badge of a series: unjudged when the shape was never measured on it. */

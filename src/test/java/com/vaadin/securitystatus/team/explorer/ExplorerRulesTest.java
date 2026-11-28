@@ -73,9 +73,11 @@ class ExplorerRulesTest {
 
         List<Finding> all = List.of(pinned, ours, spring);
 
-        assertThat(all.stream().filter(ExplorerRules::ours)).containsExactly(ours);
+        assertThat(all.stream().filter(finding -> ExplorerRules.ours(finding, false))).containsExactly(ours);
         assertThat(all.stream().filter(ExplorerRules::theirs)).containsExactly(pinned, spring);
-        assertThat(ExplorerRules.worst(all.stream().filter(ExplorerRules::ours).toList()))
+        // Without Spring nothing pins anything, so the pinned package is Vaadin's again.
+        assertThat(all.stream().filter(finding -> ExplorerRules.ours(finding, true))).containsExactly(pinned, ours);
+        assertThat(ExplorerRules.worst(all.stream().filter(finding -> ExplorerRules.ours(finding, false)).toList()))
                 .isEqualTo(ExplorerRules.Badge.NOT_AFFECTED);
         assertThat(ExplorerRules.springBadge(all)).isEqualTo(ExplorerRules.Badge.VULNERABLE);
         assertThat(ExplorerRules.worst(List.of(finding("D", "vaadin", "in_triage", 0))))

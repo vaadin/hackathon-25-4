@@ -151,9 +151,13 @@ public final class ExplorerRules {
         return RULED_OUT.contains(verdict) ? Badge.NOT_AFFECTED : Badge.UNJUDGED;
     }
 
-    /** A finding a Vaadin release moves: Vaadin's, on a version the release itself publishes. */
-    static boolean ours(Finding finding) {
-        return "vaadin".equals(finding.owner().orElse("")) && !Boolean.TRUE.equals(finding.springPins());
+    /**
+     * A finding a Vaadin release moves: Vaadin's, on a version the release
+     * itself publishes. Without Spring nothing pins anything, so there the
+     * package is the whole answer.
+     */
+    static boolean ours(Finding finding, boolean plain) {
+        return "vaadin".equals(finding.owner().orElse("")) && (plain || !Boolean.TRUE.equals(finding.springPins()));
     }
 
     /** A finding the reader's Spring Boot brings or pins, which no Vaadin release moves. */
