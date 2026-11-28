@@ -400,12 +400,8 @@ public final class ScanView extends Composite<Div> implements BeforeEnterObserve
     }
 
     private static Component advisoryLink(String advisory, String version) {
-        var parameters = new LinkedHashMap<String, String>();
-        parameters.put(CveView.IDS, advisory);
-        if (!version.isEmpty()) {
-            parameters.put(CveView.VERSION, version);
-        }
-        return css(new RouterLink(advisory, CveView.class, new RouteParameters(parameters)), "scan-advisory", "advisory-id");
+        return css(new RouterLink(advisory, CveView.class, CveView.parameters(advisory, version)), "scan-advisory",
+                "advisory-id");
     }
 
     private Component verdictCell(Triage.Row row, CasesIndex index) {

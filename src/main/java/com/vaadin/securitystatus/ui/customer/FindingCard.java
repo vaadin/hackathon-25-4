@@ -18,7 +18,6 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.markdown.Markdown;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.securitystatus.customer.VersionRules;
 import com.vaadin.securitystatus.data.model.Assessment;
@@ -85,9 +84,8 @@ final class FindingCard extends Composite<Div> {
     }
 
     static RouterLink advisoryLink(String advisory, VersionAnswer answer) {
-        return css(new RouterLink(advisory, CveView.class,
-                new RouteParameters(java.util.Map.of(CveView.IDS, advisory, CveView.VERSION,
-                        answer.version().toString()))), "finding-id", "advisory-id");
+        return css(new RouterLink(advisory, CveView.class, CveView.parameters(advisory, answer.version().toString())),
+                "finding-id", "advisory-id");
     }
 
     private Optional<Component> severity(String word) {
@@ -206,8 +204,7 @@ final class FindingCard extends Composite<Div> {
                 full.add(says);
             }
             var record = new RouterLink(getTranslation("version.layer.record", advisory), CveView.class,
-                    new RouteParameters(java.util.Map.of(CveView.IDS, advisory, CveView.VERSION,
-                            answer.version().toString())));
+                    CveView.parameters(advisory, answer.version().toString()));
             full.add(new Paragraph(record));
             layer("full", getTranslation("version.layer.full"), full, false);
         }

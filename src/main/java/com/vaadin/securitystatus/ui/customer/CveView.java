@@ -85,6 +85,11 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
 
     public static final String VERSION = "version";
 
+    /** The address of the answer for these ids, at this version when one is given. */
+    public static RouteParameters parameters(String ids, String version) {
+        return version.isEmpty() ? new RouteParameters(IDS, ids) : new RouteParameters(Map.of(IDS, ids, VERSION, version));
+    }
+
     /**
      * What the reader asked: the ids as the address carries them, the entries
      * of the address that are no advisory id, and the version beside them.
@@ -229,7 +234,7 @@ public final class CveView extends Composite<Div> implements BeforeEnterObserver
         VersionRules.nearestMeasured(index, version).ifPresent(nearest -> {
             String ids = String.join(",", answer.ones().stream().map(One::id).toList());
             var link = css(new RouterLink(getTranslation("cve.unmeasured.nearest", nearest.version().toString()),
-                    CveView.class, new RouteParameters(Map.of(IDS, ids, VERSION, nearest.version().toString()))), "nearest-measured");
+                    CveView.class, parameters(ids, nearest.version().toString())), "nearest-measured");
             notice.add(new Paragraph(link));
         });
         return notice;

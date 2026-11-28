@@ -100,10 +100,8 @@ final class CaseRules {
             if (parts.length == 0 || parts.length > 2 || parts[0].isEmpty()) {
                 return Optional.empty();
             }
-            RouteParameters parameters = parts.length == 2
-                    ? new RouteParameters(Map.of(CveView.IDS, parts[0], CveView.VERSION, parts[1]))
-                    : new RouteParameters(CveView.IDS, parts[0]);
-            return Optional.of(new Target(CveView.class, parameters, query));
+            return Optional.of(new Target(CveView.class,
+                    CveView.parameters(parts[0], parts.length == 2 ? parts[1] : ""), query));
         }
         return Optional.empty();
     }

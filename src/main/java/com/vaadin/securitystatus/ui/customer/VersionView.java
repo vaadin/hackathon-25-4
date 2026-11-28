@@ -593,8 +593,7 @@ public final class VersionView extends Composite<Div> implements BeforeEnterObse
 
     private Component fixRow(CasesIndex index, VersionAnswer measured, String advisory, String line, VersionNumber to) {
         Optional<CasesIndex.AdvisoryCatalogEntry> entry = Optional.ofNullable(index.advisories().get(advisory));
-        var row = css(new RouterLink(CveView.class, new RouteParameters(Map.of(CveView.IDS, advisory, CveView.VERSION,
-                measured.version().toString()))), "fix-row");
+        var row = css(new RouterLink(CveView.class, CveView.parameters(advisory, measured.version().toString())), "fix-row");
         row.getElement().setAttribute("data-advisory", advisory);
         var id = css(new Span(advisory), "fix-id");
         row.add(id);

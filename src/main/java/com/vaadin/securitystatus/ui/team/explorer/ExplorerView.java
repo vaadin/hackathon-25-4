@@ -245,8 +245,7 @@ public final class ExplorerView extends Composite<Div> implements BeforeEnterObs
         Optional<VersionNumber> version = ExplorerRules.fullVersion(typed);
         if (version.isPresent()) {
             // The source shortcut: a full version is a release to read, not a filter, D-103.
-            ui.navigate(ReleaseView.class, new RouteParameters(Map.of(ReleaseView.LINE, version.get().line(),
-                    ReleaseView.VERSION, version.get().toString())));
+            ui.navigate(ReleaseView.class, ReleaseView.parameters(version.get()));
             return;
         }
         address(typed, selection.off().peek(), opened.peek()).go(ui);

@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -325,7 +326,9 @@ public final class WorkbenchView extends Composite<Div> implements BeforeEnterOb
         var name = css(new Span(row.name()), "workbench-row-package");
         Tooltip.forComponent(name).setText(entry.purl().orElse(row.name()));
         boolean todo = row.closes() > 0;
-        var state = css(new Span(getTranslation(todo ? "workbench.row.todo" : "workbench.row.done")), "workbench-row-state", todo ? "todo" : "done");
+        // The explorer's badge in its colours, as the prototype draws to do and done.
+        var state = css(new Badge(getTranslation(todo ? "workbench.row.todo" : "workbench.row.done")), "explorer-badge",
+                todo ? "badge-unjudged" : "badge-not_affected");
         List<String> lines = entry.lines().stream().sorted(QueueRules.NEWEST_FIRST).toList();
         String says = getTranslation("workbench.row.says", entry.cves().size(), lines.size(), String.join(", ", lines))
                 + (entry.origin().filter("spring-boot"::equals).isPresent()

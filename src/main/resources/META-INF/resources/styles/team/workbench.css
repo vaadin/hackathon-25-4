@@ -133,24 +133,6 @@
     overflow-wrap: anywhere;
 }
 
-.workbench-row-state {
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-}
-
-.workbench-row-state.todo {
-    color: var(--status-fix);
-    background: var(--unjudged-chip);
-}
-
-.workbench-row-state.done {
-    color: var(--secure-ink);
-    background: var(--secure-chip);
-}
-
 .workbench-row-says {
     flex: 1 1 160px;
     min-width: 0;

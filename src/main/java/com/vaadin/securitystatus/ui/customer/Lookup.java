@@ -513,13 +513,8 @@ public final class Lookup extends Composite<Div> {
         if (!parsed.unrecognised().isEmpty()) {
             note.set(getTranslation("lookup.ids.unrecognised", String.join(", ", parsed.unrecognised())));
         }
-        var parameters = new HashMap<String, String>();
-        parameters.put(CveView.IDS, String.join(",", parsed.ids()));
-        String asked = LookupInput.cleanVersion(state.idsVersion().peek());
-        if (!asked.isEmpty()) {
-            parameters.put(CveView.VERSION, asked);
-        }
-        UI.getCurrent().navigate(CveView.class, new RouteParameters(parameters));
+        UI.getCurrent().navigate(CveView.class, CveView.parameters(String.join(",", parsed.ids()),
+                LookupInput.cleanVersion(state.idsVersion().peek())));
     }
 
     /** The version field emptied: the question is gone, so is its answer. */
