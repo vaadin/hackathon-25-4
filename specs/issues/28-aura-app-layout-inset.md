@@ -52,7 +52,7 @@ In a 1728 × 963 window, Chrome on macOS:
 
 The issue reproduces when the first row shows a padding and an x that are not whole numbers. On a 1x display, zooming into the two icons with a screenshot tool shows the first one softer at its edges.
 
-The inset has been `1.5vmin` since 25.0; 25.2.0, 25.3.5 and `main` carry the same line.
+`-Dvaadin.version=25.3.5` prints the same two rows, with `vaadin-app-layout` reporting 25.3.5 in the page. The inset has been `1.5vmin` since 25.0; 25.2.0, 25.3.5 and `main` carry the same line.
 
 ### Getting the project
 
